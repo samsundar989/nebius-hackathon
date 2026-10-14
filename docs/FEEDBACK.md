@@ -34,6 +34,15 @@ Measured 2026-10-14 with `scripts/smoke_tf.py` (raw output in `runs/smoke_tf_*.j
 `nvidia/nemotron-3-super-120b-a12b` — alternate planner. Was `status: error` in the catalog on 2026-10-13; **up on 2026-10-14**. With thinking off it writes its chain of thought into `content` (141 tokens of "The total number of ways…") instead of answering, so "off" saves no tokens there. The only model where `reasoning_effort` low/high changes anything (28 vs 92 reasoning tokens). json_schema clean (27 tokens).
 
 ## Token Factory Sandboxes (Contree)
+- Used for: planned as the branch-per-hypothesis runner (`leakproof/runner/contree.py`, contree-sdk 0.3.6). Not yet usable: access pending.
+- Worked: `GET /sandboxes/v1/whoami` answers in ~0.46 s and returns useful limits: `instance_max_timeout: 3600`, `instance_max_concurrency: 50`, `instance_max_layer_bytes: 12884901888` (12 GiB), `images_import_max_concurrency: 8`, `images_import_max_timeout: 3600`. The SDK source is readable and typed, so the request model could be verified without access.
+- Needs work:
+  - **"Not approved" is a 200, not a 403.** An unapproved project gets `200` with `permissions: {import: false, spawn: false, spawn_disposable: false, list: false, cancel: false, set_image_tag: false}`. The docs and community advice say to expect 403, so a naive "200 = approved" check is wrong. The same body came back for both of our project-ID formats.
+  - **No networking switch in contree-sdk 0.3.6.** `InstanceSpawnRequest` has no networking field and `ImageLike.run()` has no `network` argument, although the docs describe `networking.enabled=false`. An offline verification step can't be expressed through the pinned SDK. Our runner refuses (`UnsupportedOption`) rather than silently run with a NIC.
+  - No Dockerfile build in the SDK. We replay FROM/RUN/ENV/WORKDIR/COPY as chained saved runs (untested until access lands). Image `ENV` with `${PATH}` references has to be exported inside the guest shell.
+  - Project-ID confusion: the `Project:` header takes the Token Factory `aiproject-…` id; the AI Cloud console uses `project-…` ids; the docs call both "project ID", and the contree CLI env var `NEBIUS_AI_PROJECT` suggests the AI Cloud one.
+- Zero-to-hello-world: blocked on beta approval (requested 2026-10-13).
+- Build again?: TBD after access.
 
 ## Token Factory Batch API
 
@@ -46,3 +55,4 @@ Measured 2026-10-14 with `scripts/smoke_tf.py` (raw output in `runs/smoke_tf_*.j
 ## Tavily (if used)
 
 ## Docs and onboarding (cross-cutting)
+- Thinking control, reasoning-field names, json_schema behaviour and the batch outage are all learnable only by probing. One "Nemotron on Token Factory" page covering request knobs (`chat_template_kwargs` vs `reasoning_effort`, which models honour effort levels, where reasoning text lands, whether `reasoning_tokens` is reported) would have saved most of our first hour.
