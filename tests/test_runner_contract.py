@@ -21,6 +21,16 @@ def _docker_available() -> bool:
     return subprocess.run(["docker", "info"], capture_output=True, check=False).returncode == 0
 
 
+def _snapshots() -> list[str]:
+    out = subprocess.run(
+        ["docker", "image", "ls", "leakproof/snap", "--format", "{{.Repository}}:{{.Tag}}"],
+        capture_output=True,
+        text=True,
+        check=False,
+    ).stdout
+    return out.split()
+
+
 @pytest.fixture(scope="module", params=["docker", "contree"])
 def backend(request: pytest.FixtureRequest) -> Iterator[tuple[Runner, ImageRef]]:
     if request.param == "docker":
@@ -28,7 +38,11 @@ def backend(request: pytest.FixtureRequest) -> Iterator[tuple[Runner, ImageRef]]
             pytest.skip("docker engine not available")
         request.applymarker(pytest.mark.docker)
         subprocess.run(["docker", "pull", "-q", BASE], capture_output=True, check=True)
+        before = set(_snapshots())
         yield LocalDockerRunner(memory="1g", cpus=1), ImageRef("docker", BASE)
+        new = [t for t in _snapshots() if t not in before]
+        if new:  # checkpoints made by these tests
+            subprocess.run(["docker", "rmi", "-f", *new], capture_output=True, check=False)
     else:
         from leakproof.runner.contree import ContreeRunner, access_status
 

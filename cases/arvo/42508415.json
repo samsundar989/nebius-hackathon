@@ -1,0 +1,452 @@
+{
+ "id": "42508415",
+ "localId": 42508415,
+ "project": "lua",
+ "crash_type": "Heap-use-after-free READ 1",
+ "fuzz_target": "fuzz_lua",
+ "fuzz_engine": "afl",
+ "sanitizer": "asan",
+ "severity": "High",
+ "fix_commit": "1f3c6f4534c6411313361697d98d1145a1f030fa",
+ "patch_url": "https://github.com/lua/lua/commit/1f3c6f4534c6411313361697d98d1145a1f030fa",
+ "repo_addr": "https://github.com/lua/lua",
+ "language": "c",
+ "oss_fuzz_report": "https://issues.oss-fuzz.com/issues/42508415",
+ "image_vul": "n132/arvo:42508415-vul",
+ "image_fix": "n132/arvo:42508415-fix",
+ "fix_image_on_hub": {
+  "compressed_bytes": 680729975,
+  "last_updated": "2025-05-13T21:01:27.781033Z"
+ },
+ "vul_image_on_hub": {
+  "compressed_bytes": 1380754897,
+  "last_updated": "2025-05-13T21:01:03.27143Z"
+ },
+ "pull_s": 1.0,
+ "pull_was_cached": true,
+ "image_bytes_local": 1380788007,
+ "repro_cmd": "arvo",
+ "repro_exit": 1,
+ "repro_s": 0.325,
+ "reproduced": true,
+ "finding": {
+  "tool": "asan",
+  "kind": "heap-buffer-overflow",
+  "cwe_guess": "CWE-122",
+  "summary": "heap-buffer-overflow on address 0x617000000f58 at pc 0x000000552b8e bp 0x7ffdf9962c70 sp 0x7ffdf9962c68",
+  "frames": [
+   {
+    "index": 0,
+    "function": "luaH_newkey",
+    "file": "/src/lua/ltable.c",
+    "line": 650,
+    "column": 7,
+    "module": null,
+    "pc": "0x552b8d"
+   },
+   {
+    "index": 1,
+    "function": "luaV_finishset",
+    "file": "/src/lua/lvm.c",
+    "line": 340,
+    "column": 9,
+    "module": null,
+    "pc": "0x565ba0"
+   },
+   {
+    "index": 2,
+    "function": "luaV_execute",
+    "file": "/src/lua/lvm.c",
+    "line": 1318,
+    "column": 11,
+    "module": null,
+    "pc": "0x57d18a"
+   },
+   {
+    "index": 3,
+    "function": "ccall",
+    "file": "/src/lua/ldo.c",
+    "line": 563,
+    "column": 5,
+    "module": null,
+    "pc": "0x4f9ccc"
+   },
+   {
+    "index": 4,
+    "function": "luaD_rawrunprotected",
+    "file": "/src/lua/ldo.c",
+    "line": 144,
+    "column": 3,
+    "module": null,
+    "pc": "0x4f29a0"
+   },
+   {
+    "index": 5,
+    "function": "luaD_pcall",
+    "file": "/src/lua/ldo.c",
+    "line": 878,
+    "column": 12,
+    "module": null,
+    "pc": "0x4fc10b"
+   },
+   {
+    "index": 6,
+    "function": "lua_pcallk",
+    "file": "/src/lua/lapi.c",
+    "line": 1056,
+    "column": 14,
+    "module": null,
+    "pc": "0x4dad54"
+   },
+   {
+    "index": 7,
+    "function": "docall",
+    "file": "/src/lua/fuzz_lua.c",
+    "line": 127,
+    "column": 12,
+    "module": null,
+    "pc": "0x4cb713"
+   },
+   {
+    "index": 8,
+    "function": "dochunk",
+    "file": "/src/lua/fuzz_lua.c",
+    "line": 135,
+    "column": 34,
+    "module": null,
+    "pc": "0x4cb5b6"
+   },
+   {
+    "index": 9,
+    "function": "LLVMFuzzerTestOneInput",
+    "file": "/src/lua/fuzz_lua.c",
+    "line": 150,
+    "column": 5,
+    "module": null,
+    "pc": "0x4cb3b2"
+   },
+   {
+    "index": 10,
+    "function": "ExecuteFilesOnyByOne",
+    "file": "/src/aflplusplus/utils/aflpp_driver/aflpp_driver.c",
+    "line": 185,
+    "column": 7,
+    "module": null,
+    "pc": "0x4cb173"
+   },
+   {
+    "index": 11,
+    "function": "main",
+    "file": "/src/aflplusplus/utils/aflpp_driver/aflpp_driver.c",
+    "line": 237,
+    "column": 12,
+    "module": null,
+    "pc": "0x4cb173"
+   },
+   {
+    "index": 12,
+    "function": "__libc_start_main",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/lib/x86_64-linux-gnu/libc.so.6",
+    "pc": "0x76fa628f683f"
+   },
+   {
+    "index": 13,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/out/fuzz_lua",
+    "pc": "0x41c318"
+   }
+  ],
+  "alloc_stack": [
+   {
+    "index": 0,
+    "function": "realloc",
+    "file": "/src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp",
+    "line": 164,
+    "column": 3,
+    "module": null,
+    "pc": "0x497519"
+   },
+   {
+    "index": 1,
+    "function": "luaM_malloc_",
+    "file": "/src/lua/lmem.c",
+    "line": 193,
+    "column": 22,
+    "module": null,
+    "pc": "0x51e38e"
+   },
+   {
+    "index": 2,
+    "function": "setnodevector",
+    "file": "/src/lua/ltable.c",
+    "line": 462,
+    "column": 15,
+    "module": null,
+    "pc": "0x55075b"
+   },
+   {
+    "index": 3,
+    "function": "luaH_resize",
+    "file": "/src/lua/ltable.c",
+    "line": 530,
+    "column": 3,
+    "module": null,
+    "pc": "0x54fc6b"
+   },
+   {
+    "index": 4,
+    "function": "rehash",
+    "file": "/src/lua/ltable.c",
+    "line": 586,
+    "column": 3,
+    "module": null,
+    "pc": "0x553837"
+   },
+   {
+    "index": 5,
+    "function": "luaH_newkey",
+    "file": "/src/lua/ltable.c",
+    "line": 657,
+    "column": 7,
+    "module": null,
+    "pc": "0x55254e"
+   },
+   {
+    "index": 6,
+    "function": "luaX_newstring",
+    "file": "/src/lua/llex.c",
+    "line": 143,
+    "column": 5,
+    "module": null,
+    "pc": "0x5bc488"
+   },
+   {
+    "index": 7,
+    "function": "llex",
+    "file": "/src/lua/llex.c",
+    "line": 545,
+    "column": 16,
+    "module": null,
+    "pc": "0x5c016b"
+   },
+   {
+    "index": 8,
+    "function": "luaX_next",
+    "file": "/src/lua/llex.c",
+    "line": 572,
+    "column": 19,
+    "module": null,
+    "pc": "0x5bcb87"
+   },
+   {
+    "index": 9,
+    "function": "testnext",
+    "file": "/src/lua/lparser.c",
+    "line": 97,
+    "column": 5,
+    "module": null,
+    "pc": "0x52f30b"
+   },
+   {
+    "index": 10,
+    "function": "explist",
+    "file": "/src/lua/lparser.c",
+    "line": 1004,
+    "column": 10,
+    "module": null,
+    "pc": "0x53fd74"
+   },
+   {
+    "index": 11,
+    "function": "restassign",
+    "file": "/src/lua/lparser.c",
+    "line": 1380,
+    "column": 13,
+    "module": null,
+    "pc": "0x5454be"
+   },
+   {
+    "index": 12,
+    "function": "exprstat",
+    "file": "/src/lua/lparser.c",
+    "line": 1791,
+    "column": 5,
+    "module": null,
+    "pc": "0x5319d4"
+   },
+   {
+    "index": 13,
+    "function": "statement",
+    "file": "/src/lua/lparser.c",
+    "line": 1896,
+    "column": 7,
+    "module": null,
+    "pc": "0x52c49c"
+   },
+   {
+    "index": 14,
+    "function": "statlist /src/lua/lparser.c",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": null,
+    "pc": "0x52a64c"
+   },
+   {
+    "index": 15,
+    "function": "block",
+    "file": "/src/lua/lparser.c",
+    "line": 1298,
+    "column": 3,
+    "module": null,
+    "pc": "0x52df26"
+   },
+   {
+    "index": 16,
+    "function": "statement",
+    "file": "/src/lua/lparser.c",
+    "line": 1852,
+    "column": 7,
+    "module": null,
+    "pc": "0x52c8d2"
+   },
+   {
+    "index": 17,
+    "function": "statlist /src/lua/lparser.c",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": null,
+    "pc": "0x52a64c"
+   },
+   {
+    "index": 18,
+    "function": "mainfunc",
+    "file": "/src/lua/lparser.c",
+    "line": 1925,
+    "column": 3,
+    "module": null,
+    "pc": "0x529664"
+   },
+   {
+    "index": 19,
+    "function": "luaY_parser",
+    "file": "/src/lua/lparser.c",
+    "line": 1949,
+    "column": 3,
+    "module": null,
+    "pc": "0x529047"
+   },
+   {
+    "index": 20,
+    "function": "f_parser",
+    "file": "/src/lua/ldo.c",
+    "line": 923,
+    "column": 10,
+    "module": null,
+    "pc": "0x4fcca6"
+   },
+   {
+    "index": 21,
+    "function": "luaD_rawrunprotected",
+    "file": "/src/lua/ldo.c",
+    "line": 144,
+    "column": 3,
+    "module": null,
+    "pc": "0x4f29a0"
+   },
+   {
+    "index": 22,
+    "function": "luaD_pcall",
+    "file": "/src/lua/ldo.c",
+    "line": 878,
+    "column": 12,
+    "module": null,
+    "pc": "0x4fc10b"
+   },
+   {
+    "index": 23,
+    "function": "luaD_protectedparser",
+    "file": "/src/lua/ldo.c",
+    "line": 940,
+    "column": 12,
+    "module": null,
+    "pc": "0x4fc674"
+   },
+   {
+    "index": 24,
+    "function": "lua_load",
+    "file": "/src/lua/lapi.c",
+    "line": 1086,
+    "column": 12,
+    "module": null,
+    "pc": "0x4db3fd"
+   },
+   {
+    "index": 25,
+    "function": "luaL_loadbufferx",
+    "file": "/src/lua/lauxlib.c",
+    "line": 821,
+    "column": 10,
+    "module": null,
+    "pc": "0x599f23"
+   },
+   {
+    "index": 26,
+    "function": "LLVMFuzzerTestOneInput",
+    "file": "/src/lua/fuzz_lua.c",
+    "line": 150,
+    "column": 16,
+    "module": null,
+    "pc": "0x4cb3a8"
+   },
+   {
+    "index": 27,
+    "function": "ExecuteFilesOnyByOne",
+    "file": "/src/aflplusplus/utils/aflpp_driver/aflpp_driver.c",
+    "line": 185,
+    "column": 7,
+    "module": null,
+    "pc": "0x4cb173"
+   },
+   {
+    "index": 28,
+    "function": "main",
+    "file": "/src/aflplusplus/utils/aflpp_driver/aflpp_driver.c",
+    "line": 237,
+    "column": 12,
+    "module": null,
+    "pc": "0x4cb173"
+   }
+  ],
+  "free_stack": [],
+  "access": "READ",
+  "access_size": 1,
+  "leaked_bytes": null,
+  "leak_type": null,
+  "location": "/src/lua/ltable.c:650",
+  "alloc_site": "/src/lua/lmem.c:193",
+  "free_site": null
+ },
+ "all_kinds": [
+  "heap-buffer-overflow"
+ ],
+ "harness": "/out/fuzz_lua",
+ "poc": "/tmp/poc",
+ "source_dir": "/src/lua",
+ "workdir": "/src",
+ "rebuild_s": 53.682,
+ "rebuild_reproduces": true,
+ "rebuild_peak_kb": 282164,
+ "our_flags": "-O0 -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION",
+ "our_flags_rebuild_s": 51.87,
+ "our_flags_reproduces": true,
+ "our_flags_kind": "heap-buffer-overflow",
+ "our_flags_location": "/src/lua/ltable.c:650"
+}

@@ -1,0 +1,227 @@
+{
+ "id": "42493685",
+ "localId": 42493685,
+ "project": "md4c",
+ "crash_type": "Heap-buffer-overflow READ 1",
+ "fuzz_target": "fuzz-mdhtml",
+ "fuzz_engine": "libfuzzer",
+ "sanitizer": "asan",
+ "severity": "Medium",
+ "fix_commit": "260cd3394d45bd51f2002936a63401419658ecd7",
+ "patch_url": "https://github.com/mity/md4c/commit/260cd3394d45bd51f2002936a63401419658ecd7",
+ "repo_addr": "https://github.com/mity/md4c",
+ "language": "c",
+ "oss_fuzz_report": "https://issues.oss-fuzz.com/issues/42493685",
+ "image_vul": "n132/arvo:42493685-vul",
+ "image_fix": "n132/arvo:42493685-fix",
+ "fix_image_on_hub": {
+  "compressed_bytes": 628680801,
+  "last_updated": "2025-06-02T19:07:22.139921Z"
+ },
+ "vul_image_on_hub": {
+  "compressed_bytes": 1370211722,
+  "last_updated": "2025-06-02T19:06:51.535655Z"
+ },
+ "pull_s": 1.0,
+ "pull_was_cached": true,
+ "image_bytes_local": 1370244427,
+ "repro_cmd": "arvo",
+ "repro_exit": 1,
+ "repro_s": 0.342,
+ "reproduced": true,
+ "finding": {
+  "tool": "asan",
+  "kind": "heap-buffer-overflow",
+  "cwe_guess": "CWE-122",
+  "summary": "heap-buffer-overflow on address 0x6020000000b9 at pc 0x000000572b20 bp 0x7ffc4aea3290 sp 0x7ffc4aea3288",
+  "frames": [
+   {
+    "index": 0,
+    "function": "md_is_container_mark",
+    "file": "/src/md4c/src/md4c.c",
+    "line": 5659,
+    "column": 9,
+    "module": null,
+    "pc": "0x572b1f"
+   },
+   {
+    "index": 1,
+    "function": "md_analyze_line",
+    "file": "/src/md4c/src/md4c.c",
+    "line": 5942,
+    "column": 12,
+    "module": null,
+    "pc": "0x55d9ab"
+   },
+   {
+    "index": 2,
+    "function": "md_process_doc",
+    "file": "/src/md4c/src/md4c.c",
+    "line": 6259,
+    "column": 9,
+    "module": null,
+    "pc": "0x55d9ab"
+   },
+   {
+    "index": 3,
+    "function": "md_parse",
+    "file": "/src/md4c/src/md4c.c",
+    "line": 6337,
+    "column": 11,
+    "module": null,
+    "pc": "0x55ab2f"
+   },
+   {
+    "index": 4,
+    "function": "md_html",
+    "file": "/src/md4c/src/md4c-html.c",
+    "line": 571,
+    "column": 12,
+    "module": null,
+    "pc": "0x553f6c"
+   },
+   {
+    "index": 5,
+    "function": "LLVMFuzzerTestOneInput",
+    "file": "/src/md4c/build/../test/fuzzers/fuzz-mdhtml.c",
+    "line": 24,
+    "column": 5,
+    "module": null,
+    "pc": "0x553917"
+   },
+   {
+    "index": 6,
+    "function": "fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long)",
+    "file": "/src/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp",
+    "line": 599,
+    "column": 15,
+    "module": null,
+    "pc": "0x459a91"
+   },
+   {
+    "index": 7,
+    "function": "fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long)",
+    "file": "/src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp",
+    "line": 323,
+    "column": 6,
+    "module": null,
+    "pc": "0x443752"
+   },
+   {
+    "index": 8,
+    "function": "fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long))",
+    "file": "/src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp",
+    "line": 856,
+    "column": 9,
+    "module": null,
+    "pc": "0x449aa6"
+   },
+   {
+    "index": 9,
+    "function": "main",
+    "file": "/src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp",
+    "line": 20,
+    "column": 10,
+    "module": null,
+    "pc": "0x473a92"
+   },
+   {
+    "index": 10,
+    "function": "__libc_start_main",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/lib/x86_64-linux-gnu/libc.so.6",
+    "pc": "0x783b2692483f"
+   },
+   {
+    "index": 11,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/out/fuzz-mdhtml",
+    "pc": "0x41e118"
+   }
+  ],
+  "alloc_stack": [
+   {
+    "index": 0,
+    "function": "malloc",
+    "file": "/src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp",
+    "line": 145,
+    "column": 3,
+    "module": null,
+    "pc": "0x52255d"
+   },
+   {
+    "index": 1,
+    "function": "operator new(unsigned long)",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/out/fuzz-mdhtml",
+    "pc": "0x437267"
+   },
+   {
+    "index": 2,
+    "function": "fuzzer::RunOneTest(fuzzer::Fuzzer*, char const*, unsigned long)",
+    "file": "/src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp",
+    "line": 323,
+    "column": 6,
+    "module": null,
+    "pc": "0x443752"
+   },
+   {
+    "index": 3,
+    "function": "fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long))",
+    "file": "/src/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp",
+    "line": 856,
+    "column": 9,
+    "module": null,
+    "pc": "0x449aa6"
+   },
+   {
+    "index": 4,
+    "function": "main",
+    "file": "/src/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp",
+    "line": 20,
+    "column": 10,
+    "module": null,
+    "pc": "0x473a92"
+   },
+   {
+    "index": 5,
+    "function": "__libc_start_main",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/lib/x86_64-linux-gnu/libc.so.6",
+    "pc": "0x783b2692483f"
+   }
+  ],
+  "free_stack": [],
+  "access": "READ",
+  "access_size": 1,
+  "leaked_bytes": null,
+  "leak_type": null,
+  "location": "/src/md4c/src/md4c.c:5659",
+  "alloc_site": null,
+  "free_site": null
+ },
+ "all_kinds": [
+  "heap-buffer-overflow"
+ ],
+ "harness": "/out/fuzz-mdhtml",
+ "poc": "/tmp/poc",
+ "source_dir": "/src/md4c",
+ "workdir": "/src/md4c",
+ "rebuild_s": 18.685,
+ "rebuild_reproduces": true,
+ "rebuild_peak_kb": 120136,
+ "our_flags": "-O0 -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION",
+ "our_flags_rebuild_s": 18.917,
+ "our_flags_reproduces": true,
+ "our_flags_kind": "heap-buffer-overflow",
+ "our_flags_location": "/src/md4c/src/md4c.c:5659"
+}
