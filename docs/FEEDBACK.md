@@ -51,6 +51,15 @@ Measured 2026-10-14 with `scripts/smoke_tf.py` (raw output in `runs/smoke_tf_*.j
 ## Nebius CLI
 
 ## NVIDIA compute-sanitizer (and ncu/nsys where attempted)
+- Used for: the CUDA arm of the gate (memcheck for out-of-bounds, `--leak-check full` for `cudaMalloc` leaks). Two injected-defect samples in `cases/cuda/`, run by `cases/cuda/run_samples.sh`.
+- Worked: on a Kaggle Tesla T4 (sm_75, driver 580.178.04, CUDA 12.8, Compute Sanitizer 2025.1.0), both defects were found on the first try. Memcheck reported `Invalid __global__ write of size 4 bytes ... in oob_global.cu:8 ... by thread (255,0,0) in block (3,0,0)` with the exact source line, and "1 bytes after the nearest allocation ... of size 4,096 bytes". Leak-check reported `Leaked 4,096 bytes` with a host allocation stack down to `make_buffer(int) in leak_cudamalloc.cu:12`. The whole Kaggle run, push to output, took 45 s.
+- Needs work:
+  - **The exit code is 0 for both defects** unless `--error-exitcode` is passed. A gate that trusts the exit code would pass every buggy CUDA program, so we parse the report.
+  - **It does not run on the local RTX 5090 under WSL2.** `nvidia/cuda:12.6.3-devel` with `--gpus all` printed `Error: Failed to initialize WDDM debugger interface. Please run EnableDebuggerInterface.bat as an administrator` and `Error: Device not supported. Please refer to the "Supported Devices" section of the sanitizer documentation`. The kernel then ran uninstrumented: `kernel: no error`, and the leak sample reported `LEAK SUMMARY: 0 bytes leaked in 0 allocations`. A tool that cannot attach produces a report that looks clean. We detect those lines (`compute_sanitizer_tool_errors`) and treat the run as inconclusive.
+  - Output format drifts between releases. 2025.1 prints thousands separators (`4,096`) and host frames as `func in file:line [pc] in module`; our first parser, written from older docs, missed both.
+  - ncu: `ERR_NVGPUCTRPERM` on Kaggle (no performance-counter permission); on WSL2: `Failed to load Nsight Compute CUDA modules`. Not needed for the gate.
+- Zero-to-hello-world: about 10 min on Kaggle (a private script kernel; the sanitizer ships in `/usr/local/cuda`). Locally it was not reached: a CUDA image (11.5 GB), then the two errors above.
+- Would build again: yes, on native Linux GPUs (Kaggle, L40S). Not on WSL2 without the debugger interface and a CUDA ≥ 12.8 image.
 
 ## Tavily (if used)
 

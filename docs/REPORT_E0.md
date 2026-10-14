@@ -15,7 +15,7 @@ Date: 2026-10-14. Scope: `docs/kickoff/KICKOFF_PROMPT_2026-10-14_LEAKPROOF_E0.md
 | One Serverless L40S job with compute-sanitizer output | **Skipped by instruction** (QUESTION 0001 unanswered). |
 | Total E0 spend ≤ $5, visible in ledger | **Pass** ($0.0116). |
 
-Local CUDA check (3.7, second half): **pending.** It is queued as workerq #2802 and waiting for GPU memory behind another project's high-priority jobs. Nothing is measured yet.
+CUDA check (3.7, second half): **done on Kaggle, not locally.** On the local RTX 5090 (workerq #2821) compute-sanitizer cannot attach under WSL2: the WDDM debugger interface is disabled, and CUDA 12.6 does not support sm_120. On a Kaggle Tesla T4 (CUDA 12.8, Compute Sanitizer 2025.1) both injected defects were found with source lines in a 45 s run (`scripts/kaggle_cuda.py`, D-0028).
 
 ## 3.2 Token Factory (details in FEEDBACK.md)
 
@@ -45,7 +45,7 @@ Local CUDA check (3.7, second half): **pending.** It is queued as workerq #2802 
 
 ## 3.4 / 3.5 Findings + Juliet smoke set
 
-Parsers: ASan/LSan/UBSan/MSan, Valgrind, compute-sanitizer (format-tolerant stub; real fixtures pending the CUDA job). 100% of captured Juliet and ARVO reports parse to the expected kind (`tests/test_juliet_reports.py`, `tests/test_arvo_reports.py`).
+Parsers: ASan/LSan/UBSan/MSan, Valgrind, compute-sanitizer (real fixtures from the Kaggle T4 run plus the failed WSL2 run, `tests/test_compute_sanitizer.py`). 100% of captured Juliet and ARVO reports parse to the expected kind (`tests/test_juliet_reports.py`, `tests/test_arvo_reports.py`).
 
 Juliet 1.3 (SARD 112, sha256 `ada9d7e1…f38eb`): 60 cases chosen deterministically (seed 112) for diversity — 30 CWE-401 (15 C / 15 C++), 15 CWE-415, 15 CWE-416, every case a distinct functional + flow variant. Excluded up front: flow variant 12 (random branch) and `malloc_realloc_*` (leaks only if realloc fails). The whole set runs in ~30 s (3 parallel containers, 1.4 s mean per case, bad + good builds).
 
@@ -85,7 +85,7 @@ Raw-vs-verified in miniature: **1/4 thinking-off attempts verified**, 0/4 accept
 1. AI Cloud Serverless job — skipped (QUESTION 0001).
 2. Sandboxes — not approved; SDK 0.3.6 can't disable networking.
 3. Batch API — 403 "temporarily unavailable".
-4. Local CUDA / compute-sanitizer run — queued (workerq #2802), not yet run. Risk to check: CUDA 12.6's compute-sanitizer may not support the 5090 (sm_120); if so, record the error and use a 12.8+ image for local runs. L40S (sm_89) is unaffected.
+4. compute-sanitizer does not run on the local RTX 5090 under WSL2: `Failed to initialize WDDM debugger interface` and `Device not supported` (CUDA 12.6 versus sm_120). It then reports zero findings, which looks clean. CUDA checks run on Kaggle instead (works, 45 s); enabling it locally needs an admin registry change (QUESTION 0006). compute-sanitizer also exits 0 on detected defects unless `--error-exitcode` is set.
 5. **The machine crashed mid-session.** Contributing factors I created: Docker's data disk on C: grew 15.6 → 45.3 GB (C: at 100%), and containers ran directly instead of through workerq. Fixes: images deleted, all container work now goes through workerq, and VHDX compaction is requested in QUESTION 0003.
 
 ## Recommended E1 start

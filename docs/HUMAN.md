@@ -25,3 +25,6 @@ None of ARVO's 6,138 records is a leak, and its reproducer runs with `detect_lea
 
 ## QUESTION 0005 — Sandboxes: approval looks different from what we expected
 `GET /sandboxes/v1/whoami` returns **200** (not 403), with every permission false (`spawn`, `import`, `list`, …). The ContreeRunner treats "spawn false" as not approved and its tests skip with that reason. When you chase approval, it may help to quote that response. Also, contree-sdk 0.3.6 has no per-run networking switch, so the offline gate can't run on Contree with that SDK version yet (FEEDBACK.md). No action needed beyond QUESTION 0002.
+
+## QUESTION 0006 — compute-sanitizer on the local 5090 (optional, admin registry change)
+compute-sanitizer can't attach to the RTX 5090 from WSL2/Docker: `Failed to initialize WDDM debugger interface. Please run EnableDebuggerInterface.bat as an administrator`. It also needs a CUDA ≥ 12.8 image for sm_120 (another ~12 GB pull). Enabling it means running NVIDIA's `EnableDebuggerInterface.bat` as admin, which changes a Windows registry setting for the GPU driver, so it's your call. **Default: leave the machine alone and run CUDA checks on Kaggle** (works now, 45 s per run, free; uses the same Kaggle GPU quota as your ARC project) or on the L40S once QUESTION 0001 is answered. Reply ANSWER 0006 only if you want local CUDA sanitizing.
