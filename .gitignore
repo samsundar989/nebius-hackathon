@@ -1,0 +1,42 @@
+# secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.uv-cache/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# run artifacts (keep the README)
+runs/*
+!runs/README.md
+
+# datasets and large downloads (fetched by scripts)
+data/
+cases/**/src/
+cases/**/*.zip
+cases/**/*.tar*
+
+# build outputs
+cmake-build-*/
+out/
+*.o
+*.so
+*.a
+*.exe
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

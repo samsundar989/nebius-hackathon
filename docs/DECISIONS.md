@@ -1,0 +1,11 @@
+# Decisions (append-only)
+
+Format: `D-NNNN · YYYY-MM-DD · who · decision · why`. Never edit or delete earlier entries; supersede with a new one.
+
+- D-0001 · 2026-10-14 · Samuel + Cowork · Enter the Nebius x NVIDIA Global AI Hackathon (Devpost), Coding & Agentic Engineering track, solo. · $20k grand prize; deadline Oct 30 12:00 CDT.
+- D-0002 · 2026-10-14 · Samuel + Cowork · Product = **Leakproof**: evidence-gated memory-defect repair agent for C/C++ (sanitizer-driven) with CUDA via NVIDIA compute-sanitizer. Perf only as a deterministic stretch mode (cachegrind instruction counts / heaptrack), never wall-clock speedups as a headline. · Speedup claims are distrusted post KernelBench-Verified; memory bugs have a deterministic oracle, real Docker-reproducible data (ARVO), published baselines, and all tools run unprivileged on Nebius Sandboxes + Serverless Jobs. See docs/research/IDEA_A_REFINED_2026-10-14.md.
+- D-0003 · 2026-10-14 · Samuel + Cowork · Models: Nemotron 3 Ultra = planner/root-cause; Nemotron 3.5 Lightning = patch workers; Nemotron 3 Nano = triage; Super = alternate planner. All via Nebius Token Factory. · Required platform; tiering gives a measurable cost-per-verified-fix story.
+- D-0004 · 2026-10-14 · Samuel + Cowork · Verification runs in a separate process that workers cannot read or modify; LLM judges only flag, never gate. · PATCHBENCH: 83% of patches silence the PoC, 45% are correct; EquiBench/CodeRover-S: LLM judges 52–76% reliable.
+- D-0005 · 2026-10-14 · Samuel + Cowork · Clean-room build; nothing from Samuel's employer. Secrets only in .env. All model spend metered with a hard budget guard. · Legal safety; Devpost rules; Token Factory has no spend cap.
+- D-0006 · 2026-10-14 · Samuel · Repo lives at C:\Users\<user>\Documents\nebius-hackathon (WSL2: /mnt/c/Users/<user>/Documents/nebius-hackathon); Claude Code runs from WSL2; all Linux-only tooling runs in Docker via the Runner abstraction. · Windows-first workflow; sanitizers/Valgrind/ARVO are Linux-only.
+- D-0007 · 2026-10-14 · Samuel + Cowork · Runner abstraction with two backends (LocalDockerRunner, ContreeRunner) sharing one interface. · Sandboxes beta approval is pending; work must not block on it.
