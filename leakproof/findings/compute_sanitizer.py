@@ -1,7 +1,7 @@
 """Parse NVIDIA compute-sanitizer output (memcheck, leak-check, racecheck, initcheck).
 
 Every line is prefixed with `========= `. Fixtures in tests/fixtures/ come from real runs on the
-RTX 5090 (kickoff 3.7); formats vary slightly between CUDA releases, so matching is tolerant.
+Kaggle T4 (kickoff 3.7; sanitizer 2025.1); formats vary slightly between CUDA releases, so matching is tolerant.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ _PREFIX = re.compile(r"^=========\s?")
 _HEADS: list[tuple[re.Pattern[str], str, str | None]] = [
     (re.compile(r"Invalid __(global|shared|local)__ (read|write) of size (\d+)"), "oob", None),
     (re.compile(r"Misaligned (?:Shared or Local Address|address)"), "misaligned-access", "CWE-704"),
-    (re.compile(r"Leaked (\d+) bytes at (0x[0-9a-fA-F]+)"), "leak", "CWE-401"),
+    (re.compile(r"Leaked ([\d,]+) bytes at (0x[0-9a-fA-F]+)"), "leak", "CWE-401"),
     (
         re.compile(r"Uninitialized __(global|shared|local)__ memory read of size (\d+)"),
         "uninit",
@@ -39,6 +39,12 @@ _DEVICE_FRAME_NOLINE = re.compile(r"^\s*at (?:0x[0-9a-fA-F]+ in )?(.+?)(?:\+0x[0
 _HOST_FRAME = re.compile(
     r"^\s*Host Frame:\s*(?:\[(0x[0-9a-fA-F]+)\]\s*)?(.+?)(?:\s+\[(0x[0-9a-fA-F]+)\])?"
     r"(?:\s+in\s+(.+?))?\s*$"
+)
+# 2025.x layout: "Host Frame: main in oob_global.cu:15 [0x8c3d] in oob_global" or
+# "Host Frame: cudaMalloc [0x52b25] in leak_cudamalloc" (no source line).
+_HOST_FRAME_NEW = re.compile(
+    r"^\s*Host Frame:\s*(?P<func>.+?)(?: in (?P<file>[^\s\[]+):(?P<line>\d+))?"
+    r" \[(?P<pc>0x[0-9a-fA-F]+)\] in (?P<module>\S+)\s*$"
 )
 _THREAD = re.compile(r"by thread \((\d+),(\d+),(\d+)\) in block \((\d+),(\d+),(\d+)\)")
 
@@ -76,7 +82,7 @@ def parse_compute_sanitizer(text: str) -> list[Finding]:
                 finding.cwe_guess = "CWE-787" if finding.access == "WRITE" else "CWE-125"
                 finding.kind = f"{m.group(1)}-out-of-bounds"
             elif kind == "leak":
-                finding.leaked_bytes = int(m.group(1))
+                finding.leaked_bytes = int(m.group(1).replace(",", ""))
             findings.append(finding)
             current, host_section = finding, False
             current.raw = raw
@@ -87,10 +93,19 @@ def parse_compute_sanitizer(text: str) -> list[Finding]:
         if "Saved host backtrace" in stripped:
             host_section = True
             continue
-        if hm := _HOST_FRAME.match(stripped):
-            frame = _host_frame(
-                len(current.alloc_stack if current.kind == "leak" else current.frames), hm
-            )
+        if (nm := _HOST_FRAME_NEW.match(stripped)) or (hm := _HOST_FRAME.match(stripped)):
+            index = len(current.alloc_stack if current.kind == "leak" else current.frames)
+            if nm:
+                frame = Frame(
+                    index=index,
+                    function=nm["func"].strip(),
+                    file=nm["file"],
+                    line=int(nm["line"]) if nm["line"] else None,
+                    module=nm["module"],
+                    pc=nm["pc"],
+                )
+            else:
+                frame = _host_frame(index, hm)
             # Leak backtraces are taken at cudaMalloc time: they are the allocation stack.
             (current.alloc_stack if current.kind == "leak" else current.frames).append(frame)
             if current.kind == "leak":
@@ -111,3 +126,26 @@ def parse_compute_sanitizer(text: str) -> list[Finding]:
         for i, frame in enumerate(f.frames):
             frame.index = i
     return findings
+
+
+_TOOL_ERRORS = re.compile(
+    r"Failed to initialize|Device not supported|Unable to|could not be loaded|"
+    r"process didn't terminate successfully|Target application returned an error"
+)
+
+
+def compute_sanitizer_tool_errors(text: str) -> list[str]:
+    """Lines where compute-sanitizer itself failed (no instrumentation, crashed target).
+
+    A run with tool errors and zero findings is NOT clean: on WSL2 without the WDDM debugger
+    interface, or on a GPU the release does not support, the kernel runs uninstrumented and the
+    report has no findings. The gate must treat such runs as inconclusive.
+    """
+    errors = []
+    for raw in text.splitlines():
+        if not raw.startswith("========="):
+            continue
+        line = _PREFIX.sub("", raw).strip()
+        if _TOOL_ERRORS.search(line):
+            errors.append(line)
+    return errors

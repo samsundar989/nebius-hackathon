@@ -2,7 +2,10 @@
 
 import re
 
-from leakproof.findings.compute_sanitizer import parse_compute_sanitizer
+from leakproof.findings.compute_sanitizer import (
+    compute_sanitizer_tool_errors,
+    parse_compute_sanitizer,
+)
 from leakproof.findings.model import Finding, Frame
 from leakproof.findings.sanitizer import parse_sanitizer
 from leakproof.findings.valgrind import parse_valgrind
@@ -10,6 +13,7 @@ from leakproof.findings.valgrind import parse_valgrind
 __all__ = [
     "Finding",
     "Frame",
+    "compute_sanitizer_tool_errors",
     "parse_compute_sanitizer",
     "parse_report",
     "parse_sanitizer",

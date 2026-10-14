@@ -1,0 +1,11 @@
+========= COMPUTE-SANITIZER
+========= Leaked 4,096 bytes at 0x7fb809004000
+=========     Saved host backtrace up to driver entry point at allocation time
+=========         Host Frame: cudaMalloc [0x52b25] in leak_cudamalloc
+=========         Host Frame: cudaError cudaMalloc<float>(float**, unsigned long) in cuda_runtime.h:836 [0x8f9b] in leak_cudamalloc
+=========         Host Frame: make_buffer(int) in leak_cudamalloc.cu:12 [0x8bd1] in leak_cudamalloc
+=========         Host Frame: main in leak_cudamalloc.cu:19 [0x8c9f] in leak_cudamalloc
+========= 
+done
+========= LEAK SUMMARY: 4096 bytes leaked in 1 allocations
+========= ERROR SUMMARY: 1 error

@@ -1,0 +1,19 @@
+========= COMPUTE-SANITIZER
+========= Invalid __global__ write of size 4 bytes
+=========     at shift_write(int *, int)+0x90 in oob_global.cu:8
+=========     by thread (255,0,0) in block (3,0,0)
+=========     Address 0x796ec3001000 is out of bounds
+=========     and is 1 bytes after the nearest allocation at 0x796ec3000000 of size 4,096 bytes
+=========     Saved host backtrace up to driver entry point at kernel launch time
+=========         Host Frame: main in oob_global.cu:15 [0x8c3d] in oob_global
+========= 
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaDeviceSynchronize.
+=========     Saved host backtrace up to driver entry point at error
+=========         Host Frame: main in oob_global.cu:16 [0x8c42] in oob_global
+========= 
+========= Program hit cudaErrorLaunchFailure (error 719) due to "unspecified launch failure" on CUDA API call to cudaFree.
+=========     Saved host backtrace up to driver entry point at error
+=========         Host Frame: main in oob_global.cu:18 [0x8c72] in oob_global
+========= 
+kernel: unspecified launch failure
+========= ERROR SUMMARY: 3 errors
