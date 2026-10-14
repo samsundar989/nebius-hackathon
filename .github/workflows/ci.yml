@@ -1,0 +1,19 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: secret scan
+        run: python3 scripts/check_secrets.py --all
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      # Unit tests only: no secrets in CI, so network/contree tests skip themselves.
+      - run: uv run pytest -q -m "not network and not docker and not contree"

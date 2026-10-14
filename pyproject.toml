@@ -1,0 +1,47 @@
+[project]
+name = "leakproof"
+version = "0.0.1"
+description = "Evidence-gated memory-defect repair agent for C/C++ and CUDA. Verified fixes, or nothing."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "openai>=1.60",
+    "jsonschema>=4.23",
+    "contree-sdk==0.3.6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["leakproof"]
+
+[tool.uv]
+# The checkout lives on /mnt/c; hardlinks from the Linux-side cache do not cross filesystems.
+link-mode = "copy"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+# The formatter owns line length; long regexes and strings stay unsplit.
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "docker: needs a local Docker engine (skipped when absent)",
+    "contree: needs Nebius Sandboxes access (skipped when not approved)",
+    "network: makes real network calls",
+]
+addopts = "-m 'not network'"
