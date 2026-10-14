@@ -1,0 +1,46 @@
+{
+  "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B": {
+    "available": true,
+    "checked": "2026-10-14",
+    "json_schema_accepted": true,
+    "json_schema_enforced": true,
+    "json_schema_recommended": true,
+    "notes": "reasoning text in `reasoning`; usage.reasoning_tokens always 0; reasoning_effort=none returns empty content \u2014 use chat_template_kwargs",
+    "parallel_tool_calls": true,
+    "reasoning_field": "reasoning",
+    "thinking_method": "chat_template_kwargs"
+  },
+  "nvidia/Nemotron-3-Ultra-550b-a55b": {
+    "available": true,
+    "checked": "2026-10-14",
+    "json_schema_accepted": true,
+    "json_schema_enforced": true,
+    "json_schema_recommended": false,
+    "notes": "json_schema numeric field ran to max_tokens 1/5 probes; reasoning_effort low/high ignored",
+    "parallel_tool_calls": true,
+    "reasoning_field": "reasoning_content",
+    "thinking_method": "chat_template_kwargs"
+  },
+  "nvidia/Nemotron-3_5-Lightning": {
+    "available": true,
+    "checked": "2026-10-14",
+    "json_schema_accepted": true,
+    "json_schema_enforced": true,
+    "json_schema_recommended": false,
+    "notes": "json_schema numeric fields run to max_tokens (4/4 probes); reasoning_effort low/high ignored",
+    "parallel_tool_calls": true,
+    "reasoning_field": "reasoning_content",
+    "thinking_method": "chat_template_kwargs"
+  },
+  "nvidia/nemotron-3-super-120b-a12b": {
+    "available": true,
+    "checked": "2026-10-14",
+    "json_schema_accepted": true,
+    "json_schema_enforced": true,
+    "json_schema_recommended": true,
+    "notes": "thinking off moves chain-of-thought into content; reasoning_effort low/high honored",
+    "parallel_tool_calls": true,
+    "reasoning_field": "reasoning_content",
+    "thinking_method": "chat_template_kwargs"
+  }
+}

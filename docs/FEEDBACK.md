@@ -3,16 +3,35 @@
 For each tool: what we used it for · what worked · what needs work · zero-to-hello-world onboarding experience (minutes, blockers, exact error strings) · would we build with it again. Be specific and measured; this is read by the PMs/DevRel who own these products.
 
 ## Nebius Token Factory (inference API)
-- Used for:
+Measured 2026-10-14 with `scripts/smoke_tf.py` (raw output in `runs/smoke_tf_*.json`, not committed; capabilities distilled into `leakproof/llm/tf_capabilities.json`). 62 calls, total **$0.0089**.
+- Used for: every model call in Leakproof (planner, workers, triage) through the plain `openai` SDK with `base_url=https://api.tokenfactory.nebius.com/v1/`.
 - Worked:
+  - OpenAI compatibility is real: `chat.completions`, `tools`, `response_format`, `with_raw_response` headers all worked unchanged. `GET /v1/models` 200 in 0.42 s, 25 models, all four Nemotron IDs present.
+  - Both thinking switches pass through: `extra_body={"chat_template_kwargs": {"enable_thinking": false}}` and top-level `reasoning_effort="none"` each took Ultra and Lightning to 0 reasoning tokens.
+  - Rate limits are far higher than the ~60 RPM folklore: headers say `x-ratelimit-limit-requests: 600`, `x-ratelimit-limit-tokens: 400000`, plus `x-ratelimit-dynamic-scale-*`, `x-ratelimit-dynamic-period-remaining: 872s`, `x-ratelimit-dynamic-period-usage-*`. 20 concurrent Lightning calls: 20/20 OK, no 429, wall 3.1 s, p50 1.7 s, max 3.1 s.
+  - Parallel tool calls on chat completions: all four Nemotron models returned both tools (`get_weather` + `get_local_time`) in one turn with `parallel_tool_calls=true`, latency 0.4–0.6 s.
+  - `usage.completion_tokens_details.reasoning_tokens` is populated (Ultra, Lightning, Super) and is a subset of `completion_tokens` (OpenAI convention), so local cost computation is straightforward.
 - Needs work:
-- Zero-to-hello-world:
-- Build again?:
+  - **Batch API unavailable:** `POST /v1/batches` → `HTTP 403: {'detail': 'Creating new batch job is temporarily unavailable'}` (file upload with `purpose="batch"` succeeded first). No docs mention this state or an ETA.
+  - **`response_format: json_schema` + numeric fields runs away.** The schema *is* enforced (the model used key names that appear only in the schema), but number/integer fields are decoded digit-by-digit until `max_tokens`: Lightning 4/4 probes (`number` strict and non-strict, `integer`, `number` with `multipleOf: 0.1`) ended `finish_reason=length` with output like `"zq_population_millions": 68.3964561082864470000000…`; Ultra 1/5 (`68.478133504704…`), and once returned `683734332024` for an `integer` "millions" field. Same request with the schema only in the prompt and thinking on: clean `68.4` on both. Workaround in our client: treat `finish_reason=length` as failure and fall back to prompt-embedded schema + validation.
+  - `reasoning_effort` levels are not honored on Ultra/Lightning: low vs high gave 185 vs 166 (Ultra) and 384 vs 353 (Lightning) reasoning tokens on the same prompt; only Super responds (28 vs 92). Only `none` matters there.
+  - Reasoning lives in different fields per model: `message.reasoning_content` (Ultra, Lightning, Super) vs `message.reasoning` (Nano). Nano also reports `reasoning_tokens: 0` while returning reasoning text, so its reasoning cost is invisible in usage details (still inside `completion_tokens`).
+  - No spend cap and no cost field in the response; we compute $ locally from the price list.
+  - Sandboxes `whoami` and Token Factory share the key but Sandboxes need a `Project:` header with the `aiproject-…` id, while the AI Cloud console/CLI uses a `project-…` id — the docs call both "project ID".
+- Zero-to-hello-world: < 5 minutes once the key existed (models list + first chat). Discovering the thinking switch, json_schema behavior and the batch 403 took a 57-second scripted probe plus one follow-up; none of it is on the model cards.
+- Build again?: Yes — the OpenAI-compatible surface and generous rate limits made a thin client enough.
 
 ## Nemotron 3 Ultra
+`nvidia/Nemotron-3-Ultra-550b-a55b` — planner/root-cause. Hello 1.5 s; reasoning on by default (181 reasoning tokens for a two-step probability question, 0.98 s, correct `5/14`). Thinking off: 5 tokens, 0.37 s, still correct via `chat_template_kwargs`, but **wrong (`2/7`) via `reasoning_effort=none`** on the same prompt — thinking-off answers are not reliable for reasoning. json_schema numeric runaway 1/5. Tool calls fine.
+
 ## Nemotron 3.5 Lightning
+`nvidia/Nemotron-3_5-Lightning` — patch worker. Verbose thinker: **846 reasoning tokens for "Say hello in five words."** (3.0 s). Reasoning question: 345 reasoning tokens, 1.3 s, correct; thinking off: 0.26 s but **wrong both ways (`5/28`, `8/14`)**. Implication for workers: keep thinking on for patch reasoning, off only for mechanical formatting. json_schema numeric fields run away 4/4. 20-way concurrency clean.
+
 ## Nemotron 3 Nano
+`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` — triage. Reasoning in `message.reasoning` (not `reasoning_content`), `reasoning_tokens` always reported 0. `chat_template_kwargs` off works (but answered `5/12`, wrong); `reasoning_effort=none` returned **empty content** with 4 chars of reasoning — use `chat_template_kwargs` for Nano. json_schema worked cleanly (45 tokens, valid).
+
 ## Nemotron 3 Super
+`nvidia/nemotron-3-super-120b-a12b` — alternate planner. Was `status: error` in the catalog on 2026-10-13; **up on 2026-10-14**. With thinking off it writes its chain of thought into `content` (141 tokens of "The total number of ways…") instead of answering, so "off" saves no tokens there. The only model where `reasoning_effort` low/high changes anything (28 vs 92 reasoning tokens). json_schema clean (27 tokens).
 
 ## Token Factory Sandboxes (Contree)
 
