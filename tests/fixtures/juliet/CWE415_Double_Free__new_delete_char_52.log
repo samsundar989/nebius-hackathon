@@ -1,0 +1,30 @@
+=================================================================
+==17==ERROR: AddressSanitizer: attempting double-free on 0x502000000010 in thread T0:
+    #0 0x608ea4826091 in operator delete(void*) (/work/bin/bad+0x107091) (BuildId: 1eb56922e1044a393b1170b5e61f2e0612895aab)
+    #1 0x608ea4827d4c in CWE415_Double_Free__new_delete_char_52::badSink_c(char*) /work/case/CWE415_Double_Free__new_delete_char_52c.cpp:30:5
+    #2 0x608ea4827cec in CWE415_Double_Free__new_delete_char_52::badSink_b(char*) /work/case/CWE415_Double_Free__new_delete_char_52b.cpp:32:5
+    #3 0x608ea4827c19 in CWE415_Double_Free__new_delete_char_52::bad() /work/case/CWE415_Double_Free__new_delete_char_52a.cpp:38:5
+    #4 0x608ea4827c5e in main /work/case/CWE415_Double_Free__new_delete_char_52a.cpp:102:5
+    #5 0x7ac3c66731c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7ac3c667328a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x608ea474c3a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: 1eb56922e1044a393b1170b5e61f2e0612895aab)
+
+0x502000000010 is located 0 bytes inside of 1-byte region [0x502000000010,0x502000000011)
+freed by thread T0 here:
+    #0 0x608ea4826091 in operator delete(void*) (/work/bin/bad+0x107091) (BuildId: 1eb56922e1044a393b1170b5e61f2e0612895aab)
+    #1 0x608ea4827c10 in CWE415_Double_Free__new_delete_char_52::bad() /work/case/CWE415_Double_Free__new_delete_char_52a.cpp:37:5
+    #2 0x608ea4827c5e in main /work/case/CWE415_Double_Free__new_delete_char_52a.cpp:102:5
+    #3 0x7ac3c66731c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7ac3c667328a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x608ea474c3a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: 1eb56922e1044a393b1170b5e61f2e0612895aab)
+
+previously allocated by thread T0 here:
+    #0 0x608ea4825811 in operator new(unsigned long) (/work/bin/bad+0x106811) (BuildId: 1eb56922e1044a393b1170b5e61f2e0612895aab)
+    #1 0x608ea4827bb1 in CWE415_Double_Free__new_delete_char_52::bad() /work/case/CWE415_Double_Free__new_delete_char_52a.cpp:35:12
+    #2 0x608ea4827c5e in main /work/case/CWE415_Double_Free__new_delete_char_52a.cpp:102:5
+    #3 0x7ac3c66731c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7ac3c667328a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x608ea474c3a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: 1eb56922e1044a393b1170b5e61f2e0612895aab)
+
+SUMMARY: AddressSanitizer: double-free (/work/bin/bad+0x107091) (BuildId: 1eb56922e1044a393b1170b5e61f2e0612895aab) in operator delete(void*)
+==17==ABORTING

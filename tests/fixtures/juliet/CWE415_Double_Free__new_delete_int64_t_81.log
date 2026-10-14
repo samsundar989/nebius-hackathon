@@ -1,0 +1,29 @@
+=================================================================
+==18==ERROR: AddressSanitizer: attempting double-free on 0x502000000010 in thread T0:
+    #0 0x613900b5a091 in operator delete(void*) (/work/bin/bad+0x107091) (BuildId: e386cfc2ff2312b03c23c62b4365bf719d07946e)
+    #1 0x613900b5bc1e in CWE415_Double_Free__new_delete_int64_t_81::CWE415_Double_Free__new_delete_int64_t_81_bad::action(long*) const /work/case/CWE415_Double_Free__new_delete_int64_t_81_bad.cpp:28:5
+    #2 0x613900b5bf0e in CWE415_Double_Free__new_delete_int64_t_81::bad() /work/case/CWE415_Double_Free__new_delete_int64_t_81a.cpp:35:7
+    #3 0x613900b5bfae in main /work/case/CWE415_Double_Free__new_delete_int64_t_81a.cpp:97:5
+    #4 0x782d1c6311c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x782d1c63128a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x613900a803a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: e386cfc2ff2312b03c23c62b4365bf719d07946e)
+
+0x502000000010 is located 0 bytes inside of 8-byte region [0x502000000010,0x502000000018)
+freed by thread T0 here:
+    #0 0x613900b5a091 in operator delete(void*) (/work/bin/bad+0x107091) (BuildId: e386cfc2ff2312b03c23c62b4365bf719d07946e)
+    #1 0x613900b5bdde in CWE415_Double_Free__new_delete_int64_t_81::bad() /work/case/CWE415_Double_Free__new_delete_int64_t_81a.cpp:33:5
+    #2 0x613900b5bfae in main /work/case/CWE415_Double_Free__new_delete_int64_t_81a.cpp:97:5
+    #3 0x782d1c6311c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x782d1c63128a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x613900a803a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: e386cfc2ff2312b03c23c62b4365bf719d07946e)
+
+previously allocated by thread T0 here:
+    #0 0x613900b59811 in operator new(unsigned long) (/work/bin/bad+0x106811) (BuildId: e386cfc2ff2312b03c23c62b4365bf719d07946e)
+    #1 0x613900b5bd52 in CWE415_Double_Free__new_delete_int64_t_81::bad() /work/case/CWE415_Double_Free__new_delete_int64_t_81a.cpp:31:12
+    #2 0x613900b5bfae in main /work/case/CWE415_Double_Free__new_delete_int64_t_81a.cpp:97:5
+    #3 0x782d1c6311c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x782d1c63128a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x613900a803a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: e386cfc2ff2312b03c23c62b4365bf719d07946e)
+
+SUMMARY: AddressSanitizer: double-free (/work/bin/bad+0x107091) (BuildId: e386cfc2ff2312b03c23c62b4365bf719d07946e) in operator delete(void*)
+==18==ABORTING

@@ -1,0 +1,30 @@
+=================================================================
+==15==ERROR: AddressSanitizer: attempting double-free on 0x518000000080 in thread T0:
+    #0 0x557f67a6e191 in operator delete[](void*) (/work/bin/bad+0x107191) (BuildId: eddcb24844049990462f55bb6186e1eaffff8206)
+    #1 0x557f67a6fbcf in CWE415_Double_Free__new_delete_array_long_42::bad() /work/case/CWE415_Double_Free__new_delete_array_long_42.cpp:42:5
+    #2 0x557f67a6fc9e in main /work/case/CWE415_Double_Free__new_delete_array_long_42.cpp:117:5
+    #3 0x7882184cc1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7882184cc28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x557f679943a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: eddcb24844049990462f55bb6186e1eaffff8206)
+
+0x518000000080 is located 0 bytes inside of 800-byte region [0x518000000080,0x5180000003a0)
+freed by thread T0 here:
+    #0 0x557f67a6e191 in operator delete[](void*) (/work/bin/bad+0x107191) (BuildId: eddcb24844049990462f55bb6186e1eaffff8206)
+    #1 0x557f67a6fc53 in CWE415_Double_Free__new_delete_array_long_42::badSource(long*) /work/case/CWE415_Double_Free__new_delete_array_long_42.cpp:31:5
+    #2 0x557f67a6fbb0 in CWE415_Double_Free__new_delete_array_long_42::bad() /work/case/CWE415_Double_Free__new_delete_array_long_42.cpp:40:12
+    #3 0x557f67a6fc9e in main /work/case/CWE415_Double_Free__new_delete_array_long_42.cpp:117:5
+    #4 0x7882184cc1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7882184cc28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x557f679943a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: eddcb24844049990462f55bb6186e1eaffff8206)
+
+previously allocated by thread T0 here:
+    #0 0x557f67a6d931 in operator new[](unsigned long) (/work/bin/bad+0x106931) (BuildId: eddcb24844049990462f55bb6186e1eaffff8206)
+    #1 0x557f67a6fbfd in CWE415_Double_Free__new_delete_array_long_42::badSource(long*) /work/case/CWE415_Double_Free__new_delete_array_long_42.cpp:29:12
+    #2 0x557f67a6fbb0 in CWE415_Double_Free__new_delete_array_long_42::bad() /work/case/CWE415_Double_Free__new_delete_array_long_42.cpp:40:12
+    #3 0x557f67a6fc9e in main /work/case/CWE415_Double_Free__new_delete_array_long_42.cpp:117:5
+    #4 0x7882184cc1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7882184cc28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x557f679943a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: eddcb24844049990462f55bb6186e1eaffff8206)
+
+SUMMARY: AddressSanitizer: double-free (/work/bin/bad+0x107191) (BuildId: eddcb24844049990462f55bb6186e1eaffff8206) in operator delete[](void*)
+==15==ABORTING

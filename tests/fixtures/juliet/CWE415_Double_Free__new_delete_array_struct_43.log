@@ -1,0 +1,30 @@
+=================================================================
+==15==ERROR: AddressSanitizer: attempting double-free on 0x518000000080 in thread T0:
+    #0 0x569b6437a191 in operator delete[](void*) (/work/bin/bad+0x107191) (BuildId: e1790205c90696d040a35a797c54649dccc5f238)
+    #1 0x569b6437bd4c in CWE415_Double_Free__new_delete_array_struct_43::bad() /work/case/CWE415_Double_Free__new_delete_array_struct_43.cpp:41:5
+    #2 0x569b6437bdee in main /work/case/CWE415_Double_Free__new_delete_array_struct_43.cpp:114:5
+    #3 0x71ff200e81c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x71ff200e828a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x569b642a03a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: e1790205c90696d040a35a797c54649dccc5f238)
+
+0x518000000080 is located 0 bytes inside of 800-byte region [0x518000000080,0x5180000003a0)
+freed by thread T0 here:
+    #0 0x569b6437a191 in operator delete[](void*) (/work/bin/bad+0x107191) (BuildId: e1790205c90696d040a35a797c54649dccc5f238)
+    #1 0x569b6437bc4d in CWE415_Double_Free__new_delete_array_struct_43::badSource(_twoIntsStruct*&) /work/case/CWE415_Double_Free__new_delete_array_struct_43.cpp:31:5
+    #2 0x569b6437bd2d in CWE415_Double_Free__new_delete_array_struct_43::bad() /work/case/CWE415_Double_Free__new_delete_array_struct_43.cpp:39:5
+    #3 0x569b6437bdee in main /work/case/CWE415_Double_Free__new_delete_array_struct_43.cpp:114:5
+    #4 0x71ff200e81c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x71ff200e828a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x569b642a03a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: e1790205c90696d040a35a797c54649dccc5f238)
+
+previously allocated by thread T0 here:
+    #0 0x569b64379931 in operator new[](unsigned long) (/work/bin/bad+0x106931) (BuildId: e1790205c90696d040a35a797c54649dccc5f238)
+    #1 0x569b6437bbad in CWE415_Double_Free__new_delete_array_struct_43::badSource(_twoIntsStruct*&) /work/case/CWE415_Double_Free__new_delete_array_struct_43.cpp:29:12
+    #2 0x569b6437bd2d in CWE415_Double_Free__new_delete_array_struct_43::bad() /work/case/CWE415_Double_Free__new_delete_array_struct_43.cpp:39:5
+    #3 0x569b6437bdee in main /work/case/CWE415_Double_Free__new_delete_array_struct_43.cpp:114:5
+    #4 0x71ff200e81c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x71ff200e828a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x569b642a03a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: e1790205c90696d040a35a797c54649dccc5f238)
+
+SUMMARY: AddressSanitizer: double-free (/work/bin/bad+0x107191) (BuildId: e1790205c90696d040a35a797c54649dccc5f238) in operator delete[](void*)
+==15==ABORTING

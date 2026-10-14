@@ -1,0 +1,28 @@
+=================================================================
+==15==ERROR: AddressSanitizer: attempting double-free on 0x514000000040 in thread T0:
+    #0 0x62a9c1fba191 in operator delete[](void*) (/work/bin/bad+0x107191) (BuildId: 27b4689456168c2b5808e435dfbe8d829bb7e3bf)
+    #1 0x62a9c1fbbc32 in CWE415_Double_Free__new_delete_array_wchar_t_31::bad() /work/case/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp:39:9
+    #2 0x62a9c1fbbc7e in main /work/case/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp:110:5
+    #3 0x7291a9a681c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7291a9a6828a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x62a9c1ee03a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: 27b4689456168c2b5808e435dfbe8d829bb7e3bf)
+
+0x514000000040 is located 0 bytes inside of 400-byte region [0x514000000040,0x5140000001d0)
+freed by thread T0 here:
+    #0 0x62a9c1fba191 in operator delete[](void*) (/work/bin/bad+0x107191) (BuildId: 27b4689456168c2b5808e435dfbe8d829bb7e3bf)
+    #1 0x62a9c1fbbc07 in CWE415_Double_Free__new_delete_array_wchar_t_31::bad() /work/case/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp:34:5
+    #2 0x62a9c1fbbc7e in main /work/case/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp:110:5
+    #3 0x7291a9a681c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7291a9a6828a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x62a9c1ee03a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: 27b4689456168c2b5808e435dfbe8d829bb7e3bf)
+
+previously allocated by thread T0 here:
+    #0 0x62a9c1fb9931 in operator new[](unsigned long) (/work/bin/bad+0x106931) (BuildId: 27b4689456168c2b5808e435dfbe8d829bb7e3bf)
+    #1 0x62a9c1fbbbb1 in CWE415_Double_Free__new_delete_array_wchar_t_31::bad() /work/case/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp:32:12
+    #2 0x62a9c1fbbc7e in main /work/case/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp:110:5
+    #3 0x7291a9a681c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7291a9a6828a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x62a9c1ee03a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: 27b4689456168c2b5808e435dfbe8d829bb7e3bf)
+
+SUMMARY: AddressSanitizer: double-free (/work/bin/bad+0x107191) (BuildId: 27b4689456168c2b5808e435dfbe8d829bb7e3bf) in operator delete[](void*)
+==15==ABORTING

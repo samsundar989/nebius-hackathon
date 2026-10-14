@@ -1,0 +1,59 @@
+=================================================================
+==15==ERROR: AddressSanitizer: heap-use-after-free on address 0x518000000080 at pc 0x59672d0e30be bp 0x7ffdef33bfe0 sp 0x7ffdef33bfd8
+READ of size 8 at 0x518000000080 thread T0
+    #0 0x59672d0e30bd in CWE416_Use_After_Free__malloc_free_int64_t_14_bad /work/case/CWE416_Use_After_Free__malloc_free_int64_t_14.c:46:27
+    #1 0x59672d0e310e in main /work/case/CWE416_Use_After_Free__malloc_free_int64_t_14.c:205:5
+    #2 0x7f02a91851c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7f02a918528a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x59672d0083b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: 152bfb1bea04948efa98b705b83335a6411a1dd0)
+
+0x518000000080 is located 0 bytes inside of 800-byte region [0x518000000080,0x5180000003a0)
+freed by thread T0 here:
+    #0 0x59672d0a2f6a in free (/work/bin/bad+0xc6f6a) (BuildId: 152bfb1bea04948efa98b705b83335a6411a1dd0)
+    #1 0x59672d0e2fde in CWE416_Use_After_Free__malloc_free_int64_t_14_bad /work/case/CWE416_Use_After_Free__malloc_free_int64_t_14.c:41:9
+    #2 0x59672d0e310e in main /work/case/CWE416_Use_After_Free__malloc_free_int64_t_14.c:205:5
+    #3 0x7f02a91851c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7f02a918528a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x59672d0083b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: 152bfb1bea04948efa98b705b83335a6411a1dd0)
+
+previously allocated by thread T0 here:
+    #0 0x59672d0a3203 in malloc (/work/bin/bad+0xc7203) (BuildId: 152bfb1bea04948efa98b705b83335a6411a1dd0)
+    #1 0x59672d0e2eb3 in CWE416_Use_After_Free__malloc_free_int64_t_14_bad /work/case/CWE416_Use_After_Free__malloc_free_int64_t_14.c:31:27
+    #2 0x59672d0e310e in main /work/case/CWE416_Use_After_Free__malloc_free_int64_t_14.c:205:5
+    #3 0x7f02a91851c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7f02a918528a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x59672d0083b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: 152bfb1bea04948efa98b705b83335a6411a1dd0)
+
+SUMMARY: AddressSanitizer: heap-use-after-free /work/case/CWE416_Use_After_Free__malloc_free_int64_t_14.c:46:27 in CWE416_Use_After_Free__malloc_free_int64_t_14_bad
+Shadow bytes around the buggy address:
+  0x517ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x517ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x517fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x517fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x518000000000: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x518000000080:[fd]fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x518000000100: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x518000000180: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x518000000200: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x518000000280: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x518000000300: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==15==ABORTING

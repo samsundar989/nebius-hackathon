@@ -13,7 +13,11 @@ _RUNTIME_FUNC = re.compile(
     r"|memalign$|valloc$|operator new|operator delete|__libc_start|_start$|__GI_|cuda(Malloc|Free)"
     r"|LLVMFuzzerRunDriver|fuzzer::)"
 )
-_RUNTIME_FILE = re.compile(r"(compiler-rt/|/csu/|sysdeps/|libc-start|/libfuzzer/|FuzzerLoop\.cpp)")
+_RUNTIME_FILE = re.compile(
+    r"(compiler-rt/|/csu/|sysdeps/|libc-start|/libfuzzer/|FuzzerLoop\.cpp"
+    # glibc's own source tree, as symbolized from libc.so debug info (relative paths)
+    r"|^(csu|wcsmbs|string|stdlib|libio|stdio-common|malloc|misc|posix|nptl|elf|iconv|locale)/)"
+)
 
 
 @dataclass

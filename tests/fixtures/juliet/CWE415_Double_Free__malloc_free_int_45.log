@@ -1,0 +1,29 @@
+=================================================================
+==15==ERROR: AddressSanitizer: attempting double-free on 0x514000000040 in thread T0:
+    #0 0x5e6ba4296f6a in free (/work/bin/bad+0xc6f6a) (BuildId: 293e14f03f61f27b91fd2e6ee89693ce96c14720)
+    #1 0x5e6ba42d6f43 in badSink /work/case/CWE415_Double_Free__malloc_free_int_45.c:32:5
+    #2 0x5e6ba42d6eae in CWE415_Double_Free__malloc_free_int_45_bad /work/case/CWE415_Double_Free__malloc_free_int_45.c:45:5
+    #3 0x5e6ba42d6efe in main /work/case/CWE415_Double_Free__malloc_free_int_45.c:119:5
+    #4 0x70d7eaf4f1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x70d7eaf4f28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5e6ba41fc3b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: 293e14f03f61f27b91fd2e6ee89693ce96c14720)
+
+0x514000000040 is located 0 bytes inside of 400-byte region [0x514000000040,0x5140000001d0)
+freed by thread T0 here:
+    #0 0x5e6ba4296f6a in free (/work/bin/bad+0xc6f6a) (BuildId: 293e14f03f61f27b91fd2e6ee89693ce96c14720)
+    #1 0x5e6ba42d6e9e in CWE415_Double_Free__malloc_free_int_45_bad /work/case/CWE415_Double_Free__malloc_free_int_45.c:43:5
+    #2 0x5e6ba42d6efe in main /work/case/CWE415_Double_Free__malloc_free_int_45.c:119:5
+    #3 0x70d7eaf4f1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x70d7eaf4f28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5e6ba41fc3b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: 293e14f03f61f27b91fd2e6ee89693ce96c14720)
+
+previously allocated by thread T0 here:
+    #0 0x5e6ba4297203 in malloc (/work/bin/bad+0xc7203) (BuildId: 293e14f03f61f27b91fd2e6ee89693ce96c14720)
+    #1 0x5e6ba42d6e61 in CWE415_Double_Free__malloc_free_int_45_bad /work/case/CWE415_Double_Free__malloc_free_int_45.c:40:19
+    #2 0x5e6ba42d6efe in main /work/case/CWE415_Double_Free__malloc_free_int_45.c:119:5
+    #3 0x70d7eaf4f1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x70d7eaf4f28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5e6ba41fc3b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: 293e14f03f61f27b91fd2e6ee89693ce96c14720)
+
+SUMMARY: AddressSanitizer: double-free (/work/bin/bad+0xc6f6a) (BuildId: 293e14f03f61f27b91fd2e6ee89693ce96c14720) in free
+==15==ABORTING

@@ -1,0 +1,62 @@
+=================================================================
+==15==ERROR: AddressSanitizer: heap-use-after-free on address 0x50b000000040 at pc 0x5bad7cbf65b8 bp 0x7ffc0e59cce0 sp 0x7ffc0e59c470
+READ of size 2 at 0x50b000000040 thread T0
+    #0 0x5bad7cbf65b7 in printf_common(void*, char const*, __va_list_tag*) asan_interceptors.cpp.o
+    #1 0x5bad7cbf802d in printf (/work/bin/bad+0x5302d) (BuildId: 3e1dee4526a92808ffbd568e51ca76546f6f0323)
+    #2 0x5bad7ccaa7d0 in printLine /work/support/io.c:15:9
+    #3 0x5bad7ccabf80 in CWE416_Use_After_Free__malloc_free_char_03_bad /work/case/CWE416_Use_After_Free__malloc_free_char_03.c:41:9
+    #4 0x5bad7ccabfce in main /work/case/CWE416_Use_After_Free__malloc_free_char_03.c:180:5
+    #5 0x7736e3bef1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7736e3bef28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5bad7cbd13b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: 3e1dee4526a92808ffbd568e51ca76546f6f0323)
+
+0x50b000000040 is located 0 bytes inside of 100-byte region [0x50b000000040,0x50b0000000a4)
+freed by thread T0 here:
+    #0 0x5bad7cc6bf6a in free (/work/bin/bad+0xc6f6a) (BuildId: 3e1dee4526a92808ffbd568e51ca76546f6f0323)
+    #1 0x5bad7ccabf77 in CWE416_Use_After_Free__malloc_free_char_03_bad /work/case/CWE416_Use_After_Free__malloc_free_char_03.c:36:9
+    #2 0x5bad7ccabfce in main /work/case/CWE416_Use_After_Free__malloc_free_char_03.c:180:5
+    #3 0x7736e3bef1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7736e3bef28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5bad7cbd13b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: 3e1dee4526a92808ffbd568e51ca76546f6f0323)
+
+previously allocated by thread T0 here:
+    #0 0x5bad7cc6c203 in malloc (/work/bin/bad+0xc7203) (BuildId: 3e1dee4526a92808ffbd568e51ca76546f6f0323)
+    #1 0x5bad7ccabe61 in CWE416_Use_After_Free__malloc_free_char_03_bad /work/case/CWE416_Use_After_Free__malloc_free_char_03.c:31:24
+    #2 0x5bad7ccabfce in main /work/case/CWE416_Use_After_Free__malloc_free_char_03.c:180:5
+    #3 0x7736e3bef1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7736e3bef28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5bad7cbd13b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: 3e1dee4526a92808ffbd568e51ca76546f6f0323)
+
+SUMMARY: AddressSanitizer: heap-use-after-free asan_interceptors.cpp.o in printf_common(void*, char const*, __va_list_tag*)
+Shadow bytes around the buggy address:
+  0x50affffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50affffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50affffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50afffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50afffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x50b000000000: fa fa fa fa fa fa fa fa[fd]fd fd fd fd fd fd fd
+  0x50b000000080: fd fd fd fd fd fa fa fa fa fa fa fa fa fa fa fa
+  0x50b000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50b000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50b000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50b000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==15==ABORTING

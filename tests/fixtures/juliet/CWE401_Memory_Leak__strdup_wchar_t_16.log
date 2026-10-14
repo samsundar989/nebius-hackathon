@@ -1,0 +1,15 @@
+
+=================================================================
+==15==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 36 byte(s) in 1 object(s) allocated from:
+    #0 0x5eaa402971f3 in malloc (/work/bin/bad+0xc71f3) (BuildId: 0f9f08bcb67af07df927727578366b44c7cd5d17)
+    #1 0x7ce3b35abaf2 in wcsdup wcsmbs/wcsdup.c:28:15
+    #2 0x5eaa402633b7 in wcsdup (/work/bin/bad+0x933b7) (BuildId: 0f9f08bcb67af07df927727578366b44c7cd5d17)
+    #3 0x5eaa402d6f38 in CWE401_Memory_Leak__strdup_wchar_t_16_bad /work/case/CWE401_Memory_Leak__strdup_wchar_t_16.c:33:20
+    #4 0x5eaa402d700e in main /work/case/CWE401_Memory_Leak__strdup_wchar_t_16.c:125:5
+    #5 0x7ce3b350a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7ce3b350a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5eaa401fc3a4 in _start (/work/bin/bad+0x2c3a4) (BuildId: 0f9f08bcb67af07df927727578366b44c7cd5d17)
+
+SUMMARY: AddressSanitizer: 36 byte(s) leaked in 1 allocation(s).

@@ -1,0 +1,14 @@
+
+=================================================================
+==16==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 400 byte(s) in 1 object(s) allocated from:
+    #0 0x63a9b93c6213 in malloc (/work/bin/bad+0xc7213) (BuildId: 90258ca31200d0f83bbce33d9e796c26e056a337)
+    #1 0x63a9b9405efd in CWE401_Memory_Leak__wchar_t_malloc_61b_badSource /work/case/CWE401_Memory_Leak__wchar_t_malloc_61b.c:27:23
+    #2 0x63a9b9405e70 in CWE401_Memory_Leak__wchar_t_malloc_61_bad /work/case/CWE401_Memory_Leak__wchar_t_malloc_61a.c:31:12
+    #3 0x63a9b9405ebe in main /work/case/CWE401_Memory_Leak__wchar_t_malloc_61a.c:90:5
+    #4 0x73a47214c1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x73a47214c28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x63a9b932b3c4 in _start (/work/bin/bad+0x2c3c4) (BuildId: 90258ca31200d0f83bbce33d9e796c26e056a337)
+
+SUMMARY: AddressSanitizer: 400 byte(s) leaked in 1 allocation(s).

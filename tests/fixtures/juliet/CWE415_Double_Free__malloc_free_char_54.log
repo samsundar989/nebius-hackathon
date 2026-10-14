@@ -1,0 +1,32 @@
+=================================================================
+==19==ERROR: AddressSanitizer: attempting double-free on 0x50b000000040 in thread T0:
+    #0 0x61e914894f6a in free (/work/bin/bad+0xc6f6a) (BuildId: 3bc75a762581cc5019230e85dda38e28f76cde8c)
+    #1 0x61e9148d4fbc in CWE415_Double_Free__malloc_free_char_54e_badSink /work/case/CWE415_Double_Free__malloc_free_char_54e.c:27:5
+    #2 0x61e9148d4f8c in CWE415_Double_Free__malloc_free_char_54d_badSink /work/case/CWE415_Double_Free__malloc_free_char_54d.c:29:5
+    #3 0x61e9148d4f5c in CWE415_Double_Free__malloc_free_char_54c_badSink /work/case/CWE415_Double_Free__malloc_free_char_54c.c:29:5
+    #4 0x61e9148d4f2c in CWE415_Double_Free__malloc_free_char_54b_badSink /work/case/CWE415_Double_Free__malloc_free_char_54b.c:29:5
+    #5 0x61e9148d4ea7 in CWE415_Double_Free__malloc_free_char_54_bad /work/case/CWE415_Double_Free__malloc_free_char_54a.c:36:5
+    #6 0x61e9148d4eee in main /work/case/CWE415_Double_Free__malloc_free_char_54a.c:98:5
+    #7 0x7baefd1191c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #8 0x7baefd11928a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #9 0x61e9147fa3b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: 3bc75a762581cc5019230e85dda38e28f76cde8c)
+
+0x50b000000040 is located 0 bytes inside of 100-byte region [0x50b000000040,0x50b0000000a4)
+freed by thread T0 here:
+    #0 0x61e914894f6a in free (/work/bin/bad+0xc6f6a) (BuildId: 3bc75a762581cc5019230e85dda38e28f76cde8c)
+    #1 0x61e9148d4e9e in CWE415_Double_Free__malloc_free_char_54_bad /work/case/CWE415_Double_Free__malloc_free_char_54a.c:35:5
+    #2 0x61e9148d4eee in main /work/case/CWE415_Double_Free__malloc_free_char_54a.c:98:5
+    #3 0x7baefd1191c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7baefd11928a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x61e9147fa3b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: 3bc75a762581cc5019230e85dda38e28f76cde8c)
+
+previously allocated by thread T0 here:
+    #0 0x61e914895203 in malloc (/work/bin/bad+0xc7203) (BuildId: 3bc75a762581cc5019230e85dda38e28f76cde8c)
+    #1 0x61e9148d4e61 in CWE415_Double_Free__malloc_free_char_54_bad /work/case/CWE415_Double_Free__malloc_free_char_54a.c:32:20
+    #2 0x61e9148d4eee in main /work/case/CWE415_Double_Free__malloc_free_char_54a.c:98:5
+    #3 0x7baefd1191c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7baefd11928a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x61e9147fa3b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: 3bc75a762581cc5019230e85dda38e28f76cde8c)
+
+SUMMARY: AddressSanitizer: double-free (/work/bin/bad+0xc6f6a) (BuildId: 3bc75a762581cc5019230e85dda38e28f76cde8c) in free
+==19==ABORTING

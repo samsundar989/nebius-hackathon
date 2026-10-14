@@ -1,0 +1,13 @@
+
+=================================================================
+==15==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 800 byte(s) in 1 object(s) allocated from:
+    #0 0x5c1ad6b39931 in operator new[](unsigned long) (/work/bin/bad+0x106931) (BuildId: 252f3ba34c3ff6706005a5d563877fa06a33df69)
+    #1 0x5c1ad6b3bc03 in CWE401_Memory_Leak__new_array_struct_twoIntsStruct_14::bad() /work/case/CWE401_Memory_Leak__new_array_struct_twoIntsStruct_14.cpp:35:16
+    #2 0x5c1ad6b3be3e in main /work/case/CWE401_Memory_Leak__new_array_struct_twoIntsStruct_14.cpp:180:5
+    #3 0x7eae7e1a21c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7eae7e1a228a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5c1ad6a603a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: 252f3ba34c3ff6706005a5d563877fa06a33df69)
+
+SUMMARY: AddressSanitizer: 800 byte(s) leaked in 1 allocation(s).

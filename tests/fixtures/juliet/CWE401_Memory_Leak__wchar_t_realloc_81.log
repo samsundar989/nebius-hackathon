@@ -1,0 +1,13 @@
+
+=================================================================
+==18==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 400 byte(s) in 1 object(s) allocated from:
+    #0 0x648c83234630 in realloc (/work/bin/bad+0xc8630) (BuildId: 039b5a2e08abaa3e8d4399bec0556f833138d73f)
+    #1 0x648c83274d29 in CWE401_Memory_Leak__wchar_t_realloc_81::bad() /work/case/CWE401_Memory_Leak__wchar_t_realloc_81a.cpp:31:23
+    #2 0x648c83274f8e in main /work/case/CWE401_Memory_Leak__wchar_t_realloc_81a.cpp:103:5
+    #3 0x7dbeffa821c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7dbeffa8228a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x648c831993c4 in _start (/work/bin/bad+0x2d3c4) (BuildId: 039b5a2e08abaa3e8d4399bec0556f833138d73f)
+
+SUMMARY: AddressSanitizer: 400 byte(s) leaked in 1 allocation(s).

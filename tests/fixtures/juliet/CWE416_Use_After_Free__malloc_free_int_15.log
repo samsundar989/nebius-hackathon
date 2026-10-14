@@ -1,0 +1,59 @@
+=================================================================
+==15==ERROR: AddressSanitizer: heap-use-after-free on address 0x514000000040 at pc 0x5ba9bb80204f bp 0x7ffdb024f4c0 sp 0x7ffdb024f4b8
+READ of size 4 at 0x514000000040 thread T0
+    #0 0x5ba9bb80204e in CWE416_Use_After_Free__malloc_free_int_15_bad /work/case/CWE416_Use_After_Free__malloc_free_int_15.c:53:22
+    #1 0x5ba9bb80209e in main /work/case/CWE416_Use_After_Free__malloc_free_int_15.c:255:5
+    #2 0x7f4482e771c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7f4482e7728a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x5ba9bb7273b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: ef7f77d4afc841cda77f6afaff0caf2579c9604a)
+
+0x514000000040 is located 0 bytes inside of 400-byte region [0x514000000040,0x5140000001d0)
+freed by thread T0 here:
+    #0 0x5ba9bb7c1f6a in free (/work/bin/bad+0xc6f6a) (BuildId: ef7f77d4afc841cda77f6afaff0caf2579c9604a)
+    #1 0x5ba9bb801fa6 in CWE416_Use_After_Free__malloc_free_int_15_bad /work/case/CWE416_Use_After_Free__malloc_free_int_15.c:42:9
+    #2 0x5ba9bb80209e in main /work/case/CWE416_Use_After_Free__malloc_free_int_15.c:255:5
+    #3 0x7f4482e771c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7f4482e7728a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5ba9bb7273b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: ef7f77d4afc841cda77f6afaff0caf2579c9604a)
+
+previously allocated by thread T0 here:
+    #0 0x5ba9bb7c2203 in malloc (/work/bin/bad+0xc7203) (BuildId: ef7f77d4afc841cda77f6afaff0caf2579c9604a)
+    #1 0x5ba9bb801e61 in CWE416_Use_After_Free__malloc_free_int_15_bad /work/case/CWE416_Use_After_Free__malloc_free_int_15.c:32:23
+    #2 0x5ba9bb80209e in main /work/case/CWE416_Use_After_Free__malloc_free_int_15.c:255:5
+    #3 0x7f4482e771c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7f4482e7728a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5ba9bb7273b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: ef7f77d4afc841cda77f6afaff0caf2579c9604a)
+
+SUMMARY: AddressSanitizer: heap-use-after-free /work/case/CWE416_Use_After_Free__malloc_free_int_15.c:53:22 in CWE416_Use_After_Free__malloc_free_int_15_bad
+Shadow bytes around the buggy address:
+  0x513ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x513ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x513ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x513fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x513fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x514000000000: fa fa fa fa fa fa fa fa[fd]fd fd fd fd fd fd fd
+  0x514000000080: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x514000000100: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x514000000180: fd fd fd fd fd fd fd fd fd fd fa fa fa fa fa fa
+  0x514000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x514000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==15==ABORTING

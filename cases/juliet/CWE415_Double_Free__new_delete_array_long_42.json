@@ -1,0 +1,246 @@
+{
+ "id": "CWE415_Double_Free__new_delete_array_long_42",
+ "cwe": "CWE-415",
+ "functional_variant": "new_delete_array_long",
+ "flow_variant": "42",
+ "dir": "testcases/CWE415_Double_Free/s01",
+ "files": [
+  "CWE415_Double_Free__new_delete_array_long_42.cpp"
+ ],
+ "lang": "c++",
+ "expected_kind": "double-free",
+ "source_root": "juliet-1.3/C",
+ "support_files": [
+  "testcasesupport/io.c",
+  "testcasesupport/std_testcase.h",
+  "testcasesupport/std_testcase_io.h",
+  "testcasesupport/std_thread.h"
+ ],
+ "image": "leakproof/cpp-sanitizers:e0",
+ "env": {
+  "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=0:symbolize=1",
+  "LSAN_OPTIONS": "use_stacks=0",
+  "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=0"
+ },
+ "build_cmd_bad": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITGOOD -Isupport -Icase -c support/io.c -o bin/io_bad.o && clang++ -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITGOOD -Isupport -Icase case/CWE415_Double_Free__new_delete_array_long_42.cpp bin/io_bad.o  -o bin/bad",
+ "run_cmd_bad": "timeout 30 ./bin/bad < /dev/null",
+ "build_cmd_good": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITBAD -Isupport -Icase -c support/io.c -o bin/io_good.o && clang++ -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITBAD -Isupport -Icase case/CWE415_Double_Free__new_delete_array_long_42.cpp bin/io_good.o  -o bin/good",
+ "run_cmd_good": "timeout 30 ./bin/good < /dev/null",
+ "build_bad_ok": true,
+ "build_good_ok": true,
+ "bad_exit": 1,
+ "good_exit": 0,
+ "detected": true,
+ "parsed": true,
+ "parsed_kind_matches": true,
+ "reproducible": true,
+ "not_reproducible_reason": null,
+ "finding": {
+  "tool": "asan",
+  "kind": "double-free",
+  "cwe_guess": "CWE-415",
+  "summary": "attempting double-free on 0x518000000080 in thread T0:",
+  "frames": [
+   {
+    "index": 0,
+    "function": "operator delete[](void*)",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x557f67a6e191"
+   },
+   {
+    "index": 1,
+    "function": "CWE415_Double_Free__new_delete_array_long_42::bad()",
+    "file": "/work/case/CWE415_Double_Free__new_delete_array_long_42.cpp",
+    "line": 42,
+    "column": 5,
+    "module": null,
+    "pc": "0x557f67a6fbcf"
+   },
+   {
+    "index": 2,
+    "function": "main",
+    "file": "/work/case/CWE415_Double_Free__new_delete_array_long_42.cpp",
+    "line": 117,
+    "column": 5,
+    "module": null,
+    "pc": "0x557f67a6fc9e"
+   },
+   {
+    "index": 3,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x7882184cc1c9"
+   },
+   {
+    "index": 4,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x7882184cc28a"
+   },
+   {
+    "index": 5,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x557f679943a4"
+   }
+  ],
+  "alloc_stack": [
+   {
+    "index": 0,
+    "function": "operator new[](unsigned long)",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x557f67a6d931"
+   },
+   {
+    "index": 1,
+    "function": "CWE415_Double_Free__new_delete_array_long_42::badSource(long*)",
+    "file": "/work/case/CWE415_Double_Free__new_delete_array_long_42.cpp",
+    "line": 29,
+    "column": 12,
+    "module": null,
+    "pc": "0x557f67a6fbfd"
+   },
+   {
+    "index": 2,
+    "function": "CWE415_Double_Free__new_delete_array_long_42::bad()",
+    "file": "/work/case/CWE415_Double_Free__new_delete_array_long_42.cpp",
+    "line": 40,
+    "column": 12,
+    "module": null,
+    "pc": "0x557f67a6fbb0"
+   },
+   {
+    "index": 3,
+    "function": "main",
+    "file": "/work/case/CWE415_Double_Free__new_delete_array_long_42.cpp",
+    "line": 117,
+    "column": 5,
+    "module": null,
+    "pc": "0x557f67a6fc9e"
+   },
+   {
+    "index": 4,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x7882184cc1c9"
+   },
+   {
+    "index": 5,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x7882184cc28a"
+   },
+   {
+    "index": 6,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x557f679943a4"
+   }
+  ],
+  "free_stack": [
+   {
+    "index": 0,
+    "function": "operator delete[](void*)",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x557f67a6e191"
+   },
+   {
+    "index": 1,
+    "function": "CWE415_Double_Free__new_delete_array_long_42::badSource(long*)",
+    "file": "/work/case/CWE415_Double_Free__new_delete_array_long_42.cpp",
+    "line": 31,
+    "column": 5,
+    "module": null,
+    "pc": "0x557f67a6fc53"
+   },
+   {
+    "index": 2,
+    "function": "CWE415_Double_Free__new_delete_array_long_42::bad()",
+    "file": "/work/case/CWE415_Double_Free__new_delete_array_long_42.cpp",
+    "line": 40,
+    "column": 12,
+    "module": null,
+    "pc": "0x557f67a6fbb0"
+   },
+   {
+    "index": 3,
+    "function": "main",
+    "file": "/work/case/CWE415_Double_Free__new_delete_array_long_42.cpp",
+    "line": 117,
+    "column": 5,
+    "module": null,
+    "pc": "0x557f67a6fc9e"
+   },
+   {
+    "index": 4,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x7882184cc1c9"
+   },
+   {
+    "index": 5,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x7882184cc28a"
+   },
+   {
+    "index": 6,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x557f679943a4"
+   }
+  ],
+  "access": null,
+  "access_size": null,
+  "leaked_bytes": null,
+  "leak_type": null,
+  "location": "/work/case/CWE415_Double_Free__new_delete_array_long_42.cpp:42",
+  "alloc_site": "/work/case/CWE415_Double_Free__new_delete_array_long_42.cpp:29",
+  "free_site": "/work/case/CWE415_Double_Free__new_delete_array_long_42.cpp:31"
+ },
+ "all_bad_kinds": [
+  "double-free"
+ ],
+ "good_clean": true,
+ "good_clean_target": true,
+ "good_findings": [],
+ "build_log_bad_tail": "",
+ "wall_s": 1.43,
+ "container_peak_kb": 44560
+}

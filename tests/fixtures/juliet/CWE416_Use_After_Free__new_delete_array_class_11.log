@@ -1,0 +1,59 @@
+=================================================================
+==15==ERROR: AddressSanitizer: heap-use-after-free on address 0x518000000080 at pc 0x5bb1c01adef5 bp 0x7ffe97020d30 sp 0x7ffe97020d28
+READ of size 4 at 0x518000000080 thread T0
+    #0 0x5bb1c01adef4 in CWE416_Use_After_Free__new_delete_array_class_11::bad() /work/case/CWE416_Use_After_Free__new_delete_array_class_11.cpp:48:30
+    #1 0x5bb1c01adf4e in main /work/case/CWE416_Use_After_Free__new_delete_array_class_11.cpp:211:5
+    #2 0x7429ff8a01c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7429ff8a028a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x5bb1c00d23a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: fde1ea696a62dde38163d3b9d7e400ad18551e57)
+
+0x518000000080 is located 0 bytes inside of 800-byte region [0x518000000080,0x5180000003a0)
+freed by thread T0 here:
+    #0 0x5bb1c01ac191 in operator delete[](void*) (/work/bin/bad+0x107191) (BuildId: fde1ea696a62dde38163d3b9d7e400ad18551e57)
+    #1 0x5bb1c01ade44 in CWE416_Use_After_Free__new_delete_array_class_11::bad() /work/case/CWE416_Use_After_Free__new_delete_array_class_11.cpp:43:9
+    #2 0x5bb1c01adf4e in main /work/case/CWE416_Use_After_Free__new_delete_array_class_11.cpp:211:5
+    #3 0x7429ff8a01c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7429ff8a028a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5bb1c00d23a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: fde1ea696a62dde38163d3b9d7e400ad18551e57)
+
+previously allocated by thread T0 here:
+    #0 0x5bb1c01ab931 in operator new[](unsigned long) (/work/bin/bad+0x106931) (BuildId: fde1ea696a62dde38163d3b9d7e400ad18551e57)
+    #1 0x5bb1c01adbc2 in CWE416_Use_After_Free__new_delete_array_class_11::bad() /work/case/CWE416_Use_After_Free__new_delete_array_class_11.cpp:33:16
+    #2 0x5bb1c01adf4e in main /work/case/CWE416_Use_After_Free__new_delete_array_class_11.cpp:211:5
+    #3 0x7429ff8a01c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7429ff8a028a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5bb1c00d23a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: fde1ea696a62dde38163d3b9d7e400ad18551e57)
+
+SUMMARY: AddressSanitizer: heap-use-after-free /work/case/CWE416_Use_After_Free__new_delete_array_class_11.cpp:48:30 in CWE416_Use_After_Free__new_delete_array_class_11::bad()
+Shadow bytes around the buggy address:
+  0x517ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x517ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x517fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x517fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x518000000000: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x518000000080:[fd]fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x518000000100: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x518000000180: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x518000000200: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x518000000280: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x518000000300: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==15==ABORTING

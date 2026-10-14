@@ -1,0 +1,64 @@
+=================================================================
+==15==ERROR: AddressSanitizer: heap-use-after-free on address 0x502000000010 at pc 0x5e735786d5b8 bp 0x7ffda13ff930 sp 0x7ffda13ff0c0
+READ of size 2 at 0x502000000010 thread T0
+    #0 0x5e735786d5b7 in printf_common(void*, char const*, __va_list_tag*) asan_interceptors.cpp.o
+    #1 0x5e735786f02d in printf (/work/bin/bad+0x5302d) (BuildId: ba0e801e5564399cbcabe4aa61ddbc5d1ef7c20c)
+    #2 0x5e73579217d0 in printLine /work/support/io.c:15:9
+    #3 0x5e7357922e68 in CWE416_Use_After_Free__return_freed_ptr_16_bad /work/case/CWE416_Use_After_Free__return_freed_ptr_16.c:76:13
+    #4 0x5e735792322e in main /work/case/CWE416_Use_After_Free__return_freed_ptr_16.c:133:5
+    #5 0x743ec3e671c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x743ec3e6728a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5e73578483b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: ba0e801e5564399cbcabe4aa61ddbc5d1ef7c20c)
+
+0x502000000010 is located 0 bytes inside of 8-byte region [0x502000000010,0x502000000018)
+freed by thread T0 here:
+    #0 0x5e73578e2f6a in free (/work/bin/bad+0xc6f6a) (BuildId: ba0e801e5564399cbcabe4aa61ddbc5d1ef7c20c)
+    #1 0x5e73579231b6 in helperBad /work/case/CWE416_Use_After_Free__return_freed_ptr_16.c:34:9
+    #2 0x5e7357922e5b in CWE416_Use_After_Free__return_freed_ptr_16_bad /work/case/CWE416_Use_After_Free__return_freed_ptr_16.c:75:37
+    #3 0x5e735792322e in main /work/case/CWE416_Use_After_Free__return_freed_ptr_16.c:133:5
+    #4 0x743ec3e671c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x743ec3e6728a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5e73578483b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: ba0e801e5564399cbcabe4aa61ddbc5d1ef7c20c)
+
+previously allocated by thread T0 here:
+    #0 0x5e73578e3203 in malloc (/work/bin/bad+0xc7203) (BuildId: ba0e801e5564399cbcabe4aa61ddbc5d1ef7c20c)
+    #1 0x5e7357922ed9 in helperBad /work/case/CWE416_Use_After_Free__return_freed_ptr_16.c:26:35
+    #2 0x5e7357922e5b in CWE416_Use_After_Free__return_freed_ptr_16_bad /work/case/CWE416_Use_After_Free__return_freed_ptr_16.c:75:37
+    #3 0x5e735792322e in main /work/case/CWE416_Use_After_Free__return_freed_ptr_16.c:133:5
+    #4 0x743ec3e671c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x743ec3e6728a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5e73578483b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: ba0e801e5564399cbcabe4aa61ddbc5d1ef7c20c)
+
+SUMMARY: AddressSanitizer: heap-use-after-free asan_interceptors.cpp.o in printf_common(void*, char const*, __va_list_tag*)
+Shadow bytes around the buggy address:
+  0x501ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x502000000000: fa fa[fd]fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==15==ABORTING

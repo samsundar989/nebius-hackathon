@@ -1,0 +1,29 @@
+=================================================================
+==17==ERROR: AddressSanitizer: attempting double-free on 0x518000000080 in thread T0:
+    #0 0x5948aa485fea in free (/work/bin/bad+0xcbfea) (BuildId: 0ef1d8a7d7a50750c02eafd8471efc844cf9717c)
+    #1 0x5948aa4cf386 in CWE415_Double_Free__malloc_free_struct_72::badSink(std::vector<_twoIntsStruct*, std::allocator<_twoIntsStruct*>>) /work/case/CWE415_Double_Free__malloc_free_struct_72b.cpp:35:5
+    #2 0x5948aa4c6f54 in CWE415_Double_Free__malloc_free_struct_72::bad() /work/case/CWE415_Double_Free__malloc_free_struct_72a.cpp:47:5
+    #3 0x5948aa4c717e in main /work/case/CWE415_Double_Free__malloc_free_struct_72a.cpp:122:5
+    #4 0x7abcc72721c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7abcc727228a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5948aa3eb434 in _start (/work/bin/bad+0x31434) (BuildId: 0ef1d8a7d7a50750c02eafd8471efc844cf9717c)
+
+0x518000000080 is located 0 bytes inside of 800-byte region [0x518000000080,0x5180000003a0)
+freed by thread T0 here:
+    #0 0x5948aa485fea in free (/work/bin/bad+0xcbfea) (BuildId: 0ef1d8a7d7a50750c02eafd8471efc844cf9717c)
+    #1 0x5948aa4c6e3f in CWE415_Double_Free__malloc_free_struct_72::bad() /work/case/CWE415_Double_Free__malloc_free_struct_72a.cpp:42:5
+    #2 0x5948aa4c717e in main /work/case/CWE415_Double_Free__malloc_free_struct_72a.cpp:122:5
+    #3 0x7abcc72721c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7abcc727228a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5948aa3eb434 in _start (/work/bin/bad+0x31434) (BuildId: 0ef1d8a7d7a50750c02eafd8471efc844cf9717c)
+
+previously allocated by thread T0 here:
+    #0 0x5948aa486283 in malloc (/work/bin/bad+0xcc283) (BuildId: 0ef1d8a7d7a50750c02eafd8471efc844cf9717c)
+    #1 0x5948aa4c6df5 in CWE415_Double_Free__malloc_free_struct_72::bad() /work/case/CWE415_Double_Free__malloc_free_struct_72a.cpp:39:29
+    #2 0x5948aa4c717e in main /work/case/CWE415_Double_Free__malloc_free_struct_72a.cpp:122:5
+    #3 0x7abcc72721c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7abcc727228a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5948aa3eb434 in _start (/work/bin/bad+0x31434) (BuildId: 0ef1d8a7d7a50750c02eafd8471efc844cf9717c)
+
+SUMMARY: AddressSanitizer: double-free (/work/bin/bad+0xcbfea) (BuildId: 0ef1d8a7d7a50750c02eafd8471efc844cf9717c) in free
+==17==ABORTING

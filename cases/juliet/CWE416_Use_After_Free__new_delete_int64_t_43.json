@@ -1,0 +1,239 @@
+{
+ "id": "CWE416_Use_After_Free__new_delete_int64_t_43",
+ "cwe": "CWE-416",
+ "functional_variant": "new_delete_int64_t",
+ "flow_variant": "43",
+ "dir": "testcases/CWE416_Use_After_Free",
+ "files": [
+  "CWE416_Use_After_Free__new_delete_int64_t_43.cpp"
+ ],
+ "lang": "c++",
+ "expected_kind": "use-after-free",
+ "source_root": "juliet-1.3/C",
+ "support_files": [
+  "testcasesupport/io.c",
+  "testcasesupport/std_testcase.h",
+  "testcasesupport/std_testcase_io.h",
+  "testcasesupport/std_thread.h"
+ ],
+ "image": "leakproof/cpp-sanitizers:e0",
+ "env": {
+  "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=0:symbolize=1",
+  "LSAN_OPTIONS": "use_stacks=0",
+  "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=0"
+ },
+ "build_cmd_bad": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITGOOD -Isupport -Icase -c support/io.c -o bin/io_bad.o && clang++ -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITGOOD -Isupport -Icase case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp bin/io_bad.o  -o bin/bad",
+ "run_cmd_bad": "timeout 30 ./bin/bad < /dev/null",
+ "build_cmd_good": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITBAD -Isupport -Icase -c support/io.c -o bin/io_good.o && clang++ -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITBAD -Isupport -Icase case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp bin/io_good.o  -o bin/good",
+ "run_cmd_good": "timeout 30 ./bin/good < /dev/null",
+ "build_bad_ok": true,
+ "build_good_ok": true,
+ "bad_exit": 1,
+ "good_exit": 1,
+ "detected": true,
+ "parsed": true,
+ "parsed_kind_matches": true,
+ "reproducible": true,
+ "not_reproducible_reason": null,
+ "finding": {
+  "tool": "asan",
+  "kind": "use-after-free",
+  "cwe_guess": "CWE-416",
+  "summary": "heap-use-after-free on address 0x502000000010 at pc 0x5f24f6f40e34 bp 0x7fff240c7ad0 sp 0x7fff240c7ac8",
+  "frames": [
+   {
+    "index": 0,
+    "function": "CWE416_Use_After_Free__new_delete_int64_t_43::bad()",
+    "file": "/work/case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp",
+    "line": 42,
+    "column": 23,
+    "module": null,
+    "pc": "0x5f24f6f40e33"
+   },
+   {
+    "index": 1,
+    "function": "main",
+    "file": "/work/case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp",
+    "line": 120,
+    "column": 5,
+    "module": null,
+    "pc": "0x5f24f6f40ede"
+   },
+   {
+    "index": 2,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x7100d0f621c9"
+   },
+   {
+    "index": 3,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x7100d0f6228a"
+   },
+   {
+    "index": 4,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5f24f6e653a4"
+   }
+  ],
+  "alloc_stack": [
+   {
+    "index": 0,
+    "function": "operator new(unsigned long)",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5f24f6f3e811"
+   },
+   {
+    "index": 1,
+    "function": "CWE416_Use_After_Free__new_delete_int64_t_43::badSource(long*&)",
+    "file": "/work/case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp",
+    "line": 29,
+    "column": 12,
+    "module": null,
+    "pc": "0x5f24f6f40bad"
+   },
+   {
+    "index": 2,
+    "function": "CWE416_Use_After_Free__new_delete_int64_t_43::bad()",
+    "file": "/work/case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp",
+    "line": 40,
+    "column": 5,
+    "module": null,
+    "pc": "0x5f24f6f40ddd"
+   },
+   {
+    "index": 3,
+    "function": "main",
+    "file": "/work/case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp",
+    "line": 120,
+    "column": 5,
+    "module": null,
+    "pc": "0x5f24f6f40ede"
+   },
+   {
+    "index": 4,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x7100d0f621c9"
+   },
+   {
+    "index": 5,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x7100d0f6228a"
+   },
+   {
+    "index": 6,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5f24f6e653a4"
+   }
+  ],
+  "free_stack": [
+   {
+    "index": 0,
+    "function": "operator delete(void*)",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5f24f6f3f091"
+   },
+   {
+    "index": 1,
+    "function": "CWE416_Use_After_Free__new_delete_int64_t_43::badSource(long*&)",
+    "file": "/work/case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp",
+    "line": 32,
+    "column": 5,
+    "module": null,
+    "pc": "0x5f24f6f40cff"
+   },
+   {
+    "index": 2,
+    "function": "CWE416_Use_After_Free__new_delete_int64_t_43::bad()",
+    "file": "/work/case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp",
+    "line": 40,
+    "column": 5,
+    "module": null,
+    "pc": "0x5f24f6f40ddd"
+   },
+   {
+    "index": 3,
+    "function": "main",
+    "file": "/work/case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp",
+    "line": 120,
+    "column": 5,
+    "module": null,
+    "pc": "0x5f24f6f40ede"
+   },
+   {
+    "index": 4,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x7100d0f621c9"
+   },
+   {
+    "index": 5,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x7100d0f6228a"
+   },
+   {
+    "index": 6,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5f24f6e653a4"
+   }
+  ],
+  "access": "READ",
+  "access_size": 8,
+  "leaked_bytes": null,
+  "leak_type": null,
+  "location": "/work/case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp:42",
+  "alloc_site": "/work/case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp:29",
+  "free_site": "/work/case/CWE416_Use_After_Free__new_delete_int64_t_43.cpp:32"
+ },
+ "all_bad_kinds": [
+  "use-after-free"
+ ],
+ "good_clean": false,
+ "good_clean_target": true,
+ "good_findings": [
+  "leak"
+ ],
+ "build_log_bad_tail": "",
+ "wall_s": 1.5,
+ "container_peak_kb": 44448
+}

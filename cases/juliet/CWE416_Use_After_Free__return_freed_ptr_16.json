@@ -1,0 +1,266 @@
+{
+ "id": "CWE416_Use_After_Free__return_freed_ptr_16",
+ "cwe": "CWE-416",
+ "functional_variant": "return_freed_ptr",
+ "flow_variant": "16",
+ "dir": "testcases/CWE416_Use_After_Free",
+ "files": [
+  "CWE416_Use_After_Free__return_freed_ptr_16.c"
+ ],
+ "lang": "c",
+ "expected_kind": "use-after-free",
+ "source_root": "juliet-1.3/C",
+ "support_files": [
+  "testcasesupport/io.c",
+  "testcasesupport/std_testcase.h",
+  "testcasesupport/std_testcase_io.h",
+  "testcasesupport/std_thread.h"
+ ],
+ "image": "leakproof/cpp-sanitizers:e0",
+ "env": {
+  "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=0:symbolize=1",
+  "LSAN_OPTIONS": "use_stacks=0",
+  "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=0"
+ },
+ "build_cmd_bad": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITGOOD -Isupport -Icase support/io.c case/CWE416_Use_After_Free__return_freed_ptr_16.c -o bin/bad",
+ "run_cmd_bad": "timeout 30 ./bin/bad < /dev/null",
+ "build_cmd_good": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITBAD -Isupport -Icase support/io.c case/CWE416_Use_After_Free__return_freed_ptr_16.c -o bin/good",
+ "run_cmd_good": "timeout 30 ./bin/good < /dev/null",
+ "build_bad_ok": true,
+ "build_good_ok": true,
+ "bad_exit": 1,
+ "good_exit": 1,
+ "detected": true,
+ "parsed": true,
+ "parsed_kind_matches": true,
+ "reproducible": true,
+ "not_reproducible_reason": null,
+ "finding": {
+  "tool": "asan",
+  "kind": "use-after-free",
+  "cwe_guess": "CWE-416",
+  "summary": "heap-use-after-free on address 0x502000000010 at pc 0x5e735786d5b8 bp 0x7ffda13ff930 sp 0x7ffda13ff0c0",
+  "frames": [
+   {
+    "index": 0,
+    "function": "printf_common(void*, char const*, __va_list_tag*) asan_interceptors.cpp.o",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": null,
+    "pc": "0x5e735786d5b7"
+   },
+   {
+    "index": 1,
+    "function": "printf",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5e735786f02d"
+   },
+   {
+    "index": 2,
+    "function": "printLine",
+    "file": "/work/support/io.c",
+    "line": 15,
+    "column": 9,
+    "module": null,
+    "pc": "0x5e73579217d0"
+   },
+   {
+    "index": 3,
+    "function": "CWE416_Use_After_Free__return_freed_ptr_16_bad",
+    "file": "/work/case/CWE416_Use_After_Free__return_freed_ptr_16.c",
+    "line": 76,
+    "column": 13,
+    "module": null,
+    "pc": "0x5e7357922e68"
+   },
+   {
+    "index": 4,
+    "function": "main",
+    "file": "/work/case/CWE416_Use_After_Free__return_freed_ptr_16.c",
+    "line": 133,
+    "column": 5,
+    "module": null,
+    "pc": "0x5e735792322e"
+   },
+   {
+    "index": 5,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x743ec3e671c9"
+   },
+   {
+    "index": 6,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x743ec3e6728a"
+   },
+   {
+    "index": 7,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5e73578483b4"
+   }
+  ],
+  "alloc_stack": [
+   {
+    "index": 0,
+    "function": "malloc",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5e73578e3203"
+   },
+   {
+    "index": 1,
+    "function": "helperBad",
+    "file": "/work/case/CWE416_Use_After_Free__return_freed_ptr_16.c",
+    "line": 26,
+    "column": 35,
+    "module": null,
+    "pc": "0x5e7357922ed9"
+   },
+   {
+    "index": 2,
+    "function": "CWE416_Use_After_Free__return_freed_ptr_16_bad",
+    "file": "/work/case/CWE416_Use_After_Free__return_freed_ptr_16.c",
+    "line": 75,
+    "column": 37,
+    "module": null,
+    "pc": "0x5e7357922e5b"
+   },
+   {
+    "index": 3,
+    "function": "main",
+    "file": "/work/case/CWE416_Use_After_Free__return_freed_ptr_16.c",
+    "line": 133,
+    "column": 5,
+    "module": null,
+    "pc": "0x5e735792322e"
+   },
+   {
+    "index": 4,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x743ec3e671c9"
+   },
+   {
+    "index": 5,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x743ec3e6728a"
+   },
+   {
+    "index": 6,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5e73578483b4"
+   }
+  ],
+  "free_stack": [
+   {
+    "index": 0,
+    "function": "free",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5e73578e2f6a"
+   },
+   {
+    "index": 1,
+    "function": "helperBad",
+    "file": "/work/case/CWE416_Use_After_Free__return_freed_ptr_16.c",
+    "line": 34,
+    "column": 9,
+    "module": null,
+    "pc": "0x5e73579231b6"
+   },
+   {
+    "index": 2,
+    "function": "CWE416_Use_After_Free__return_freed_ptr_16_bad",
+    "file": "/work/case/CWE416_Use_After_Free__return_freed_ptr_16.c",
+    "line": 75,
+    "column": 37,
+    "module": null,
+    "pc": "0x5e7357922e5b"
+   },
+   {
+    "index": 3,
+    "function": "main",
+    "file": "/work/case/CWE416_Use_After_Free__return_freed_ptr_16.c",
+    "line": 133,
+    "column": 5,
+    "module": null,
+    "pc": "0x5e735792322e"
+   },
+   {
+    "index": 4,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x743ec3e671c9"
+   },
+   {
+    "index": 5,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x743ec3e6728a"
+   },
+   {
+    "index": 6,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5e73578483b4"
+   }
+  ],
+  "access": "READ",
+  "access_size": 2,
+  "leaked_bytes": null,
+  "leak_type": null,
+  "location": "/work/support/io.c:15",
+  "alloc_site": "/work/case/CWE416_Use_After_Free__return_freed_ptr_16.c:26",
+  "free_site": "/work/case/CWE416_Use_After_Free__return_freed_ptr_16.c:34"
+ },
+ "all_bad_kinds": [
+  "use-after-free"
+ ],
+ "good_clean": false,
+ "good_clean_target": true,
+ "good_findings": [
+  "leak"
+ ],
+ "build_log_bad_tail": "",
+ "wall_s": 1.22,
+ "container_peak_kb": 38276
+}

@@ -1,0 +1,29 @@
+=================================================================
+==16==ERROR: AddressSanitizer: attempting double-free on 0x518000000080 in thread T0:
+    #0 0x653f51343191 in operator delete[](void*) (/work/bin/bad+0x107191) (BuildId: 135505af725ee230d40ad80bcf2c16999057a802)
+    #1 0x653f51344d2c in CWE415_Double_Free__new_delete_array_int64_t_68::badSink() /work/case/CWE415_Double_Free__new_delete_array_int64_t_68b.cpp:35:5
+    #2 0x653f51344c17 in CWE415_Double_Free__new_delete_array_int64_t_68::bad() /work/case/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp:43:5
+    #3 0x653f51344c5e in main /work/case/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp:109:5
+    #4 0x76b83e03c1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x76b83e03c28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x653f512693a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: 135505af725ee230d40ad80bcf2c16999057a802)
+
+0x518000000080 is located 0 bytes inside of 800-byte region [0x518000000080,0x5180000003a0)
+freed by thread T0 here:
+    #0 0x653f51343191 in operator delete[](void*) (/work/bin/bad+0x107191) (BuildId: 135505af725ee230d40ad80bcf2c16999057a802)
+    #1 0x653f51344c07 in CWE415_Double_Free__new_delete_array_int64_t_68::bad() /work/case/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp:41:5
+    #2 0x653f51344c5e in main /work/case/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp:109:5
+    #3 0x76b83e03c1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x76b83e03c28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x653f512693a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: 135505af725ee230d40ad80bcf2c16999057a802)
+
+previously allocated by thread T0 here:
+    #0 0x653f51342931 in operator new[](unsigned long) (/work/bin/bad+0x106931) (BuildId: 135505af725ee230d40ad80bcf2c16999057a802)
+    #1 0x653f51344bb1 in CWE415_Double_Free__new_delete_array_int64_t_68::bad() /work/case/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp:39:12
+    #2 0x653f51344c5e in main /work/case/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp:109:5
+    #3 0x76b83e03c1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x76b83e03c28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x653f512693a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: 135505af725ee230d40ad80bcf2c16999057a802)
+
+SUMMARY: AddressSanitizer: double-free (/work/bin/bad+0x107191) (BuildId: 135505af725ee230d40ad80bcf2c16999057a802) in operator delete[](void*)
+==16==ABORTING

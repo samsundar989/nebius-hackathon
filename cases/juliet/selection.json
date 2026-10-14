@@ -1,0 +1,760 @@
+{
+ "seed": 112,
+ "cases": [
+  {
+   "id": "CWE401_Memory_Leak__char_calloc_66",
+   "cwe": "CWE-401",
+   "functional_variant": "char_calloc",
+   "flow_variant": "66",
+   "dir": "testcases/CWE401_Memory_Leak/s01",
+   "files": [
+    "CWE401_Memory_Leak__char_calloc_66a.c",
+    "CWE401_Memory_Leak__char_calloc_66b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__char_malloc_05",
+   "cwe": "CWE-401",
+   "functional_variant": "char_malloc",
+   "flow_variant": "05",
+   "dir": "testcases/CWE401_Memory_Leak/s01",
+   "files": [
+    "CWE401_Memory_Leak__char_malloc_05.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__char_realloc_73",
+   "cwe": "CWE-401",
+   "functional_variant": "char_realloc",
+   "flow_variant": "73",
+   "dir": "testcases/CWE401_Memory_Leak/s01",
+   "files": [
+    "CWE401_Memory_Leak__char_realloc_73a.cpp",
+    "CWE401_Memory_Leak__char_realloc_73b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_calloc_72",
+   "cwe": "CWE-401",
+   "functional_variant": "int64_t_calloc",
+   "flow_variant": "72",
+   "dir": "testcases/CWE401_Memory_Leak/s01",
+   "files": [
+    "CWE401_Memory_Leak__int64_t_calloc_72a.cpp",
+    "CWE401_Memory_Leak__int64_t_calloc_72b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_realloc_64",
+   "cwe": "CWE-401",
+   "functional_variant": "int64_t_realloc",
+   "flow_variant": "64",
+   "dir": "testcases/CWE401_Memory_Leak/s01",
+   "files": [
+    "CWE401_Memory_Leak__int64_t_realloc_64a.c",
+    "CWE401_Memory_Leak__int64_t_realloc_64b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int_calloc_18",
+   "cwe": "CWE-401",
+   "functional_variant": "int_calloc",
+   "flow_variant": "18",
+   "dir": "testcases/CWE401_Memory_Leak/s01",
+   "files": [
+    "CWE401_Memory_Leak__int_calloc_18.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int_malloc_53",
+   "cwe": "CWE-401",
+   "functional_variant": "int_malloc",
+   "flow_variant": "53",
+   "dir": "testcases/CWE401_Memory_Leak/s01",
+   "files": [
+    "CWE401_Memory_Leak__int_malloc_53a.c",
+    "CWE401_Memory_Leak__int_malloc_53b.c",
+    "CWE401_Memory_Leak__int_malloc_53c.c",
+    "CWE401_Memory_Leak__int_malloc_53d.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int_realloc_51",
+   "cwe": "CWE-401",
+   "functional_variant": "int_realloc",
+   "flow_variant": "51",
+   "dir": "testcases/CWE401_Memory_Leak/s01",
+   "files": [
+    "CWE401_Memory_Leak__int_realloc_51a.c",
+    "CWE401_Memory_Leak__int_realloc_51b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_TwoIntsClass_21",
+   "cwe": "CWE-401",
+   "functional_variant": "new_TwoIntsClass",
+   "flow_variant": "21",
+   "dir": "testcases/CWE401_Memory_Leak/s02",
+   "files": [
+    "CWE401_Memory_Leak__new_TwoIntsClass_21.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_TwoIntsClass_11",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_TwoIntsClass",
+   "flow_variant": "11",
+   "dir": "testcases/CWE401_Memory_Leak/s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_TwoIntsClass_11.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_char_09",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_char",
+   "flow_variant": "09",
+   "dir": "testcases/CWE401_Memory_Leak/s01",
+   "files": [
+    "CWE401_Memory_Leak__new_array_char_09.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_int64_t_34",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_int64_t",
+   "flow_variant": "34",
+   "dir": "testcases/CWE401_Memory_Leak/s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_int64_t_34.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_struct_twoIntsStruct_14",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_struct_twoIntsStruct",
+   "flow_variant": "14",
+   "dir": "testcases/CWE401_Memory_Leak/s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_struct_twoIntsStruct_14.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_twointsStruct_10",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_twointsStruct",
+   "flow_variant": "10",
+   "dir": "testcases/CWE401_Memory_Leak/s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_twointsStruct_10.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_wchar_t_63",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_wchar_t",
+   "flow_variant": "63",
+   "dir": "testcases/CWE401_Memory_Leak/s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_wchar_t_63a.cpp",
+    "CWE401_Memory_Leak__new_array_wchar_t_63b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_char_33",
+   "cwe": "CWE-401",
+   "functional_variant": "new_char",
+   "flow_variant": "33",
+   "dir": "testcases/CWE401_Memory_Leak/s02",
+   "files": [
+    "CWE401_Memory_Leak__new_char_33.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_int64_t_02",
+   "cwe": "CWE-401",
+   "functional_variant": "new_int64_t",
+   "flow_variant": "02",
+   "dir": "testcases/CWE401_Memory_Leak/s02",
+   "files": [
+    "CWE401_Memory_Leak__new_int64_t_02.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_int_06",
+   "cwe": "CWE-401",
+   "functional_variant": "new_int",
+   "flow_variant": "06",
+   "dir": "testcases/CWE401_Memory_Leak/s02",
+   "files": [
+    "CWE401_Memory_Leak__new_int_06.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_struct_twoIntsStruct_22",
+   "cwe": "CWE-401",
+   "functional_variant": "new_struct_twoIntsStruct",
+   "flow_variant": "22",
+   "dir": "testcases/CWE401_Memory_Leak/s02",
+   "files": [
+    "CWE401_Memory_Leak__new_struct_twoIntsStruct_22a.cpp",
+    "CWE401_Memory_Leak__new_struct_twoIntsStruct_22b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_twoIntsStruct_03",
+   "cwe": "CWE-401",
+   "functional_variant": "new_twoIntsStruct",
+   "flow_variant": "03",
+   "dir": "testcases/CWE401_Memory_Leak/s02",
+   "files": [
+    "CWE401_Memory_Leak__new_twoIntsStruct_03.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__strdup_char_54",
+   "cwe": "CWE-401",
+   "functional_variant": "strdup_char",
+   "flow_variant": "54",
+   "dir": "testcases/CWE401_Memory_Leak/s02",
+   "files": [
+    "CWE401_Memory_Leak__strdup_char_54a.c",
+    "CWE401_Memory_Leak__strdup_char_54b.c",
+    "CWE401_Memory_Leak__strdup_char_54c.c",
+    "CWE401_Memory_Leak__strdup_char_54d.c",
+    "CWE401_Memory_Leak__strdup_char_54e.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__strdup_wchar_t_16",
+   "cwe": "CWE-401",
+   "functional_variant": "strdup_wchar_t",
+   "flow_variant": "16",
+   "dir": "testcases/CWE401_Memory_Leak/s03",
+   "files": [
+    "CWE401_Memory_Leak__strdup_wchar_t_16.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_04",
+   "cwe": "CWE-401",
+   "functional_variant": "struct_twoIntsStruct_calloc",
+   "flow_variant": "04",
+   "dir": "testcases/CWE401_Memory_Leak/s03",
+   "files": [
+    "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_04.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__struct_twoIntsStruct_malloc_17",
+   "cwe": "CWE-401",
+   "functional_variant": "struct_twoIntsStruct_malloc",
+   "flow_variant": "17",
+   "dir": "testcases/CWE401_Memory_Leak/s03",
+   "files": [
+    "CWE401_Memory_Leak__struct_twoIntsStruct_malloc_17.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__struct_twoIntsStruct_realloc_01",
+   "cwe": "CWE-401",
+   "functional_variant": "struct_twoIntsStruct_realloc",
+   "flow_variant": "01",
+   "dir": "testcases/CWE401_Memory_Leak/s03",
+   "files": [
+    "CWE401_Memory_Leak__struct_twoIntsStruct_realloc_01.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__twoIntsStruct_calloc_68",
+   "cwe": "CWE-401",
+   "functional_variant": "twoIntsStruct_calloc",
+   "flow_variant": "68",
+   "dir": "testcases/CWE401_Memory_Leak/s03",
+   "files": [
+    "CWE401_Memory_Leak__twoIntsStruct_calloc_68a.c",
+    "CWE401_Memory_Leak__twoIntsStruct_calloc_68b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__twoIntsStruct_malloc_31",
+   "cwe": "CWE-401",
+   "functional_variant": "twoIntsStruct_malloc",
+   "flow_variant": "31",
+   "dir": "testcases/CWE401_Memory_Leak/s03",
+   "files": [
+    "CWE401_Memory_Leak__twoIntsStruct_malloc_31.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__twoIntsStruct_realloc_07",
+   "cwe": "CWE-401",
+   "functional_variant": "twoIntsStruct_realloc",
+   "flow_variant": "07",
+   "dir": "testcases/CWE401_Memory_Leak/s03",
+   "files": [
+    "CWE401_Memory_Leak__twoIntsStruct_realloc_07.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__wchar_t_malloc_61",
+   "cwe": "CWE-401",
+   "functional_variant": "wchar_t_malloc",
+   "flow_variant": "61",
+   "dir": "testcases/CWE401_Memory_Leak/s03",
+   "files": [
+    "CWE401_Memory_Leak__wchar_t_malloc_61a.c",
+    "CWE401_Memory_Leak__wchar_t_malloc_61b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__wchar_t_realloc_81",
+   "cwe": "CWE-401",
+   "functional_variant": "wchar_t_realloc",
+   "flow_variant": "81",
+   "dir": "testcases/CWE401_Memory_Leak/s03",
+   "files": [
+    "CWE401_Memory_Leak__wchar_t_realloc_81.h",
+    "CWE401_Memory_Leak__wchar_t_realloc_81_bad.cpp",
+    "CWE401_Memory_Leak__wchar_t_realloc_81_goodB2G.cpp",
+    "CWE401_Memory_Leak__wchar_t_realloc_81_goodG2B.cpp",
+    "CWE401_Memory_Leak__wchar_t_realloc_81a.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE415_Double_Free__malloc_free_char_54",
+   "cwe": "CWE-415",
+   "functional_variant": "malloc_free_char",
+   "flow_variant": "54",
+   "dir": "testcases/CWE415_Double_Free/s01",
+   "files": [
+    "CWE415_Double_Free__malloc_free_char_54a.c",
+    "CWE415_Double_Free__malloc_free_char_54b.c",
+    "CWE415_Double_Free__malloc_free_char_54c.c",
+    "CWE415_Double_Free__malloc_free_char_54d.c",
+    "CWE415_Double_Free__malloc_free_char_54e.c"
+   ],
+   "lang": "c",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__malloc_free_int64_t_13",
+   "cwe": "CWE-415",
+   "functional_variant": "malloc_free_int64_t",
+   "flow_variant": "13",
+   "dir": "testcases/CWE415_Double_Free/s01",
+   "files": [
+    "CWE415_Double_Free__malloc_free_int64_t_13.c"
+   ],
+   "lang": "c",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__malloc_free_int_45",
+   "cwe": "CWE-415",
+   "functional_variant": "malloc_free_int",
+   "flow_variant": "45",
+   "dir": "testcases/CWE415_Double_Free/s01",
+   "files": [
+    "CWE415_Double_Free__malloc_free_int_45.c"
+   ],
+   "lang": "c",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__malloc_free_long_02",
+   "cwe": "CWE-415",
+   "functional_variant": "malloc_free_long",
+   "flow_variant": "02",
+   "dir": "testcases/CWE415_Double_Free/s01",
+   "files": [
+    "CWE415_Double_Free__malloc_free_long_02.c"
+   ],
+   "lang": "c",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__malloc_free_struct_72",
+   "cwe": "CWE-415",
+   "functional_variant": "malloc_free_struct",
+   "flow_variant": "72",
+   "dir": "testcases/CWE415_Double_Free/s01",
+   "files": [
+    "CWE415_Double_Free__malloc_free_struct_72a.cpp",
+    "CWE415_Double_Free__malloc_free_struct_72b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__malloc_free_wchar_t_32",
+   "cwe": "CWE-415",
+   "functional_variant": "malloc_free_wchar_t",
+   "flow_variant": "32",
+   "dir": "testcases/CWE415_Double_Free/s01",
+   "files": [
+    "CWE415_Double_Free__malloc_free_wchar_t_32.c"
+   ],
+   "lang": "c",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__new_delete_array_int64_t_68",
+   "cwe": "CWE-415",
+   "functional_variant": "new_delete_array_int64_t",
+   "flow_variant": "68",
+   "dir": "testcases/CWE415_Double_Free/s01",
+   "files": [
+    "CWE415_Double_Free__new_delete_array_int64_t_68a.cpp",
+    "CWE415_Double_Free__new_delete_array_int64_t_68b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__new_delete_array_int_41",
+   "cwe": "CWE-415",
+   "functional_variant": "new_delete_array_int",
+   "flow_variant": "41",
+   "dir": "testcases/CWE415_Double_Free/s01",
+   "files": [
+    "CWE415_Double_Free__new_delete_array_int_41.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__new_delete_array_long_42",
+   "cwe": "CWE-415",
+   "functional_variant": "new_delete_array_long",
+   "flow_variant": "42",
+   "dir": "testcases/CWE415_Double_Free/s01",
+   "files": [
+    "CWE415_Double_Free__new_delete_array_long_42.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__new_delete_array_struct_43",
+   "cwe": "CWE-415",
+   "functional_variant": "new_delete_array_struct",
+   "flow_variant": "43",
+   "dir": "testcases/CWE415_Double_Free/s02",
+   "files": [
+    "CWE415_Double_Free__new_delete_array_struct_43.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__new_delete_array_wchar_t_31",
+   "cwe": "CWE-415",
+   "functional_variant": "new_delete_array_wchar_t",
+   "flow_variant": "31",
+   "dir": "testcases/CWE415_Double_Free/s02",
+   "files": [
+    "CWE415_Double_Free__new_delete_array_wchar_t_31.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__new_delete_char_52",
+   "cwe": "CWE-415",
+   "functional_variant": "new_delete_char",
+   "flow_variant": "52",
+   "dir": "testcases/CWE415_Double_Free/s02",
+   "files": [
+    "CWE415_Double_Free__new_delete_char_52a.cpp",
+    "CWE415_Double_Free__new_delete_char_52b.cpp",
+    "CWE415_Double_Free__new_delete_char_52c.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__new_delete_int64_t_81",
+   "cwe": "CWE-415",
+   "functional_variant": "new_delete_int64_t",
+   "flow_variant": "81",
+   "dir": "testcases/CWE415_Double_Free/s02",
+   "files": [
+    "CWE415_Double_Free__new_delete_int64_t_81.h",
+    "CWE415_Double_Free__new_delete_int64_t_81_bad.cpp",
+    "CWE415_Double_Free__new_delete_int64_t_81_goodB2G.cpp",
+    "CWE415_Double_Free__new_delete_int64_t_81_goodG2B.cpp",
+    "CWE415_Double_Free__new_delete_int64_t_81a.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__new_delete_long_67",
+   "cwe": "CWE-415",
+   "functional_variant": "new_delete_long",
+   "flow_variant": "67",
+   "dir": "testcases/CWE415_Double_Free/s02",
+   "files": [
+    "CWE415_Double_Free__new_delete_long_67a.cpp",
+    "CWE415_Double_Free__new_delete_long_67b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE415_Double_Free__new_delete_struct_05",
+   "cwe": "CWE-415",
+   "functional_variant": "new_delete_struct",
+   "flow_variant": "05",
+   "dir": "testcases/CWE415_Double_Free/s02",
+   "files": [
+    "CWE415_Double_Free__new_delete_struct_05.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "double-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__malloc_free_char_03",
+   "cwe": "CWE-416",
+   "functional_variant": "malloc_free_char",
+   "flow_variant": "03",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__malloc_free_char_03.c"
+   ],
+   "lang": "c",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__malloc_free_int64_t_14",
+   "cwe": "CWE-416",
+   "functional_variant": "malloc_free_int64_t",
+   "flow_variant": "14",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__malloc_free_int64_t_14.c"
+   ],
+   "lang": "c",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__malloc_free_int_15",
+   "cwe": "CWE-416",
+   "functional_variant": "malloc_free_int",
+   "flow_variant": "15",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__malloc_free_int_15.c"
+   ],
+   "lang": "c",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__malloc_free_long_08",
+   "cwe": "CWE-416",
+   "functional_variant": "malloc_free_long",
+   "flow_variant": "08",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__malloc_free_long_08.c"
+   ],
+   "lang": "c",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__malloc_free_struct_07",
+   "cwe": "CWE-416",
+   "functional_variant": "malloc_free_struct",
+   "flow_variant": "07",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__malloc_free_struct_07.c"
+   ],
+   "lang": "c",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__malloc_free_wchar_t_62",
+   "cwe": "CWE-416",
+   "functional_variant": "malloc_free_wchar_t",
+   "flow_variant": "62",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__malloc_free_wchar_t_62a.cpp",
+    "CWE416_Use_After_Free__malloc_free_wchar_t_62b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__new_delete_array_class_11",
+   "cwe": "CWE-416",
+   "functional_variant": "new_delete_array_class",
+   "flow_variant": "11",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__new_delete_array_class_11.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__new_delete_array_int_13",
+   "cwe": "CWE-416",
+   "functional_variant": "new_delete_array_int",
+   "flow_variant": "13",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__new_delete_array_int_13.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__new_delete_array_struct_01",
+   "cwe": "CWE-416",
+   "functional_variant": "new_delete_array_struct",
+   "flow_variant": "01",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__new_delete_array_struct_01.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__new_delete_class_06",
+   "cwe": "CWE-416",
+   "functional_variant": "new_delete_class",
+   "flow_variant": "06",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__new_delete_class_06.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__new_delete_int64_t_43",
+   "cwe": "CWE-416",
+   "functional_variant": "new_delete_int64_t",
+   "flow_variant": "43",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__new_delete_int64_t_43.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__new_delete_long_05",
+   "cwe": "CWE-416",
+   "functional_variant": "new_delete_long",
+   "flow_variant": "05",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__new_delete_long_05.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__new_delete_struct_63",
+   "cwe": "CWE-416",
+   "functional_variant": "new_delete_struct",
+   "flow_variant": "63",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__new_delete_struct_63a.cpp",
+    "CWE416_Use_After_Free__new_delete_struct_63b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__new_delete_wchar_t_17",
+   "cwe": "CWE-416",
+   "functional_variant": "new_delete_wchar_t",
+   "flow_variant": "17",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__new_delete_wchar_t_17.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "use-after-free"
+  },
+  {
+   "id": "CWE416_Use_After_Free__return_freed_ptr_16",
+   "cwe": "CWE-416",
+   "functional_variant": "return_freed_ptr",
+   "flow_variant": "16",
+   "dir": "testcases/CWE416_Use_After_Free",
+   "files": [
+    "CWE416_Use_After_Free__return_freed_ptr_16.c"
+   ],
+   "lang": "c",
+   "expected_kind": "use-after-free"
+  }
+ ]
+}
