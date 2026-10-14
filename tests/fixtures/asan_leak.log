@@ -1,0 +1,16 @@
+
+=================================================================
+==10==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 64 byte(s) in 1 object(s) allocated from:
+    #0 0x645516942193 in malloc (/tmp/leak+0xc6193) (BuildId: eaf8a165ee1081aba21b42713bfa08f3933890be)
+    #1 0x64551698079c in make src/leak.c:3:41
+    #2 0x645516980750 in main src/leak.c:4:28
+    #3 0x796f630941c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x796f6309428a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x6455168a7344 in _start (/tmp/leak+0x2b344) (BuildId: eaf8a165ee1081aba21b42713bfa08f3933890be)
+
+Objects leaked above:
+0x506000000020 (64 bytes)
+
+SUMMARY: AddressSanitizer: 64 byte(s) leaked in 1 allocation(s).

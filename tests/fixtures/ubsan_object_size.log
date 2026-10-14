@@ -1,0 +1,10 @@
+src/heap_overflow.c:2:53: runtime error: store to address 0x504000000038 with insufficient space for an object of type 'int'
+0x504000000038: note: pointer points here
+ be be be be  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  00 00 00 00
+              ^ 
+    #0 0x5afbf0fb876e in main src/heap_overflow.c:2:59
+    #1 0x7d045cf371c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #2 0x7d045cf3728a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #3 0x5afbf0edf344 in _start (/tmp/heap_overflow+0x2b344) (BuildId: fb10f1f7163383a0bd105a8ac992cc05298c9da1)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior src/heap_overflow.c:2:53 

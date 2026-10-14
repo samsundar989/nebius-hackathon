@@ -1,0 +1,7 @@
+src/ubsan_overflow.c:3:66: runtime error: signed integer overflow: 2147483647 + 1 cannot be represented in type 'int'
+    #0 0x56c0355bf773 in main src/ubsan_overflow.c:3:66
+    #1 0x7350e544c1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #2 0x7350e544c28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #3 0x56c0354e6344 in _start (/tmp/ubsan_overflow+0x2b344) (BuildId: b2c4cc73a70a4a3f6bc9c8fe6968d9013c84ec31)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior src/ubsan_overflow.c:3:66 

@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Symbolized, deterministic sanitizer reports by default; callers may override.
 ENV ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer-18 \
     ASAN_OPTIONS=detect_leaks=1:abort_on_error=0:symbolize=1 \
-    UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1 \
+    UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=0 \
     LSAN_OPTIONS=report_objects=1
 
 RUN mkdir -p /work

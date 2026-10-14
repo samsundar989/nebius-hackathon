@@ -1,0 +1,14 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==11==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x5e3851eeb7ed bp 0x7fff8bb917f0 sp 0x7fff8bb917d0 T0)
+==11==The signal is caused by a READ memory access.
+==11==Hint: address points to the zero page.
+    #0 0x5e3851eeb7ed in get src/null_deref.c:3:41
+    #1 0x5e3851eeb778 in main src/null_deref.c:4:112
+    #2 0x7a5eff20f1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7a5eff20f28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x5e3851e12344 in _start (/tmp/nd+0x2b344) (BuildId: 9591d5cdc10bb61caed224d5a411a8b7e3efbcf3)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV src/null_deref.c:3:41 in get
+==11==ABORTING

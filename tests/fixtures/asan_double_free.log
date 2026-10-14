@@ -1,0 +1,25 @@
+=================================================================
+==16==ERROR: AddressSanitizer: attempting double-free on 0x502000000010 in thread T0:
+    #0 0x6124e09f9efa in free (/tmp/double_free+0xc5efa) (BuildId: 3baad32d5c4bbd388f549657758a3d8e1be162bf)
+    #1 0x6124e0a38766 in main src/double_free.c:2:49
+    #2 0x7f9a7d4831c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7f9a7d48328a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x6124e095f344 in _start (/tmp/double_free+0x2b344) (BuildId: 3baad32d5c4bbd388f549657758a3d8e1be162bf)
+
+0x502000000010 is located 0 bytes inside of 16-byte region [0x502000000010,0x502000000020)
+freed by thread T0 here:
+    #0 0x6124e09f9efa in free (/tmp/double_free+0xc5efa) (BuildId: 3baad32d5c4bbd388f549657758a3d8e1be162bf)
+    #1 0x6124e0a3875d in main src/double_free.c:2:40
+    #2 0x7f9a7d4831c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7f9a7d48328a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x6124e095f344 in _start (/tmp/double_free+0x2b344) (BuildId: 3baad32d5c4bbd388f549657758a3d8e1be162bf)
+
+previously allocated by thread T0 here:
+    #0 0x6124e09fa193 in malloc (/tmp/double_free+0xc6193) (BuildId: 3baad32d5c4bbd388f549657758a3d8e1be162bf)
+    #1 0x6124e0a38750 in main src/double_free.c:2:28
+    #2 0x7f9a7d4831c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7f9a7d48328a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x6124e095f344 in _start (/tmp/double_free+0x2b344) (BuildId: 3baad32d5c4bbd388f549657758a3d8e1be162bf)
+
+SUMMARY: AddressSanitizer: double-free (/tmp/double_free+0xc5efa) (BuildId: 3baad32d5c4bbd388f549657758a3d8e1be162bf) in free
+==16==ABORTING

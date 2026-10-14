@@ -1,0 +1,59 @@
+src/heap_overflow.c:2:53: runtime error: store to address 0x504000000078 with insufficient space for an object of type 'int'
+0x504000000078: note: pointer points here
+ be be be be  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  00 00 00 00
+              ^ 
+    #0 0x5d06ddf4276e in main src/heap_overflow.c:2:59
+    #1 0x7529b397f1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #2 0x7529b397f28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #3 0x5d06dde69344 in _start (/tmp/h+0x2b344) (BuildId: fb10f1f7163383a0bd105a8ac992cc05298c9da1)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior src/heap_overflow.c:2:53 
+=================================================================
+==10==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x504000000078 at pc 0x5d06ddf427ac bp 0x7ffd4ee57bf0 sp 0x7ffd4ee57be8
+WRITE of size 4 at 0x504000000078 thread T0
+    #0 0x5d06ddf427ab in main src/heap_overflow.c:2:59
+    #1 0x7529b397f1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #2 0x7529b397f28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #3 0x5d06dde69344 in _start (/tmp/h+0x2b344) (BuildId: fb10f1f7163383a0bd105a8ac992cc05298c9da1)
+
+0x504000000078 is located 0 bytes after 40-byte region [0x504000000050,0x504000000078)
+allocated by thread T0 here:
+    #0 0x5d06ddf04193 in malloc (/tmp/h+0xc6193) (BuildId: fb10f1f7163383a0bd105a8ac992cc05298c9da1)
+    #1 0x5d06ddf42748 in main src/heap_overflow.c:2:27
+    #2 0x7529b397f1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7529b397f28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x5d06dde69344 in _start (/tmp/h+0x2b344) (BuildId: fb10f1f7163383a0bd105a8ac992cc05298c9da1)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow src/heap_overflow.c:2:59 in main
+Shadow bytes around the buggy address:
+  0x503ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x504000000000: fa fa 00 00 00 00 00 fa fa fa 00 00 00 00 00[fa]
+  0x504000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==10==ABORTING
