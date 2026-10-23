@@ -29,11 +29,26 @@ BUILD_ENV = {"CFLAGS": OUR_FLAGS, "CXXFLAGS": f"{OUR_FLAGS} -stdlib=libc++"}
 WINDOW = 80
 
 
-def touch_cmd(files: dict[str, str]) -> str:
-    """Re-stamp copied-in sources with the container's clock before `make` decides what to
-    rebuild: their mtime comes from the Windows host, the objects' from the Docker VM, and a VM
-    clock running ahead made mosquitto's make skip the patched file (E1 ARVO run 2)."""
-    return f"touch {shlex.join(sorted(files))}; " if files else ""
+def rebuild_prep_cmd(
+    project: str, fuzz_target: str, files: dict[str, str], clean: bool = False
+) -> str:
+    """Shell prefix that makes `arvo compile` really rebuild what we changed (D-0041/D-0042).
+
+    - touch copied-in sources with the container's clock (their mtime is the Windows host's);
+    - delete the harness binary: some fuzzer Makefile rules depend only on the harness .cpp, not
+      on the project library (mosquitto), so an existing binary is never relinked;
+    - clean=True (baseline): delete objects/archives too, since make does not rebuild when only
+      CFLAGS change and the image's objects are -O1.
+    """
+    cmd = f"touch {shlex.join(sorted(files))}; " if files else ""
+    target = shlex.quote(fuzz_target)
+    cmd += f"rm -f /out/{target}; find /src/{project} -type f -name {target} -delete; "
+    if clean:
+        cmd += (
+            f"find /src/{project} -type f \\( -name '*.o' -o -name '*.lo' -o -name '*.a' "
+            "-o -name '*.la' \\) -delete; "
+        )
+    return cmd
 
 
 HARNESS_DIRS = re.compile(r"/(tests?|fuzz|fuzzing|oss-fuzz)/", re.I)
@@ -129,7 +144,8 @@ class ArvoCase:
             )
         rebuilt = runner.run(
             ref,
-            "arvo compile > /tmp/compile.log 2>&1; rc=$?; tail -20 /tmp/compile.log; "
+            rebuild_prep_cmd(self.project, self.fuzz_target, {}, clean=True)
+            + "arvo compile > /tmp/compile.log 2>&1; rc=$?; tail -20 /tmp/compile.log; "
             "[ $rc = 0 ] || exit 97; arvo",
             env=BUILD_ENV,
             cwd=self.workdir,
@@ -238,7 +254,7 @@ class ArvoCase:
         t0 = time.monotonic()
         res = runner.run(
             baseline,
-            touch_cmd(files)
+            rebuild_prep_cmd(self.project, self.fuzz_target, files)
             + "arvo compile > /tmp/compile.log 2>&1; rc=$?; grep -E 'error|Error' /tmp/compile.log "
             "| head -30; tail -15 /tmp/compile.log; exit $rc",
             files={k: v.encode() for k, v in files.items()},

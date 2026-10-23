@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from leakproof.cases.arvo import BUILD_ENV, ArvoCase, touch_cmd
+from leakproof.cases.arvo import BUILD_ENV, ArvoCase, rebuild_prep_cmd
 from leakproof.cases.juliet import JulietCase
 from leakproof.findings import parse_report, primary
 from leakproof.runner import ImageRef, LocalDockerRunner
@@ -303,7 +303,7 @@ class ArvoGate:
     def candidate(self, cand: dict[str, Any], checks: dict[str, Check]) -> str:
         tests = self.case.tests_cmd
         script = [
-            touch_cmd(cand["files"])
+            rebuild_prep_cmd(self.case.project, self.case.fuzz_target, cand["files"])
             + "arvo compile > /tmp/compile.log 2>&1; echo $? > /tmp/rc_build; "
             f"md5sum {self.harness} > /tmp/hash 2>&1",
             "if [ $(cat /tmp/rc_build) = 0 ]; then arvo > /tmp/out_run 2> /tmp/err_run; "
