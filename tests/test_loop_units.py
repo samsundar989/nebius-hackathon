@@ -196,3 +196,14 @@ def test_path_prefix_and_reindent() -> None:
     out, how = apply_blocks({"a.c": src}, parse_blocks(model))
     assert how == ["whitespace"]
     assert out["a.c"] == "void g(void) {\n    if (x)\n    {\n        free(p);\n    }\n}\n"
+
+
+def test_code_lines_fallback_skips_dropped_comment() -> None:
+    src = "    if(x)\n    {\n        /* POTENTIAL FLAW: No deallocation */\n        ;\n    }\n}\n"
+    model = block(
+        "a.c",
+        "    if(x)\n    {\n        ;\n    }\n}",
+        "    if(x)\n    {\n        ;\n    }\n    delete data;\n}",
+    )
+    out, how = apply_blocks({"a.c": src}, parse_blocks(model))
+    assert how == ["code_lines"] and "delete data;" in out["a.c"]

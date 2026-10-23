@@ -89,14 +89,27 @@ def apply_block(source: str, block: EditBlock) -> tuple[str, str]:
     while needle and not needle[-1]:
         needle.pop()
     hay = [_norm(x) for x in lines]
-    hits = [i for i in range(len(hay) - len(needle) + 1) if hay[i : i + len(needle)] == needle]
-    if len(hits) != 1:
-        first = block.search.strip().splitlines()[0]
+    hits = _hits(hay, needle)
+    how = "whitespace"
+    if len(hits) == 1:
+        i, end = hits[0], hits[0] + len(needle)
+    elif not hits:
+        # Models drop comment-only and blank lines when quoting; match on code lines alone.
+        code_idx = [k for k, h in enumerate(hay) if h and not _COMMENT.match(h)]
+        code_needle = [n for n in needle if n and not _COMMENT.match(n)]
+        code_hits = _hits([hay[k] for k in code_idx], code_needle) if code_needle else []
+        if len(code_hits) != 1:
+            raise EditError(
+                f"{block.path}: SEARCH matches 0 times (even ignoring whitespace and comment "
+                f"lines); first SEARCH line was: {block.search.strip().splitlines()[0]!r}"
+            )
+        j = code_hits[0]
+        i, end, how = code_idx[j], code_idx[j + len(code_needle) - 1] + 1, "code_lines"
+    else:
         raise EditError(
             f"{block.path}: SEARCH matches {len(hits)} times (whitespace-insensitive); "
-            f"first SEARCH line was: {first!r}"
+            "add context lines"
         )
-    i = hits[0]
     # Models often shift a whole block's indentation; move the replacement by the same offset
     # the SEARCH text was off by, so the diff shows only the real change.
     have = _indent(lines[i])
@@ -104,8 +117,15 @@ def apply_block(source: str, block: EditBlock) -> tuple[str, str]:
     replacement = [
         have + x[len(said) :] if x.startswith(said) else x for x in block.replace.splitlines()
     ]
-    lines[i : i + len(needle)] = replacement
-    return "\n".join(lines) + ("\n" if source.endswith("\n") else ""), "whitespace"
+    lines[i:end] = replacement
+    return "\n".join(lines) + ("\n" if source.endswith("\n") else ""), how
+
+
+_COMMENT = re.compile(r"^(//.*|/\*.*\*/)$")
+
+
+def _hits(hay: list[str], needle: list[str]) -> list[int]:
+    return [i for i in range(len(hay) - len(needle) + 1) if hay[i : i + len(needle)] == needle]
 
 
 def _indent(line: str) -> str:

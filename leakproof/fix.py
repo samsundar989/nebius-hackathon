@@ -109,7 +109,10 @@ def fix_case(
                 model=planner_model,
             )
             rec["plan"] = pl.to_dict()
-            root_cause, hyps = pl.root_cause, pl.hypotheses[:n_workers]
+            root_cause = pl.root_cause
+            # Fewer hypotheses than workers: cycle them (sampling at temperature > 0 varies
+            # the edits); a single worker's formatting slip should not sink the case.
+            hyps = [pl.hypotheses[i % len(pl.hypotheses)] for i in range(n_workers)]
         else:
             root_cause = "(no planner)"
             hyps = no_planner_hypotheses(case.finding, sorted(sources), n_workers)
