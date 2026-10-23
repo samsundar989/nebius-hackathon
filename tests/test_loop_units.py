@@ -207,3 +207,10 @@ def test_code_lines_fallback_skips_dropped_comment() -> None:
     )
     out, how = apply_blocks({"a.c": src}, parse_blocks(model))
     assert how == ["code_lines"] and "delete data;" in out["a.c"]
+
+
+def test_alloc_failure_exit_is_allowed() -> None:
+    guard = "--- a/x\n+++ b/x\n+    data = malloc(4);\n+    if (data == NULL) {exit(-1);}\n"
+    assert diff_scope(guard, ["a.c"], {"a.c"}, None, "other", "use-after-free").status == "pass"
+    plain = "--- a/x\n+++ b/x\n+    if (len > 4) exit(0);\n"
+    assert diff_scope(plain, ["a.c"], {"a.c"}, None, "other", "x").status == "fail"

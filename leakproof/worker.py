@@ -25,11 +25,9 @@ replacement:
 
 path/of/the/file.c
 <<<<<<< SEARCH
-    buf = malloc(len);
-    memcpy(buf, src, len + 1);
+<the lines to change, copied from that file>
 =======
-    buf = malloc(len + 1);
-    memcpy(buf, src, len + 1);
+<the new lines>
 >>>>>>> REPLACE
 
 Rules:

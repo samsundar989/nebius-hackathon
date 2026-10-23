@@ -8,6 +8,7 @@ image (D-0027: one ARVO image on disk at a time).
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 import subprocess
 import time
@@ -24,6 +25,7 @@ SHORTLIST = REPO_ROOT / "cases" / "arvo" / "shortlist_2026-10-22.json"
 OUR_FLAGS = "-O0 -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION"
 BUILD_ENV = {"CFLAGS": OUR_FLAGS, "CXXFLAGS": f"{OUR_FLAGS} -stdlib=libc++"}
 WINDOW = 80
+HARNESS_DIRS = re.compile(r"/(tests?|fuzz|fuzzing|oss-fuzz)/", re.I)
 MAX_CRASH_FRAMES = 5
 # Project test commands, run from the case workdir inside the rebuilt image (gate check 3).
 # Filled per project after inspecting its image; None = no runnable suite found (stated).
@@ -139,16 +141,16 @@ class ArvoCase:
         self._baseline = None
 
     # ---------------------------------------------------------------- worker-visible view
+    def _editable(self, path: str | None) -> bool:
+        """Project sources, minus the fuzz harness and tests (the gate rejects edits there)."""
+        return bool(path) and path.startswith(self.src_root) and not HARNESS_DIRS.search(path)
+
     def _frames(self) -> list[tuple[str, dict[str, Any]]]:
         f = self.finding
-        user = [
-            fr for fr in f.get("frames", []) if (fr.get("file") or "").startswith(self.src_root)
-        ]
+        user = [fr for fr in f.get("frames", []) if self._editable(fr.get("file"))]
         out = [("crash", fr) for fr in user[:MAX_CRASH_FRAMES]]
         for label, key in (("alloc", "alloc_stack"), ("free", "free_stack")):
-            stack = [
-                fr for fr in f.get(key, []) if (fr.get("file") or "").startswith(self.src_root)
-            ]
+            stack = [fr for fr in f.get(key, []) if self._editable(fr.get("file"))]
             out += [(label, fr) for fr in stack[:2]]
         return [(lbl, fr) for lbl, fr in out if fr.get("line")]
 

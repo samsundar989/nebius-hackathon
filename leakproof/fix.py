@@ -89,6 +89,17 @@ def fix_case(
     }
     case = load_case(case_id)
     rec["suite"] = case.suite
+    if case.suite == "juliet" and not case.finding:
+        # E0 could not reproduce it (D-0021); it stays in the denominator, unattempted.
+        rec.update(
+            verdict="inconclusive:not_reproducible",
+            usd=0.0,
+            usd_by_model={},
+            note=case.data.get("not_reproducible_reason"),
+            elapsed_s=round(time.monotonic() - t0, 2),
+        )
+        (run_dir / f"{case_id}.json").write_text(json.dumps(rec, indent=1))
+        return rec
     try:
         p0 = time.monotonic()
         baseline = case.prepare(runner)

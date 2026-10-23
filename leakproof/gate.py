@@ -47,6 +47,8 @@ FORBIDDEN_ADDED = [
     (re.compile(r"#\s*pragma\b"), "pragma"),
     (re.compile(r"FUZZING_BUILD_MODE|LLVMFuzzerTestOneInput"), "fuzz_harness"),
 ]
+# `if (p == NULL) {exit(-1);}` after an allocation is the one exit an edit may add.
+ALLOC_FAILURE_GUARD = re.compile(r"if\s*\(\s*(\w+\s*==\s*NULL|NULL\s*==\s*\w+|!\s*\w+)\s*\)")
 FREE_CALL = re.compile(r"\b(free|g_free|xfree|[A-Za-z_]\w*_free)\s*\(|\bdelete\b")
 
 
@@ -99,7 +101,15 @@ def diff_scope(
         ln[1:] for ln in diff.splitlines() if ln.startswith("-") and not ln.startswith("---")
     ]
     for pattern, reason in FORBIDDEN_ADDED:
-        hit = next((ln for ln in added if pattern.search(ln)), None)
+        hit = next(
+            (
+                ln
+                for ln in added
+                if pattern.search(ln)
+                and not (reason == "exit_bypass" and ALLOC_FAILURE_GUARD.search(ln))
+            ),
+            None,
+        )
         if hit is not None:
             return Check("fail", f"{reason}: {hit.strip()[:120]}")
     frees_removed = sum(len(FREE_CALL.findall(ln)) for ln in removed)
