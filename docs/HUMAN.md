@@ -28,3 +28,12 @@ None of ARVO's 6,138 records is a leak, and its reproducer runs with `detect_lea
 
 ## QUESTION 0006 — compute-sanitizer on the local 5090 (optional, admin registry change)
 compute-sanitizer can't attach to the RTX 5090 from WSL2/Docker: `Failed to initialize WDDM debugger interface. Please run EnableDebuggerInterface.bat as an administrator`. It also needs a CUDA ≥ 12.8 image for sm_120 (another ~12 GB pull). Enabling it means running NVIDIA's `EnableDebuggerInterface.bat` as admin, which changes a Windows registry setting for the GPU driver, so it's your call. **Default: leave the machine alone and run CUDA checks on Kaggle** (works now, 45 s per run, free; uses the same Kaggle GPU quota as your ARC project) or on the L40S once QUESTION 0001 is answered. Reply ANSWER 0006 only if you want local CUDA sanitizing.
+
+## QUESTION 0007 — Kaggle GPU quota (CUDA extension)
+Is ~1–2 h of Kaggle T4 time free this week for the three CUDA compute-sanitizer cases (Phase 3, Oct 26)? Default: assume yes, use ≤ 1 h.
+
+## QUESTION 0008 — Render account for the demo button
+The "run one Juliet case" button is a free Render web service (no card). Please create a Render account (https://render.com) and connect the GitHub repo, or say "skip" and the demo URL will be the GitHub Pages dashboard with recorded runs only. Default: build the service; deploy when you confirm.
+
+## QUESTION 0009 — Video narration
+Default: you record screen + voice on Oct 28 from `docs/VIDEO_SCRIPT.md` and `scripts/demo_run.sh`. Say if you want a captions-only video instead.

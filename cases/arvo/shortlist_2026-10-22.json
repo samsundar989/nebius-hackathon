@@ -1,0 +1,469 @@
+{
+ "generated": "2026-10-22",
+ "source": "arvo.db v3.0.0 (https://github.com/n132/ARVO-Meta/releases/tag/v3.0.0), Docker Hub v2 tag sizes; produced by Cowork research pass \u2014 VERIFY each row against the local arvo.db before use",
+ "selection_rule": "sanitizer=asan, submodule_bug=0, heap-class crash (HBO/UAF/double-free/invalid-free), one case per developer fix_commit, compressed image <= ~1 GB, C project with a test suite",
+ "notes": {
+  "oniguruma": "42517790/42517796/42517801 share the fix of 42517784 \u2014 skip them",
+  "miniz": "42536112 shares the fix of 42536108 \u2014 skip",
+  "quickjs": "414962711 shares the fix of 413161375 \u2014 skip",
+  "libbpf": "no unit tests in repo; 'tests pass' gate = fuzzer over its corpus only",
+  "avoid_large_images": [
+   "lua (1.38-1.49 GB)",
+   "sudo",
+   "libdwarf (~1.45 GB)",
+   "libyaml 1.35 GB",
+   "libucl 42486194 1.41 GB",
+   "md4c 42493685 1.37 GB",
+   "zstd 42507889 1.82 GB",
+   "flac 42526958 1.47 GB"
+  ],
+  "e0_cases_already_reproduced": [
+   42493685,
+   42508415,
+   42492467
+  ]
+ },
+ "tier1": [
+  {
+   "localId": 42530604,
+   "project": "jq",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow WRITE 1",
+   "fuzz_target": "jq_fuzz_parse_extended",
+   "compressed_mb": 628,
+   "fix_commit": "71c2ab509a",
+   "tests": "make check (tests/jq.test, shtest)",
+   "image": "n132/arvo:42530604-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42531297,
+   "project": "jq",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow READ 2",
+   "fuzz_target": "jq_fuzz_execute",
+   "compressed_mb": 631,
+   "fix_commit": "dc849e9bb7",
+   "tests": "make check (tests/jq.test, shtest)",
+   "image": "n132/arvo:42531297-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 417323384,
+   "project": "jq",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow READ 2",
+   "fuzz_target": "jq_fuzz_execute",
+   "compressed_mb": 636,
+   "fix_commit": "c6e041699d",
+   "tests": "make check (tests/jq.test, shtest)",
+   "image": "n132/arvo:417323384-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42520883,
+   "project": "mosquitto",
+   "tier": 1,
+   "crash_type": "Invalid-free",
+   "fuzz_target": "broker_fuzz_test_config",
+   "compressed_mb": 604,
+   "fix_commit": null,
+   "tests": "test/unit (cunit) + python broker tests",
+   "image": "n132/arvo:42520883-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42520955,
+   "project": "mosquitto",
+   "tier": 1,
+   "crash_type": "Heap-use-after-free READ 2",
+   "fuzz_target": null,
+   "compressed_mb": 609,
+   "fix_commit": null,
+   "tests": "test/unit (cunit) + python broker tests",
+   "image": "n132/arvo:42520955-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42521026,
+   "project": "mosquitto",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "fuzz_target": "lib_fuzz_utf8",
+   "compressed_mb": 609,
+   "fix_commit": null,
+   "tests": "test/unit (cunit) + python broker tests",
+   "image": "n132/arvo:42521026-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42521092,
+   "project": "mosquitto",
+   "tier": 1,
+   "crash_type": "Heap-use-after-free READ 8",
+   "fuzz_target": null,
+   "compressed_mb": 605,
+   "fix_commit": null,
+   "tests": "test/unit (cunit) + python broker tests",
+   "image": "n132/arvo:42521092-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42523423,
+   "project": "mosquitto",
+   "tier": 1,
+   "crash_type": "Heap-use-after-free READ 8",
+   "fuzz_target": "dynsec_fuzz_load",
+   "compressed_mb": 642,
+   "fix_commit": null,
+   "tests": "test/unit (cunit) + python broker tests",
+   "image": "n132/arvo:42523423-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42534812,
+   "project": "mosquitto",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow WRITE {*}",
+   "fuzz_target": null,
+   "compressed_mb": 653,
+   "fix_commit": null,
+   "tests": "test/unit (cunit) + python broker tests",
+   "image": "n132/arvo:42534812-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42517784,
+   "project": "oniguruma",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "fuzz_target": null,
+   "compressed_mb": 573,
+   "fix_commit": null,
+   "tests": "make check",
+   "image": "n132/arvo:42517784-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42507851,
+   "project": "libplist",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow READ 2",
+   "fuzz_target": "jplist_fuzzer",
+   "compressed_mb": 681,
+   "fix_commit": null,
+   "tests": "make check",
+   "image": "n132/arvo:42507851-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42519914,
+   "project": "libplist",
+   "tier": 1,
+   "crash_type": "Heap-use-after-free READ 8",
+   "fuzz_target": "oplist_fuzzer",
+   "compressed_mb": 590,
+   "fix_commit": null,
+   "tests": "make check",
+   "image": "n132/arvo:42519914-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42536108,
+   "project": "miniz",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow READ {*}",
+   "fuzz_target": "zip_fuzzer",
+   "compressed_mb": 671,
+   "fix_commit": null,
+   "tests": "miniz_tester (weak)",
+   "image": "n132/arvo:42536108-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42507297,
+   "project": "md4c",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "fuzz_target": "fuzz-mdhtml",
+   "compressed_mb": 643,
+   "fix_commit": null,
+   "tests": "test/run-tests.sh (python spec tests)",
+   "image": "n132/arvo:42507297-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42531514,
+   "project": "quickjs",
+   "tier": 1,
+   "crash_type": "Heap-use-after-free WRITE 8",
+   "fuzz_target": "fuzz_eval",
+   "compressed_mb": 617,
+   "fix_commit": null,
+   "tests": "make test",
+   "image": "n132/arvo:42531514-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 413161375,
+   "project": "quickjs",
+   "tier": 1,
+   "crash_type": "Heap-use-after-free WRITE 8",
+   "fuzz_target": null,
+   "compressed_mb": 663,
+   "fix_commit": null,
+   "tests": "make test",
+   "image": "n132/arvo:413161375-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42535924,
+   "project": "libssh2",
+   "tier": 1,
+   "crash_type": "Heap-double-free",
+   "fuzz_target": "ssh2_client_fuzzer",
+   "compressed_mb": 601,
+   "fix_commit": null,
+   "tests": "make check (offline subset)",
+   "image": "n132/arvo:42535924-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42523626,
+   "project": "libssh2",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "fuzz_target": null,
+   "compressed_mb": 574,
+   "fix_commit": null,
+   "tests": "make check (offline subset)",
+   "image": "n132/arvo:42523626-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42520377,
+   "project": "libzip",
+   "tier": 1,
+   "crash_type": "Heap-use-after-free READ 1",
+   "fuzz_target": "zip_read_fuzzer",
+   "compressed_mb": 641,
+   "fix_commit": null,
+   "tests": "ctest (regress/)",
+   "image": "n132/arvo:42520377-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42536390,
+   "project": "libical",
+   "tier": 1,
+   "crash_type": "Heap-use-after-free READ 2",
+   "fuzz_target": "libical_extended_fuzzer",
+   "compressed_mb": 595,
+   "fix_commit": null,
+   "tests": "ctest",
+   "image": "n132/arvo:42536390-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42526932,
+   "project": "pcre2",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow WRITE 4",
+   "fuzz_target": null,
+   "compressed_mb": 610,
+   "fix_commit": null,
+   "tests": "RunTest",
+   "image": "n132/arvo:42526932-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42533629,
+   "project": "pcre2",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow READ 4",
+   "fuzz_target": "pcre2_fuzzer_32_3l",
+   "compressed_mb": 649,
+   "fix_commit": null,
+   "tests": "RunTest",
+   "image": "n132/arvo:42533629-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42513177,
+   "project": "lz4",
+   "tier": 1,
+   "crash_type": "Invalid-free",
+   "fuzz_target": "round_trip_fuzzer",
+   "compressed_mb": 688,
+   "fix_commit": null,
+   "tests": "make -C tests",
+   "image": "n132/arvo:42513177-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42504164,
+   "project": "libbpf",
+   "tier": 1,
+   "crash_type": "Heap-use-after-free READ 1",
+   "fuzz_target": "bpf-object-fuzzer",
+   "compressed_mb": 644,
+   "fix_commit": null,
+   "tests": "none (fuzzer-on-corpus only)",
+   "image": "n132/arvo:42504164-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 375220555,
+   "project": "h3",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow WRITE 8",
+   "fuzz_target": "fuzzerPolygonToCellsExperimental",
+   "compressed_mb": 768,
+   "fix_commit": null,
+   "tests": "ctest (extensive)",
+   "image": "n132/arvo:375220555-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 372515086,
+   "project": "h3",
+   "tier": 1,
+   "crash_type": "Heap-buffer-overflow WRITE 8",
+   "fuzz_target": null,
+   "compressed_mb": 774,
+   "fix_commit": null,
+   "tests": "ctest (extensive)",
+   "image": "n132/arvo:372515086-vul",
+   "same_fix_skip": null
+  }
+ ],
+ "tier2": [
+  {
+   "localId": 42510992,
+   "project": "libexif",
+   "tier": 2,
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "fuzz_target": null,
+   "compressed_mb": 852,
+   "fix_commit": null,
+   "tests": "make check",
+   "image": "n132/arvo:42510992-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42483313,
+   "project": "oniguruma",
+   "tier": 2,
+   "crash_type": "Heap-use-after-free READ 4",
+   "fuzz_target": null,
+   "compressed_mb": 941,
+   "fix_commit": null,
+   "tests": "make check",
+   "image": "n132/arvo:42483313-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42510753,
+   "project": "quickjs",
+   "tier": 2,
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "fuzz_target": null,
+   "compressed_mb": 962,
+   "fix_commit": null,
+   "tests": "make test",
+   "image": "n132/arvo:42510753-vul",
+   "same_fix_skip": null
+  },
+  {
+   "localId": 42512369,
+   "project": "libucl",
+   "tier": 2,
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "fuzz_target": null,
+   "compressed_mb": 978,
+   "fix_commit": null,
+   "tests": "make check",
+   "image": "n132/arvo:42512369-vul",
+   "same_fix_skip": null
+  }
+ ],
+ "reserves": [
+  {
+   "localId": 42508390,
+   "project": "libplist",
+   "tier": "reserve",
+   "image": "n132/arvo:42508390-vul",
+   "tests": "make check"
+  },
+  {
+   "localId": 42508524,
+   "project": "libplist",
+   "tier": "reserve",
+   "image": "n132/arvo:42508524-vul",
+   "tests": "make check"
+  },
+  {
+   "localId": 42520011,
+   "project": "libplist",
+   "tier": "reserve",
+   "image": "n132/arvo:42520011-vul",
+   "tests": "make check"
+  },
+  {
+   "localId": 42500216,
+   "project": "libexif",
+   "tier": "reserve",
+   "image": "n132/arvo:42500216-vul",
+   "tests": "make check"
+  },
+  {
+   "localId": 42500232,
+   "project": "libexif",
+   "tier": "reserve",
+   "image": "n132/arvo:42500232-vul",
+   "tests": "make check"
+  },
+  {
+   "localId": 42522195,
+   "project": "mosquitto",
+   "tier": "reserve",
+   "image": "n132/arvo:42522195-vul",
+   "tests": "test/unit (cunit) + python broker tests"
+  },
+  {
+   "localId": 42541221,
+   "project": "pcre2",
+   "tier": "reserve",
+   "image": "n132/arvo:42541221-vul",
+   "tests": "RunTest"
+  },
+  {
+   "localId": 418354766,
+   "project": "quickjs",
+   "tier": "reserve",
+   "image": "n132/arvo:418354766-vul",
+   "tests": "make test"
+  },
+  {
+   "localId": 419216923,
+   "project": "quickjs",
+   "tier": "reserve",
+   "image": "n132/arvo:419216923-vul",
+   "tests": "make test"
+  },
+  {
+   "localId": 42475737,
+   "project": "libpcap",
+   "tier": "reserve",
+   "image": "n132/arvo:42475737-vul",
+   "tests": "?"
+  },
+  {
+   "localId": 42482401,
+   "project": "c-ares",
+   "tier": "reserve",
+   "image": "n132/arvo:42482401-vul",
+   "tests": "?"
+  }
+ ]
+}
