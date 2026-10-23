@@ -94,8 +94,19 @@ def apply_block(source: str, block: EditBlock) -> tuple[str, str]:
             f"first SEARCH line was: {first!r}"
         )
     i = hits[0]
-    lines[i : i + len(needle)] = block.replace.splitlines()
+    # Models often shift a whole block's indentation; move the replacement by the same offset
+    # the SEARCH text was off by, so the diff shows only the real change.
+    have = _indent(lines[i])
+    said = _indent(next(x for x in block.search.splitlines() if x.strip()))
+    replacement = [
+        have + x[len(said) :] if x.startswith(said) else x for x in block.replace.splitlines()
+    ]
+    lines[i : i + len(needle)] = replacement
     return "\n".join(lines) + ("\n" if source.endswith("\n") else ""), "whitespace"
+
+
+def _indent(line: str) -> str:
+    return line[: len(line) - len(line.lstrip())]
 
 
 def apply_blocks(
@@ -106,9 +117,11 @@ def apply_blocks(
     strategies = []
     for block in blocks:
         if block.path not in out:
-            matches = [
-                p for p in out if p.endswith("/" + block.path) or p.split("/")[-1] == block.path
-            ]
+            # Models add or drop leading directories ("src/x.c" for "x.c"): suffix, then basename.
+            matches = [p for p in out if p.endswith("/" + block.path.lstrip("/"))]
+            if not matches:
+                base = block.path.rsplit("/", 1)[-1]
+                matches = [p for p in out if p.rsplit("/", 1)[-1] == base]
             if len(matches) != 1:
                 raise EditError(f"{block.path}: not one of the files you were given")
             block = EditBlock(matches[0], block.search, block.replace)

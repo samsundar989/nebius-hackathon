@@ -182,13 +182,19 @@ class JulietGate:
             f"( {d['build_cmd_bad']} ) > out_b.log 2>&1; echo $? > rc_build",
             f"( {d['run_cmd_bad']} ) > out_run 2> err_run; echo $? > rc_run",
         ]
+        if not good:
+            # Behavior reference: LSan and ASan exit without flushing stdio, so the sanitizer
+            # run's stdout is truncated. Leaks off + unbuffered stdout keeps what was printed.
+            lines.append(
+                f"( ASAN_OPTIONS=detect_leaks=0 stdbuf -o0 {d['run_cmd_bad']} ) > out_ref 2>/dev/null"
+            )
         if good:
             lines += [
                 f"( {d['build_cmd_good']} ) > out_bg.log 2>&1; echo $? > rc_build_good",
                 f"( {d['run_cmd_good']} ) > /dev/null 2> err_good; echo $? > rc_good",
             ]
         for name in ("rc_build", "rc_run", "out_run", "err_run", "out_b.log") + (
-            ("rc_build_good", "rc_good", "err_good") if good else ()
+            ("rc_build_good", "rc_good", "err_good") if good else ("out_ref",)
         ):
             lines.append(f"echo '{MARK} {name}'; cat {name} 2>/dev/null")
         return "\n".join(lines)
@@ -207,13 +213,15 @@ class JulietGate:
 
     def unpatched(self) -> Check:
         sec, _ = self._run(None, good=False)
-        self.unpatched_stdout = sec.get("out_run", "")
+        self.unpatched_stdout = sec.get("out_ref", "")
         if sec.get("rc_build", "").strip() != "0":
             return Check("fail", "unpatched build failed")
         p = primary(parse_report(sec.get("err_run", "")))
         if p is None or p.kind != self.case.data["expected_kind"]:
             return Check("fail", f"unpatched run: {p.kind if p else 'no report'}")
-        return Check("pass", f"{p.kind} at {p.location}")
+        return Check(
+            "pass", f"{p.kind} at {p.location}; reference stdout {len(self.unpatched_stdout)} bytes"
+        )
 
     def candidate(self, cand: dict[str, Any], checks: dict[str, Check]) -> str:
         sec, res = self._run(cand["files"], good=True)

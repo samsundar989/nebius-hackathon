@@ -66,11 +66,16 @@ def test_diff_scope_rules() -> None:
     assert diff_scope(ok, ["b.c"], {"a.c"}, None, "add_free", "leak").status == "fail"
     bypass = "--- a/x\n+++ b/x\n+    exit(0);\n"
     assert "exit_bypass" in diff_scope(bypass, ["a.c"], {"a.c"}, None, "other", "leak").detail
-    attr = "--- a/x\n+++ b/x\n+__attribute__((no_sanitize(\"address\")))\n"
+    attr = '--- a/x\n+++ b/x\n+__attribute__((no_sanitize("address")))\n'
     assert "sanitizer" in diff_scope(attr, ["a.c"], {"a.c"}, None, "other", "leak").detail
     drop = "--- a/x\n+++ b/x\n-    free(p);\n"
-    assert "removed_free" in diff_scope(drop, ["a.c"], {"a.c"}, None, "lifetime_fix", "use-after-free").detail
-    assert diff_scope(drop, ["a.c"], {"a.c"}, None, "remove_free", "use-after-free").status == "pass"
+    assert (
+        "removed_free"
+        in diff_scope(drop, ["a.c"], {"a.c"}, None, "lifetime_fix", "use-after-free").detail
+    )
+    assert (
+        diff_scope(drop, ["a.c"], {"a.c"}, None, "remove_free", "use-after-free").status == "pass"
+    )
     assert diff_scope(drop, ["a.c"], {"a.c"}, None, "other", "double-free").status == "pass"
     root = "/src/jq/"
     assert diff_scope(ok, ["/src/jq/src/jv.c"], None, root, "other", "x").status == "pass"
@@ -87,7 +92,9 @@ ASAN = (
 def test_patched_check() -> None:
     assert patched_check(0, False, "", "use-after-free").status == "pass"
     assert patched_check(1, False, ASAN, "use-after-free").detail.startswith("still_crashes")
-    assert patched_check(1, False, ASAN, "heap-buffer-overflow").detail.startswith("new_use-after-free")
+    assert patched_check(1, False, ASAN, "heap-buffer-overflow").detail.startswith(
+        "new_use-after-free"
+    )
     assert patched_check(1, False, "Segmentation fault", "x").status == "inconclusive"
     assert patched_check(124, True, "", "x").status == "inconclusive"
 
@@ -99,7 +106,9 @@ def test_decide() -> None:
     assert decide({**base, "tests": Check("skipped")}) == "verified"
     assert decide({**base, "tests": Check("fail")}) == "silenced_only"
     assert decide({**base, "behavior": Check("fail")}) == "silenced_only"
-    assert decide({**base, "patched": Check("fail", "still_crashes: x")}) == "rejected:still_crashes"
+    assert (
+        decide({**base, "patched": Check("fail", "still_crashes: x")}) == "rejected:still_crashes"
+    )
     assert decide({**base, "patched": Check("inconclusive", "timeout")}) == "inconclusive:timeout"
     assert decide({**base, "build": Check("fail")}) == "build_failed"
     assert decide({**base, "diff_scope": Check("fail")}) == "rejected:diff_scope"
@@ -121,21 +130,41 @@ class FakeClient:
 
     def chat(self, model, messages, *, purpose, thinking, **kw):  # noqa: ANN001, ANN201
         self.calls.append((purpose, thinking, messages[-1]["content"]))
-        return SimpleNamespace(text=self.replies.pop(0), usd=0.001, latency_s=0.1,
-                               finish_reason="stop", completion_tokens=10, reasoning_tokens=5)
+        return SimpleNamespace(
+            text=self.replies.pop(0),
+            usd=0.001,
+            latency_s=0.1,
+            finish_reason="stop",
+            completion_tokens=10,
+            reasoning_tokens=5,
+        )
 
 
-FINDING = {"tool": "lsan", "kind": "leak", "cwe_guess": "CWE-401", "summary": "leak",
-           "frames": [], "alloc_stack": [], "free_stack": []}
+FINDING = {
+    "tool": "lsan",
+    "kind": "leak",
+    "cwe_guess": "CWE-401",
+    "summary": "leak",
+    "frames": [],
+    "alloc_stack": [],
+    "free_stack": [],
+}
 HYP = {"id": "H1", "summary": "free p", "files": ["a.c"], "strategy": "add_free", "risk": "low"}
 
 
 def _run(client: FakeClient, builds: list[bool]) -> object:
     results = iter(builds)
-    return run_worker(client, index=0, finding=FINDING, root_cause="p leaks", hypothesis=HYP,
-                      sources={"a.c": SRC}, windows=[Window("a.c", 1, 5, SRC)],
-                      restore=lambda p, t: t,
-                      build=lambda files: BuildResult(next(results), "a.c:3: error: x", 0.1))
+    return run_worker(
+        client,
+        index=0,
+        finding=FINDING,
+        root_cause="p leaks",
+        hypothesis=HYP,
+        sources={"a.c": SRC},
+        windows=[Window("a.c", 1, 5, SRC)],
+        restore=lambda p, t: t,
+        build=lambda files: BuildResult(next(results), "a.c:3: error: x", 0.1),
+    )
 
 
 def test_worker_apply_repair_then_build() -> None:
@@ -153,3 +182,15 @@ def test_worker_empty_reply_retries_without_thinking_and_build_repair() -> None:
     assert cand.status == "build_failed"
     assert client.calls[1][:2] == ("worker:retry_no_thinking", False)
     assert client.calls[2][0] == "worker:build_repair" and "does not compile" in client.calls[2][2]
+
+
+def test_path_prefix_and_reindent() -> None:
+    src = "void g(void) {\n    if (x)\n    {\n        ;\n    }\n}\n"
+    model = block(
+        "src/a.c",
+        "       if (x)\n       {\n           ;\n       }",
+        "       if (x)\n       {\n           free(p);\n       }",
+    )
+    out, how = apply_blocks({"a.c": src}, parse_blocks(model))
+    assert how == ["whitespace"]
+    assert out["a.c"] == "void g(void) {\n    if (x)\n    {\n        free(p);\n    }\n}\n"
