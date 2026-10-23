@@ -214,3 +214,16 @@ def test_alloc_failure_exit_is_allowed() -> None:
     assert diff_scope(guard, ["a.c"], {"a.c"}, None, "other", "use-after-free").status == "pass"
     plain = "--- a/x\n+++ b/x\n+    if (len > 4) exit(0);\n"
     assert diff_scope(plain, ["a.c"], {"a.c"}, None, "other", "x").status == "fail"
+
+
+def test_gate_split_survives_missing_trailing_newline() -> None:
+    from leakproof.gate import MARK, split
+
+    out = f"\n{MARK} out_run\nno newline at end\n{MARK} rc_tests\n0\n\n{MARK} empty\n"
+    sec = split(out)
+    assert sec["out_run"] == "no newline at end" and sec["rc_tests"].strip() == "0"
+
+
+def test_path_line_with_prefix_text() -> None:
+    text = "Edit: /src/m/src/conf.c\n<<<<<<< SEARCH\n    use(p);\n=======\n    use(q);\n>>>>>>> REPLACE\n"
+    assert parse_blocks(text)[0].path == "/src/m/src/conf.c"

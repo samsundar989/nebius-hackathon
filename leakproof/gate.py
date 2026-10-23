@@ -176,7 +176,9 @@ def behavior_check(cwe: str, before: str, after: str) -> Check:
 
 
 def split(stdout: str) -> dict[str, str]:
-    parts = re.split(rf"^{re.escape(MARK)} (\S+)\n", stdout, flags=re.M)
+    # The separator carries its own leading newline (printf '\n@@LPGATE@@ name\n'), so a file
+    # without a trailing newline cannot swallow the next marker; contents stay byte-exact.
+    parts = re.split(rf"\n{re.escape(MARK)} (\S+)\n", stdout)
     return {parts[i]: parts[i + 1] for i in range(1, len(parts) - 1, 2)}
 
 
@@ -206,7 +208,7 @@ class JulietGate:
         for name in ("rc_build", "rc_run", "out_run", "err_run", "out_b.log") + (
             ("rc_build_good", "rc_good", "err_good") if good else ("out_ref",)
         ):
-            lines.append(f"echo '{MARK} {name}'; cat {name} 2>/dev/null")
+            lines.append(f"printf '\n{MARK} {name}\n'; cat {name} 2>/dev/null")
         return "\n".join(lines)
 
     def _run(self, files: dict[str, str] | None, good: bool) -> tuple[dict[str, str], Any]:
@@ -310,7 +312,7 @@ class ArvoGate:
             "tests.log",
             "compile.log",
         ):
-            script.append(f"echo '{MARK} {name}'; tail -c 20000 /tmp/{name} 2>/dev/null")
+            script.append(f"printf '\n{MARK} {name}\n'; tail -c 20000 /tmp/{name} 2>/dev/null")
         res = self.runner.run(
             self.baseline,
             "\n".join(script),

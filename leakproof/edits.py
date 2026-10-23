@@ -21,6 +21,7 @@ from dataclasses import dataclass
 SEARCH = re.compile(r"^<{5,}\s*SEARCH\s*$")
 DIVIDER = re.compile(r"^={5,}\s*$")
 REPLACE = re.compile(r"^>{5,}\s*(REPLACE)?\s*$")
+SOURCE_PATH = re.compile(r"[\w./+-]+\.(c|h|cc|cpp|cxx|hpp|hh|inc)\b")
 
 
 class EditError(ValueError):
@@ -53,6 +54,8 @@ def parse_blocks(text: str) -> list[EditBlock]:
             candidate = _clean_path(lines[j]) if j >= 0 else ""
             if candidate and re.fullmatch(r"[\w./+-]+", candidate):
                 path = candidate
+            elif m := SOURCE_PATH.search(candidate):  # "Edit: /src/x/conf.c", "File `a.c`:"
+                path = m.group(0)
             try:
                 mid = next(k for k in range(i + 1, len(lines)) if DIVIDER.match(lines[k].strip()))
                 end = next(k for k in range(mid + 1, len(lines)) if REPLACE.match(lines[k].strip()))

@@ -17,6 +17,10 @@ from leakproof.llm import LLMClient
 from leakproof.planner import no_planner_hypotheses, plan
 from leakproof.runner import Runner
 
+# Juliet keeps the kickoff's 6K. Real files are 1-3K lines and Lightning's reasoning ran into
+# 6K mid-fix on 3/4 ARVO workers (mosquitto 42520955, E1 run 1), hence 12K there (D-0040).
+WORKER_MAX_TOKENS = {"juliet": 6_000, "arvo": 12_000}
+
 # Best outcome first; a case's verdict is its best candidate's.
 VERDICT_RANK = [
     "verified",
@@ -74,6 +78,7 @@ def fix_case(
     planner_model: str | None = "ultra",
     worker_model: str = "lightning",
     n_workers: int = 4,
+    worker_max_tokens: int | None = None,
 ) -> dict[str, Any]:
     """`client` must be this case's own (its ledger's spend is the case's cost)."""
     t0 = time.monotonic()
@@ -138,6 +143,7 @@ def fix_case(
             sources=sources,
             windows=windows,
             model=worker_model,
+            max_completion_tokens=worker_max_tokens or WORKER_MAX_TOKENS[case.suite],
         )
         strategy = {h["id"]: h["strategy"] for h in hyps}
         # Identical patches are gated once.

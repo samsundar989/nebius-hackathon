@@ -8,6 +8,7 @@ image (D-0027: one ARVO image on disk at a time).
 from __future__ import annotations
 
 import json
+import posixpath
 import re
 import sqlite3
 import subprocess
@@ -152,7 +153,14 @@ class ArvoCase:
         return bool(path) and path.startswith(self.src_root) and not HARNESS_DIRS.search(path)
 
     def _frames(self) -> list[tuple[str, dict[str, Any]]]:
-        f = self.finding
+        """Crash/alloc/free frames in editable sources, paths normalized (`src/../lib/x.c`)."""
+        f = {
+            k: [
+                {**fr, "file": posixpath.normpath(fr["file"]) if fr.get("file") else None}
+                for fr in self.finding.get(k) or []
+            ]
+            for k in ("frames", "alloc_stack", "free_stack")
+        }
         user = [fr for fr in f.get("frames", []) if self._editable(fr.get("file"))]
         out = [("crash", fr) for fr in user[:MAX_CRASH_FRAMES]]
         for label, key in (("alloc", "alloc_stack"), ("free", "free_stack")):

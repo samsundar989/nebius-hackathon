@@ -24,6 +24,7 @@ def fan_out(
     sources: dict[str, str],
     windows: list[Window],
     model: str = "lightning",
+    max_completion_tokens: int = 6_000,
     parallel: int = MAX_PARALLEL,
 ) -> list[Candidate]:
     def one(i: int, hyp: dict[str, Any]) -> Candidate:
@@ -38,6 +39,7 @@ def fan_out(
             restore=case.restore,
             build=lambda files: case.build_candidate(runner, baseline, files),
             model=model,
+            max_completion_tokens=max_completion_tokens,
         )
 
     with cf.ThreadPoolExecutor(min(parallel, MAX_PARALLEL)) as pool:
