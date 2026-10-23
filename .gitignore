@@ -9,6 +9,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+.venv-win/
 .uv-cache/
 *.egg-info/
 dist/

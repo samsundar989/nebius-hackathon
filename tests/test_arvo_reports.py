@@ -10,7 +10,7 @@ import pytest
 from leakproof.findings import parse_report, primary
 
 ROOT = Path(__file__).resolve().parent.parent
-CASES = sorted((ROOT / "cases" / "arvo").glob("*.json"))
+CASES = sorted((ROOT / "cases" / "arvo").glob("[0-9]*.json"))
 
 
 @pytest.mark.parametrize("case_path", CASES, ids=lambda p: p.stem)

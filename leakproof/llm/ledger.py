@@ -53,6 +53,7 @@ class CostLedger:
             ledger_cap if ledger_cap is not None else (float(cap_env) if cap_env else None)
         )
         self.spent = 0.0
+        self.by_model: dict[str, float] = {}
         self._lock = threading.Lock()
         self.path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -83,3 +84,4 @@ class CostLedger:
             with self.path.open("a") as fh:
                 fh.write(json.dumps(asdict(entry)) + "\n")
             self.spent += entry.usd
+            self.by_model[entry.model] = self.by_model.get(entry.model, 0.0) + entry.usd

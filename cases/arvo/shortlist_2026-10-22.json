@@ -67,7 +67,7 @@
    "crash_type": "Invalid-free",
    "fuzz_target": "broker_fuzz_test_config",
    "compressed_mb": 604,
-   "fix_commit": null,
+   "fix_commit": "7adf77e966",
    "tests": "test/unit (cunit) + python broker tests",
    "image": "n132/arvo:42520883-vul",
    "same_fix_skip": null
@@ -77,9 +77,9 @@
    "project": "mosquitto",
    "tier": 1,
    "crash_type": "Heap-use-after-free READ 2",
-   "fuzz_target": null,
+   "fuzz_target": "broker_fuzz_test_config",
    "compressed_mb": 609,
-   "fix_commit": null,
+   "fix_commit": "1df253e4e3",
    "tests": "test/unit (cunit) + python broker tests",
    "image": "n132/arvo:42520955-vul",
    "same_fix_skip": null
@@ -91,7 +91,7 @@
    "crash_type": "Heap-buffer-overflow READ 1",
    "fuzz_target": "lib_fuzz_utf8",
    "compressed_mb": 609,
-   "fix_commit": null,
+   "fix_commit": "769c94a103",
    "tests": "test/unit (cunit) + python broker tests",
    "image": "n132/arvo:42521026-vul",
    "same_fix_skip": null
@@ -101,9 +101,9 @@
    "project": "mosquitto",
    "tier": 1,
    "crash_type": "Heap-use-after-free READ 8",
-   "fuzz_target": null,
+   "fuzz_target": "broker_fuzz_test_config",
    "compressed_mb": 605,
-   "fix_commit": null,
+   "fix_commit": "77b5dfb770",
    "tests": "test/unit (cunit) + python broker tests",
    "image": "n132/arvo:42521092-vul",
    "same_fix_skip": null
@@ -115,7 +115,7 @@
    "crash_type": "Heap-use-after-free READ 8",
    "fuzz_target": "dynsec_fuzz_load",
    "compressed_mb": 642,
-   "fix_commit": null,
+   "fix_commit": "56462c1229",
    "tests": "test/unit (cunit) + python broker tests",
    "image": "n132/arvo:42523423-vul",
    "same_fix_skip": null
@@ -125,9 +125,9 @@
    "project": "mosquitto",
    "tier": 1,
    "crash_type": "Heap-buffer-overflow WRITE {*}",
-   "fuzz_target": null,
+   "fuzz_target": "broker_fuzz_test_config",
    "compressed_mb": 653,
-   "fix_commit": null,
+   "fix_commit": "2754b6667d",
    "tests": "test/unit (cunit) + python broker tests",
    "image": "n132/arvo:42534812-vul",
    "same_fix_skip": null
@@ -137,9 +137,9 @@
    "project": "oniguruma",
    "tier": 1,
    "crash_type": "Heap-buffer-overflow READ 1",
-   "fuzz_target": null,
+   "fuzz_target": "fuzzer",
    "compressed_mb": 573,
-   "fix_commit": null,
+   "fix_commit": "34eac88301",
    "tests": "make check",
    "image": "n132/arvo:42517784-vul",
    "same_fix_skip": null
@@ -151,7 +151,7 @@
    "crash_type": "Heap-buffer-overflow READ 2",
    "fuzz_target": "jplist_fuzzer",
    "compressed_mb": 681,
-   "fix_commit": null,
+   "fix_commit": "8ea84caa3c",
    "tests": "make check",
    "image": "n132/arvo:42507851-vul",
    "same_fix_skip": null
@@ -163,7 +163,7 @@
    "crash_type": "Heap-use-after-free READ 8",
    "fuzz_target": "oplist_fuzzer",
    "compressed_mb": 590,
-   "fix_commit": null,
+   "fix_commit": "62b03b85a5",
    "tests": "make check",
    "image": "n132/arvo:42519914-vul",
    "same_fix_skip": null
@@ -175,7 +175,7 @@
    "crash_type": "Heap-buffer-overflow READ {*}",
    "fuzz_target": "zip_fuzzer",
    "compressed_mb": 671,
-   "fix_commit": null,
+   "fix_commit": "0283a1796e",
    "tests": "miniz_tester (weak)",
    "image": "n132/arvo:42536108-vul",
    "same_fix_skip": null
@@ -187,7 +187,7 @@
    "crash_type": "Heap-buffer-overflow READ 1",
    "fuzz_target": "fuzz-mdhtml",
    "compressed_mb": 643,
-   "fix_commit": null,
+   "fix_commit": "62b60979f6",
    "tests": "test/run-tests.sh (python spec tests)",
    "image": "n132/arvo:42507297-vul",
    "same_fix_skip": null
@@ -199,7 +199,7 @@
    "crash_type": "Heap-use-after-free WRITE 8",
    "fuzz_target": "fuzz_eval",
    "compressed_mb": 617,
-   "fix_commit": null,
+   "fix_commit": "df3781d082",
    "tests": "make test",
    "image": "n132/arvo:42531514-vul",
    "same_fix_skip": null
@@ -209,9 +209,9 @@
    "project": "quickjs",
    "tier": 1,
    "crash_type": "Heap-use-after-free WRITE 8",
-   "fuzz_target": null,
+   "fuzz_target": "fuzz_eval",
    "compressed_mb": 663,
-   "fix_commit": null,
+   "fix_commit": "be06b3e92b",
    "tests": "make test",
    "image": "n132/arvo:413161375-vul",
    "same_fix_skip": null
@@ -223,7 +223,7 @@
    "crash_type": "Heap-double-free",
    "fuzz_target": "ssh2_client_fuzzer",
    "compressed_mb": 601,
-   "fix_commit": null,
+   "fix_commit": "b346541847",
    "tests": "make check (offline subset)",
    "image": "n132/arvo:42535924-vul",
    "same_fix_skip": null
@@ -233,9 +233,9 @@
    "project": "libssh2",
    "tier": 1,
    "crash_type": "Heap-buffer-overflow READ 1",
-   "fuzz_target": null,
+   "fuzz_target": "ssh2_client_fuzzer",
    "compressed_mb": 574,
-   "fix_commit": null,
+   "fix_commit": "88a960a86b",
    "tests": "make check (offline subset)",
    "image": "n132/arvo:42523626-vul",
    "same_fix_skip": null
@@ -247,7 +247,7 @@
    "crash_type": "Heap-use-after-free READ 1",
    "fuzz_target": "zip_read_fuzzer",
    "compressed_mb": 641,
-   "fix_commit": null,
+   "fix_commit": "e907b0bda2",
    "tests": "ctest (regress/)",
    "image": "n132/arvo:42520377-vul",
    "same_fix_skip": null
@@ -259,7 +259,7 @@
    "crash_type": "Heap-use-after-free READ 2",
    "fuzz_target": "libical_extended_fuzzer",
    "compressed_mb": 595,
-   "fix_commit": null,
+   "fix_commit": "4ae76d2caf",
    "tests": "ctest",
    "image": "n132/arvo:42536390-vul",
    "same_fix_skip": null
@@ -269,9 +269,9 @@
    "project": "pcre2",
    "tier": 1,
    "crash_type": "Heap-buffer-overflow WRITE 4",
-   "fuzz_target": null,
+   "fuzz_target": "pcre2_fuzzer",
    "compressed_mb": 610,
-   "fix_commit": null,
+   "fix_commit": "fb1c7d27db",
    "tests": "RunTest",
    "image": "n132/arvo:42526932-vul",
    "same_fix_skip": null
@@ -283,7 +283,7 @@
    "crash_type": "Heap-buffer-overflow READ 4",
    "fuzz_target": "pcre2_fuzzer_32_3l",
    "compressed_mb": 649,
-   "fix_commit": null,
+   "fix_commit": "dd0bc880bc",
    "tests": "RunTest",
    "image": "n132/arvo:42533629-vul",
    "same_fix_skip": null
@@ -295,7 +295,7 @@
    "crash_type": "Invalid-free",
    "fuzz_target": "round_trip_fuzzer",
    "compressed_mb": 688,
-   "fix_commit": null,
+   "fix_commit": "910ec80d28",
    "tests": "make -C tests",
    "image": "n132/arvo:42513177-vul",
    "same_fix_skip": null
@@ -307,7 +307,7 @@
    "crash_type": "Heap-use-after-free READ 1",
    "fuzz_target": "bpf-object-fuzzer",
    "compressed_mb": 644,
-   "fix_commit": null,
+   "fix_commit": "738277b773",
    "tests": "none (fuzzer-on-corpus only)",
    "image": "n132/arvo:42504164-vul",
    "same_fix_skip": null
@@ -317,9 +317,9 @@
    "project": "h3",
    "tier": 1,
    "crash_type": "Heap-buffer-overflow WRITE 8",
-   "fuzz_target": "fuzzerPolygonToCellsExperimental",
+   "fuzz_target": "fuzzerPolygonToCellsExperimentalNoHoles",
    "compressed_mb": 768,
-   "fix_commit": null,
+   "fix_commit": "573ff1e7f3",
    "tests": "ctest (extensive)",
    "image": "n132/arvo:375220555-vul",
    "same_fix_skip": null
@@ -329,9 +329,9 @@
    "project": "h3",
    "tier": 1,
    "crash_type": "Heap-buffer-overflow WRITE 8",
-   "fuzz_target": null,
+   "fuzz_target": "fuzzerPolygonToCellsExperimental",
    "compressed_mb": 774,
-   "fix_commit": null,
+   "fix_commit": "a99f03e4d7",
    "tests": "ctest (extensive)",
    "image": "n132/arvo:372515086-vul",
    "same_fix_skip": null
@@ -465,5 +465,44 @@
    "image": "n132/arvo:42482401-vul",
    "tests": "?"
   }
- ]
+ ],
+ "verified_against_local_db": {
+  "date": "2026-10-23",
+  "by": "Claude Code",
+  "result": "all 26 tier1 ids present; project and crash_type match",
+  "corrections": [
+   "42520883 fix_commit: None -> '7adf77e966'",
+   "42520955 fuzz_target: None -> 'broker_fuzz_test_config'",
+   "42520955 fix_commit: None -> '1df253e4e3'",
+   "42521026 fix_commit: None -> '769c94a103'",
+   "42521092 fuzz_target: None -> 'broker_fuzz_test_config'",
+   "42521092 fix_commit: None -> '77b5dfb770'",
+   "42523423 fix_commit: None -> '56462c1229'",
+   "42534812 fuzz_target: None -> 'broker_fuzz_test_config'",
+   "42534812 fix_commit: None -> '2754b6667d'",
+   "42517784 fuzz_target: None -> 'fuzzer'",
+   "42517784 fix_commit: None -> '34eac88301'",
+   "42507851 fix_commit: None -> '8ea84caa3c'",
+   "42519914 fix_commit: None -> '62b03b85a5'",
+   "42536108 fix_commit: None -> '0283a1796e'",
+   "42507297 fix_commit: None -> '62b60979f6'",
+   "42531514 fix_commit: None -> 'df3781d082'",
+   "413161375 fuzz_target: None -> 'fuzz_eval'",
+   "413161375 fix_commit: None -> 'be06b3e92b'",
+   "42535924 fix_commit: None -> 'b346541847'",
+   "42523626 fuzz_target: None -> 'ssh2_client_fuzzer'",
+   "42523626 fix_commit: None -> '88a960a86b'",
+   "42520377 fix_commit: None -> 'e907b0bda2'",
+   "42536390 fix_commit: None -> '4ae76d2caf'",
+   "42526932 fuzz_target: None -> 'pcre2_fuzzer'",
+   "42526932 fix_commit: None -> 'fb1c7d27db'",
+   "42533629 fix_commit: None -> 'dd0bc880bc'",
+   "42513177 fix_commit: None -> '910ec80d28'",
+   "42504164 fix_commit: None -> '738277b773'",
+   "375220555 fuzz_target: 'fuzzerPolygonToCellsExperimental' -> 'fuzzerPolygonToCellsExperimentalNoHoles'",
+   "375220555 fix_commit: None -> '573ff1e7f3'",
+   "372515086 fuzz_target: None -> 'fuzzerPolygonToCellsExperimental'",
+   "372515086 fix_commit: None -> 'a99f03e4d7'"
+  ]
+ }
 }
