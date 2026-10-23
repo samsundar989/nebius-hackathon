@@ -265,8 +265,21 @@ class JulietGate:
 class ArvoGate:
     def __init__(self, case: ArvoCase, runner: LocalDockerRunner, baseline: ImageRef) -> None:
         self.case, self.runner, self.baseline = case, runner, baseline
+        self.tests_baseline: Check | None = None
 
     def unpatched(self) -> Check:
+        tests = self.case.tests_cmd
+        if tests:
+            # A suite that already fails on the unpatched build cannot judge a patch.
+            t = self.runner.run(
+                self.baseline,
+                f"( {tests} ) > /tmp/t.log 2>&1; rc=$?; tail -40 /tmp/t.log; exit $rc",
+                env=BUILD_ENV,
+                cwd=self.case.workdir,
+                timeout_s=3600,
+                network=False,
+            )
+            self.tests_baseline = Check("pass" if t.exit_code == 0 else "fail", t.stdout[-600:])
         res = self.runner.run(
             self.baseline, "arvo", cwd=self.case.workdir, timeout_s=300, network=False
         )
@@ -319,6 +332,8 @@ class ArvoGate:
         )
         if tests is None:
             checks["tests"] = Check("skipped", "no runnable project test suite in the image")
+        elif self.tests_baseline is not None and self.tests_baseline.status != "pass":
+            checks["tests"] = Check("skipped", "suite fails on the unpatched baseline too")
         elif checks["patched"].status == "pass":
             rc_t = sec.get("rc_tests", "").strip()
             checks["tests"] = Check(
@@ -377,6 +392,7 @@ def run_gate(
         "baseline": baseline.ref,
         "gate_version": "v0",
         "unpatched": unpatched.to_dict(),
+        "tests_baseline": tb.to_dict() if (tb := getattr(gate, "tests_baseline", None)) else None,
         "results": results,
         "elapsed_s": round(time.monotonic() - t0, 2),
     }

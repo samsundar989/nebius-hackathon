@@ -29,7 +29,13 @@ HARNESS_DIRS = re.compile(r"/(tests?|fuzz|fuzzing|oss-fuzz)/", re.I)
 MAX_CRASH_FRAMES = 5
 # Project test commands, run from the case workdir inside the rebuilt image (gate check 3).
 # Filled per project after inspecting its image; None = no runnable suite found (stated).
-TESTS: dict[str, str | None] = {}
+TESTS: dict[str, str | None] = {
+    # 7 of jq's 8 suites; tests/shtest already fails on the unpatched -O0 image (runs/arvo_inspect).
+    "jq": 'ASAN_OPTIONS=detect_leaks=0 make check-TESTS TESTS="tests/utf8test tests/base64test '
+    'tests/optionaltest tests/onigtest tests/manonigtest tests/mantest tests/jqtest"',
+    # test/unit needs CUnit, which the image lacks (and the gate runs offline).
+    "mosquitto": None,
+}
 
 
 @dataclass
