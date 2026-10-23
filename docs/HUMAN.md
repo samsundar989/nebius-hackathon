@@ -37,3 +37,6 @@ The "run one Juliet case" button is a free Render web service (no card). Please 
 
 ## QUESTION 0009 — Video narration
 Default: you record screen + voice on Oct 28 from `docs/VIDEO_SCRIPT.md` and `scripts/demo_run.sh`. Say if you want a captions-only video instead.
+
+## NOTE 0010 — Sandboxes access is live (builder update, no answer needed)
+2026-10-23: `GET /sandboxes/v1/whoami` with the Token Factory project id (`NEBIUS_PROJECT_ID`, `aiproject-…`) returns all permissions `true` (spawn, import, list, …). With the AI Cloud id (`NEBIUS_AI_PROJECT`, `project-…`) it still says all `false`. So QUESTION 0002/0005 are resolved on the platform side. Per kickoff §1 rule 2 I'll add the thin REST backend (networking off, ≤ 2 h, behind a flag) after the Phase 1 exit, not before. If `NEBIUS_AI_PROJECT` is meant to equal the Token Factory id (CLAUDE.md says "same value"), you may want to correct it in `.env`; I have not touched `.env`.
