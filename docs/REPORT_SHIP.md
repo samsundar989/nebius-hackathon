@@ -27,6 +27,25 @@ Ultra planner + 4 Lightning workers per case, gate v0, 3 cases in parallel.
 - Cost: **$0.7422 for 60 cases → $0.0133 per verified fix** (Ultra $0.45 / Lightning $0.39 across all runs so far). Latency: planner p50 5.0 s, worker LLM time p50 33.7 s, case wall p50 77 s, max 172 s; batch wall 26.6 min.
 - Caveat (goes in Limitations): Juliet marks its flaws with `POTENTIAL FLAW` comments and is synthetic; this proves the engine and the gate, not real-world skill. That is what the ARVO cases are for.
 
+### Numbers — ARVO mosquitto 42520955 + jq 42530604 (four runs; only run 4 counts)
+Real multi-file C projects, one `n132/arvo` image on disk at a time, `rmi` after each case. Run 4 (`runs/e1_arvo2_v4`, `scripts/run_report.py e1_arvo2_v4`):
+
+| case | ARVO label | reproduced (-O0) | verdict | winning change | gate evidence | $ | wall |
+|---|---|---|---|---|---|---|---|
+| mosquitto 42520955 | Heap-use-after-free READ 2 | UAF `src/conf.c:2098` | **verified** | save `default_listener`'s index before `realloc` of `config->listeners`, re-point after (4/4 workers, same idea as Ultra's root cause) | unpatched trips · harness relinked (hash changed) · PoC clean · diff-scope · **tests skipped: no runnable suite in the image** (test/unit needs CUnit; the gate runs offline) | 0.0384 | 135 s |
+| jq 42530604 | Heap-buffer-overflow WRITE 1 | HBO `decNumber.c:3764` | **verified (gate v0) — suspected false verify** | copy `decNumberToString` output via a fixed `JVP_DTOA_FMT_MAX_LEN` stack buffer, then heap-allocate `strlen+1` | unpatched trips · harness relinked · PoC clean · 7/7 baseline-passing jq suites pass under ASan · diff-scope | 0.0273 | 166 s |
+
+- **jq run 4's winner is probably unsafe**: jq keeps a number literal's full precision, so a literal with more digits than the stack buffer should overflow it. Neither the PoC nor the test suite has such a literal, so gate v0 cannot see it. This is the class Phase 2's differential corpus and re-fuzz exist for; it stays in the tables as "verified (v0)" with this note until gate v1 re-judges it, and becomes the demo of "v0 verified, v1 rejects" if re-fuzz catches it. In run 2 two workers made the minimal fix (`digits + 14` → `digits + 17`), verified with the same evidence.
+- Run-to-run variance on jq: verified (run 2, size fix), rejected (run 3: two compiled candidates still overflowed, one moved the crash to line 3758), verified (run 4). The leaderboard will need repeats, not single runs.
+- Ultra's root cause was right on both cases in every run (mosquitto: `default_listener` dangling after `realloc`; jq: buffer `digits + 14` too small for `decToString`). The losses were in workers and in our harness, not in planning.
+
+**Runs 1–3 are void, and why matters (D-0041, D-0042):**
+1. Run 1: jq's 7/7 passing tests were read as failed: the gate's output sections were split on line-start markers, and a file without a trailing newline swallowed the next marker. Fixed (separator carries its own newline; unit test).
+2. Runs 1–2: mosquitto candidates "still crashed" at the original line although one inserted 4 lines above it, and the gate "rebuilt" in 3.45 s vs 20 s for a real build. Run 3 added a gate check that the harness binary's hash must change after a patched build → `inconclusive:patch_not_compiled`. Cause: `fuzzing/broker/Makefile` links `broker_fuzz_test_config` from its `.cpp` only, so an existing binary is never relinked when `mosquitto_broker.a` changes; and make never rebuilds objects when only CFLAGS change, so our "-O0 baseline" for mosquitto was really the image's -O1 harness. Fix: delete the harness before every build and the objects before the baseline build. **Without the hash check, a gate would have reported a real fix as "still crashes"; with a different bug it could equally have reported a non-fix as clean.** The hash check stays as a permanent gate item.
+3. Worker cap raised to 12K tokens for ARVO (D-0040): at 6K, 3 of 4 mosquitto workers ran out mid-fix.
+
+Worker losses on real code are still mostly the edit format: in run 4, 2 of 8 workers hit 12K tokens or wrote unterminated blocks, 1 failed to build after its retry.
+
 ### Engine fixes found by smoke runs (before the 60-case run)
 1. Behavior check read truncated stdout: LSan/ASan exit without flushing stdio, so the unpatched reference printed 0 bytes. Reference now comes from a `detect_leaks=0`, `stdbuf -o0` run (D-0038).
 2. Lightning spent its whole 6K-token budget counting indentation (5/7 failed calls hit `finish_reason=length`). Prompt now says matching ignores whitespace and to think briefly; smoke went from 1/3 to 5/6 verified.
@@ -34,7 +53,17 @@ Ultra planner + 4 Lightning workers per case, gate v0, 3 cases in parallel.
 4. The planner often returns one hypothesis; the fan-out now always runs N workers (cycling hypotheses), so one formatting slip doesn't sink a case.
 
 ### Spend
-Token Factory ledger total **$0.8458** of the $25 week cap (E0 $0.0116; E1 smoke runs $0.0921; Juliet 60 $0.7422).
+Token Factory ledger total **$1.2201** of the $25 week cap (E0 $0.0116; E1 Juliet smoke runs $0.0921; Juliet 60 $0.7422; ARVO runs 1–4 $0.3742, of which run 4 $0.0657).
 
 ### Blockers
 None. Open: `NEBIUS_AI_PROJECT` in `.env` holds the AI Cloud id although CLAUDE.md says it equals the Token Factory id (NOTE 0010; not touched).
+
+### Phase 1 exit (kickoff §3)
+- Juliet ≥ 50% verified with Lightning workers: **met, 56/60 (93%)**.
+- Both ARVO cases produce an honest funnel: **met** (both verified in run 4 with the hash-proven gate; jq flagged as a suspected false verify pending gate v1; mosquitto's tests are unavailable and shown as skipped).
+
+### Tomorrow (Fri Oct 24 → Phase 2)
+1. Gate v1: differential corpus, re-fuzz 60–120 s, safe-fix (leak-sensitive), audit flag (Nano). First test: re-judge jq run 4's winner.
+2. Sandboxes REST backend (≤ 2 h, behind a flag; access is live).
+3. Juliet CWE-401 sample (100) and the ARVO Tier-1 batch (26 cases, 20 min box each), then the model leaderboard.
+4. Edit format: keep comment lines the model omitted from SEARCH in the code-lines fallback (bundles should not delete upstream comments).
