@@ -37,7 +37,9 @@ def test_whitespace_fallback_and_errors() -> None:
     with pytest.raises(EditError, match="matches 0 times"):
         apply_blocks({"a.c": SRC}, parse_blocks(block("a.c", "nope();", "x();")))
     with pytest.raises(EditError, match="not one of the files"):
-        apply_blocks({"a.c": SRC}, parse_blocks(block("b.c", "use(p);", "x();")))
+        apply_blocks({"a.c": SRC, "c.c": SRC}, parse_blocks(block("b.c", "use(p);", "x();")))
+    out, _ = apply_blocks({"a.c": SRC}, parse_blocks(block("src/example.c", "use(p);", "x();")))
+    assert "x();" in out["a.c"]
 
 
 @pytest.mark.skipif(not JULIET.exists(), reason="Juliet cache not present")

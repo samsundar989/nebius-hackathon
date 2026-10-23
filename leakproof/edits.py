@@ -17,7 +17,10 @@ import difflib
 import re
 from dataclasses import dataclass
 
-SEARCH, DIVIDER, REPLACE = "<<<<<<< SEARCH", "=======", ">>>>>>> REPLACE"
+# Lenient on marker length and a missing "REPLACE": models drift on both.
+SEARCH = re.compile(r"^<{5,}\s*SEARCH\s*$")
+DIVIDER = re.compile(r"^={5,}\s*$")
+REPLACE = re.compile(r"^>{5,}\s*(REPLACE)?\s*$")
 
 
 class EditError(ValueError):
@@ -43,7 +46,7 @@ def parse_blocks(text: str) -> list[EditBlock]:
     i = 0
     while i < len(lines):
         line = lines[i]
-        if line.strip() == SEARCH:
+        if SEARCH.match(line.strip()):
             j = i - 1
             while j >= 0 and (not lines[j].strip() or lines[j].strip().startswith("```")):
                 j -= 1
@@ -51,8 +54,8 @@ def parse_blocks(text: str) -> list[EditBlock]:
             if candidate and re.fullmatch(r"[\w./+-]+", candidate):
                 path = candidate
             try:
-                mid = next(k for k in range(i + 1, len(lines)) if lines[k].strip() == DIVIDER)
-                end = next(k for k in range(mid + 1, len(lines)) if lines[k].strip() == REPLACE)
+                mid = next(k for k in range(i + 1, len(lines)) if DIVIDER.match(lines[k].strip()))
+                end = next(k for k in range(mid + 1, len(lines)) if REPLACE.match(lines[k].strip()))
             except StopIteration as exc:
                 raise EditError("unterminated SEARCH/REPLACE block") from exc
             if not path:
@@ -112,7 +115,9 @@ def _indent(line: str) -> str:
 def apply_blocks(
     files: dict[str, str], blocks: list[EditBlock]
 ) -> tuple[dict[str, str], list[str]]:
-    """Apply blocks to {path: source}; unknown paths are an error (scope is the caller's list)."""
+    """Apply blocks to {path: source}; unknown paths are an error (scope is the caller's list).
+
+    With a single file in scope every block targets it, whatever path the model wrote."""
     out = dict(files)
     strategies = []
     for block in blocks:
@@ -122,6 +127,8 @@ def apply_blocks(
             if not matches:
                 base = block.path.rsplit("/", 1)[-1]
                 matches = [p for p in out if p.rsplit("/", 1)[-1] == base]
+            if len(out) == 1:
+                matches = list(out)
             if len(matches) != 1:
                 raise EditError(f"{block.path}: not one of the files you were given")
             block = EditBlock(matches[0], block.search, block.replace)

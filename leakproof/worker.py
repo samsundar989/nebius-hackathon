@@ -23,7 +23,7 @@ Reply with one or more edit blocks and nothing else. Each block names the file o
 then SEARCH lines copied exactly from that file (enough lines to be unique), then the
 replacement:
 
-src/example.c
+path/of/the/file.c
 <<<<<<< SEARCH
     buf = malloc(len);
     memcpy(buf, src, len + 1);
@@ -40,7 +40,10 @@ Rules:
 - Make the smallest change that removes the defect and keeps behavior on valid inputs.
 - Lines like "/* [LEAKPROOF: ... omitted ...] */" stand for code you cannot see: keep each one
   exactly once and do not put it inside a SEARCH block.
-- SEARCH text must match the file character for character, including indentation."""
+- SEARCH lines are matched ignoring indentation and spacing: copy the code lines as shown and
+  do not spend effort counting spaces. Use the real file name from "Files you may edit".
+- Think briefly. The fix is usually a few lines; reply with the edit blocks as soon as you
+  know the change."""
 
 
 @dataclass
@@ -145,8 +148,10 @@ def run_worker(
     try:
         res = call("worker")
         while True:
+            blocks_seen = False
             try:
                 blocks = parse_blocks(res.text)
+                blocks_seen = bool(blocks)
                 if not blocks:
                     raise EditError("no SEARCH/REPLACE blocks in the reply")
                 edited, strategies = apply_blocks(allowed, blocks)
@@ -154,7 +159,8 @@ def run_worker(
                 if not full:
                     raise EditError("the edits do not change anything")
             except (EditError, ValueError) as exc:
-                empty = not res.text.strip()
+                # No reply, or reasoning that ran into the token cap before any edit (E0/E1).
+                empty = not res.text.strip() or (res.finish_reason == "length" and not blocks_seen)
                 key = "empty" if empty else "apply"
                 if feedback_rounds[key] >= 1:
                     cand.status = "no_edit" if empty else "apply_failed"
