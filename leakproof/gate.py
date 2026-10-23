@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from leakproof.cases.arvo import BUILD_ENV, ArvoCase
+from leakproof.cases.arvo import BUILD_ENV, ArvoCase, touch_cmd
 from leakproof.cases.juliet import JulietCase
 from leakproof.findings import parse_report, primary
 from leakproof.runner import ImageRef, LocalDockerRunner
@@ -148,6 +148,8 @@ def decide(checks: dict[str, Check]) -> str:
         return "rejected:diff_scope"
     if st("build") == "fail":
         return "build_failed"
+    if st("compiled") == "inconclusive":
+        return "inconclusive:patch_not_compiled"
     patched = checks.get("patched")
     if patched is None or patched.status == "inconclusive":
         return f"inconclusive:{patched.detail if patched else 'not_run'}"
@@ -268,6 +270,8 @@ class ArvoGate:
     def __init__(self, case: ArvoCase, runner: LocalDockerRunner, baseline: ImageRef) -> None:
         self.case, self.runner, self.baseline = case, runner, baseline
         self.tests_baseline: Check | None = None
+        self.harness = f"/out/{case.fuzz_target}"
+        self.harness_hash = ""
 
     def unpatched(self) -> Check:
         tests = self.case.tests_cmd
@@ -283,8 +287,13 @@ class ArvoGate:
             )
             self.tests_baseline = Check("pass" if t.exit_code == 0 else "fail", t.stdout[-600:])
         res = self.runner.run(
-            self.baseline, "arvo", cwd=self.case.workdir, timeout_s=300, network=False
+            self.baseline,
+            f"md5sum {self.harness} > /tmp/hash; arvo; rc=$?; cat /tmp/hash; exit $rc",
+            cwd=self.case.workdir,
+            timeout_s=300,
+            network=False,
         )
+        self.harness_hash = res.stdout.strip().split("\n")[-1].split(" ")[0]
         p = primary(parse_report(res.stderr + res.stdout))
         want = self.case.finding.get("kind")
         if p is None or p.kind != want:
@@ -294,7 +303,9 @@ class ArvoGate:
     def candidate(self, cand: dict[str, Any], checks: dict[str, Check]) -> str:
         tests = self.case.tests_cmd
         script = [
-            "arvo compile > /tmp/compile.log 2>&1; echo $? > /tmp/rc_build",
+            touch_cmd(cand["files"])
+            + "arvo compile > /tmp/compile.log 2>&1; echo $? > /tmp/rc_build; "
+            f"md5sum {self.harness} > /tmp/hash 2>&1",
             "if [ $(cat /tmp/rc_build) = 0 ]; then arvo > /tmp/out_run 2> /tmp/err_run; "
             "echo $? > /tmp/rc_run; fi",
         ]
@@ -311,6 +322,7 @@ class ArvoGate:
             "rc_tests",
             "tests.log",
             "compile.log",
+            "hash",
         ):
             script.append(f"printf '\n{MARK} {name}\n'; tail -c 20000 /tmp/{name} 2>/dev/null")
         res = self.runner.run(
@@ -327,6 +339,15 @@ class ArvoGate:
             checks["build"] = Check("fail", sec.get("compile.log", "")[-800:])
             return ""
         checks["build"] = Check("pass")
+        # Proof the patch is in the binary under test: an unchanged harness means the build
+        # system skipped the edited files, and any result from it says nothing about the patch.
+        new_hash = sec.get("hash", "").split(" ")[0].strip()
+        if not new_hash or new_hash == self.harness_hash:
+            checks["compiled"] = Check(
+                "inconclusive", f"harness unchanged ({new_hash or 'no hash'})"
+            )
+            return ""
+        checks["compiled"] = Check("pass", f"harness {self.harness_hash[:8]} -> {new_hash[:8]}")
         rc_raw = sec.get("rc_run", "").strip()
         report = sec.get("err_run", "") + sec.get("out_run", "")
         checks["patched"] = patched_check(

@@ -227,3 +227,9 @@ def test_gate_split_survives_missing_trailing_newline() -> None:
 def test_path_line_with_prefix_text() -> None:
     text = "Edit: /src/m/src/conf.c\n<<<<<<< SEARCH\n    use(p);\n=======\n    use(q);\n>>>>>>> REPLACE\n"
     assert parse_blocks(text)[0].path == "/src/m/src/conf.c"
+
+
+def test_unchanged_binary_is_inconclusive() -> None:
+    p = Check("pass")
+    checks = {"unpatched_trips": p, "diff_scope": p, "build": p, "compiled": Check("inconclusive")}
+    assert decide(checks) == "inconclusive:patch_not_compiled"

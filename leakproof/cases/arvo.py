@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import posixpath
 import re
+import shlex
 import sqlite3
 import subprocess
 import time
@@ -26,6 +27,15 @@ SHORTLIST = REPO_ROOT / "cases" / "arvo" / "shortlist_2026-10-22.json"
 OUR_FLAGS = "-O0 -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION"
 BUILD_ENV = {"CFLAGS": OUR_FLAGS, "CXXFLAGS": f"{OUR_FLAGS} -stdlib=libc++"}
 WINDOW = 80
+
+
+def touch_cmd(files: dict[str, str]) -> str:
+    """Re-stamp copied-in sources with the container's clock before `make` decides what to
+    rebuild: their mtime comes from the Windows host, the objects' from the Docker VM, and a VM
+    clock running ahead made mosquitto's make skip the patched file (E1 ARVO run 2)."""
+    return f"touch {shlex.join(sorted(files))}; " if files else ""
+
+
 HARNESS_DIRS = re.compile(r"/(tests?|fuzz|fuzzing|oss-fuzz)/", re.I)
 MAX_CRASH_FRAMES = 5
 # Project test commands, run from the case workdir inside the rebuilt image (gate check 3).
@@ -228,7 +238,8 @@ class ArvoCase:
         t0 = time.monotonic()
         res = runner.run(
             baseline,
-            "arvo compile > /tmp/compile.log 2>&1; rc=$?; grep -E 'error|Error' /tmp/compile.log "
+            touch_cmd(files)
+            + "arvo compile > /tmp/compile.log 2>&1; rc=$?; grep -E 'error|Error' /tmp/compile.log "
             "| head -30; tail -15 /tmp/compile.log; exit $rc",
             files={k: v.encode() for k, v in files.items()},
             env=BUILD_ENV,
