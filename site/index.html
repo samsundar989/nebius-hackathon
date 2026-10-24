@@ -110,6 +110,11 @@ footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
   </section>
 
   <section>
+    <h2>CUDA: compute-sanitizer on a T4</h2>
+    <div class="panel" id="cuda"><p class="muted">No CUDA run yet.</p></div>
+  </section>
+
+  <section>
     <h2>Model leaderboard</h2>
     <div class="panel" id="leaderboard"><p class="muted">Leaderboard runs pending.</p></div>
   </section>
@@ -220,6 +225,12 @@ async function showRun(run, btn) {
     $("#calibration").innerHTML = `<p>For each ARVO case we applied the developer's real fix commit and ran it through the same gate, judged exactly like a model patch. <strong>${a.classes.accepted} of ${a.judged}</strong> developer fixes are accepted (raw, before review: ${raw.classes.accepted}/${raw.judged}); ${a.classes.true_reject || 0} is rejected because it really leaks; ${a.classes.false_reject || 0} are false rejects from known limits.</p>
       <div class="scroll"><table><thead><tr><th>case</th><th>project</th><th>gate on the developer fix</th><th>class</th><th>note</th></tr></thead><tbody>${
       cal.rows.map((r) => `<tr><td><code>${esc(r.case)}</code></td><td>${esc(r.project)}</td><td>${chip(String(r.verdict).split("\n")[0].slice(0, 40))}</td><td>${esc(r.class)}</td><td class="muted">${esc(r.why || "")}</td></tr>`).join("")}</tbody></table></div>`;
+  }
+  const cu = await get("data/cuda.json");
+  if (cu) {
+    const names = Object.keys(cu).filter((k) => !k.startsWith("_"));
+    $("#cuda").innerHTML = `<p class="muted">Each candidate is built with nvcc and run under compute-sanitizer (memcheck, leak-check, racecheck); it must also print the correct checksum, which is what catches a patch that only silences the sanitizer.</p><div class="scroll"><table><thead><tr><th>case</th><th>defect</th><th>case verdict</th><th>candidates</th></tr></thead><tbody>${
+      names.map((n) => `<tr><td><code>${esc(n)}</code></td><td>${esc(cu[n].baseline_kind)}</td><td>${chip(cu[n].verdict)}</td><td>${cu[n].candidates.map((c) => chip(c.verdict)).join(" ")}</td></tr>`).join("")}</tbody></table></div>`;
   }
   const lb = await get("data/leaderboard.json");
   if (lb && lb.configs && Object.keys(lb.configs).length) {

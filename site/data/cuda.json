@@ -1,0 +1,261 @@
+{
+ "_meta": {
+  "status": "neopok919/leakproof-cuda-gate has status \"kernelworkerstatus.complete\"",
+  "wall_s": 74.9
+ },
+ "oob_global": {
+  "baseline_kind": "global-out-of-bounds",
+  "verdict": "verified",
+  "candidates": [
+   {
+    "id": "oob_global__H1w0",
+    "verdict": "verified",
+    "checks": {
+     "unpatched_trips": {
+      "status": "pass",
+      "detail": "original: global-out-of-bounds: Invalid __global__ write of size 4 bytes"
+     },
+     "diff_scope": {
+      "status": "pass",
+      "detail": "1 file(s), +1/-1"
+     },
+     "build": {
+      "status": "pass",
+      "detail": ""
+     },
+     "sanitizer": {
+      "status": "pass",
+      "detail": "no compute-sanitizer report, ERROR SUMMARY 0"
+     },
+     "behavior": {
+      "status": "pass",
+      "detail": "expected output"
+     }
+    }
+   },
+   {
+    "id": "oob_global__H2w1",
+    "verdict": "silenced_only",
+    "checks": {
+     "unpatched_trips": {
+      "status": "pass",
+      "detail": "original: global-out-of-bounds: Invalid __global__ write of size 4 bytes"
+     },
+     "diff_scope": {
+      "status": "pass",
+      "detail": "1 file(s), +1/-1"
+     },
+     "build": {
+      "status": "pass",
+      "detail": ""
+     },
+     "sanitizer": {
+      "status": "pass",
+      "detail": "no compute-sanitizer report, ERROR SUMMARY 0"
+     },
+     "behavior": {
+      "status": "fail",
+      "detail": "missing ['checksum: 357913600']"
+     }
+    }
+   },
+   {
+    "id": "oob_global__H3w2",
+    "verdict": "silenced_only",
+    "checks": {
+     "unpatched_trips": {
+      "status": "pass",
+      "detail": "original: global-out-of-bounds: Invalid __global__ write of size 4 bytes"
+     },
+     "diff_scope": {
+      "status": "pass",
+      "detail": "1 file(s), +1/-1"
+     },
+     "build": {
+      "status": "pass",
+      "detail": ""
+     },
+     "sanitizer": {
+      "status": "pass",
+      "detail": "no compute-sanitizer report, ERROR SUMMARY 0"
+     },
+     "behavior": {
+      "status": "fail",
+      "detail": "missing ['checksum: 357913600']"
+     }
+    }
+   },
+   {
+    "id": "oob_global__H4w3",
+    "verdict": "verified",
+    "checks": {
+     "unpatched_trips": {
+      "status": "pass",
+      "detail": "original: global-out-of-bounds: Invalid __global__ write of size 4 bytes"
+     },
+     "diff_scope": {
+      "status": "pass",
+      "detail": "1 file(s), +1/-1"
+     },
+     "build": {
+      "status": "pass",
+      "detail": ""
+     },
+     "sanitizer": {
+      "status": "pass",
+      "detail": "no compute-sanitizer report, ERROR SUMMARY 0"
+     },
+     "behavior": {
+      "status": "pass",
+      "detail": "expected output"
+     }
+    }
+   }
+  ],
+  "usd": 0.007864
+ },
+ "leak_cudamalloc": {
+  "baseline_kind": "leak",
+  "verdict": "verified",
+  "candidates": [
+   {
+    "id": "leak_cudamalloc__H1w0",
+    "verdict": "verified",
+    "checks": {
+     "unpatched_trips": {
+      "status": "pass",
+      "detail": "original: leak: Leaked 4,096 bytes at 0x78fb15004000"
+     },
+     "diff_scope": {
+      "status": "pass",
+      "detail": "1 file(s), +1/-1"
+     },
+     "build": {
+      "status": "pass",
+      "detail": ""
+     },
+     "sanitizer": {
+      "status": "pass",
+      "detail": "no compute-sanitizer report, ERROR SUMMARY 0"
+     },
+     "behavior": {
+      "status": "pass",
+      "detail": "expected output"
+     }
+    }
+   },
+   {
+    "id": "leak_cudamalloc__H2w1",
+    "verdict": "verified",
+    "checks": {
+     "unpatched_trips": {
+      "status": "pass",
+      "detail": "original: leak: Leaked 4,096 bytes at 0x78fb15004000"
+     },
+     "diff_scope": {
+      "status": "pass",
+      "detail": "1 file(s), +2/-1"
+     },
+     "build": {
+      "status": "pass",
+      "detail": ""
+     },
+     "sanitizer": {
+      "status": "pass",
+      "detail": "no compute-sanitizer report, ERROR SUMMARY 0"
+     },
+     "behavior": {
+      "status": "pass",
+      "detail": "expected output"
+     }
+    }
+   },
+   {
+    "id": "leak_cudamalloc__H1w2",
+    "verdict": "verified",
+    "checks": {
+     "unpatched_trips": {
+      "status": "pass",
+      "detail": "original: leak: Leaked 4,096 bytes at 0x78fb15004000"
+     },
+     "diff_scope": {
+      "status": "pass",
+      "detail": "1 file(s), +2/-1"
+     },
+     "build": {
+      "status": "pass",
+      "detail": ""
+     },
+     "sanitizer": {
+      "status": "pass",
+      "detail": "no compute-sanitizer report, ERROR SUMMARY 0"
+     },
+     "behavior": {
+      "status": "pass",
+      "detail": "expected output"
+     }
+    }
+   },
+   {
+    "id": "leak_cudamalloc__H2w3",
+    "verdict": "verified",
+    "checks": {
+     "unpatched_trips": {
+      "status": "pass",
+      "detail": "original: leak: Leaked 4,096 bytes at 0x78fb15004000"
+     },
+     "diff_scope": {
+      "status": "pass",
+      "detail": "1 file(s), +2/-1"
+     },
+     "build": {
+      "status": "pass",
+      "detail": ""
+     },
+     "sanitizer": {
+      "status": "pass",
+      "detail": "no compute-sanitizer report, ERROR SUMMARY 0"
+     },
+     "behavior": {
+      "status": "pass",
+      "detail": "expected output"
+     }
+    }
+   }
+  ],
+  "usd": 0.006549
+ },
+ "race_shared": {
+  "baseline_kind": "race",
+  "verdict": "verified",
+  "candidates": [
+   {
+    "id": "race_shared__H1w0",
+    "verdict": "verified",
+    "checks": {
+     "unpatched_trips": {
+      "status": "pass",
+      "detail": "original: race: Error: Race reported between Write access at block_sum(const int *, int *, int)+0x150 in case.cu:15"
+     },
+     "diff_scope": {
+      "status": "pass",
+      "detail": "1 file(s), +1/-1"
+     },
+     "build": {
+      "status": "pass",
+      "detail": ""
+     },
+     "sanitizer": {
+      "status": "pass",
+      "detail": "no compute-sanitizer report, ERROR SUMMARY 0"
+     },
+     "behavior": {
+      "status": "pass",
+      "detail": "expected output"
+     }
+    }
+   }
+  ],
+  "usd": 0.006068
+ }
+}

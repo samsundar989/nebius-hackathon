@@ -134,6 +134,7 @@ def main() -> int:
     for name, src in (
         ("calibration", RUNS_DIR / "p1_calibration_v3" / "summary.json"),
         ("leaderboard", RUNS_DIR / "leaderboard.json"),
+        ("cuda", RUNS_DIR / "p5_cuda" / "verdicts.json"),
     ):
         if src.exists():
             (SITE / f"{name}.json").write_text(src.read_text())

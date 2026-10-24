@@ -1,0 +1,25 @@
+{
+ "_about": "Gate side (never shown to workers): the compute-sanitizer tool per case and the stdout lines a correct fix must print.",
+ "cases": {
+  "oob_global": {
+   "tool": "--tool memcheck",
+   "expect": [
+    "kernel: no error",
+    "checksum: 357913600"
+   ]
+  },
+  "leak_cudamalloc": {
+   "tool": "--tool memcheck --leak-check full",
+   "expect": [
+    "total: 6144.0",
+    "done"
+   ]
+  },
+  "race_shared": {
+   "tool": "--tool racecheck",
+   "expect": [
+    "total: 49146"
+   ]
+  }
+ }
+}
