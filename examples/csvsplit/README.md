@@ -17,8 +17,9 @@ only `src/*.c` and `src/*.h`.
 
 ## Triage mode
 
-`findings/` holds ten inputs — eight that trip the quoted-field overflow in different shapes and
-two plain lines that do not — written by hand for this demo (not fuzzer output):
+`findings/` holds ten inputs written by hand for this demo (not fuzzer output): six that trip
+the quoted-field overflow in different shapes and four that do not (two plain lines, a quoted
+field with doubled quotes, which shrinks on copy, and an empty quoted field):
 
 ```
 uv run leakproof batch --config examples/csvsplit/leakproof.toml --findings examples/csvsplit/findings
