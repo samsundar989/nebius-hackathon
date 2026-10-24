@@ -64,3 +64,10 @@ def test_function_replacement_by_name_with_return_type_line() -> None:
 def test_function_not_found_is_an_error() -> None:
     with pytest.raises(EditError, match="no definition"):
         apply_blocks(FILES, parse_blocks("@@ function nope in a.c @@\nx\n@@ end @@\n"))
+
+
+def test_line_range_that_splits_a_block_is_rejected() -> None:
+    # P3 r2 mosquitto 42522195: a range ending mid-block left an unmatched brace.
+    text = "@@ replace a.c lines 10-11 @@\n    for (i = 0; i < n; i++) {\n        buf[i] = 0;\n    }\n@@ end @@\n"
+    with pytest.raises(EditError, match="brace balance"):
+        apply_blocks(FILES, parse_blocks(text), {"/src/p/a.c": [(6, 13)]})

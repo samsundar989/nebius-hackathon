@@ -221,8 +221,27 @@ def apply_range(source: str, block: EditBlock, shown: list[tuple[int, int]] | No
             f"{block.path}: lines {a}-{b} are not inside one window you were shown "
             f"({', '.join(f'{lo}-{hi}' for lo, hi in shown) or 'none'})"
         )
+    _same_braces(block, "\n".join(lines[a - 1 : b]), block.replace)
     lines[a - 1 : b] = block.replace.splitlines()
     return "\n".join(lines) + ("\n" if source.endswith("\n") else "")
+
+
+def _brace_delta(text: str) -> int:
+    code = re.sub(r'"(\\.|[^"\\])*"|\'(\\.|[^\'\\])*\'|//[^\n]*|/\*.*?\*/', "", text, flags=re.S)
+    return code.count("{") - code.count("}")
+
+
+def _same_braces(block: EditBlock, old: str, new: str) -> None:
+    """A range/function replacement must open and close as many blocks as the lines it replaces
+    (P3 r2: line ranges that split a block produced `expected identifier` build failures)."""
+    before, after = _brace_delta(old), _brace_delta(new)
+    if before != after:
+        where = f"lines {block.start}-{block.end}" if block.kind == "range" else block.name
+        raise EditError(
+            f"{block.path}: your replacement of {where} changes the brace balance "
+            f"({before:+d} in the original lines, {after:+d} in yours); replace whole statements "
+            "or blocks"
+        )
 
 
 def _definition(lines: list[str], name: str) -> tuple[int, int]:
@@ -254,6 +273,7 @@ def _definition(lines: list[str], name: str) -> tuple[int, int]:
 def apply_function(source: str, block: EditBlock) -> str:
     lines = source.splitlines()
     first, last = _definition(lines, block.name)
+    _same_braces(block, "\n".join(lines[first : last + 1]), block.replace)
     lines[first : last + 1] = block.replace.splitlines()
     return "\n".join(lines) + ("\n" if source.endswith("\n") else "")
 
