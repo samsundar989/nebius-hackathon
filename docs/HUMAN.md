@@ -89,3 +89,12 @@ From now on, strategist reviews and orders arrive in `docs/kickoff/STRATEGIST_NO
 
 ## QUESTION 0015 — P3 r2 budget: up to $3.00 for one batch (money)
 2026-10-24: P3 r2 (27 ARVO cases with the edit fallbacks and one repair round, strategist order B4) is estimated at ~$2.2–2.8 model spend (r1 was $1.05; a repair round adds an Ultra re-plan with whole files plus 4 Lightning workers, ~$0.10 per unverified case). CLAUDE.md asks before any single action > $2. **Default while unanswered:** the batch runs with a hard cap of `--budget 1.95`; it is resumable, so cases it could not reach are listed as `not_run`. Reply "yes" and I resume the same run with `--budget 3.0`. Ledger model spend so far: $3.28 (Nebius billing $3.27); $25 cap.
+
+## QUESTION 0011 — Render ready (please apply the Blueprint and send both URLs)
+2026-10-24: `render.yaml`, `site/` and `service/` are on `main`. Local checks passed: `docker build` of the service; recorded-mode smoke; live-mode smoke **3/3 Juliet cases verified in 16–24 s, $0.005–0.012 each**, and the isolation probe confirmed that code running as `nobody` (how candidate code runs) cannot read the API key from the server's `/proc/1/environ` (D-0061).
+Your clicks:
+1. Render → **New → Blueprint** → repo `samsundar989/nebius-hackathon` (private, via the Render GitHub app) → it finds `render.yaml` with two services: `leakproof-dashboard` (static site) and `leakproof-demo` (free web service, Docker).
+2. Paste the **demo** Token Factory key into `NEBIUS_API_KEY` and the project id into `NEBIUS_PROJECT_ID` (asked once, at creation) → **Apply**.
+3. When both are deployed, copy the static-site URL and the web-service URL into `## ANSWER 0011`.
+4. Live runs ship **off** (`DEMO_ENABLED=false`): the button serves labelled recorded results. When you want the live button, set `DEMO_ENABLED=true` on `leakproof-demo` → Environment (it redeploys). Caps: 25 runs/day, 3 per visitor per 10 min, $0.50 service budget (counters reset on restart); flipping it back to `false` is the kill switch.
+After your answer I set `site/config.json` to the service URL, push, and test from a clean browser.
