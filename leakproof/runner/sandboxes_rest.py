@@ -46,8 +46,8 @@ class SandboxesRestRunner:
         run_id: str = "sandboxes",
     ):
         load_dotenv()
-        # Sandboxes compute bills the same account as the models: every run's reported cost
-        # goes into the cost ledger as kind=compute (CLAUDE.md rule 3).
+        # Every run's reported cost goes into the ledger as kind=compute, `units` (not USD:
+        # Sandboxes are not billed during the beta, ANSWER 0013 / D-0057), usd=0.
         self.ledger = ledger or CostLedger()
         self.run_id = run_id
         self.http = http or httpx.Client(
@@ -215,10 +215,12 @@ class SandboxesRestRunner:
                 prompt_tokens=0,
                 completion_tokens=0,
                 reasoning_tokens=0,
-                usd=float(cost or 0.0),
+                usd=0.0,  # not billed during the beta (ANSWER 0013); the cost goes in units
                 latency_s=round(time.monotonic() - t0, 3),
                 kind="compute",
-                note=shell_cmd[:80],
+                units=float(cost or 0.0),
+                note="sandbox_units, not billed during beta (billing page 2026-10-24): "
+                + shell_cmd[:60],
             )
         )
         timed_out = bool(state.get("timed_out"))

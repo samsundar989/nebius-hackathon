@@ -58,6 +58,7 @@ class LedgerEntry:
     usd: float
     latency_s: float
     kind: str = "chat"  # chat | batch | compute
+    units: float = 0.0  # compute: provider-reported units, not USD (Sandboxes: D-0057)
     ok: bool = True
     note: str = ""
     ts: float = field(default_factory=time.time)

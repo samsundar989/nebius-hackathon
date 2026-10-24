@@ -13,6 +13,23 @@ from collections import Counter, defaultdict
 from leakproof.config import RUNS_DIR
 
 
+def sandbox_units(run_id: str) -> float:
+    """Sandboxes `units` the ledger recorded for this run's cases and gate runs (D-0057)."""
+    path = RUNS_DIR / "cost_ledger.jsonl"
+    if not path.exists():
+        return 0.0
+    total = 0.0
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            e = json.loads(line)
+        except ValueError:
+            continue
+        rid = e.get("run_id", "")
+        if e.get("kind") == "compute" and (rid == run_id or rid.startswith(f"{run_id}:")):
+            total += float(e.get("units", 0.0))
+    return total
+
+
 def main() -> int:
     run = RUNS_DIR / sys.argv[1]
     recs = [
@@ -64,6 +81,9 @@ def main() -> int:
         if v
         else f"\nVerified 0/{n}; spend ${usd:.4f}"
     )
+    units = sandbox_units(sys.argv[1])
+    if units:
+        print(f"Sandboxes compute: {units:.4f} units (not billed during the beta; not in $)")
     lat = sorted(r["elapsed_s"] for r in recs)
     if lat:
         print(f"Case wall time p50 {lat[len(lat) // 2]:.0f} s, max {lat[-1]:.0f} s")
