@@ -31,7 +31,21 @@ CONFIGS = {"lightning": "none", "ultra": "ultra", "super": "super"}
 QUOTA = {"401": 10, "415": 5, "416": 5}
 
 
-def subset() -> list[str]:
+ARVO_SUBSET = ROOT / "cases" / "arvo" / "selection_leaderboard10.json"
+
+
+def subset(suite: str = "juliet") -> list[str]:
+    if suite == "arvo":
+        if not ARVO_SUBSET.exists():
+            pool = sorted(
+                str(c["localId"])
+                for c in json.loads((ROOT / "cases" / "arvo" / "batch_p3.json").read_text())[
+                    "cases"
+                ]
+            )
+            picked = sorted(random.Random(7).sample(pool, 10))
+            ARVO_SUBSET.write_text(json.dumps({"seed": 7, "cases": picked}, indent=1) + "\n")
+        return json.loads(ARVO_SUBSET.read_text())["cases"]
     if not SUBSET.exists():
         smoke = json.loads((ROOT / "cases" / "juliet" / "selection.json").read_text())["cases"]
         rng = random.Random(7)
@@ -44,17 +58,18 @@ def subset() -> list[str]:
 
 
 def run(args: argparse.Namespace) -> int:
-    subset()
+    ids = subset(args.suite)
+    prefix = "lb_arvo" if args.suite == "arvo" else "lb"
     for k in range(1, args.repeats + 1):
         for name, planner in CONFIGS.items():
-            run_id = f"lb_{name}_r{k}"
+            run_id = f"{prefix}_{name}_r{k}"
             if (RUNS_DIR / run_id / "summary.json").exists():
                 continue
             cmd = [
                 sys.executable,
                 str(ROOT / "scripts" / "fix_batch.py"),
                 "--cases",
-                "selection:selection_leaderboard20",
+                ",".join(ids) if args.suite == "arvo" else "selection:selection_leaderboard20",
                 "--planner",
                 planner,
                 "--runner",
@@ -66,19 +81,22 @@ def run(args: argparse.Namespace) -> int:
                 "--budget",
                 "0.9",
                 "--case-budget",
-                "0.1",
+                "0.3" if args.suite == "arvo" else "0.1",
             ]
+            if args.suite == "arvo":
+                cmd += ["--reference", "developer"]
             print(f"== {run_id}", flush=True)
             subprocess.run(cmd, check=False, stdout=subprocess.DEVNULL)
     return report(args)
 
 
 def report(args: argparse.Namespace) -> int:
-    ids = subset()
+    ids = subset(args.suite)
+    prefix = "lb_arvo" if args.suite == "arvo" else "lb"
     rows = {}
     for name in CONFIGS:
         reps = []
-        for path in sorted(RUNS_DIR.glob(f"lb_{name}_r*/summary.json")):
+        for path in sorted(RUNS_DIR.glob(f"{prefix}_{name}_r*/summary.json")):
             s = json.loads(path.read_text())
             recs = [json.loads((path.parent / f"{i}.json").read_text()) for i in ids]
             verified = sum(r["verdict"] == "verified" for r in recs)
@@ -108,8 +126,15 @@ def report(args: argparse.Namespace) -> int:
             "p50_latency_s": round(statistics.median(r["p50_s"] for r in reps), 1),
             "runs": reps,
         }
-    out = {"cases": len(ids), "subset": str(SUBSET.relative_to(ROOT)), "configs": rows}
-    (RUNS_DIR / "leaderboard.json").write_text(json.dumps(out, indent=1))
+    sub = ARVO_SUBSET if args.suite == "arvo" else SUBSET
+    out = {
+        "suite": args.suite,
+        "cases": len(ids),
+        "subset": str(sub.relative_to(ROOT)),
+        "configs": rows,
+    }
+    name = "leaderboard_arvo.json" if args.suite == "arvo" else "leaderboard.json"
+    (RUNS_DIR / name).write_text(json.dumps(out, indent=1))
     print("| config | repeats | verified (mean, min-max) | $/verified | p50 latency |")
     print("|---|---|---|---|---|")
     for name, r in rows.items():
@@ -127,6 +152,7 @@ def main() -> int:
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--runner", default="sandboxes")
     ap.add_argument("--jobs", type=int, default=8)
+    ap.add_argument("--suite", choices=["juliet", "arvo"], default="juliet")
     args = ap.parse_args()
     return run(args) if args.action == "run" else report(args)
 
