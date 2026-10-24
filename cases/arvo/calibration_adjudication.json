@@ -1,0 +1,23 @@
+{
+  "_about": "Manual review of every developer fix the gate did not verify in runs/p1_calibration_v3 (D-0048). 'class' replaces the automatic class in the adjudicated column; the raw class is always reported next to it. Evidence paths are under runs/p1_calibration_v3/<case>/dev/.",
+  "42520883": {
+    "class": "true_reject",
+    "why": "The developer fix leaks: on 21 seed-corpus inputs the baseline is clean under LeakSanitizer and the fix reports a direct leak allocated by mosquitto__strdup at src/conf.c:993, a line the fix adds.",
+    "evidence": "gate.json results[0].evidence.leak_reports"
+  },
+  "42520377": {
+    "class": "false_reject",
+    "why": "Strict removed-free rule (D-0046): the fix drops zip_source_free(src_window) and the PoC then reports a leak under LSan, but the leak is allocated in _zip_read_cdir/_zip_string_new (lib/zip_open.c:305), not src_window: a pre-existing leak the original use-after-free used to mask. Kept strict for model candidates.",
+    "evidence": "gate.json results[0].evidence.poc_leak_report"
+  },
+  "42531514": {
+    "class": "false_reject",
+    "why": "Masked pre-existing crash: an amplified PoC makes the fix hit an assert in get_lvalue (quickjs.c); the baseline dies earlier on the original heap overflow, so baseline-only attribution blames the fix. In the batch the developer fix is the reference and covers this for model candidates.",
+    "evidence": "gate_artifacts/DEV_w0_amplification_digits2_x8.log"
+  },
+  "375220555": {
+    "class": "out_of_scope",
+    "why": "The fix renames library functions that the fuzz harness (src/apps/fuzzers/fuzzerPolygonToCellsExperimental.c) calls; without its harness half the harness no longer compiles, and no candidate may edit the harness.",
+    "evidence": "gate_artifacts/DEV_w0_compile.log"
+  }
+}

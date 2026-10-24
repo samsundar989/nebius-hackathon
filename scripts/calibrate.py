@@ -44,7 +44,7 @@ def progress(frac: float) -> None:
 
 
 def case_ids(spec: str) -> list[str]:
-    if spec in ("tier1", "tier2"):
+    if spec in ("tier1", "tier2", "reserves"):
         return [str(r["localId"]) for r in json.loads(SHORTLIST.read_text())[spec]]
     return [s.strip() for s in spec.split(",") if s.strip()]
 
@@ -125,7 +125,7 @@ def calibrate_case(
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cases", required=True, help="tier1 | tier2 | comma-separated ids")
+    ap.add_argument("--cases", required=True, help="tier1 | tier2 | reserves | comma-separated ids")
     ap.add_argument("--runs", default="", help="model runs to re-gate with the reference")
     ap.add_argument("--probe", default="", help="run dirs whose saved crash inputs to probe")
     ap.add_argument("--out", required=True)

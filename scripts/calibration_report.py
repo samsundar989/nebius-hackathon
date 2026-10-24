@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """Summarize P1 calibration: the gate's verdict on each developer fix.
 
-  scripts/calibration_report.py p1_calibration   -> runs/<dir>/summary.json + a markdown table
+  scripts/calibration_report.py p1_calibration_v3   -> runs/<dir>/summary.json + markdown
 
-Classes:
+Automatic ("raw") classes:
   accepted       developer fix verified
   false_reject   gated in full and not verified (a gate bug or harness quirk until explained)
   partial        the fix commit did not apply cleanly to the baseline: not counted
   out_of_scope   the fix is in the fuzz harness (no candidate may edit it): not counted
   no_candidate   no applicable fix commit / baseline failure: not counted
-False-reject rate = false_reject / (accepted + false_reject).
+Adjudicated class: the raw class unless cases/arvo/calibration_adjudication.json (a reviewed,
+evidence-linked note per case) overrides it; adds true_reject (the gate is right: the
+developer fix itself has the defect it rejects). Both columns are always reported.
+False-reject rate = false_reject / (accepted + false_reject + true_reject).
 """
 
 from __future__ import annotations
@@ -18,7 +21,10 @@ import json
 import sys
 from collections import Counter
 
-from leakproof.config import RUNS_DIR
+from leakproof.config import REPO_ROOT, RUNS_DIR
+
+ADJUDICATION = REPO_ROOT / "cases" / "arvo" / "calibration_adjudication.json"
+JUDGED = ("accepted", "false_reject", "true_reject")
 
 
 def classify(rec: dict) -> str:
@@ -33,18 +39,28 @@ def classify(rec: dict) -> str:
     return "accepted" if verdict == "verified" else "false_reject"
 
 
+def rate(counts: Counter) -> tuple[int, float | None]:
+    judged = sum(counts[k] for k in JUDGED)
+    return judged, (round(counts["false_reject"] / judged, 3) if judged else None)
+
+
 def main(argv: list[str]) -> int:
     run = RUNS_DIR / argv[0]
+    notes = json.loads(ADJUDICATION.read_text()) if ADJUDICATION.exists() else {}
     rows = []
     for path in sorted(run.glob("*/calibration.json")):
         rec = json.loads(path.read_text())
         meta = rec.get("dev_fix", {})
+        raw = classify(rec)
+        note = notes.get(rec["case"], {})
         rows.append(
             {
                 "case": rec["case"],
                 "project": rec.get("project"),
                 "crash_type": rec.get("crash_type"),
-                "class": classify(rec),
+                "raw_class": raw,
+                "class": note.get("class", raw),
+                "why": note.get("why", ""),
                 "verdict": rec.get("dev", {}).get("verdict") or rec.get("error", "")[:120],
                 "files": meta.get("files"),
                 "diff_lines": meta.get("diff_lines"),
@@ -52,23 +68,29 @@ def main(argv: list[str]) -> int:
                 "elapsed_s": rec.get("elapsed_s"),
             }
         )
+    raw_counts = Counter(r["raw_class"] for r in rows)
     counts = Counter(r["class"] for r in rows)
-    judged = counts["accepted"] + counts["false_reject"]
+    raw_judged, raw_rate = rate(raw_counts)
+    judged, adj_rate = rate(counts)
     summary = {
         "cases": len(rows),
-        "classes": dict(counts),
-        "false_reject_rate": round(counts["false_reject"] / judged, 3) if judged else None,
+        "raw": {"classes": dict(raw_counts), "judged": raw_judged, "false_reject_rate": raw_rate},
+        "adjudicated": {"classes": dict(counts), "judged": judged, "false_reject_rate": adj_rate},
         "rows": rows,
     }
     (run / "summary.json").write_text(json.dumps(summary, indent=1))
-    print("| case | project | crash type | developer fix | class |\n|---|---|---|---|---|")
+    print("| case | project | crash type | gate on developer fix | raw | adjudicated |")
+    print("|---|---|---|---|---|---|")
     for r in rows:
+        v = r["verdict"].splitlines()[0][:70]
         print(
-            f"| {r['case']} | {r['project']} | {r['crash_type']} | {r['verdict']} | {r['class']} |"
+            f"| {r['case']} | {r['project']} | {r['crash_type']} | {v} | "
+            f"{r['raw_class']} | {r['class']} |"
         )
     print(
-        f"\n{counts['accepted']}/{judged} developer fixes accepted; "
-        f"false-reject rate {summary['false_reject_rate']}; classes {dict(counts)}"
+        f"\nraw: {raw_counts['accepted']}/{raw_judged} accepted, false-reject rate {raw_rate}"
+        f"\nadjudicated: {counts['accepted']}/{judged} accepted, {counts['true_reject']} true "
+        f"reject(s), false-reject rate {adj_rate}; classes {dict(counts)}"
     )
     return 0
 
