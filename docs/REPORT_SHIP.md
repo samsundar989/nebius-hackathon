@@ -131,3 +131,16 @@ How the number moved (all three passes kept): v1 10/19 → v2 9/19 → v3 15/19.
 ### Open
 1. Calibrate Tier-2 + reserves (15 cases) as replacements for the 8 uncalibratable Tier-1 cases → P3 case list.
 2. Check 8 (LLM audit flag) not built.
+
+### P1 final — 41 ARVO cases (Tier-1 + Tier-2 + reserves), gate after D-0049
+| | raw | adjudicated |
+|---|---|---|
+| developer fixes gated | 33 | 27 countable |
+| **accepted (verified)** | **24** | **24** |
+| true reject (developer fix leaks) | — | 1 (mosquitto 42520883) |
+| false reject | 9 (27%) | **2 (7.4%)** — libzip 42520377, quickjs 42531514 |
+| not countable | 8 | 14: harness-only fix 4, fix commit not standalone 5, does not apply 2, baseline needs network 3 |
+
+- One more gate bug found and fixed on the way (D-0049): refuzz attribution compared exact lines, so a pre-existing crash a few lines below the developer's edit was blamed on the fix (libucl 42512369 `:2152`→`:2154`, libexif 42500232 `:126`→`:132`). Now compared by kind + function + file; both re-run → verified. Checked that no other verdict could change.
+- **P3 batch list**: `cases/arvo/batch_p3.json` — 27 calibrated cases (Tier-1 18, Tier-2 2, reserves 7), each with a developer-fix reference for attribution.
+- Headline sentence the data supports: *"Our gate accepts 24 of 27 developer fixes (and rejects one that leaks), and rejects the model candidate that only silenced jq's crash."* The model-side reject count comes from P3.

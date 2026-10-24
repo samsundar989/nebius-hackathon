@@ -1,0 +1,194 @@
+{
+ "_about": "P3 ARVO batch: every case whose developer fix the gate could judge (runs/p1_calibration_v3, D-0050). calibration = adjudicated class of the developer fix. Excluded cases and why: runs/p1_calibration_v3/summary.json.",
+ "cases": [
+  {
+   "localId": 42482401,
+   "project": "c-ares",
+   "tier": "reserves",
+   "crash_type": "Heap-double-free",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42500216,
+   "project": "libexif",
+   "tier": "reserves",
+   "crash_type": "Heap-buffer-overflow READ 3",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42500232,
+   "project": "libexif",
+   "tier": "reserves",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42508524,
+   "project": "libplist",
+   "tier": "reserves",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42522195,
+   "project": "mosquitto",
+   "tier": "reserves",
+   "crash_type": "Heap-buffer-overflow READ {*}",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42541221,
+   "project": "pcre2",
+   "tier": "reserves",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 419216923,
+   "project": "quickjs",
+   "tier": "reserves",
+   "crash_type": "Heap-use-after-free WRITE 8",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 372515086,
+   "project": "h3",
+   "tier": "tier1",
+   "crash_type": "Heap-buffer-overflow WRITE 8",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 417323384,
+   "project": "jq",
+   "tier": "tier1",
+   "crash_type": "Heap-buffer-overflow READ 2",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42530604,
+   "project": "jq",
+   "tier": "tier1",
+   "crash_type": "Heap-buffer-overflow WRITE 1",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42531297,
+   "project": "jq",
+   "tier": "tier1",
+   "crash_type": "Heap-buffer-overflow READ 2",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42536390,
+   "project": "libical",
+   "tier": "tier1",
+   "crash_type": "Heap-use-after-free READ 2",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42507851,
+   "project": "libplist",
+   "tier": "tier1",
+   "crash_type": "Heap-buffer-overflow READ 2",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42519914,
+   "project": "libplist",
+   "tier": "tier1",
+   "crash_type": "Heap-use-after-free READ 8",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42520377,
+   "project": "libzip",
+   "tier": "tier1",
+   "crash_type": "Heap-use-after-free READ 1",
+   "calibration": "false_reject"
+  },
+  {
+   "localId": 42507297,
+   "project": "md4c",
+   "tier": "tier1",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42536108,
+   "project": "miniz",
+   "tier": "tier1",
+   "crash_type": "Heap-buffer-overflow READ {*}",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42520883,
+   "project": "mosquitto",
+   "tier": "tier1",
+   "crash_type": "Invalid-free",
+   "calibration": "true_reject"
+  },
+  {
+   "localId": 42520955,
+   "project": "mosquitto",
+   "tier": "tier1",
+   "crash_type": "Heap-use-after-free READ 2",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42521026,
+   "project": "mosquitto",
+   "tier": "tier1",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42521092,
+   "project": "mosquitto",
+   "tier": "tier1",
+   "crash_type": "Heap-use-after-free READ 8",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42523423,
+   "project": "mosquitto",
+   "tier": "tier1",
+   "crash_type": "Heap-use-after-free READ 8",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42534812,
+   "project": "mosquitto",
+   "tier": "tier1",
+   "crash_type": "Heap-buffer-overflow WRITE {*}",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42526932,
+   "project": "pcre2",
+   "tier": "tier1",
+   "crash_type": "Heap-buffer-overflow WRITE 4",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42531514,
+   "project": "quickjs",
+   "tier": "tier1",
+   "crash_type": "Heap-use-after-free WRITE 8",
+   "calibration": "false_reject"
+  },
+  {
+   "localId": 42510992,
+   "project": "libexif",
+   "tier": "tier2",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "calibration": "accepted"
+  },
+  {
+   "localId": 42512369,
+   "project": "libucl",
+   "tier": "tier2",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "calibration": "accepted"
+  }
+ ]
+}

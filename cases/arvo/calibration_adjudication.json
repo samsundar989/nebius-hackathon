@@ -19,5 +19,30 @@
     "class": "out_of_scope",
     "why": "The fix renames library functions that the fuzz harness (src/apps/fuzzers/fuzzerPolygonToCellsExperimental.c) calls; without its harness half the harness no longer compiles, and no candidate may edit the harness.",
     "evidence": "gate_artifacts/DEV_w0_compile.log"
+  },
+  "42483313": {
+    "class": "not_standalone",
+    "why": "The fix commit uses NODE_IS_REFERENCED, defined by an earlier commit absent from the baseline: link fails (undefined reference). Not the developer's whole fix on this baseline.",
+    "evidence": "gate_artifacts/DEV_w0_compile.log"
+  },
+  "418354766": {
+    "class": "not_standalone",
+    "why": "The fix commit calls JS_FreePropertyEnum, which earlier commits introduce: build fails (undeclared function).",
+    "evidence": "gate_artifacts/DEV_w0_compile.log"
+  },
+  "42510753": {
+    "class": "not_standalone",
+    "why": "Applied alone, the located fix commit does not fix the PoC (still_crashes at the target quickjs.c:15131), while ARVO records the -fix revision as not crashing: the fix spans more than this commit. The gate is right about the patch as applied.",
+    "evidence": "gate.json results[0].checks.patched"
+  },
+  "42520011": {
+    "class": "not_standalone",
+    "why": "Applied alone, the fix commit turns the PoC into a heap-use-after-free at plist.c:331 while ARVO records the -fix revision as not crashing: the fix depends on other commits. The gate is right about the patch as applied.",
+    "evidence": "gate.json results[0].checks.patched"
+  },
+  "42475737": {
+    "class": "not_standalone",
+    "why": "Applied alone, the fix commit leaves the target stack exhaustion (optimize.c:2085) while ARVO records the -fix revision as not crashing. The gate is right about the patch as applied.",
+    "evidence": "gate.json results[0].checks.patched"
   }
 }
