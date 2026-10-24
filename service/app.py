@@ -4,9 +4,10 @@ GET  /healthz   liveness (the dashboard pings it to wake a sleeping instance)
 POST /run       one Juliet case: live when DEMO_ENABLED=true and under the caps, otherwise a
                 labelled recorded result from a real run (service/recorded/*.json)
 
-Live runs stay off in this version: a live run compiles and executes model-written C next to the
-Token Factory key, which needs a privilege-separated runner first (no key in the child's
-environment or /proc view). Until then every response is recorded and says so.
+A live run (D-0061): one whitelisted Juliet case, an Ultra plan, 2 Lightning workers and the gate
+(its own process), all on `LocalProcessRunner`: model-written code is built and run as `nobody`
+with a cleared environment, so it can neither inherit nor read the API key. One run at a time;
+caps and the service budget (LEAKPROOF_BUDGET_USD) fall back to a labelled recorded result.
 """
 
 from __future__ import annotations
@@ -69,10 +70,63 @@ def healthz() -> dict:
     return {"ok": True, "live": os.environ.get("DEMO_ENABLED", "false").lower() == "true"}
 
 
+_busy = threading.Lock()
+_ledger = None
+
+
+def _live() -> dict:
+    global _ledger
+    import tempfile
+
+    from leakproof.fix import fix_case
+    from leakproof.llm import CostLedger, LLMClient
+    from leakproof.runner.local_process import LocalProcessRunner
+
+    if _ledger is None:
+        _ledger = CostLedger(
+            path=Path(tempfile.gettempdir()) / "demo_ledger.jsonl",
+            budget=float(os.environ.get("LEAKPROOF_BUDGET_USD", "0.50")),
+        )
+    _ledger.check()  # BudgetExceeded once the service budget is spent
+    cases = (Path(__file__).parent / "juliet" / "cases.txt").read_text().split()
+    case_id = random.choice(cases)
+    client = LLMClient(ledger=_ledger, run_id=f"demo:{case_id}")
+    with tempfile.TemporaryDirectory() as tmp:
+        rec = fix_case(
+            case_id,
+            Path(tmp),
+            client,
+            LocalProcessRunner(),
+            planner_model="ultra",
+            n_workers=2,
+            audit_model=None,
+        )
+    return {
+        "case": rec["case"],
+        "verdict": rec["verdict"],
+        "usd": rec.get("usd"),
+        "elapsed_s": rec.get("elapsed_s"),
+        "finding": {k: (rec.get("finding") or {}).get(k) for k in ("kind", "location")},
+        "root_cause": (rec.get("plan") or {}).get("root_cause"),
+        "winner": (rec.get("winner") or {}).get("diff"),
+        "workers": [
+            {"id": f"{w['hypothesis_id']}·w{w['worker_index']}", "verdict": w["verdict"]}
+            for w in rec.get("workers", [])
+        ],
+        "recorded": False,
+    }
+
+
 @app.post("/run")
 def run(request: Request) -> dict:
     ok, why = _allowed(request.client.host if request.client else "?")
     if not ok:
         return _recorded(why)
-    # Live path intentionally not wired yet (see module docstring).
-    return _recorded("live runner not enabled in this build")
+    if not _busy.acquire(blocking=False):
+        return _recorded("another live run is in progress")
+    try:
+        return _live()
+    except Exception as exc:  # noqa: BLE001 - budget, API or build failure: never a 500
+        return _recorded(f"live run unavailable ({type(exc).__name__})")
+    finally:
+        _busy.release()

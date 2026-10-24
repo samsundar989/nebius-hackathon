@@ -134,7 +134,7 @@ class JulietCase:
 
     def prepare(self, runner: Runner) -> ImageRef:
         res = runner.run(
-            IMAGES[getattr(runner, "name", "docker")],
+            IMAGES.get(getattr(runner, "name", "docker")) or runner.base(),  # type: ignore[attr-defined]
             "mkdir -p bin out",
             files=self.base_files(),
             cwd="/work",

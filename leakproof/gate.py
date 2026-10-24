@@ -711,7 +711,7 @@ def main() -> int:
     ap.add_argument("--artifacts", type=Path, help="refuzz crash inputs (default: next to --out)")
     ap.add_argument("--fuzz-seconds", type=int, default=90)
     ap.add_argument("--reference", help="image with the developer's fix (refuzz attribution)")
-    ap.add_argument("--runner", default="docker", choices=["docker", "sandboxes"])
+    ap.add_argument("--runner", default="docker", choices=["docker", "sandboxes", "local"])
     ap.add_argument(
         "--fuzz-seed", type=int, default=1, help="libFuzzer -seed (repair rounds: fresh)"
     )

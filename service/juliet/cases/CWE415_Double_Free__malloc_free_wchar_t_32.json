@@ -1,0 +1,228 @@
+{
+ "id": "CWE415_Double_Free__malloc_free_wchar_t_32",
+ "cwe": "CWE-415",
+ "functional_variant": "malloc_free_wchar_t",
+ "flow_variant": "32",
+ "dir": "testcases/CWE415_Double_Free/s01",
+ "files": [
+  "CWE415_Double_Free__malloc_free_wchar_t_32.c"
+ ],
+ "lang": "c",
+ "expected_kind": "double-free",
+ "source_root": "juliet-1.3/C",
+ "support_files": [
+  "testcasesupport/io.c",
+  "testcasesupport/std_testcase.h",
+  "testcasesupport/std_testcase_io.h",
+  "testcasesupport/std_thread.h"
+ ],
+ "image": "leakproof/cpp-sanitizers:e0",
+ "env": {
+  "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=0:symbolize=1",
+  "LSAN_OPTIONS": "use_stacks=0",
+  "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=0"
+ },
+ "build_cmd_bad": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITGOOD -Isupport -Icase support/io.c case/CWE415_Double_Free__malloc_free_wchar_t_32.c -o bin/bad",
+ "run_cmd_bad": "timeout 30 ./bin/bad < /dev/null",
+ "build_cmd_good": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITBAD -Isupport -Icase support/io.c case/CWE415_Double_Free__malloc_free_wchar_t_32.c -o bin/good",
+ "run_cmd_good": "timeout 30 ./bin/good < /dev/null",
+ "build_bad_ok": true,
+ "build_good_ok": true,
+ "bad_exit": 1,
+ "good_exit": 0,
+ "detected": true,
+ "parsed": true,
+ "parsed_kind_matches": true,
+ "reproducible": true,
+ "not_reproducible_reason": null,
+ "finding": {
+  "tool": "asan",
+  "kind": "double-free",
+  "cwe_guess": "CWE-415",
+  "summary": "attempting double-free on 0x514000000040 in thread T0:",
+  "frames": [
+   {
+    "index": 0,
+    "function": "free",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5d406f6a1f6a"
+   },
+   {
+    "index": 1,
+    "function": "CWE415_Double_Free__malloc_free_wchar_t_32_bad",
+    "file": "/work/case/CWE415_Double_Free__malloc_free_wchar_t_32.c",
+    "line": 42,
+    "column": 9,
+    "module": null,
+    "pc": "0x5d406f6e208b"
+   },
+   {
+    "index": 2,
+    "function": "main",
+    "file": "/work/case/CWE415_Double_Free__malloc_free_wchar_t_32.c",
+    "line": 121,
+    "column": 5,
+    "module": null,
+    "pc": "0x5d406f6e211e"
+   },
+   {
+    "index": 3,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x74b4524541c9"
+   },
+   {
+    "index": 4,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x74b45245428a"
+   },
+   {
+    "index": 5,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5d406f6073b4"
+   }
+  ],
+  "alloc_stack": [
+   {
+    "index": 0,
+    "function": "malloc",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5d406f6a2203"
+   },
+   {
+    "index": 1,
+    "function": "CWE415_Double_Free__malloc_free_wchar_t_32_bad",
+    "file": "/work/case/CWE415_Double_Free__malloc_free_wchar_t_32.c",
+    "line": 33,
+    "column": 27,
+    "module": null,
+    "pc": "0x5d406f6e1f80"
+   },
+   {
+    "index": 2,
+    "function": "main",
+    "file": "/work/case/CWE415_Double_Free__malloc_free_wchar_t_32.c",
+    "line": 121,
+    "column": 5,
+    "module": null,
+    "pc": "0x5d406f6e211e"
+   },
+   {
+    "index": 3,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x74b4524541c9"
+   },
+   {
+    "index": 4,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x74b45245428a"
+   },
+   {
+    "index": 5,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5d406f6073b4"
+   }
+  ],
+  "free_stack": [
+   {
+    "index": 0,
+    "function": "free",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5d406f6a1f6a"
+   },
+   {
+    "index": 1,
+    "function": "CWE415_Double_Free__malloc_free_wchar_t_32_bad",
+    "file": "/work/case/CWE415_Double_Free__malloc_free_wchar_t_32.c",
+    "line": 36,
+    "column": 9,
+    "module": null,
+    "pc": "0x5d406f6e1fbd"
+   },
+   {
+    "index": 2,
+    "function": "main",
+    "file": "/work/case/CWE415_Double_Free__malloc_free_wchar_t_32.c",
+    "line": 121,
+    "column": 5,
+    "module": null,
+    "pc": "0x5d406f6e211e"
+   },
+   {
+    "index": 3,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x74b4524541c9"
+   },
+   {
+    "index": 4,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x74b45245428a"
+   },
+   {
+    "index": 5,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5d406f6073b4"
+   }
+  ],
+  "access": null,
+  "access_size": null,
+  "leaked_bytes": null,
+  "leak_type": null,
+  "location": "/work/case/CWE415_Double_Free__malloc_free_wchar_t_32.c:42",
+  "alloc_site": "/work/case/CWE415_Double_Free__malloc_free_wchar_t_32.c:33",
+  "free_site": "/work/case/CWE415_Double_Free__malloc_free_wchar_t_32.c:36"
+ },
+ "all_bad_kinds": [
+  "double-free"
+ ],
+ "good_clean": true,
+ "good_clean_target": true,
+ "good_findings": [],
+ "build_log_bad_tail": "",
+ "wall_s": 1.29,
+ "container_peak_kb": 38328
+}

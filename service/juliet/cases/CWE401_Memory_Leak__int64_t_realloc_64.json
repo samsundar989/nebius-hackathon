@@ -1,0 +1,174 @@
+{
+ "id": "CWE401_Memory_Leak__int64_t_realloc_64",
+ "cwe": "CWE-401",
+ "functional_variant": "int64_t_realloc",
+ "flow_variant": "64",
+ "dir": "testcases/CWE401_Memory_Leak/s01",
+ "files": [
+  "CWE401_Memory_Leak__int64_t_realloc_64a.c",
+  "CWE401_Memory_Leak__int64_t_realloc_64b.c"
+ ],
+ "lang": "c",
+ "expected_kind": "leak",
+ "source_root": "juliet-1.3/C",
+ "support_files": [
+  "testcasesupport/io.c",
+  "testcasesupport/std_testcase.h",
+  "testcasesupport/std_testcase_io.h",
+  "testcasesupport/std_thread.h"
+ ],
+ "image": "leakproof/cpp-sanitizers:e0",
+ "env": {
+  "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=0:symbolize=1",
+  "LSAN_OPTIONS": "use_stacks=0",
+  "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=0"
+ },
+ "build_cmd_bad": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITGOOD -Isupport -Icase support/io.c case/CWE401_Memory_Leak__int64_t_realloc_64a.c case/CWE401_Memory_Leak__int64_t_realloc_64b.c -o bin/bad",
+ "run_cmd_bad": "timeout 30 ./bin/bad < /dev/null",
+ "build_cmd_good": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITBAD -Isupport -Icase support/io.c case/CWE401_Memory_Leak__int64_t_realloc_64a.c case/CWE401_Memory_Leak__int64_t_realloc_64b.c -o bin/good",
+ "run_cmd_good": "timeout 30 ./bin/good < /dev/null",
+ "build_bad_ok": true,
+ "build_good_ok": true,
+ "bad_exit": 1,
+ "good_exit": 0,
+ "detected": true,
+ "parsed": true,
+ "parsed_kind_matches": true,
+ "reproducible": true,
+ "not_reproducible_reason": null,
+ "finding": {
+  "tool": "lsan",
+  "kind": "leak",
+  "cwe_guess": "CWE-401",
+  "summary": "Direct leak of 800 byte(s) in 1 object(s) allocated from:",
+  "frames": [
+   {
+    "index": 0,
+    "function": "realloc",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x56c6916bf620"
+   },
+   {
+    "index": 1,
+    "function": "CWE401_Memory_Leak__int64_t_realloc_64_bad",
+    "file": "/work/case/CWE401_Memory_Leak__int64_t_realloc_64a.c",
+    "line": 32,
+    "column": 23,
+    "module": null,
+    "pc": "0x56c6916fef1d"
+   },
+   {
+    "index": 2,
+    "function": "main",
+    "file": "/work/case/CWE401_Memory_Leak__int64_t_realloc_64a.c",
+    "line": 101,
+    "column": 5,
+    "module": null,
+    "pc": "0x56c6916ff12e"
+   },
+   {
+    "index": 3,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x7f40a276e1c9"
+   },
+   {
+    "index": 4,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x7f40a276e28a"
+   },
+   {
+    "index": 5,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x56c6916243b4"
+   }
+  ],
+  "alloc_stack": [
+   {
+    "index": 0,
+    "function": "realloc",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x56c6916bf620"
+   },
+   {
+    "index": 1,
+    "function": "CWE401_Memory_Leak__int64_t_realloc_64_bad",
+    "file": "/work/case/CWE401_Memory_Leak__int64_t_realloc_64a.c",
+    "line": 32,
+    "column": 23,
+    "module": null,
+    "pc": "0x56c6916fef1d"
+   },
+   {
+    "index": 2,
+    "function": "main",
+    "file": "/work/case/CWE401_Memory_Leak__int64_t_realloc_64a.c",
+    "line": 101,
+    "column": 5,
+    "module": null,
+    "pc": "0x56c6916ff12e"
+   },
+   {
+    "index": 3,
+    "function": "__libc_start_call_main",
+    "file": "csu/../sysdeps/nptl/libc_start_call_main.h",
+    "line": 58,
+    "column": 16,
+    "module": null,
+    "pc": "0x7f40a276e1c9"
+   },
+   {
+    "index": 4,
+    "function": "__libc_start_main",
+    "file": "csu/../csu/libc-start.c",
+    "line": 360,
+    "column": 3,
+    "module": null,
+    "pc": "0x7f40a276e28a"
+   },
+   {
+    "index": 5,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x56c6916243b4"
+   }
+  ],
+  "free_stack": [],
+  "access": null,
+  "access_size": null,
+  "leaked_bytes": 800,
+  "leak_type": "direct",
+  "location": "/work/case/CWE401_Memory_Leak__int64_t_realloc_64a.c:32",
+  "alloc_site": "/work/case/CWE401_Memory_Leak__int64_t_realloc_64a.c:32",
+  "free_site": null
+ },
+ "all_bad_kinds": [
+  "leak"
+ ],
+ "good_clean": true,
+ "good_clean_target": true,
+ "good_findings": [],
+ "build_log_bad_tail": "",
+ "wall_s": 1.34,
+ "container_peak_kb": 38904
+}

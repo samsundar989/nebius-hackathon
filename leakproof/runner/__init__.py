@@ -21,6 +21,10 @@ def get_runner(name: str = "docker", **kwargs: object) -> Runner:
         from leakproof.runner.contree import ContreeRunner
 
         return ContreeRunner(**kwargs)  # type: ignore[arg-type]
+    if name == "local":
+        from leakproof.runner.local_process import LocalProcessRunner
+
+        return LocalProcessRunner(**kwargs)  # type: ignore[arg-type]
     if name == "sandboxes":
         from leakproof.runner.sandboxes_rest import SandboxesRestRunner
 
