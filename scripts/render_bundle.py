@@ -5,7 +5,7 @@
 
 Verified cases by default (--all: every case). Each bundle: summary, root cause, the winning
 diff, the gate matrix with every check's evidence, before/after sanitizer reports, the funnel
-over all workers (verdict + audit flags), cost by model, and the developer's fix for comparison.
+over all workers (verdict + advisory reviewer notes), cost by model, and the developer's fix for comparison.
 """
 
 from __future__ import annotations
@@ -67,7 +67,7 @@ def bundle(rec: dict, case_dir: Path) -> str:
         f"- **Defect:** {finding.get('kind', '?')} at `{finding.get('location', '?')}`"
         + (f" (ARVO crash type: {arvo['crash_type']})" if arvo.get("crash_type") else ""),
         f"- **Models:** planner `{rec.get('planner_model')}`, {rec.get('n_workers')} x "
-        f"`{rec.get('worker_model')}` workers; audit `lightning` (advisory)",
+        f"`{rec.get('worker_model')}` workers; reviewer notes `lightning` (advisory, D-0060)",
         f"- **Cost:** ${rec.get('usd', 0):.4f} "
         + " · ".join(
             f"{m.split('/')[-1]} ${v:.4f}" for m, v in rec.get("usd_by_model", {}).items()
@@ -106,14 +106,14 @@ def bundle(rec: dict, case_dir: Path) -> str:
             clean = sum(1 for v in amp.values() if v["rc"] == "0" and not v["sig"])
             out.append(f"Amplified PoC variants: {clean}/{len(amp)} clean ({', '.join(amp)}).")
         if win.get("audit", {}).get("flags"):
-            out += ["", "### Audit flags (advisory, never gating)", ""]
+            out += ["", "### Reviewer notes (an LLM review; advisory, never gating, D-0060)", ""]
             for k in win["audit"]["flags"]:
                 out.append(f"- `{k}`: {win['audit']['checks'][k]['note']}")
     out += [
         "",
         "## Funnel: every worker",
         "",
-        "| worker | hypothesis | verdict | audit flags |",
+        "| worker | hypothesis | verdict | reviewer notes |",
         "|---|---|---|---|",
     ]
     for w in workers:

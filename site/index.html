@@ -120,12 +120,12 @@ footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
       <li>ARVO has no memory-leak cases; leak results come from Juliet, which is synthetic.</li>
       <li>The gate proves absence of the reported crash and of new sanitizer reports on the inputs it tries. It cannot prove a fix correct for every input (for example, a stack buffer sized from input length).</li>
       <li>Calibration false rejects come from known limits: a strict rule for patches that remove a <code>free</code>, and crashes the original bug used to mask.</li>
-      <li>The audit flag is an LLM review and advisory only; it never changes a verdict.</li>
+      <li>Reviewer notes are an LLM review shown for context only: they flag verified and rejected candidates at about the same rate, so they are not evidence and never change a verdict.</li>
       <li>Nebius Sandboxes runs the Juliet suite with the gate offline; ARVO images do not import there yet, so ARVO runs on local Docker.</li>
     </ul></div>
   </section>
 
-  <footer>Every number on this page is generated from run records by <code>scripts/build_site.py</code>. Model calls: NVIDIA Nemotron on Nebius Token Factory (Ultra plans, Lightning works and audits).</footer>
+  <footer>Every number on this page is generated from run records by <code>scripts/build_site.py</code>. Model calls: NVIDIA Nemotron on Nebius Token Factory (Ultra plans, Lightning workers and reviewer notes).</footer>
 </main>
 <script>
 const $ = (s) => document.querySelector(s);
@@ -162,7 +162,7 @@ async function demo() {
 function renderCase(c) {
   const ws = c.workers.filter((w) => Object.keys(w.checks).length);
   const cols = CHECKS.filter((k) => ws.some((w) => w.checks[k]));
-  const matrix = ws.length ? `<div class="scroll"><table class="matrix"><thead><tr><th>worker</th>${cols.map((k) => `<th>${esc(k)}</th>`).join("")}<th>verdict</th><th>audit</th></tr></thead><tbody>${
+  const matrix = ws.length ? `<div class="scroll"><table class="matrix"><thead><tr><th>worker</th>${cols.map((k) => `<th>${esc(k)}</th>`).join("")}<th>verdict</th><th>reviewer notes</th></tr></thead><tbody>${
     ws.map((w) => `<tr><td><code>${esc(w.id)}</code></td>${cols.map((k) => `<td class="cell">${w.checks[k] ? chip(w.checks[k].s, w.checks[k].d) : ""}</td>`).join("")}<td>${chip(w.verdict)}</td><td class="muted">${esc(w.audit.join(", ") || "–")}</td></tr>`).join("")
   }</tbody></table></div><p class="muted">Hover a cell for the evidence.</p>` : '<p class="muted">No candidate reached the gate.</p>';
   const others = c.workers.filter((w) => !Object.keys(w.checks).length);
