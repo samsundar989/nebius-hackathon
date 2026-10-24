@@ -148,6 +148,43 @@ def parse_blocks(text: str, complete: bool = False) -> list[EditBlock]:
     return blocks
 
 
+_HUNK_LINE = re.compile(r"^[ +-]")
+_DIFF_PATH = re.compile(r"^(?:\+\+\+ b/|--- a/|===\s*|diff --git a/\S+ b/)(\S+?\.\w+)\b")
+
+
+def parse_unified(text: str) -> list[EditBlock]:
+    """Diff-shaped replies (`-`/`+`/` ` lines, P3 r2: 'no edit blocks' for 11 workers that wrote
+    one) as SEARCH/REPLACE blocks: context + `-` lines are SEARCH, context + `+` lines REPLACE."""
+    blocks: list[EditBlock] = []
+    path, hunk = "", []
+
+    def flush() -> None:
+        while hunk and hunk[-1] == " ":
+            hunk.pop()
+        if any(x[:1] in "+-" for x in hunk):
+            old = "\n".join(x[1:] for x in hunk if x[:1] in " -")
+            new = "\n".join(x[1:] for x in hunk if x[:1] in " +")
+            if old.strip() and old != new:
+                blocks.append(EditBlock(path or "?", old, new))
+        hunk.clear()
+
+    for line in text.splitlines():
+        m = _DIFF_PATH.match(line.strip())
+        if m:
+            flush()
+            path = m.group(1)
+        elif line.startswith(("+++", "---")):
+            continue
+        elif line == "" and hunk:
+            hunk.append(" ")  # a blank context line whose leading space was stripped
+        elif line.startswith("@@") or line.strip().startswith("```") or not _HUNK_LINE.match(line):
+            flush()
+        else:
+            hunk.append(line)
+    flush()
+    return blocks
+
+
 def _norm(line: str) -> str:
     return " ".join(line.split())
 
@@ -292,6 +329,7 @@ def apply_blocks(
     out = dict(files)
     strategies = []
     resolved = []
+    seen: set[tuple] = set()
     for block in blocks:
         if block.path not in out:
             # Models add or drop leading directories ("src/x.c" for "x.c"): suffix, then basename.
@@ -312,7 +350,18 @@ def apply_blocks(
                 block.end,
                 block.name,
             )
-        resolved.append(block)
+        key = (
+            block.path,
+            block.kind,
+            block.start,
+            block.end,
+            block.name,
+            block.search,
+            block.replace,
+        )
+        if key not in seen:  # the same block twice is one edit, not an overlap
+            seen.add(key)
+            resolved.append(block)
     # Line ranges first, bottom-up, on the original numbering; then functions; then SEARCH
     # blocks, which match by content and do not care about shifted lines.
     ranges = sorted((b for b in resolved if b.kind == "range"), key=lambda b: (b.path, -b.start))

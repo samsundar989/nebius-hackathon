@@ -14,7 +14,7 @@ from typing import Any
 
 from leakproof.cases.base import BuildResult, Window
 from leakproof.context import render_finding, render_windows, shown_ranges
-from leakproof.edits import EditError, apply_blocks, parse_blocks, unified_diff
+from leakproof.edits import EditError, apply_blocks, parse_blocks, parse_unified, unified_diff
 from leakproof.llm import ChatResult, LLMClient
 
 SYSTEM = """You fix one memory-safety defect in C/C++ code, following the plan you are given.
@@ -166,6 +166,8 @@ def run_worker(
             blocks_seen = False
             try:
                 blocks = parse_blocks(res.text, complete=res.finish_reason != "length")
+                if not blocks:
+                    blocks = parse_unified(res.text)  # a diff instead of edit blocks (D-0065)
                 blocks_seen = bool(blocks)
                 if not blocks:
                     raise EditError("no edit blocks in the reply")

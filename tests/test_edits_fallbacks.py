@@ -71,3 +71,18 @@ def test_line_range_that_splits_a_block_is_rejected() -> None:
     text = "@@ replace a.c lines 10-11 @@\n    for (i = 0; i < n; i++) {\n        buf[i] = 0;\n    }\n@@ end @@\n"
     with pytest.raises(EditError, match="brace balance"):
         apply_blocks(FILES, parse_blocks(text), {"/src/p/a.c": [(6, 13)]})
+
+
+def test_unified_diff_reply_becomes_a_search_block() -> None:
+    from leakproof.edits import parse_unified
+
+    # P3 r2 libexif 42500232: a diff under a `=== path` header instead of edit blocks.
+    text = "=== /src/p/a.c\n     int i;\n-    for (i = 0; i <= n; i++) {\n+    for (i = 0; i < n; i++) {\n         buf[i] = 0;\n==="
+    out, _ = apply_blocks(FILES, parse_unified(text))
+    assert "i < n" in out["/src/p/a.c"] and "i <= n" not in out["/src/p/a.c"]
+
+
+def test_identical_blocks_twice_are_one_edit() -> None:
+    text = "@@ replace a.c lines 10-10 @@\n    for (i = 0; i < n; i++) {\n@@ end @@\n" * 2
+    out, how = apply_blocks(FILES, parse_blocks(text), {"/src/p/a.c": [(6, 13)]})
+    assert how == ["line_range"]
