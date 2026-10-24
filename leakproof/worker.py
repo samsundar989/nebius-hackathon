@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from leakproof.cases.base import BuildResult, Window
-from leakproof.context import render_finding, render_windows
+from leakproof.context import render_finding, render_windows, shown_ranges
 from leakproof.edits import EditError, apply_blocks, parse_blocks, unified_diff
 from leakproof.llm import ChatResult, LLMClient
 
@@ -40,8 +40,23 @@ Rules:
   exactly once and do not put it inside a SEARCH block.
 - SEARCH lines are matched ignoring indentation and spacing: copy the code lines as shown and
   do not spend effort counting spaces. Use the real file name from "Files you may edit".
+  Source is shown with line numbers ("  120| code"); do not copy the numbers into SEARCH.
 - Think briefly. The fix is usually a few lines; reply with the edit blocks as soon as you
-  know the change."""
+  know the change.
+
+If you cannot quote the lines exactly, two other forms work (prefer SEARCH/REPLACE):
+
+@@ replace path/of/the/file.c lines 120-134 @@
+<new text for exactly those shown lines>
+@@ end @@
+
+@@ function name_of_function in path/of/the/file.c @@
+<the complete new definition of that function>
+@@ end @@"""
+NO_THINKING_RETRY = (
+    "Reply now with the edit blocks only: no explanation, no reasoning, no restating the code. "
+    "If SEARCH text is hard to reproduce, use the '@@ replace <file> lines A-B @@' form."
+)
 
 
 @dataclass
@@ -115,16 +130,18 @@ def run_worker(
     editable = _files_for(hypothesis, sources)
     messages = build_messages(finding, root_cause, hypothesis, windows, editable)
     allowed = {p: sources[p] for p in editable}
+    # Line-range edits may only replace lines the worker was actually shown.
+    shown = shown_ranges([w for w in windows if w.path in editable])
     feedback_rounds = {"apply": 0, "build": 0, "empty": 0}
     thinking = True
 
-    def call(purpose: str) -> ChatResult:
+    def call(purpose: str, cap: int | None = None) -> ChatResult:
         res = client.chat(
             model,
             messages,
             purpose=purpose,
             thinking=thinking,
-            max_completion_tokens=max_completion_tokens,
+            max_completion_tokens=min(cap or max_completion_tokens, max_completion_tokens),
             temperature=temperature,
         )
         cand.usd += res.usd
@@ -148,11 +165,11 @@ def run_worker(
         while True:
             blocks_seen = False
             try:
-                blocks = parse_blocks(res.text)
+                blocks = parse_blocks(res.text, complete=res.finish_reason != "length")
                 blocks_seen = bool(blocks)
                 if not blocks:
-                    raise EditError("no SEARCH/REPLACE blocks in the reply")
-                edited, strategies = apply_blocks(allowed, blocks)
+                    raise EditError("no edit blocks in the reply")
+                edited, strategies = apply_blocks(allowed, blocks, shown)
                 full = {p: restore(p, t) for p, t in edited.items() if t != allowed[p]}
                 if not full:
                     raise EditError("the edits do not change anything")
@@ -166,15 +183,21 @@ def run_worker(
                     break
                 feedback_rounds[key] += 1
                 if empty:
-                    thinking = False  # E0: reasoning spent the budget and no edit came out
-                    res = call("worker:retry_no_thinking")
+                    # E0/P3: reasoning spent the budget and no edit came out. Without thinking
+                    # the model reasons in the reply instead (P3: 11 replies ran to 12K), so
+                    # ask for blocks only and cap the reply.
+                    thinking = False
+                    messages += [{"role": "user", "content": NO_THINKING_RETRY}]
+                    res = call("worker:retry_no_thinking", cap=4_000)
                 else:
                     messages += [
-                        {"role": "assistant", "content": res.text},
+                        {"role": "assistant", "content": res.text[-6000:]},
                         {
                             "role": "user",
-                            "content": f"Your edit could not be applied: {exc}. "
-                            "Reply again with corrected edit blocks only.",
+                            "content": f"Your edit could not be applied: {exc}. Reply again "
+                            "with corrected edit blocks only. If the SEARCH text keeps "
+                            "failing, use '@@ replace <file> lines A-B @@' with the line "
+                            "numbers shown in the source.",
                         },
                     ]
                     res = call("worker:apply_repair")

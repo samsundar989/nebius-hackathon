@@ -43,15 +43,30 @@ def render_finding(f: dict[str, Any], frame_limit: int = 8) -> str:
     return "\n".join(lines)
 
 
-def render_windows(windows: list[Window]) -> str:
+def render_windows(windows: list[Window], numbered: bool = True) -> str:
+    """Each window with its line numbers ("  120| code"), so a worker can address lines by
+    number (the `@@ replace ... lines A-B @@` fallback, D-0058)."""
     parts = []
     for w in windows:
+        lines = w.text.splitlines()
         marks = "".join(
-            f"\n  line {ln} ({why}): {w.text.splitlines()[ln - w.start].strip()}"
+            f"\n  line {ln} ({why}): {lines[ln - w.start].strip()}"
             for ln, why in sorted(w.marks.items())
-            if 0 <= ln - w.start < len(w.text.splitlines())
+            if 0 <= ln - w.start < len(lines)
+        )
+        body = (
+            "\n".join(f"{w.start + k:>5}| {line}" for k, line in enumerate(lines))
+            if numbered
+            else w.text
         )
         parts.append(
-            f"=== {w.path} (lines {w.start}-{w.end}) ==={marks}\n{w.text}\n=== end {w.path} ==="
+            f"=== {w.path} (lines {w.start}-{w.end}) ==={marks}\n{body}\n=== end {w.path} ==="
         )
     return "\n\n".join(parts)
+
+
+def shown_ranges(windows: list[Window]) -> dict[str, list[tuple[int, int]]]:
+    out: dict[str, list[tuple[int, int]]] = {}
+    for w in windows:
+        out.setdefault(w.path, []).append((w.start, w.start + len(w.text.splitlines()) - 1))
+    return out

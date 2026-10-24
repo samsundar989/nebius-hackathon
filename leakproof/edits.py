@@ -9,6 +9,19 @@
 
 A SEARCH block must match exactly once: first verbatim, then line-by-line ignoring whitespace.
 We write the unified diff ourselves, so the model never has to get diff syntax right.
+
+Fallbacks (D-0058), for when SEARCH text will not match what the model remembers:
+
+    @@ replace path/to/file.c lines 120-134 @@      the shown lines 120-134, replaced
+    <new lines>
+    @@ end @@
+
+    @@ function name in path/to/file.c @@           the whole definition of `name`, replaced
+    <the complete new function>
+    @@ end @@
+
+A line range applies only inside a window the worker was shown (the lines it saw are the lines
+it replaces); a function is located by name and brace matching.
 """
 
 from __future__ import annotations
@@ -22,6 +35,11 @@ SEARCH = re.compile(r"^<{5,}\s*SEARCH\s*$")
 DIVIDER = re.compile(r"^={5,}\s*$")
 REPLACE = re.compile(r"^>{5,}\s*(REPLACE)?\s*$")
 SOURCE_PATH = re.compile(r"[\w./+-]+\.(c|h|cc|cpp|cxx|hpp|hh|inc)\b")
+RANGE = re.compile(r"^@@\s*replace\s+`?([\w./+-]+)`?\s+lines?\s+(\d+)\s*-\s*(\d+)\s*@@$", re.I)
+FUNCTION = re.compile(r"^@@\s*function\s+`?(\w+)`?\s+in\s+`?([\w./+-]+)`?\s*@@$", re.I)
+END = re.compile(r"^@@\s*end\s*@@$", re.I)
+# Windows are shown with line numbers ("  120| code"); models sometimes copy the prefix.
+NUMBERED = re.compile(r"^\s*\d+\|\s?")
 
 
 class EditError(ValueError):
@@ -33,20 +51,55 @@ class EditBlock:
     path: str
     search: str
     replace: str
+    kind: str = "search"  # search | range | function
+    start: int = 0  # range: 1-based inclusive
+    end: int = 0
+    name: str = ""  # function
+
+
+def _unnumber(text: str) -> str:
+    lines = text.splitlines()
+    if lines and all(NUMBERED.match(x) for x in lines if x.strip()):
+        return "\n".join(NUMBERED.sub("", x, count=1) for x in lines)
+    return text
 
 
 def _clean_path(line: str) -> str:
     return line.strip().strip("`*#:").strip()
 
 
-def parse_blocks(text: str) -> list[EditBlock]:
-    """Every SEARCH/REPLACE block in `text`; the path is the nearest non-fence line above it."""
+def parse_blocks(text: str, complete: bool = False) -> list[EditBlock]:
+    """Every edit block in `text` (SEARCH/REPLACE, line range, function); for SEARCH blocks the
+    path is the nearest non-fence line above. `complete`: the reply was not cut off, so a last
+    block may end at the end of the text."""
     lines = text.splitlines()
     blocks: list[EditBlock] = []
     path = ""
     i = 0
     while i < len(lines):
         line = lines[i]
+        header = RANGE.match(line.strip()) or FUNCTION.match(line.strip())
+        if header:
+            end = next((k for k in range(i + 1, len(lines)) if END.match(lines[k].strip())), None)
+            if end is None:
+                fence = next(
+                    (k for k in range(i + 1, len(lines)) if lines[k].strip().startswith("```")),
+                    None,
+                )
+                if fence is None and not complete:
+                    raise EditError("unterminated @@ block (missing '@@ end @@')")
+                end = fence if fence is not None else len(lines)
+            body = "\n".join(x for x in lines[i + 1 : end] if not x.strip().startswith("```"))
+            body = _unnumber(body)
+            if header.re is RANGE:
+                p, a, b = header.group(1), int(header.group(2)), int(header.group(3))
+                blocks.append(EditBlock(p, "", body, "range", min(a, b), max(a, b)))
+            else:
+                blocks.append(
+                    EditBlock(header.group(2), "", body, "function", name=header.group(1))
+                )
+            i = end + 1
+            continue
         if SEARCH.match(line.strip()):
             j = i - 1
             while j >= 0 and (not lines[j].strip() or lines[j].strip().startswith("```")):
@@ -58,14 +111,37 @@ def parse_blocks(text: str) -> list[EditBlock]:
                 path = m.group(0)
             try:
                 mid = next(k for k in range(i + 1, len(lines)) if DIVIDER.match(lines[k].strip()))
-                end = next(k for k in range(mid + 1, len(lines)) if REPLACE.match(lines[k].strip()))
             except StopIteration as exc:
                 raise EditError("unterminated SEARCH/REPLACE block") from exc
+            # The closing marker: ">>>>>>> REPLACE", or what models also write instead - a
+            # second "=======" (P3: 10 complete edits lost to it), a fence, or the next block.
+            end = next(
+                (
+                    k
+                    for k in range(mid + 1, len(lines))
+                    if REPLACE.match(lines[k].strip())
+                    or DIVIDER.match(lines[k].strip())
+                    or SEARCH.match(lines[k].strip())
+                    or lines[k].strip().startswith("```")
+                ),
+                None,
+            )
+            if end is None:
+                if not complete:
+                    raise EditError("unterminated SEARCH/REPLACE block")
+                end = len(lines)
             if not path:
                 raise EditError("SEARCH block without a file path line above it")
             blocks.append(
-                EditBlock(path, "\n".join(lines[i + 1 : mid]), "\n".join(lines[mid + 1 : end]))
+                EditBlock(
+                    path,
+                    _unnumber("\n".join(lines[i + 1 : mid])),
+                    _unnumber("\n".join(lines[mid + 1 : end])),
+                )
             )
+            if end < len(lines) and SEARCH.match(lines[end].strip()):
+                i = end  # the next block starts right here (same file unless it names one)
+                continue
             i = end + 1
             continue
         i += 1
@@ -135,14 +211,67 @@ def _indent(line: str) -> str:
     return line[: len(line) - len(line.lstrip())]
 
 
+def apply_range(source: str, block: EditBlock, shown: list[tuple[int, int]] | None) -> str:
+    lines = source.splitlines()
+    a, b = block.start, block.end
+    if not 1 <= a <= b <= len(lines):
+        raise EditError(f"{block.path}: lines {a}-{b} are outside the file (1-{len(lines)})")
+    if shown is not None and not any(lo <= a and b <= hi for lo, hi in shown):
+        raise EditError(
+            f"{block.path}: lines {a}-{b} are not inside one window you were shown "
+            f"({', '.join(f'{lo}-{hi}' for lo, hi in shown) or 'none'})"
+        )
+    lines[a - 1 : b] = block.replace.splitlines()
+    return "\n".join(lines) + ("\n" if source.endswith("\n") else "")
+
+
+def _definition(lines: list[str], name: str) -> tuple[int, int]:
+    """(first, last) 0-based lines of the definition of `name`, by brace matching."""
+    call = re.compile(rf"(^|[\s*&(]){re.escape(name)}\s*\(")
+    for i, line in enumerate(lines):
+        if not call.search(line) or line.lstrip().startswith(("#", "//", "*", "return ")):
+            continue
+        # A definition: the parameter list is followed by '{' before any ';'.
+        depth, j, opened = 0, i, False
+        tail = "\n".join(lines[i : i + 12])
+        brace, semi = tail.find("{"), tail.find(";")
+        if brace < 0 or (0 <= semi < brace):
+            continue
+        start = i
+        prev = lines[i - 1].strip() if i else ""
+        if prev and not prev.endswith((";", "}", "{", "*/")) and not prev.startswith(("#", "//")):
+            start = i - 1  # return type on its own line ("static int\nname(...)")
+        for j in range(i, len(lines)):
+            code = re.sub(r'"(\\.|[^"\\])*"|\'(\\.|[^\'\\])*\'|//.*', "", lines[j])
+            depth += code.count("{") - code.count("}")
+            opened = opened or "{" in code
+            if opened and depth == 0:
+                return start, j
+        raise EditError(f"function {name}: unbalanced braces")
+    raise EditError(f"function {name}: no definition found")
+
+
+def apply_function(source: str, block: EditBlock) -> str:
+    lines = source.splitlines()
+    first, last = _definition(lines, block.name)
+    lines[first : last + 1] = block.replace.splitlines()
+    return "\n".join(lines) + ("\n" if source.endswith("\n") else "")
+
+
 def apply_blocks(
-    files: dict[str, str], blocks: list[EditBlock]
+    files: dict[str, str],
+    blocks: list[EditBlock],
+    shown: dict[str, list[tuple[int, int]]] | None = None,
 ) -> tuple[dict[str, str], list[str]]:
     """Apply blocks to {path: source}; unknown paths are an error (scope is the caller's list).
 
-    With a single file in scope every block targets it, whatever path the model wrote."""
+    With a single file in scope every block targets it, whatever path the model wrote.
+    `shown`: {path: [(first, last line), ...]} the worker saw; line-range edits must stay inside
+    one of them. Range and function blocks address the original file, so they are applied
+    bottom-up (by position) after SEARCH blocks would have shifted nothing."""
     out = dict(files)
     strategies = []
+    resolved = []
     for block in blocks:
         if block.path not in out:
             # Models add or drop leading directories ("src/x.c" for "x.c"): suffix, then basename.
@@ -154,7 +283,31 @@ def apply_blocks(
                 matches = list(out)
             if len(matches) != 1:
                 raise EditError(f"{block.path}: not one of the files you were given")
-            block = EditBlock(matches[0], block.search, block.replace)
+            block = EditBlock(
+                matches[0],
+                block.search,
+                block.replace,
+                block.kind,
+                block.start,
+                block.end,
+                block.name,
+            )
+        resolved.append(block)
+    # Line ranges first, bottom-up, on the original numbering; then functions; then SEARCH
+    # blocks, which match by content and do not care about shifted lines.
+    ranges = sorted((b for b in resolved if b.kind == "range"), key=lambda b: (b.path, -b.start))
+    for prev, cur in zip(ranges, ranges[1:], strict=False):
+        if prev.path == cur.path and cur.end >= prev.start:
+            raise EditError(
+                f"{cur.path}: line ranges {cur.start}-{cur.end} and {prev.start}-{prev.end} overlap"
+            )
+    for block in ranges:
+        out[block.path] = apply_range(out[block.path], block, (shown or {}).get(block.path))
+        strategies.append("line_range")
+    for block in (b for b in resolved if b.kind == "function"):
+        out[block.path] = apply_function(out[block.path], block)
+        strategies.append("function")
+    for block in (b for b in resolved if b.kind == "search"):
         out[block.path], how = apply_block(out[block.path], block)
         strategies.append(how)
     return out, strategies
