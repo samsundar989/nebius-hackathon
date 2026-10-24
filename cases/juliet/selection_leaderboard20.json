@@ -1,0 +1,65 @@
+{
+ "seed": 7,
+ "cases": [
+  {
+   "id": "CWE401_Memory_Leak__new_array_char_09"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_realloc_64"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_struct_twoIntsStruct_14"
+  },
+  {
+   "id": "CWE401_Memory_Leak__strdup_char_54"
+  },
+  {
+   "id": "CWE401_Memory_Leak__char_malloc_05"
+  },
+  {
+   "id": "CWE401_Memory_Leak__char_realloc_73"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_int_06"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_calloc_72"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_int64_t_34"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_struct_twoIntsStruct_22"
+  },
+  {
+   "id": "CWE415_Double_Free__malloc_free_char_54"
+  },
+  {
+   "id": "CWE415_Double_Free__new_delete_array_long_42"
+  },
+  {
+   "id": "CWE415_Double_Free__malloc_free_long_02"
+  },
+  {
+   "id": "CWE415_Double_Free__new_delete_struct_05"
+  },
+  {
+   "id": "CWE415_Double_Free__malloc_free_int64_t_13"
+  },
+  {
+   "id": "CWE416_Use_After_Free__new_delete_array_class_11"
+  },
+  {
+   "id": "CWE416_Use_After_Free__return_freed_ptr_16"
+  },
+  {
+   "id": "CWE416_Use_After_Free__malloc_free_int64_t_14"
+  },
+  {
+   "id": "CWE416_Use_After_Free__malloc_free_long_08"
+  },
+  {
+   "id": "CWE416_Use_After_Free__new_delete_struct_63"
+  }
+ ]
+}
