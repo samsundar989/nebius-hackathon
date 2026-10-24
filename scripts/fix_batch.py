@@ -35,7 +35,41 @@ def case_ids(spec: str) -> list[str]:
     if spec == "juliet-smoke":
         sel = json.loads((ROOT / "cases" / "juliet" / "selection.json").read_text())["cases"]
         return [c["id"] for c in sel]
+    if spec == "batch_p3":
+        sel = json.loads((ROOT / "cases" / "arvo" / "batch_p3.json").read_text())["cases"]
+        return [str(c["localId"]) for c in sel]
     return [s.strip() for s in spec.split(",") if s.strip()]
+
+
+def developer_reference(case, runner, baseline):  # noqa: ANN001, ANN201 - fix_case callback
+    """Gate side (this script, not the worker path): the developer's fix built on the baseline,
+    called by fix_case after the workers are done (D-0052)."""
+    from leakproof.calibrate import build_reference, dev_fix_candidate
+
+    if getattr(case, "suite", "") != "arvo":
+        return None, None
+    dev, meta = dev_fix_candidate(case, runner, baseline)
+    if dev is None:
+        return None, {"error": meta.get("error")}
+    ref, err = build_reference(case, runner, baseline, dev["files"])
+    info = {"commits": meta.get("commits"), "files": meta.get("files"), "partial": meta["partial"]}
+    return (ref.ref if ref else None), info | ({"build_error": err[-300:]} if err else {})
+
+
+def v0_verdict(worker: dict) -> str | None:
+    """The verdict without v1's checks 5-7: the funnel's middle column (raw -> v0 -> v1)."""
+    from leakproof.gate import Check, decide
+
+    checks = (worker.get("gate") or {}).get("checks")
+    if not checks:
+        return None
+    return decide(
+        {
+            k: Check(v["status"], v["detail"])
+            for k, v in checks.items()
+            if k not in ("differential", "refuzz", "safe_fix")
+        }
+    )
 
 
 def progress(frac: float) -> None:
@@ -63,6 +97,7 @@ def summarize(recs: list[dict], args: argparse.Namespace, wall: float) -> dict:
             for w in r.get("workers", [])
         )
     )
+    v0 = sum(1 for r in recs if any(v0_verdict(w) == "verified" for w in r.get("workers", [])))
     lat = sorted(r["elapsed_s"] for r in recs)
     return {
         "run_id": args.run_id,
@@ -74,6 +109,8 @@ def summarize(recs: list[dict], args: argparse.Namespace, wall: float) -> dict:
         "verified_rate": round(verified / max(len(recs), 1), 3),
         "raw_crash_gone": raw,
         "raw_crash_gone_rate": round(raw / max(len(recs), 1), 3),
+        "v0_verified": v0,
+        "v0_verified_rate": round(v0 / max(len(recs), 1), 3),
         "per_cwe": {k: dict(v) for k, v in sorted(by_cwe.items())},
         "usd_total": round(usd, 4),
         "usd_per_verified": round(usd / verified, 4) if verified else None,
@@ -94,6 +131,13 @@ def main() -> int:
     ap.add_argument("--budget", type=float, default=3.0)
     ap.add_argument("--case-budget", type=float, default=0.5)
     ap.add_argument("--limit", type=int)
+    ap.add_argument(
+        "--reference",
+        choices=["none", "developer"],
+        default="none",
+        help="ARVO: build the developer fix as the gate's attribution reference (P3)",
+    )
+    ap.add_argument("--audit-model", default="lightning", help="'none' disables check 8")
     args = ap.parse_args()
     load_dotenv()
     os.environ.setdefault("LEAKPROOF_LEDGER_CAP_USD", "25")
@@ -117,11 +161,23 @@ def main() -> int:
             planner_model=None if args.planner == "none" else args.planner,
             worker_model=args.worker_model,
             n_workers=args.workers,
+            audit_model=None if args.audit_model == "none" else args.audit_model,
+            reference_builder=developer_reference if args.reference == "developer" else None,
         )
 
+    # Resume: a case with a finished record (not an infrastructure error) is not re-run, so a
+    # preempted batch continues where it stopped and its spend is still counted.
+    for cid in ids:
+        path = run_dir / f"{cid}.json"
+        if path.exists():
+            r = json.loads(path.read_text())
+            if not r.get("verdict", "").startswith("error"):
+                recs.append(r)
+                spent += r.get("usd", 0.0)
+    done_ids = {r["case"] for r in recs}
     with cf.ThreadPoolExecutor(jobs) as pool:
         pending = {}
-        queue = list(ids)
+        queue = [i for i in ids if i not in done_ids]
         while queue or pending:
             while queue and len(pending) < jobs and spent < args.budget:
                 cid = queue.pop(0)

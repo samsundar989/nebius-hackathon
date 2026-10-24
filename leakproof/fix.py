@@ -7,6 +7,7 @@ import subprocess
 import sys
 import time
 import traceback
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +17,7 @@ from leakproof.cases import load_case
 from leakproof.config import REPO_ROOT
 from leakproof.llm import LLMClient
 from leakproof.planner import no_planner_hypotheses, plan
-from leakproof.runner import Runner
+from leakproof.runner import ImageRef, Runner
 
 # Juliet keeps the kickoff's 6K. Real files are 1-3K lines and Lightning's reasoning ran into
 # 6K mid-fix on 3/4 ARVO workers (mosquitto 42520955, E1 run 1), hence 12K there (D-0040).
@@ -84,9 +85,14 @@ def fix_case(
     n_workers: int = 4,
     worker_max_tokens: int | None = None,
     audit_model: str | None = "lightning",
-    reference: str | None = None,
+    reference_builder: Callable[[Any, Runner, Any], tuple[str | None, Any]] | None = None,
 ) -> dict[str, Any]:
-    """`client` must be this case's own (its ledger's spend is the case's cost)."""
+    """`client` must be this case's own (its ledger's spend is the case's cost).
+
+    reference_builder(case, runner, baseline) -> (image ref or None, record): supplied by a
+    gate-side script (calibration, ARVO batch); called after the workers, before the gate.
+    """
+    reference: str | None = None
     t0 = time.monotonic()
     case_dir = run_dir / case_id
     case_dir.mkdir(parents=True, exist_ok=True)
@@ -164,6 +170,10 @@ def fix_case(
                     "diff": c.diff,
                 }
         gate = None
+        if unique and reference_builder is not None:
+            # Only now, with every candidate final: the gate side builds its reference (the
+            # developer's fix) for attribution. Workers have finished and never see it.
+            reference, rec["reference"] = reference_builder(case, runner, baseline)
         if unique:
             gate = run_gate_process(
                 case_id,
@@ -222,6 +232,8 @@ def fix_case(
         rec["error"] = f"{exc}\n{traceback.format_exc()[-3000:]}"
     finally:
         try:
+            if reference and hasattr(runner, "remove_image"):
+                runner.remove_image(ImageRef("docker", reference))
             case.cleanup(runner)
         except Exception as exc:  # noqa: BLE001 - cleanup must not mask the result
             rec["cleanup_error"] = str(exc)
