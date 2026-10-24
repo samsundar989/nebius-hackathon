@@ -1,4 +1,4 @@
-"""The evidence gate (v0). Runs as its own process; workers never import this module.
+"""The evidence gate (v1). Runs as its own process; workers never import this module.
 
     python -m leakproof.gate --case ID --baseline IMAGE [--workdir DIR] --candidates C.json --out V.json
 
@@ -9,12 +9,18 @@ Every check starts from the baseline checkpoint in a fresh container with the ne
   3b behavior        Juliet: program output unchanged (leaks) / not truncated (crashes)
   4 diff_scope       only editable source files; no sanitizer, flag or exit tricks; no removed
                      free() without a replacement unless the defect is a double free
+  compiled           ARVO: the harness binary changed, i.e. the patch is in what we test
+  5 differential     ARVO: corpus before/after: same exit codes and stdout, no new report
+  6 refuzz           ARVO: amplified PoC variants, then libFuzzer seeded with corpus + PoC
+  7 safe_fix         ARVO: corpus under LeakSanitizer: no new leak / UAF / double free
+  (5-7 live in leakproof/gate_fuzz.py; Juliet programs take no input, so they skip there)
 Verdict: verified | silenced_only | rejected:<reason> | build_failed | inconclusive:<reason>
 """
 
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import re
 import sys
@@ -23,6 +29,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from leakproof import gate_fuzz as gf
 from leakproof.cases.arvo import BUILD_ENV, ArvoCase, rebuild_prep_cmd
 from leakproof.cases.juliet import JulietCase
 from leakproof.findings import parse_report, primary
@@ -69,6 +76,7 @@ class GateResult:
     checks: dict[str, Check] = field(default_factory=dict)
     patched_report_tail: str = ""
     elapsed_s: float = 0.0
+    artifacts: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         d = self.__dict__.copy()
@@ -155,6 +163,16 @@ def decide(checks: dict[str, Check]) -> str:
         return f"inconclusive:{patched.detail if patched else 'not_run'}"
     if patched.status == "fail":
         return "rejected:" + patched.detail.split(":", 1)[0]
+    for name, reason in (
+        ("refuzz", "refuzz_new_crash"),
+        ("differential", "differential"),
+        ("safe_fix", "safe_fix"),
+    ):
+        if st(name) == "fail":
+            return f"rejected:{reason}"
+    for name in ("refuzz", "differential", "safe_fix"):
+        if st(name) == "inconclusive":
+            return f"inconclusive:{name}"
     if "fail" in (st("tests"), st("behavior")):
         return "silenced_only"
     if "inconclusive" in (st("tests"), st("behavior")):
@@ -263,15 +281,31 @@ class JulietGate:
         checks["behavior"] = behavior_check(
             self.case.data["cwe"], self.unpatched_stdout, sec.get("out_run", "")
         )
+        for name in ("differential", "refuzz", "safe_fix"):
+            checks[name] = Check("skipped", "Juliet programs take no input (no fuzz harness)")
         return report
 
 
 class ArvoGate:
-    def __init__(self, case: ArvoCase, runner: LocalDockerRunner, baseline: ImageRef) -> None:
+    def __init__(
+        self,
+        case: ArvoCase,
+        runner: LocalDockerRunner,
+        baseline: ImageRef,
+        artifacts: Path | None = None,
+        fuzz_seconds: int = 90,
+    ) -> None:
         self.case, self.runner, self.baseline = case, runner, baseline
         self.tests_baseline: Check | None = None
         self.harness = f"/out/{case.fuzz_target}"
         self.harness_hash = ""
+        self.artifacts, self.fuzz_seconds = artifacts, fuzz_seconds
+        self.poc = b""
+        self.corpus_tgz = b""
+        self.corpus_source = ""
+        self.base_diff: dict[str, gf.Row] = {}
+        self.base_leak: dict[str, gf.Row] = {}
+        self.amp: list[tuple[str, bytes]] = []
 
     def unpatched(self) -> Check:
         tests = self.case.tests_cmd
@@ -298,7 +332,113 @@ class ArvoGate:
         want = self.case.finding.get("kind")
         if p is None or p.kind != want:
             return Check("fail", f"unpatched run: {p.kind if p else 'no report'} (expected {want})")
-        return Check("pass", f"{p.kind} at {p.location}")
+        self._baseline_corpus()
+        return Check(
+            "pass",
+            f"{p.kind} at {p.location}; corpus {len(self.base_diff)} inputs "
+            f"({self.corpus_source}); {len(self.amp)} amplified PoC variants",
+        )
+
+    def _baseline_corpus(self) -> None:
+        h = self.harness
+        script = gf.discover_script(self.case.project, h)
+        script += gf.corpus_run_script(h, gf.ASAN_DIFF, "corpus_diff")
+        script += gf.corpus_run_script(h, gf.ASAN_LEAK, "corpus_leak", "-detect_leaks=1")
+        res = self.runner.run(
+            self.baseline, script, cwd=self.case.workdir, timeout_s=3600, network=False
+        )
+        sec = split(res.stdout)
+        self.corpus_source = sec.get("corpus_source", "").strip()
+        self.corpus_tgz = base64.b64decode(sec.get("corpus_b64", "").strip())
+        self.poc = base64.b64decode(sec.get("poc_b64", "").strip())
+        self.base_diff = gf.parse_rows(sec.get("corpus_diff", ""))
+        self.base_leak = gf.parse_rows(sec.get("corpus_leak", ""))
+        self.amp = gf.amplify(self.poc)
+
+    def _fuzz_files(self) -> dict[str, bytes]:
+        files = {f"{gf.LP}/amp/{n}": d for n, d in self.amp}
+        if self.corpus_tgz:
+            files[f"{gf.LP}/corpus.tgz"] = self.corpus_tgz
+        return files
+
+    def _fuzz_script(self) -> str:
+        # Seed libFuzzer only with corpus inputs the baseline runs cleanly, so a pre-existing
+        # crash in the corpus cannot end the campaign at its first execution.
+        clean = sorted(n for n, r in self.base_diff.items() if not r.sig and r.rc == "0")
+        h = self.harness
+        return "\n".join(
+            [
+                gf.unpack_corpus_cmd() if self.corpus_tgz else f"mkdir -p {gf.LP}/corpus",
+                gf.corpus_run_script(h, gf.ASAN_DIFF, "corpus_diff"),
+                gf.corpus_run_script(h, gf.ASAN_LEAK, "corpus_leak", "-detect_leaks=1"),
+                gf.refuzz_script(
+                    h,
+                    [n for n, _ in self.amp],
+                    clean,
+                    self.fuzz_seconds,
+                    max(8 * len(self.poc), 4096),
+                ),
+            ]
+        )
+
+    def _judge_fuzz(
+        self, sec: dict[str, str], cand: dict[str, Any], checks: dict[str, Check]
+    ) -> list[str]:
+        """Checks 5-7 from the candidate run's sections; returns saved artifact paths."""
+        st, detail = gf.differential(self.base_diff, gf.parse_rows(sec.get("corpus_diff", "")))
+        checks["differential"] = Check(st, detail)
+        st, detail = gf.safe_fix(self.base_leak, gf.parse_rows(sec.get("corpus_leak", "")))
+        checks["safe_fix"] = Check(st, detail)
+        amp_rows = gf.parse_amp(sec.get("amp_res", ""))
+        crash: tuple[str, bytes, str, str] | None = None  # source, input, report, rc
+        for name, data in self.amp:
+            rc, sig = amp_rows.get(name, ("0", ""))
+            if rc != "0" or sig:
+                crash = (f"amplification:{name}", data, sec.get("amp_report", ""), rc)
+                break
+        fuzz_note = ""
+        if crash is None:
+            rc = sec.get("fuzz_rc", "").strip()
+            runs = gf.summary(sec.get("fuzz_stats", "")).get("number_of_executed_units", "?")
+            fuzz_note = f"libFuzzer {self.fuzz_seconds}s rc={rc or '?'} runs={runs}"
+            name, _, data = sec.get("fuzz_artifact", "").strip().partition(" ")
+            if data:
+                crash = (f"fuzzing:{name}", base64.b64decode(data), sec.get("fuzz_report", ""), rc)
+            elif not rc:
+                checks["refuzz"] = Check("inconclusive", "libFuzzer did not run")
+                return []
+            elif rc != "0":
+                checks["refuzz"] = Check("inconclusive", f"{fuzz_note} without an artifact")
+                return []
+            else:
+                checks["refuzz"] = Check(
+                    "pass", f"{len(self.amp)} amplified variants clean; {fuzz_note}, no crash"
+                )
+                return []
+        source, data, report, rc = crash
+        key = gf.crash_key(report, rc) or ("unknown", "")
+        confirm = self.runner.run(
+            self.baseline,
+            gf.confirm_script(self.harness),
+            files={f"{gf.LP}/confirm/input": data},
+            cwd=self.case.workdir,
+            timeout_s=300,
+            network=False,
+        )
+        base_report = split(confirm.stdout).get("confirm", "")
+        blame, why = gf.attribute(key, base_report, self.case.finding.get("location") or "")
+        detail = f"{key[0]} at {key[1] or '?'} from {source} ({len(data)} bytes); {why}"
+        if fuzz_note:
+            detail += f"; {fuzz_note}"
+        checks["refuzz"] = Check("fail" if blame else "pass", detail)
+        if self.artifacts is None:
+            return []
+        self.artifacts.mkdir(parents=True, exist_ok=True)
+        tag = re.sub(r"[^A-Za-z0-9_.-]", "_", source)
+        path = self.artifacts / f"{cand['hypothesis_id']}_w{cand['worker_index']}_{tag}.bin"
+        path.write_bytes(data)
+        path.with_suffix(".log").write_text(report, encoding="utf-8")
+        return [str(path), str(path.with_suffix(".log"))]
 
     def candidate(self, cand: dict[str, Any], checks: dict[str, Check]) -> str:
         tests = self.case.tests_cmd
@@ -314,6 +454,10 @@ class ArvoGate:
                 f"if [ $(cat /tmp/rc_run 2>/dev/null) = 0 ]; then ( {tests} ) > /tmp/tests.log 2>&1; "
                 "echo $? > /tmp/rc_tests; fi"
             )
+        # Checks 5-7 only judge a patch that already survives its own PoC.
+        script.append(
+            "if [ $(cat /tmp/rc_run 2>/dev/null) = 0 ]; then\n" + self._fuzz_script() + "\nfi"
+        )
         for name in (
             "rc_build",
             "rc_run",
@@ -328,7 +472,7 @@ class ArvoGate:
         res = self.runner.run(
             self.baseline,
             "\n".join(script),
-            files={k: v.encode() for k, v in cand["files"].items()},
+            files={k: v.encode() for k, v in cand["files"].items()} | self._fuzz_files(),
             env=BUILD_ENV,
             cwd=self.case.workdir,
             timeout_s=3600,
@@ -362,6 +506,8 @@ class ArvoGate:
             checks["tests"] = Check(
                 "pass" if rc_t == "0" else "fail", sec.get("tests.log", "")[-800:]
             )
+        if checks["patched"].status == "pass":
+            cand["_artifacts"] = self._judge_fuzz(sec, cand, checks)
         return report
 
 
@@ -371,6 +517,8 @@ def run_gate(
     candidates: list[dict[str, Any]],
     workdir: str | None,
     finding: dict[str, Any] | None,
+    artifacts: Path | None = None,
+    fuzz_seconds: int = 90,
 ) -> dict[str, Any]:
     runner = LocalDockerRunner(memory="4g", cpus=2)
     t0 = time.monotonic()
@@ -378,7 +526,7 @@ def run_gate(
         case = ArvoCase.load(case_id)
         case.workdir = workdir or case.workdir
         case.finding = finding or {}
-        gate: JulietGate | ArvoGate = ArvoGate(case, runner, baseline)
+        gate: JulietGate | ArvoGate = ArvoGate(case, runner, baseline, artifacts, fuzz_seconds)
         allowed, src_root = None, case.src_root
     else:
         jcase = JulietCase.load(case_id)
@@ -408,13 +556,20 @@ def run_gate(
             checks,
             report[-4000:],
             round(time.monotonic() - c0, 2),
+            cand.pop("_artifacts", []),
         )
         results.append(r.to_dict())
     return {
         "case": case_id,
         "baseline": baseline.ref,
-        "gate_version": "v0",
+        "gate_version": "v1",
         "unpatched": unpatched.to_dict(),
+        "corpus": {
+            "source": getattr(gate, "corpus_source", None),
+            "inputs": len(getattr(gate, "base_diff", {})),
+            "amplified_variants": [n for n, _ in getattr(gate, "amp", [])],
+            "poc_bytes": len(getattr(gate, "poc", b"")),
+        },
         "tests_baseline": tb.to_dict() if (tb := getattr(gate, "tests_baseline", None)) else None,
         "results": results,
         "elapsed_s": round(time.monotonic() - t0, 2),
@@ -428,6 +583,8 @@ def main() -> int:
     ap.add_argument("--workdir")
     ap.add_argument("--candidates", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--artifacts", type=Path, help="refuzz crash inputs (default: next to --out)")
+    ap.add_argument("--fuzz-seconds", type=int, default=90)
     args = ap.parse_args()
     payload = json.loads(args.candidates.read_text())
     out = run_gate(
@@ -436,6 +593,8 @@ def main() -> int:
         payload["candidates"],
         args.workdir,
         payload.get("finding"),
+        args.artifacts or args.out.parent / "gate_artifacts",
+        args.fuzz_seconds,
     )
     args.out.write_text(json.dumps(out, indent=1))
     return 0
