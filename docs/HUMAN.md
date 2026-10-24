@@ -40,3 +40,38 @@ Default: you record screen + voice on Oct 28 from `docs/VIDEO_SCRIPT.md` and `sc
 
 ## NOTE 0010 — Sandboxes access is live (builder update, no answer needed)
 2026-10-23: `GET /sandboxes/v1/whoami` with the Token Factory project id (`NEBIUS_PROJECT_ID`, `aiproject-…`) returns all permissions `true` (spawn, import, list, …). With the AI Cloud id (`NEBIUS_AI_PROJECT`, `project-…`) it still says all `false`. So QUESTION 0002/0005 are resolved on the platform side. Per kickoff §1 rule 2 I'll add the thin REST backend (networking off, ≤ 2 h, behind a flag) after the Phase 1 exit, not before. If `NEBIUS_AI_PROJECT` is meant to equal the Token Factory id (CLAUDE.md says "same value"), you may want to correct it in `.env`; I have not touched `.env`.
+
+## ANSWER 0001 — AI Cloud
+Skip Nebius AI Cloud (Serverless Jobs/Endpoints) for this submission. Sandboxes access is live and is the stronger Nebius story; CUDA stays on Kaggle. Do not create AI Cloud resources unless a later answer says otherwise. (Recorded by the strategist 2026-10-23 on Samuel's behalf; Samuel may override.)
+
+## ANSWER 0002 / 0005 — Sandboxes
+Resolved: access is live with the Token Factory project id (NOTE 0010).
+
+## ANSWER 0003 — Disk
+Resolved: C: has ~198 GB free. Keep the < 10 GB stop rule.
+
+## ANSWER 0004 — Leaks
+Option (a): ARVO headline = UAF/double free/overflows; leaks from Juliet (+ optional mined case studies). README states ARVO has no leak cases.
+
+## ANSWER 0006 — Local CUDA
+Leave the machine alone (no registry change). CUDA runs on Kaggle.
+
+## ANSWER 0007 — Kaggle
+1 hour of T4 time is available in total. Plan ≤ 30 min: batch all CUDA cases of a round into one kernel run; keep ≥ 30 min in reserve for re-runs and the video.
+
+## ANSWER 0008 — Render
+Samuel has a Render account. He will: connect the GitHub repo to Render now, create a dedicated Token Factory API key for the demo, and enable GitHub Pages (Source: GitHub Actions). He creates the Render service himself from `render.yaml` when you tell him it is ready (see KICKOFF_ADDENDUM_2026-10-23_PHASE2.md §6). Never put a key in the repo.
+
+## ANSWER 0009 — Video
+Samuel records screen + voice when `docs/VIDEO_SCRIPT.md` and `scripts/demo_run.sh` are ready (target Mon night or Tue Oct 28). Tell him in HUMAN.md the moment they are ready.
+
+## ANSWER 0010 — .env
+Fixed: `NEBIUS_AI_PROJECT` now equals `NEBIUS_PROJECT_ID` (Token Factory id).
+
+## ANSWER 0008 (amended 2026-10-23 21:45) — hosting
+The repo is private on GitHub Free, so GitHub Pages is unavailable. Do **not** use Pages. Both the dashboard (Render static site) and the live button (Render web service) come from one `render.yaml` Blueprint; see KICKOFF_ADDENDUM §6. Samuel has connected (or is connecting) the Render GitHub app to this repo and has a dedicated demo key ready.
+
+## QUESTION 0012 — One-time history rewrite before going public (needs a yes/no)
+2026-10-23: `docs/research/` and `docs/kickoff/` are now gitignored and untracked (files stay on disk), but they and the employer wording are still in past commits, which become visible when the repo goes public on Oct 28. Removing them needs a one-time `git filter-repo` (drop both folders from every commit, plus `--replace-text` for the reworded lines) and **one force-push while the repo is still private**. CLAUDE.md forbids force-pushes, so I will not do it without your yes. This is irreversible for the old history; other checkouts (and Render's clone) must re-clone or hard-reset afterwards.
+- **yes** → I do it Tue Oct 28 morning after the Mon rewording, then update commit hashes quoted in `docs/REPORT_SHIP.md`/`docs/DECISIONS.md` from filter-repo's commit map, re-run CI, and tell you to re-clone.
+- **no** (default if unanswered) → no rewrite; the rewording of current files still happens Mon Oct 27.

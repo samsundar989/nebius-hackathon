@@ -41,3 +41,7 @@ out/
 .idea/
 .DS_Store
 Thumbs.db
+
+# strategy material (local only; never commit)
+docs/research/
+docs/kickoff/
