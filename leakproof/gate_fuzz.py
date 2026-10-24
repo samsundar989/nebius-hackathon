@@ -307,16 +307,36 @@ def crash_key(report: str, rc: str = "") -> tuple[str, str] | None:
 
 
 def attribute(
-    patched: tuple[str, str], baseline_report: str, target_location: str
+    patched: tuple[str, str],
+    baseline_report: str,
+    target_location: str,
+    reference_report: str | None = None,
 ) -> tuple[bool, str]:
-    """True when the crash is the patch's responsibility (not a pre-existing unrelated bug)."""
+    """True when the crash is the patch's responsibility (not a pre-existing unrelated bug).
+
+    Pre-existing: the baseline crashes identically away from the target, or the reference
+    build (the developer's fix, when there is one) crashes identically - a bug the correct
+    fix also has is not this patch's doing.
+    """
     b = crash_key(baseline_report)
     if b is not None and b == patched and patched[1] and patched[1] != target_location:
         return (
             False,
             f"baseline crashes identically ({b[0]} at {b[1]}): pre-existing, not attributed",
         )
-    return True, "baseline " + (f"gives {b[0]} at {b[1] or '?'}" if b else "is clean on this input")
+    why = "baseline " + (f"gives {b[0]} at {b[1] or '?'}" if b else "is clean on this input")
+    if reference_report is None:
+        return True, why
+    r = crash_key(reference_report)
+    if r is not None and r == patched:
+        return (
+            False,
+            f"{why}; developer fix crashes identically ({r[0]} at {r[1] or '?'}): "
+            "pre-existing, not attributed",
+        )
+    return True, f"{why}; developer fix " + (
+        f"gives {r[0]} at {r[1] or '?'}" if r else "is clean on this input"
+    )
 
 
 def b64(data: bytes) -> str:

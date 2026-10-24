@@ -45,6 +45,7 @@ def run_gate_process(
     finding: dict[str, Any],
     candidates: list[dict[str, Any]],
     case_dir: Path,
+    reference: str | None = None,
 ) -> dict[str, Any]:
     cpath, vpath = case_dir / "candidates.json", case_dir / "gate.json"
     cpath.write_text(json.dumps({"finding": finding, "candidates": candidates}, indent=1))
@@ -63,6 +64,8 @@ def run_gate_process(
     ]
     if workdir:
         cmd += ["--workdir", workdir]
+    if reference:
+        cmd += ["--reference", reference]
     proc = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True, check=False)
     if proc.returncode != 0 or not vpath.exists():
         raise RuntimeError(f"gate process failed ({proc.returncode}): {proc.stderr[-2000:]}")

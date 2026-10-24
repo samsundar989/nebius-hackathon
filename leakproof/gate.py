@@ -295,8 +295,12 @@ class ArvoGate:
         baseline: ImageRef,
         artifacts: Path | None = None,
         fuzz_seconds: int = 90,
+        reference: ImageRef | None = None,
     ) -> None:
         self.case, self.runner, self.baseline = case, runner, baseline
+        # The developer's fix built on the baseline (calibration / ARVO only): a second
+        # reference when attributing a refuzz crash. Never shown to workers.
+        self.reference = reference
         self.tests_baseline: Check | None = None
         self.harness = f"/out/{case.fuzz_target}"
         self.harness_hash = ""
@@ -382,6 +386,18 @@ class ArvoGate:
             ]
         )
 
+    def probe(self, image: ImageRef, data: bytes) -> str:
+        """Run one input through `image`'s harness; the sanitizer report ('' if clean)."""
+        res = self.runner.run(
+            image,
+            gf.confirm_script(self.harness),
+            files={f"{gf.LP}/confirm/input": data},
+            cwd=self.case.workdir,
+            timeout_s=300,
+            network=False,
+        )
+        return split(res.stdout).get("confirm", "")
+
     def _judge_fuzz(
         self, sec: dict[str, str], cand: dict[str, Any], checks: dict[str, Check]
     ) -> list[str]:
@@ -419,16 +435,11 @@ class ArvoGate:
                 return []
         source, data, report, rc = crash
         key = gf.crash_key(report, rc) or ("unknown", "")
-        confirm = self.runner.run(
-            self.baseline,
-            gf.confirm_script(self.harness),
-            files={f"{gf.LP}/confirm/input": data},
-            cwd=self.case.workdir,
-            timeout_s=300,
-            network=False,
+        base_report = self.probe(self.baseline, data)
+        ref_report = self.probe(self.reference, data) if self.reference else None
+        blame, why = gf.attribute(
+            key, base_report, self.case.finding.get("location") or "", ref_report
         )
-        base_report = split(confirm.stdout).get("confirm", "")
-        blame, why = gf.attribute(key, base_report, self.case.finding.get("location") or "")
         detail = f"{key[0]} at {key[1] or '?'} from {source} ({len(data)} bytes); {why}"
         if fuzz_note:
             detail += f"; {fuzz_note}"
@@ -521,6 +532,7 @@ def run_gate(
     finding: dict[str, Any] | None,
     artifacts: Path | None = None,
     fuzz_seconds: int = 90,
+    reference: ImageRef | None = None,
 ) -> dict[str, Any]:
     runner = LocalDockerRunner(memory="4g", cpus=2)
     t0 = time.monotonic()
@@ -528,7 +540,9 @@ def run_gate(
         case = ArvoCase.load(case_id)
         case.workdir = workdir or case.workdir
         case.finding = finding or {}
-        gate: JulietGate | ArvoGate = ArvoGate(case, runner, baseline, artifacts, fuzz_seconds)
+        gate: JulietGate | ArvoGate = ArvoGate(
+            case, runner, baseline, artifacts, fuzz_seconds, reference
+        )
         allowed, src_root = None, case.src_root
     else:
         jcase = JulietCase.load(case_id)
@@ -566,6 +580,7 @@ def run_gate(
         "case": case_id,
         "baseline": baseline.ref,
         "gate_version": "v1",
+        "reference": reference.ref if reference else None,
         "unpatched": unpatched.to_dict(),
         "corpus": {
             "source": getattr(gate, "corpus_source", None),
@@ -589,6 +604,7 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--artifacts", type=Path, help="refuzz crash inputs (default: next to --out)")
     ap.add_argument("--fuzz-seconds", type=int, default=90)
+    ap.add_argument("--reference", help="image with the developer's fix (refuzz attribution)")
     args = ap.parse_args()
     payload = json.loads(args.candidates.read_text())
     out = run_gate(
@@ -599,6 +615,7 @@ def main() -> int:
         payload.get("finding"),
         args.artifacts or args.out.parent / "gate_artifacts",
         args.fuzz_seconds,
+        ImageRef("docker", args.reference) if args.reference else None,
     )
     args.out.write_text(json.dumps(out, indent=1))
     return 0

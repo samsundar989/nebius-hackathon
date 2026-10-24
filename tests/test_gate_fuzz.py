@@ -75,6 +75,17 @@ def test_attribute_pre_existing_bug_elsewhere_is_not_blamed() -> None:
     assert gf.attribute(key, "", "x")[0] is True
 
 
+def test_attribute_with_developer_fix_reference() -> None:
+    key = gf.crash_key(ASAN_SBO)
+    assert key is not None
+    # Baseline differs, but the developer's fix shows the same crash: pre-existing.
+    blame, why = gf.attribute(key, ASAN_HBO, "x", reference_report=ASAN_SBO)
+    assert blame is False and "developer fix crashes identically" in why
+    # Developer fix is clean on it: the patch is blamed.
+    blame, why = gf.attribute(key, ASAN_HBO, "x", reference_report="")
+    assert blame is True and "developer fix is clean" in why
+
+
 def test_crash_key_libfuzzer_timeout() -> None:
     assert gf.crash_key("==7== ERROR: libFuzzer: timeout after 25 seconds") == ("timeout", "")
 
