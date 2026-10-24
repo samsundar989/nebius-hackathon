@@ -10,6 +10,7 @@ import traceback
 from pathlib import Path
 from typing import Any
 
+from leakproof.audit import audit
 from leakproof.branch import fan_out
 from leakproof.cases import load_case
 from leakproof.config import REPO_ROOT
@@ -82,6 +83,8 @@ def fix_case(
     worker_model: str = "lightning",
     n_workers: int = 4,
     worker_max_tokens: int | None = None,
+    audit_model: str | None = "lightning",
+    reference: str | None = None,
 ) -> dict[str, Any]:
     """`client` must be this case's own (its ledger's spend is the case's cost)."""
     t0 = time.monotonic()
@@ -169,12 +172,19 @@ def fix_case(
                 case.finding,
                 list(unique.values()),
                 case_dir,
+                reference=reference,
             )
             rec["gate"] = {k: v for k, v in gate.items() if k != "results"}
         by_diff = {}
         if gate:
             for g, u in zip(gate["results"], unique.values(), strict=True):
                 by_diff[u["diff"]] = g
+        # Check 8: flags only, after the verdicts exist and never feeding back into them.
+        audits = (
+            {d: audit(client, case.finding, d, model=audit_model) for d in unique}
+            if audit_model
+            else {}
+        )
         workers = []
         for c in cands:
             w = c.to_dict()
@@ -182,6 +192,8 @@ def fix_case(
                 g = by_diff[c.diff]
                 w["gate"] = g
                 w["verdict"] = g["verdict"]
+                if c.diff in audits:
+                    w["audit"] = audits[c.diff]
             elif c.status == "build_failed":
                 w["verdict"] = "build_failed"
             elif c.status == "error":
