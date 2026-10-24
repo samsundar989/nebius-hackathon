@@ -168,3 +168,9 @@ def test_decide_v1_rejections() -> None:
     assert decide(base | {"safe_fix": Check("fail")}) == "rejected:safe_fix"
     assert decide(base | {"refuzz": Check("inconclusive")}) == "inconclusive:refuzz"
     assert decide(base | {"refuzz": Check("skipped")}) == "verified"
+
+
+def test_refuzz_never_reports_a_slow_unit_as_a_crash() -> None:
+    # jq 42531297 (P3): a libFuzzer slow-unit-* artifact with exit 0 was taken as a crash.
+    script = gf.refuzz_script("/out/h", ["a"], [], 90, 4096)
+    assert "grep -E '^(crash|leak|oom|timeout)-'" in script

@@ -218,7 +218,7 @@ if [ -z "$ampcrash" ]; then
   printf '\\n@@LPGATE@@ fuzz_rc\\n'; cat {LP}/fuzz_rc
   printf '\\n@@LPGATE@@ fuzz_stats\\n'; grep -E '^(stat::|#[0-9]+.*(DONE|cov))' {LP}/fuzz.log | tail -12
   printf '\\n@@LPGATE@@ fuzz_report\\n'; {report_cmd(f"{LP}/fuzz.log")}
-  a=$(ls {LP}/art | head -1)
+  a=$(ls {LP}/art | grep -E '^(crash|leak|oom|timeout)-' | head -1)  # never slow-unit-* (D-0056)
   if [ -n "$a" ]; then printf '\\n@@LPGATE@@ fuzz_artifact\\n%s ' "$a"; head -c 262144 "{LP}/art/$a" | base64 -w0; fi
 fi
 """

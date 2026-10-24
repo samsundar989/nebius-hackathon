@@ -1,0 +1,72 @@
+{
+ "runs": [
+  {
+   "run": "p3_arvo27_r1",
+   "label": "ARVO: 27 calibrated real OSS-Fuzz cases",
+   "suite": "arvo",
+   "cases": 17,
+   "raw": 11,
+   "v0": 11,
+   "verified": 7,
+   "verdicts": {
+    "rejected": 7,
+    "verified": 7,
+    "build_failed": 2,
+    "inconclusive": 1
+   },
+   "usd": 0.7005,
+   "usd_per_verified": 0.1001,
+   "gate_version": "v1"
+  },
+  {
+   "run": "e1_juliet60_v1",
+   "label": "Juliet smoke set: 60 cases (CWE-401/415/416)",
+   "suite": "juliet",
+   "cases": 60,
+   "raw": 56,
+   "v0": 56,
+   "verified": 56,
+   "verdicts": {
+    "verified": 56,
+    "error": 2,
+    "rejected": 1,
+    "no_candidate": 1
+   },
+   "usd": 0.7422,
+   "usd_per_verified": 0.0133,
+   "gate_version": "v0"
+  },
+  {
+   "run": "p4_juliet401x100_r1",
+   "label": "Juliet CWE-401 sample: 100 cases",
+   "suite": "juliet",
+   "cases": 100,
+   "raw": 72,
+   "v0": 72,
+   "verified": 72,
+   "verdicts": {
+    "verified": 72,
+    "inconclusive": 6,
+    "error": 22
+   },
+   "usd": 0.8663,
+   "usd_per_verified": 0.012,
+   "gate_version": "v1"
+  },
+  {
+   "run": "p2_sandboxes_juliet3",
+   "label": "Nebius Sandboxes: 3 Juliet cases, gate offline",
+   "suite": "juliet",
+   "cases": 3,
+   "raw": 3,
+   "v0": 3,
+   "verified": 3,
+   "verdicts": {
+    "verified": 3
+   },
+   "usd": 0.0446,
+   "usd_per_verified": 0.0149,
+   "gate_version": "v1"
+  }
+ ]
+}

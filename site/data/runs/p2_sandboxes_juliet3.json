@@ -1,0 +1,815 @@
+{
+ "summary": {
+  "run": "p2_sandboxes_juliet3",
+  "label": "Nebius Sandboxes: 3 Juliet cases, gate offline",
+  "suite": "juliet",
+  "cases": 3,
+  "raw": 3,
+  "v0": 3,
+  "verified": 3,
+  "verdicts": {
+   "verified": 3
+  },
+  "usd": 0.0446,
+  "usd_per_verified": 0.0149,
+  "gate_version": "v1"
+ },
+ "cases": [
+  {
+   "case": "CWE401_Memory_Leak__char_calloc_66",
+   "project": "CWE401_Memory_Leak",
+   "verdict": "verified",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "leak",
+    "location": "/work/case/CWE401_Memory_Leak__char_calloc_66a.c:33",
+    "cwe_guess": "CWE-401"
+   },
+   "root_cause": "Memory allocated via calloc() in CWE401_Memory_Leak__char_calloc_66_bad() (66a.c) is passed through an array to CWE401_Memory_Leak__char_calloc_66b_badSink() (66b.c), which extracts the pointer but never calls free(), causing a direct leak of 100 bytes.",
+   "planner": "ultra",
+   "usd": 0.008857,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.004582,
+    "nvidia/Nemotron-3_5-Lightning": 0.004275
+   },
+   "elapsed_s": 55.25,
+   "gate_version": "v1",
+   "dev_fix": null,
+   "winner": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -26,7 +26,7 @@\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "leak at /work/case/CWE401_Memory_Leak__char_calloc_66a.c:33; reference stdout 41 bytes"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-2"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "good-only build clean"
+      },
+      "behavior": {
+       "s": "pass",
+       "d": "stdout identical"
+      },
+      "differential": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "refuzz": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "safe_fix": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      }
+     },
+     "audit": [],
+     "diff": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -25,8 +25,7 @@\n {\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
+    },
+    {
+     "id": "H1\u00b7w1",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "leak at /work/case/CWE401_Memory_Leak__char_calloc_66a.c:33; reference stdout 41 bytes"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-2"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "good-only build clean"
+      },
+      "behavior": {
+       "s": "pass",
+       "d": "stdout identical"
+      },
+      "differential": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "refuzz": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "safe_fix": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      }
+     },
+     "audit": [],
+     "diff": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -25,8 +25,7 @@\n {\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
+    },
+    {
+     "id": "H1\u00b7w2",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "leak at /work/case/CWE401_Memory_Leak__char_calloc_66a.c:33; reference stdout 41 bytes"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "good-only build clean"
+      },
+      "behavior": {
+       "s": "pass",
+       "d": "stdout identical"
+      },
+      "differential": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "refuzz": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "safe_fix": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk",
+      "behavior_change"
+     ],
+     "diff": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -26,7 +26,7 @@\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
+    },
+    {
+     "id": "H1\u00b7w3",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "leak at /work/case/CWE401_Memory_Leak__char_calloc_66a.c:33; reference stdout 41 bytes"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-2"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "good-only build clean"
+      },
+      "behavior": {
+       "s": "pass",
+       "d": "stdout identical"
+      },
+      "differential": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "refuzz": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "safe_fix": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      }
+     },
+     "audit": [],
+     "diff": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -25,8 +25,7 @@\n {\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
+    }
+   ],
+   "lineage": [
+    {
+     "op": "save",
+     "parent": "tag:lp-cpp-sanitizers",
+     "image": "fae5528a-6c65-4de5-9ca1-3b38b41da29d",
+     "network": false,
+     "exit": 0,
+     "s": 2.33,
+     "usd": 8.957999999999999e-05
+    },
+    {
+     "op": "run",
+     "parent": "fae5528a-6c65-4de5-9ca1-3b38b41da29d",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 1.73,
+     "usd": 0.0027889900000000003
+    },
+    {
+     "op": "run",
+     "parent": "fae5528a-6c65-4de5-9ca1-3b38b41da29d",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.31,
+     "usd": 0.00282611
+    },
+    {
+     "op": "run",
+     "parent": "fae5528a-6c65-4de5-9ca1-3b38b41da29d",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.31,
+     "usd": 0.00289701
+    },
+    {
+     "op": "run",
+     "parent": "fae5528a-6c65-4de5-9ca1-3b38b41da29d",
+     "image": null,
+     "network": false,
+     "exit": 1,
+     "s": 1.47,
+     "usd": 0.00197815
+    },
+    {
+     "op": "run",
+     "parent": "fae5528a-6c65-4de5-9ca1-3b38b41da29d",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 1.47,
+     "usd": 0.00300784
+    },
+    {
+     "op": "run",
+     "parent": "fae5528a-6c65-4de5-9ca1-3b38b41da29d",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 1.72,
+     "usd": 0.0028944
+    },
+    {
+     "op": "run",
+     "parent": "fae5528a-6c65-4de5-9ca1-3b38b41da29d",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.33,
+     "usd": 0.00534116
+    },
+    {
+     "op": "run",
+     "parent": "fae5528a-6c65-4de5-9ca1-3b38b41da29d",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 3.62,
+     "usd": 0.00496826
+    }
+   ]
+  },
+  {
+   "case": "CWE415_Double_Free__malloc_free_char_54",
+   "project": "CWE415_Double_Free",
+   "verdict": "verified",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "double-free",
+    "location": "/work/case/CWE415_Double_Free__malloc_free_char_54e.c:27",
+    "cwe_guess": "CWE-415"
+   },
+   "root_cause": "The program allocates memory in CWE415_Double_Free__malloc_free_char_54_bad (54a.c), frees it there, and then passes the freed pointer through a chain of functions to CWE415_Double_Free__malloc_free_char_54e_badSink (54e.c) which frees it again, resulting in a double-free.",
+   "planner": "ultra",
+   "usd": 0.013245,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.01043,
+    "nvidia/Nemotron-3_5-Lightning": 0.002815
+   },
+   "elapsed_s": 48.03,
+   "gate_version": "v1",
+   "dev_fix": null,
+   "winner": "--- a/CWE415_Double_Free__malloc_free_char_54e.c\n+++ b/CWE415_Double_Free__malloc_free_char_54e.c\n@@ -24,7 +24,6 @@\n void CWE415_Double_Free__malloc_free_char_54e_badSink(char * data)\n {\n     /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n }\n \n #endif /* OMITBAD */\n",
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "double-free at /work/case/CWE415_Double_Free__malloc_free_char_54e.c:27; reference stdout 17 bytes"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +0/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "good-only build clean"
+      },
+      "behavior": {
+       "s": "pass",
+       "d": "stdout keeps the pre-crash output"
+      },
+      "differential": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "refuzz": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "safe_fix": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      }
+     },
+     "audit": [
+      "root_cause"
+     ],
+     "diff": "--- a/CWE415_Double_Free__malloc_free_char_54a.c\n+++ b/CWE415_Double_Free__malloc_free_char_54a.c\n@@ -32,7 +32,6 @@\n     data = (char *)malloc(100*sizeof(char));\n     if (data == NULL) {exit(-1);}\n     /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-    free(data);\n     CWE415_Double_Free__malloc_free_char_54b_badSink(data);\n }\n \n"
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "double-free at /work/case/CWE415_Double_Free__malloc_free_char_54e.c:27; reference stdout 17 bytes"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +0/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "good-only build clean"
+      },
+      "behavior": {
+       "s": "pass",
+       "d": "stdout keeps the pre-crash output"
+      },
+      "differential": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "refuzz": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "safe_fix": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "silencing",
+      "behavior_change"
+     ],
+     "diff": "--- a/CWE415_Double_Free__malloc_free_char_54e.c\n+++ b/CWE415_Double_Free__malloc_free_char_54e.c\n@@ -24,7 +24,6 @@\n void CWE415_Double_Free__malloc_free_char_54e_badSink(char * data)\n {\n     /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n }\n \n #endif /* OMITBAD */\n"
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "double-free at /work/case/CWE415_Double_Free__malloc_free_char_54e.c:27; reference stdout 17 bytes"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "2 file(s), +5/-2"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "good-only build clean"
+      },
+      "behavior": {
+       "s": "pass",
+       "d": "stdout keeps the pre-crash output"
+      },
+      "differential": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "refuzz": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "safe_fix": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      }
+     },
+     "audit": [],
+     "diff": "--- a/CWE415_Double_Free__malloc_free_char_54a.c\n+++ b/CWE415_Double_Free__malloc_free_char_54a.c\n@@ -33,6 +33,7 @@\n     if (data == NULL) {exit(-1);}\n     /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n     free(data);\n+    data = NULL;\n     CWE415_Double_Free__malloc_free_char_54b_badSink(data);\n }\n \n--- a/CWE415_Double_Free__malloc_free_char_54e.c\n+++ b/CWE415_Double_Free__malloc_free_char_54e.c\n@@ -23,8 +23,10 @@\n \n void CWE415_Double_Free__malloc_free_char_54e_badSink(char * data)\n {\n-    /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n+    if (data != NULL) {\n+        free(data);\n+        data = NULL;\n+    }\n }\n \n #endif /* OMITBAD */\n"
+    },
+    {
+     "id": "H1\u00b7w3",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "double-free at /work/case/CWE415_Double_Free__malloc_free_char_54e.c:27; reference stdout 17 bytes"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-2"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "good-only build clean"
+      },
+      "behavior": {
+       "s": "pass",
+       "d": "stdout keeps the pre-crash output"
+      },
+      "differential": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "refuzz": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "safe_fix": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "behavior_change"
+     ],
+     "diff": "--- a/CWE415_Double_Free__malloc_free_char_54a.c\n+++ b/CWE415_Double_Free__malloc_free_char_54a.c\n@@ -31,8 +31,7 @@\n     data = NULL;\n     data = (char *)malloc(100*sizeof(char));\n     if (data == NULL) {exit(-1);}\n-    /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-    free(data);\n+    /* Data deallocated by the sink function */\n     CWE415_Double_Free__malloc_free_char_54b_badSink(data);\n }\n \n"
+    }
+   ],
+   "lineage": [
+    {
+     "op": "save",
+     "parent": "tag:lp-cpp-sanitizers",
+     "image": "ee7bd92e-6896-4640-98d2-f093ff186074",
+     "network": false,
+     "exit": 0,
+     "s": 1.49,
+     "usd": 9.799e-05
+    },
+    {
+     "op": "run",
+     "parent": "ee7bd92e-6896-4640-98d2-f093ff186074",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.56,
+     "usd": 0.0035339100000000003
+    },
+    {
+     "op": "run",
+     "parent": "ee7bd92e-6896-4640-98d2-f093ff186074",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.31,
+     "usd": 0.00356506
+    },
+    {
+     "op": "run",
+     "parent": "ee7bd92e-6896-4640-98d2-f093ff186074",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.33,
+     "usd": 0.00385459
+    },
+    {
+     "op": "run",
+     "parent": "ee7bd92e-6896-4640-98d2-f093ff186074",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.33,
+     "usd": 0.0038543600000000003
+    },
+    {
+     "op": "run",
+     "parent": "ee7bd92e-6896-4640-98d2-f093ff186074",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.59,
+     "usd": 0.00368529
+    },
+    {
+     "op": "run",
+     "parent": "ee7bd92e-6896-4640-98d2-f093ff186074",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 3.53,
+     "usd": 0.007033730000000001
+    },
+    {
+     "op": "run",
+     "parent": "ee7bd92e-6896-4640-98d2-f093ff186074",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.31,
+     "usd": 0.00693679
+    },
+    {
+     "op": "run",
+     "parent": "ee7bd92e-6896-4640-98d2-f093ff186074",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 3.53,
+     "usd": 0.00658334
+    },
+    {
+     "op": "run",
+     "parent": "ee7bd92e-6896-4640-98d2-f093ff186074",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.34,
+     "usd": 0.00642542
+    }
+   ]
+  },
+  {
+   "case": "CWE416_Use_After_Free__malloc_free_char_03",
+   "project": "CWE416_Use_After_Free",
+   "verdict": "verified",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "use-after-free",
+    "location": "/work/support/io.c:15",
+    "cwe_guess": "CWE-416"
+   },
+   "root_cause": "The function CWE416_Use_After_Free__malloc_free_char_03_bad frees the allocated buffer in the first if block (line 36) and then reads it in the second if block (line 41) via printLine, causing a use-after-free.",
+   "planner": "ultra",
+   "usd": 0.022539,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.012596,
+    "nvidia/Nemotron-3_5-Lightning": 0.009943
+   },
+   "elapsed_s": 73.75,
+   "gate_version": "v1",
+   "dev_fix": null,
+   "winner": "--- a/CWE416_Use_After_Free__malloc_free_char_03.c\n+++ b/CWE416_Use_After_Free__malloc_free_char_03.c\n@@ -32,14 +32,11 @@\n         if (data == NULL) {exit(-1);}\n         memset(data, 'A', 100-1);\n         data[100-1] = '\\0';\n-        /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n-        free(data);\n     }\n     if(5==5)\n     {\n-        /* POTENTIAL FLAW: Use of data that may have been freed */\n         printLine(data);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n+        free(data);\n     }\n }\n \n",
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H1\u00b7w2",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "use-after-free at /work/support/io.c:15; reference stdout 17 bytes"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-4"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "good-only build clean"
+      },
+      "behavior": {
+       "s": "pass",
+       "d": "stdout keeps the pre-crash output"
+      },
+      "differential": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "refuzz": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "safe_fix": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk",
+      "behavior_change",
+      "error_handling",
+      "scope"
+     ],
+     "diff": "--- a/CWE416_Use_After_Free__malloc_free_char_03.c\n+++ b/CWE416_Use_After_Free__malloc_free_char_03.c\n@@ -32,14 +32,11 @@\n         if (data == NULL) {exit(-1);}\n         memset(data, 'A', 100-1);\n         data[100-1] = '\\0';\n-        /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n-        free(data);\n     }\n     if(5==5)\n     {\n-        /* POTENTIAL FLAW: Use of data that may have been freed */\n         printLine(data);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n+        free(data);\n     }\n }\n \n"
+    },
+    {
+     "id": "H2\u00b7w3",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "use-after-free at /work/support/io.c:15; reference stdout 17 bytes"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +6/-6"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "good-only build clean"
+      },
+      "behavior": {
+       "s": "pass",
+       "d": "stdout keeps the pre-crash output"
+      },
+      "differential": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "refuzz": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      },
+      "safe_fix": {
+       "s": "skipped",
+       "d": "Juliet programs take no input (no fuzz harness)"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk",
+      "behavior_change",
+      "error_handling"
+     ],
+     "diff": "--- a/CWE416_Use_After_Free__malloc_free_char_03.c\n+++ b/CWE416_Use_After_Free__malloc_free_char_03.c\n@@ -28,18 +28,18 @@\n     data = NULL;\n     if(5==5)\n     {\n+        /* POTENTIAL FLAW: Use of data that may have been freed */\n+        printLine(data);\n+        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n+    }\n+    if(5==5)\n+    {\n         data = (char *)malloc(100*sizeof(char));\n         if (data == NULL) {exit(-1);}\n         memset(data, 'A', 100-1);\n         data[100-1] = '\\0';\n         /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n         free(data);\n-    }\n-    if(5==5)\n-    {\n-        /* POTENTIAL FLAW: Use of data that may have been freed */\n-        printLine(data);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n }\n \n"
+    }
+   ],
+   "lineage": [
+    {
+     "op": "save",
+     "parent": "tag:lp-cpp-sanitizers",
+     "image": "e0d8f934-10ff-4461-87b9-7d138b2fb5ce",
+     "network": false,
+     "exit": 0,
+     "s": 0.84,
+     "usd": 9.366000000000001e-05
+    },
+    {
+     "op": "run",
+     "parent": "e0d8f934-10ff-4461-87b9-7d138b2fb5ce",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 1.47,
+     "usd": 0.00260857
+    },
+    {
+     "op": "run",
+     "parent": "e0d8f934-10ff-4461-87b9-7d138b2fb5ce",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.34,
+     "usd": 0.00268788
+    },
+    {
+     "op": "run",
+     "parent": "e0d8f934-10ff-4461-87b9-7d138b2fb5ce",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.59,
+     "usd": 0.0028289200000000004
+    },
+    {
+     "op": "run",
+     "parent": "e0d8f934-10ff-4461-87b9-7d138b2fb5ce",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.31,
+     "usd": 0.0047066700000000005
+    },
+    {
+     "op": "run",
+     "parent": "e0d8f934-10ff-4461-87b9-7d138b2fb5ce",
+     "image": null,
+     "network": false,
+     "exit": 0,
+     "s": 2.31,
+     "usd": 0.00450411
+    }
+   ]
+  }
+ ]
+}

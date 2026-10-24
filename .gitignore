@@ -24,6 +24,7 @@ runs/*
 
 # datasets and large downloads (fetched by scripts)
 data/
+!site/data/
 cases/**/src/
 cases/**/*.zip
 cases/**/*.tar*

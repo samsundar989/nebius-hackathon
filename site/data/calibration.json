@@ -1,0 +1,680 @@
+{
+ "cases": 41,
+ "raw": {
+  "classes": {
+   "accepted": 24,
+   "false_reject": 9,
+   "partial": 1,
+   "no_candidate": 6,
+   "out_of_scope": 1
+  },
+  "judged": 33,
+  "false_reject_rate": 0.273
+ },
+ "adjudicated": {
+  "classes": {
+   "accepted": 24,
+   "out_of_scope": 2,
+   "partial": 1,
+   "not_standalone": 5,
+   "no_candidate": 6,
+   "false_reject": 2,
+   "true_reject": 1
+  },
+  "judged": 27,
+  "false_reject_rate": 0.074
+ },
+ "rows": [
+  {
+   "case": "372515086",
+   "project": "h3",
+   "crash_type": "Heap-buffer-overflow WRITE 8",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/h3/src/h3lib/lib/polyfill.c"
+   ],
+   "diff_lines": 12,
+   "commits": 1,
+   "elapsed_s": 156.9
+  },
+  {
+   "case": "375220555",
+   "project": "h3",
+   "crash_type": "Heap-buffer-overflow WRITE 8",
+   "raw_class": "false_reject",
+   "class": "out_of_scope",
+   "why": "The fix renames library functions that the fuzz harness (src/apps/fuzzers/fuzzerPolygonToCellsExperimental.c) calls; without its harness half the harness no longer compiles, and no candidate may edit the harness.",
+   "verdict": "build_failed",
+   "files": [
+    "/src/h3/src/apps/benchmarks/benchmarkPolygonToCellsExperimental.c",
+    "/src/h3/src/apps/testapps/testH3Memory.c",
+    "/src/h3/src/apps/testapps/testPolygonToCellsExperimental.c",
+    "/src/h3/src/apps/testapps/testPolygonToCellsReportedExperimental.c",
+    "/src/h3/src/h3lib/include/polyfill.h",
+    "/src/h3/src/h3lib/lib/polyfill.c"
+   ],
+   "diff_lines": 701,
+   "commits": 1,
+   "elapsed_s": 57.1
+  },
+  {
+   "case": "413161375",
+   "project": "quickjs",
+   "crash_type": "Heap-use-after-free WRITE 8",
+   "raw_class": "partial",
+   "class": "partial",
+   "why": "",
+   "verdict": "build_failed",
+   "files": [
+    "/src/quickjs/quickjs-libc.c",
+    "/src/quickjs/quickjs.c",
+    "/src/quickjs/quickjs.h",
+    "/src/quickjs/run-test262.c"
+   ],
+   "diff_lines": 1188,
+   "commits": 1,
+   "elapsed_s": 77.4
+  },
+  {
+   "case": "417323384",
+   "project": "jq",
+   "crash_type": "Heap-buffer-overflow READ 2",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/jq/src/jv.c"
+   ],
+   "diff_lines": 10,
+   "commits": 1,
+   "elapsed_s": 216.3
+  },
+  {
+   "case": "418354766",
+   "project": "quickjs",
+   "crash_type": "Heap-use-after-free WRITE 8",
+   "raw_class": "false_reject",
+   "class": "not_standalone",
+   "why": "The fix commit calls JS_FreePropertyEnum, which earlier commits introduce: build fails (undeclared function).",
+   "verdict": "build_failed",
+   "files": [
+    "/src/quickjs/qjs.c",
+    "/src/quickjs/qjsc.c",
+    "/src/quickjs/quickjs-libc.c",
+    "/src/quickjs/quickjs-libc.h",
+    "/src/quickjs/quickjs-opcode.h",
+    "/src/quickjs/quickjs.c",
+    "/src/quickjs/quickjs.h",
+    "/src/quickjs/run-test262.c"
+   ],
+   "diff_lines": 912,
+   "commits": 1,
+   "elapsed_s": 90.5
+  },
+  {
+   "case": "419216923",
+   "project": "quickjs",
+   "crash_type": "Heap-use-after-free WRITE 8",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/quickjs/quickjs.c"
+   ],
+   "diff_lines": 11,
+   "commits": 1,
+   "elapsed_s": 227.0
+  },
+  {
+   "case": "42475737",
+   "project": "libpcap",
+   "crash_type": "Heap-double-free",
+   "raw_class": "false_reject",
+   "class": "not_standalone",
+   "why": "Applied alone, the fix commit leaves the target stack exhaustion (optimize.c:2085) while ARVO records the -fix revision as not crashing. The gate is right about the patch as applied.",
+   "verdict": "rejected:still_crashes",
+   "files": [
+    "/src/libpcap/optimize.c"
+   ],
+   "diff_lines": 77,
+   "commits": 1,
+   "elapsed_s": 114.0
+  },
+  {
+   "case": "42482401",
+   "project": "c-ares",
+   "crash_type": "Heap-double-free",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/c-ares/ares_parse_soa_reply.c"
+   ],
+   "diff_lines": 12,
+   "commits": 1,
+   "elapsed_s": 232.3
+  },
+  {
+   "case": "42483313",
+   "project": "oniguruma",
+   "crash_type": "Heap-use-after-free READ 4",
+   "raw_class": "false_reject",
+   "class": "not_standalone",
+   "why": "The fix commit uses NODE_IS_REFERENCED, defined by an earlier commit absent from the baseline: link fails (undefined reference). Not the developer's whole fix on this baseline.",
+   "verdict": "build_failed",
+   "files": [
+    "/src/oniguruma/src/regcomp.c"
+   ],
+   "diff_lines": 13,
+   "commits": 1,
+   "elapsed_s": 128.9
+  },
+  {
+   "case": "42500216",
+   "project": "libexif",
+   "crash_type": "Heap-buffer-overflow READ 3",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/libexif/libexif/apple/exif-mnote-data-apple.c"
+   ],
+   "diff_lines": 22,
+   "commits": 1,
+   "elapsed_s": 200.1
+  },
+  {
+   "case": "42500232",
+   "project": "libexif",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/libexif/libexif/apple/exif-mnote-data-apple.c"
+   ],
+   "diff_lines": 38,
+   "commits": 1,
+   "elapsed_s": 111.0
+  },
+  {
+   "case": "42504164",
+   "project": "libbpf",
+   "crash_type": "Heap-use-after-free READ 1",
+   "raw_class": "no_candidate",
+   "class": "no_candidate",
+   "why": "",
+   "verdict": "RuntimeError: 42504164: rebuild with our flags failed:\n+ export CC=clang\n+ CC=clang\n+ export 'CFLAGS=-O0 -gline-tables-o",
+   "files": null,
+   "diff_lines": null,
+   "commits": 0,
+   "elapsed_s": 33.8
+  },
+  {
+   "case": "42507297",
+   "project": "md4c",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/md4c/src/md4c.c"
+   ],
+   "diff_lines": 31,
+   "commits": 1,
+   "elapsed_s": 145.0
+  },
+  {
+   "case": "42507851",
+   "project": "libplist",
+   "crash_type": "Heap-buffer-overflow READ 2",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/libplist/src/jplist.c"
+   ],
+   "diff_lines": 26,
+   "commits": 1,
+   "elapsed_s": 80.2
+  },
+  {
+   "case": "42508390",
+   "project": "libplist",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "raw_class": "no_candidate",
+   "class": "no_candidate",
+   "why": "",
+   "verdict": "no_candidate:fix commit did not apply to the baseline",
+   "files": [],
+   "diff_lines": null,
+   "commits": 1,
+   "elapsed_s": 48.4
+  },
+  {
+   "case": "42508524",
+   "project": "libplist",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/libplist/src/jplist.c"
+   ],
+   "diff_lines": 11,
+   "commits": 1,
+   "elapsed_s": 78.1
+  },
+  {
+   "case": "42510753",
+   "project": "quickjs",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "raw_class": "false_reject",
+   "class": "not_standalone",
+   "why": "Applied alone, the located fix commit does not fix the PoC (still_crashes at the target quickjs.c:15131), while ARVO records the -fix revision as not crashing: the fix spans more than this commit. The gate is right about the patch as applied.",
+   "verdict": "rejected:still_crashes",
+   "files": [
+    "/src/quickjs/quickjs.c"
+   ],
+   "diff_lines": 165,
+   "commits": 1,
+   "elapsed_s": 209.6
+  },
+  {
+   "case": "42510992",
+   "project": "libexif",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/libexif/libexif/fuji/exif-mnote-data-fuji.c"
+   ],
+   "diff_lines": 11,
+   "commits": 1,
+   "elapsed_s": 189.0
+  },
+  {
+   "case": "42512369",
+   "project": "libucl",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/libucl/src/ucl_parser.c"
+   ],
+   "diff_lines": 19,
+   "commits": 1,
+   "elapsed_s": 95.1
+  },
+  {
+   "case": "42513177",
+   "project": "lz4",
+   "crash_type": "Invalid-free",
+   "raw_class": "no_candidate",
+   "class": "no_candidate",
+   "why": "",
+   "verdict": "no_candidate:no fix commit touches an editable source file (or none could be fetched)",
+   "files": null,
+   "diff_lines": null,
+   "commits": 1,
+   "elapsed_s": 42.0
+  },
+  {
+   "case": "42517784",
+   "project": "oniguruma",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "raw_class": "no_candidate",
+   "class": "no_candidate",
+   "why": "",
+   "verdict": "no_candidate:no fix commit touches an editable source file (or none could be fetched)",
+   "files": null,
+   "diff_lines": null,
+   "commits": 1,
+   "elapsed_s": 39.2
+  },
+  {
+   "case": "42519914",
+   "project": "libplist",
+   "crash_type": "Heap-use-after-free READ 8",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/libplist/src/oplist.c"
+   ],
+   "diff_lines": 10,
+   "commits": 1,
+   "elapsed_s": 76.6
+  },
+  {
+   "case": "42520011",
+   "project": "libplist",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "raw_class": "false_reject",
+   "class": "not_standalone",
+   "why": "Applied alone, the fix commit turns the PoC into a heap-use-after-free at plist.c:331 while ARVO records the -fix revision as not crashing: the fix depends on other commits. The gate is right about the patch as applied.",
+   "verdict": "rejected:new_use-after-free",
+   "files": [
+    "/src/libplist/src/oplist.c"
+   ],
+   "diff_lines": 12,
+   "commits": 1,
+   "elapsed_s": 76.0
+  },
+  {
+   "case": "42520377",
+   "project": "libzip",
+   "crash_type": "Heap-use-after-free READ 1",
+   "raw_class": "false_reject",
+   "class": "false_reject",
+   "why": "Strict removed-free rule (D-0046): the fix drops zip_source_free(src_window) and the PoC then reports a leak under LSan, but the leak is allocated in _zip_read_cdir/_zip_string_new (lib/zip_open.c:305), not src_window: a pre-existing leak the original use-after-free used to mask. Kept strict for model candidates.",
+   "verdict": "rejected:safe_fix",
+   "files": [
+    "/src/libzip/lib/zip_open.c"
+   ],
+   "diff_lines": 10,
+   "commits": 1,
+   "elapsed_s": 152.3
+  },
+  {
+   "case": "42520883",
+   "project": "mosquitto",
+   "crash_type": "Invalid-free",
+   "raw_class": "false_reject",
+   "class": "true_reject",
+   "why": "The developer fix leaks: on 21 seed-corpus inputs the baseline is clean under LeakSanitizer and the fix reports a direct leak allocated by mosquitto__strdup at src/conf.c:993, a line the fix adds.",
+   "verdict": "rejected:safe_fix",
+   "files": [
+    "/src/mosquitto/src/conf.c"
+   ],
+   "diff_lines": 16,
+   "commits": 1,
+   "elapsed_s": 106.9
+  },
+  {
+   "case": "42520955",
+   "project": "mosquitto",
+   "crash_type": "Heap-use-after-free READ 2",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/mosquitto/src/conf.c"
+   ],
+   "diff_lines": 30,
+   "commits": 1,
+   "elapsed_s": 172.5
+  },
+  {
+   "case": "42521026",
+   "project": "mosquitto",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/mosquitto/lib/utf8_mosq.c"
+   ],
+   "diff_lines": 11,
+   "commits": 1,
+   "elapsed_s": 164.8
+  },
+  {
+   "case": "42521092",
+   "project": "mosquitto",
+   "crash_type": "Heap-use-after-free READ 8",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/mosquitto/apps/db_dump/db_dump.c",
+    "/src/mosquitto/apps/mosquitto_passwd/mosquitto_passwd.c",
+    "/src/mosquitto/lib/packet_mosq.c",
+    "/src/mosquitto/lib/send_disconnect.c",
+    "/src/mosquitto/lib/send_mosq.c",
+    "/src/mosquitto/lib/send_publish.c",
+    "/src/mosquitto/lib/send_subscribe.c",
+    "/src/mosquitto/src/bridge.c",
+    "/src/mosquitto/src/conf.c",
+    "/src/mosquitto/src/context.c",
+    "/src/mosquitto/src/database.c",
+    "/src/mosquitto/src/handle_connect.c",
+    "/src/mosquitto/src/handle_publish.c",
+    "/src/mosquitto/src/loop.c",
+    "/src/mosquitto/src/mosquitto_broker_internal.h",
+    "/src/mosquitto/src/net.c",
+    "/src/mosquitto/src/read_handle.c",
+    "/src/mosquitto/src/send_auth.c",
+    "/src/mosquitto/src/send_connack.c",
+    "/src/mosquitto/src/send_suback.c",
+    "/src/mosquitto/src/send_unsuback.c",
+    "/src/mosquitto/src/session_expiry.c",
+    "/src/mosquitto/src/sys_tree.c",
+    "/src/mosquitto/src/sys_tree.h",
+    "/src/mosquitto/src/websockets.c"
+   ],
+   "diff_lines": 1149,
+   "commits": 14,
+   "elapsed_s": 92.3
+  },
+  {
+   "case": "42522195",
+   "project": "mosquitto",
+   "crash_type": "Heap-buffer-overflow READ {*}",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/mosquitto/src/conf.c"
+   ],
+   "diff_lines": 31,
+   "commits": 1,
+   "elapsed_s": 75.9
+  },
+  {
+   "case": "42523423",
+   "project": "mosquitto",
+   "crash_type": "Heap-use-after-free READ 8",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/mosquitto/apps/mosquitto_ctrl/broker.c",
+    "/src/mosquitto/apps/mosquitto_ctrl/dynsec.c",
+    "/src/mosquitto/apps/mosquitto_ctrl/dynsec_client.c",
+    "/src/mosquitto/common/json_help.c",
+    "/src/mosquitto/plugins/dynamic-security/clients.c",
+    "/src/mosquitto/plugins/dynamic-security/default_acl.c",
+    "/src/mosquitto/plugins/dynamic-security/groups.c",
+    "/src/mosquitto/plugins/dynamic-security/rolelist.c",
+    "/src/mosquitto/plugins/dynamic-security/roles.c",
+    "/src/mosquitto/plugins/persist-sqlite/restore.c"
+   ],
+   "diff_lines": 1204,
+   "commits": 1,
+   "elapsed_s": 171.2
+  },
+  {
+   "case": "42523626",
+   "project": "libssh2",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "raw_class": "no_candidate",
+   "class": "no_candidate",
+   "why": "",
+   "verdict": "RuntimeError: 42523626: rebuild with our flags failed:\ng 'archive.ubuntu.com'\nE: Failed to fetch http://archive.ubuntu.c",
+   "files": null,
+   "diff_lines": null,
+   "commits": 0,
+   "elapsed_s": 30.9
+  },
+  {
+   "case": "42526932",
+   "project": "pcre2",
+   "crash_type": "Heap-buffer-overflow WRITE 4",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/pcre2/src/pcre2_compile.c"
+   ],
+   "diff_lines": 11,
+   "commits": 1,
+   "elapsed_s": 162.8
+  },
+  {
+   "case": "42530604",
+   "project": "jq",
+   "crash_type": "Heap-buffer-overflow WRITE 1",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/jq/src/jv.c"
+   ],
+   "diff_lines": 11,
+   "commits": 1,
+   "elapsed_s": 370.2
+  },
+  {
+   "case": "42531297",
+   "project": "jq",
+   "crash_type": "Heap-buffer-overflow READ 2",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/jq/src/builtin.c",
+    "/src/jq/src/jv.c",
+    "/src/jq/src/jv.h"
+   ],
+   "diff_lines": 71,
+   "commits": 1,
+   "elapsed_s": 222.1
+  },
+  {
+   "case": "42531514",
+   "project": "quickjs",
+   "crash_type": "Heap-use-after-free WRITE 8",
+   "raw_class": "false_reject",
+   "class": "false_reject",
+   "why": "Masked pre-existing crash: an amplified PoC makes the fix hit an assert in get_lvalue (quickjs.c); the baseline dies earlier on the original heap overflow, so baseline-only attribution blames the fix. In the batch the developer fix is the reference and covers this for model candidates.",
+   "verdict": "rejected:refuzz_new_crash",
+   "files": [
+    "/src/quickjs/quickjs.c"
+   ],
+   "diff_lines": 310,
+   "commits": 1,
+   "elapsed_s": 164.6
+  },
+  {
+   "case": "42533629",
+   "project": "pcre2",
+   "crash_type": "Heap-buffer-overflow READ 4",
+   "raw_class": "out_of_scope",
+   "class": "out_of_scope",
+   "why": "",
+   "verdict": "no_candidate:out_of_scope: the fix is in the fuzz harness",
+   "files": [],
+   "diff_lines": null,
+   "commits": 1,
+   "elapsed_s": 88.0
+  },
+  {
+   "case": "42534812",
+   "project": "mosquitto",
+   "crash_type": "Heap-buffer-overflow WRITE {*}",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/mosquitto/src/conf.c"
+   ],
+   "diff_lines": 11,
+   "commits": 1,
+   "elapsed_s": 196.5
+  },
+  {
+   "case": "42535924",
+   "project": "libssh2",
+   "crash_type": "Heap-double-free",
+   "raw_class": "no_candidate",
+   "class": "no_candidate",
+   "why": "",
+   "verdict": "RuntimeError: 42535924: rebuild with our flags failed:\ng 'archive.ubuntu.com'\nE: Failed to fetch http://archive.ubuntu.c",
+   "files": null,
+   "diff_lines": null,
+   "commits": 0,
+   "elapsed_s": 30.5
+  },
+  {
+   "case": "42536108",
+   "project": "miniz",
+   "crash_type": "Heap-buffer-overflow READ {*}",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/miniz/miniz_zip.c"
+   ],
+   "diff_lines": 12,
+   "commits": 1,
+   "elapsed_s": 154.0
+  },
+  {
+   "case": "42536390",
+   "project": "libical",
+   "crash_type": "Heap-use-after-free READ 2",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/libical/src/libical/icaltypes.c"
+   ],
+   "diff_lines": 19,
+   "commits": 1,
+   "elapsed_s": 80.5
+  },
+  {
+   "case": "42541221",
+   "project": "pcre2",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "raw_class": "accepted",
+   "class": "accepted",
+   "why": "",
+   "verdict": "verified",
+   "files": [
+    "/src/pcre2/src/pcre2_auto_possess.c"
+   ],
+   "diff_lines": 19,
+   "commits": 1,
+   "elapsed_s": 201.9
+  }
+ ]
+}

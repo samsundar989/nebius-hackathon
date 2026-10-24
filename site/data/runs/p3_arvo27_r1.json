@@ -1,0 +1,2216 @@
+{
+ "summary": {
+  "run": "p3_arvo27_r1",
+  "label": "ARVO: 27 calibrated real OSS-Fuzz cases",
+  "suite": "arvo",
+  "cases": 17,
+  "raw": 11,
+  "v0": 11,
+  "verified": 7,
+  "verdicts": {
+   "rejected": 7,
+   "verified": 7,
+   "build_failed": 2,
+   "inconclusive": 1
+  },
+  "usd": 0.7005,
+  "usd_per_verified": 0.1001,
+  "gate_version": "v1"
+ },
+ "cases": [
+  {
+   "case": "372515086",
+   "project": "h3",
+   "verdict": "rejected:new_abort",
+   "raw": false,
+   "v0": false,
+   "finding": {
+    "kind": "heap-buffer-overflow",
+    "location": "/src/h3/src/h3lib/lib/polyfill.c:720",
+    "cwe_guess": "CWE-122"
+   },
+   "root_cause": "polygonToCellsExperimental writes to the caller-provided output buffer 'out' without any bounds checking in production builds. The only bounds check exists under H3_POLYGON_TO_CELLS_ASSERT (debug-only), which computes the required size via maxPolygonToCellsSizeExperimental and verifies i < maxSize. The fuzzer build disables this macro, so the loop at line 720 writes past the allocated buffer when the caller undersizes 'out'.",
+   "planner": "ultra",
+   "usd": 0.02033,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.009392,
+    "nvidia/Nemotron-3_5-Lightning": 0.010938
+   },
+   "elapsed_s": 129.67,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/uber/h3/commit/a99f03e4d7b30169eb835db9844aba3a7c2e2827",
+   "winner": null,
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "rejected:new_abort",
+     "v0": "rejected:new_abort",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/h3/src/h3lib/lib/polyfill.c:720; corpus 67 inputs (test_files); 5 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +0/-7"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness c685f66f -> ee3fb620"
+      },
+      "patched": {
+       "s": "fail",
+       "d": "new_abort: ABRT on unknown address 0x000000000089 (pc 0x7b9ed99b500b bp 0x7b9ed9b2a588 sp 0x7ffdd1df9b70 T0) at /src/h3/src/h3lib/lib/polyfill.c:709"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk",
+      "behavior_change",
+      "error_handling"
+     ],
+     "diff": "--- a/src/h3/src/h3lib/lib/polyfill.c\n+++ b/src/h3/src/h3lib/lib/polyfill.c\n@@ -696,27 +696,20 @@\n H3Error H3_EXPORT(polygonToCellsExperimental)(const GeoPolygon *polygon,\n                                               int res, uint32_t flags,\n                                               H3Index *out) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n-    // TODO: This is incompatible with testH3Memory, since it will make more\n-    // allocations. This is just for debugging that the algorithm is not\n-    // exceeding its buffer size.\n     int64_t maxSize;\n     H3Error sizeError = H3_EXPORT(maxPolygonToCellsSizeExperimental)(\n         polygon, res, flags, &maxSize);\n     if (sizeError) {\n         return sizeError;\n     }\n-#endif\n \n     IterCellsPolygon iter = iterInitPolygon(polygon, res, flags);\n     int64_t i = 0;\n     for (; iter.cell; iterStepPolygon(&iter)) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n         if (NEVER(i >= maxSize)) {\n             iterDestroyPolygon(&iter);\n             return E_FAILED;\n         }\n-#endif\n         out[i++] = iter.cell;\n     }\n     return iter.error;\n"
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": "--- a/src/h3/src/h3lib/lib/polyfill.c\n+++ b/src/h3/src/h3lib/lib/polyfill.c\n@@ -695,28 +695,10 @@\n  */\n H3Error H3_EXPORT(polygonToCellsExperimental)(const GeoPolygon *polygon,\n                                               int res, uint32_t flags,\n-                                              H3Index *out) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n-    // TODO: This is incompatible with testH3Memory, since it will make more\n-    // allocations. This is just for debugging that the algorithm is not\n-    // exceeding its buffer size.\n-    int64_t maxSize;\n-    H3Error sizeError = H3_EXPORT(maxPolygonToCellsSizeExperimental)(\n-        polygon, res, flags, &maxSize);\n-    if (sizeError) {\n-        return sizeError;\n-    }\n-#endif\n-\n+                                              H3Index *out, int64_t maxOut) {\n     IterCellsPolygon iter = iterInitPolygon(polygon, res, flags);\n     int64_t i = 0;\n-    for (; iter.cell; iterStepPolygon(&iter)) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n-        if (NEVER(i >= maxSize)) {\n-            iterDestroyPolygon(&iter);\n-            return E_FAILED;\n-        }\n-#endif\n+    for (; iter.cell && i < maxOut; iterStepPolygon(&iter)) {\n         out[i++] = iter.cell;\n     }\n     return iter.error;\n"
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": "--- a/src/h3/src/h3lib/lib/polyfill.c\n+++ b/src/h3/src/h3lib/lib/polyfill.c\n@@ -695,28 +695,24 @@\n  */\n H3Error H3_EXPORT(polygonToCellsExperimental)(const GeoPolygon *polygon,\n                                               int res, uint32_t flags,\n-                                              H3Index *out) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n-    // TODO: This is incompatible with testH3Memory, since it will make more\n-    // allocations. This is just for debugging that the algorithm is not\n-    // exceeding its buffer size.\n+                                              H3Index *out, int64_t outSize) {\n     int64_t maxSize;\n     H3Error sizeError = H3_EXPORT(maxPolygonToCellsSizeExperimental)(\n         polygon, res, flags, &maxSize);\n     if (sizeError) {\n         return sizeError;\n     }\n-#endif\n+    if (outSize < maxSize) {\n+        return E_FAILED;\n+    }\n \n     IterCellsPolygon iter = iterInitPolygon(polygon, res, flags);\n     int64_t i = 0;\n     for (; iter.cell; iterStepPolygon(&iter)) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n-        if (NEVER(i >= maxSize)) {\n+        if (i >= maxSize) {\n             iterDestroyPolygon(&iter);\n             return E_FAILED;\n         }\n-#endif\n         out[i++] = iter.cell;\n     }\n     return iter.error;\n"
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "rejected:new_abort",
+     "v0": "rejected:new_abort",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/h3/src/h3lib/lib/polyfill.c:720; corpus 67 inputs (test_files); 5 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +11/-15"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness c685f66f -> 1ec0d49d"
+      },
+      "patched": {
+       "s": "fail",
+       "d": "new_abort: ABRT on unknown address 0x000000000088 (pc 0x74be53ce300b bp 0x74be53e58588 sp 0x7fff5f781bf0 T0) at /src/h3/src/h3lib/lib/polyfill.c:712"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "silencing",
+      "behavior_change"
+     ],
+     "diff": "--- a/src/h3/src/h3lib/lib/polyfill.c\n+++ b/src/h3/src/h3lib/lib/polyfill.c\n@@ -696,7 +696,6 @@\n H3Error H3_EXPORT(polygonToCellsExperimental)(const GeoPolygon *polygon,\n                                               int res, uint32_t flags,\n                                               H3Index *out) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n     // TODO: This is incompatible with testH3Memory, since it will make more\n     // allocations. This is just for debugging that the algorithm is not\n     // exceeding its buffer size.\n@@ -706,20 +705,17 @@\n     if (sizeError) {\n         return sizeError;\n     }\n-#endif\n-\n-    IterCellsPolygon iter = iterInitPolygon(polygon, res, flags);\n-    int64_t i = 0;\n-    for (; iter.cell; iterStepPolygon(&iter)) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n-        if (NEVER(i >= maxSize)) {\n-            iterDestroyPolygon(&iter);\n-            return E_FAILED;\n-        }\n-#endif\n-        out[i++] = iter.cell;\n-    }\n-    return iter.error;\n+\n+IterCellsPolygon iter = iterInitPolygon(polygon, res, flags);\n+int64_t i = 0;\n+for (; iter.cell; iterStepPolygon(&iter)) {\n+    if (NEVER(i >= maxSize)) {\n+        iterDestroyPolygon(&iter);\n+        return E_FAILED;\n+    }\n+    out[i++] = iter.cell;\n+}\n+return iter.error;\n }\n \n static int MAX_SIZE_CELL_THRESHOLD = 10;\n"
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "417323384",
+   "project": "jq",
+   "verdict": "verified",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "heap-buffer-overflow",
+    "location": "/src/jq/src/jv.c:1453",
+    "cwe_guess": "CWE-122"
+   },
+   "root_cause": "jvp_string_empty_new creates strings with logical length 0 but fails to null-terminate the data buffer when the allocated capacity is 0 (memset with length 0 is a no-op), leaving data[0] uninitialized. Combined with jvp_string_alloc allocating only size+1 bytes for data, a 0-capacity string has a 1-byte data buffer. When such a string is later passed as a %s argument to jv_string_fmt/vsnprintf, the AddressSanitizer interceptor performs a 2-byte validation read at the string's data pointer, reading 1 byte in-bounds and 1 byte out-of-bounds.",
+   "planner": "ultra",
+   "usd": 0.054349,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.044511,
+    "nvidia/Nemotron-3_5-Lightning": 0.009838
+   },
+   "elapsed_s": 667.05,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/jqlang/jq/commit/c6e041699d8cd31b97375a2596217aff2cfca85b",
+   "winner": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1106,6 +1106,7 @@\n   jvp_string* s = jvp_string_alloc(length);\n   s->length_hashed = 0;\n   memset(s->data, 0, length);\n+  s->data[length] = 0;\n   jv r = {JVP_FLAGS_STRING, 0, 0, 0, {&s->refcnt}};\n   return r;\n }\n",
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/jq/src/jv.c:1453; corpus 19 inputs (seed_corpus_zip); 13 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +2/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness fc9c270f -> b1738ba8"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "make[1]: Entering directory '/src/jq'\nPASS: tests/utf8test\nPASS: tests/base64test\nPASS: tests/optionaltest\nPASS: tests/onigtest\nPASS: tests/manonigtest\nPASS: tests/mantest\nPASS: tests/jqtest\n============================================================================\nTestsuite summary for jq 1.7-48-gbfb7fd5-dirty\n============================================================================\n# TOTAL:"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "19 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "13 amplified variants clean; libFuzzer 90s rc=0 runs=91512, no crash"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "19 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk"
+     ],
+     "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1061,7 +1061,7 @@\n }\n \n static jvp_string* jvp_string_alloc(uint32_t size) {\n-  jvp_string* s = jv_mem_alloc(sizeof(jvp_string) + size + 1);\n+  jvp_string* s = jv_mem_alloc(sizeof(jvp_string) + size + 2);\n   s->refcnt.count = 1;\n   s->alloc_length = size;\n   return s;\n@@ -1106,6 +1106,7 @@\n   jvp_string* s = jvp_string_alloc(length);\n   s->length_hashed = 0;\n   memset(s->data, 0, length);\n+  s->data[length] = 0;\n   jv r = {JVP_FLAGS_STRING, 0, 0, 0, {&s->refcnt}};\n   return r;\n }\n"
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/jq/src/jv.c:1453; corpus 19 inputs (seed_corpus_zip); 13 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-0"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness fc9c270f -> 8cce5771"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "make[1]: Entering directory '/src/jq'\nPASS: tests/utf8test\nPASS: tests/base64test\nPASS: tests/optionaltest\nPASS: tests/onigtest\nPASS: tests/manonigtest\nPASS: tests/mantest\nPASS: tests/jqtest\n============================================================================\nTestsuite summary for jq 1.7-48-gbfb7fd5-dirty\n============================================================================\n# TOTAL:"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "19 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "13 amplified variants clean; libFuzzer 90s rc=0 runs=99923, no crash"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "19 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause"
+     ],
+     "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1106,6 +1106,7 @@\n   jvp_string* s = jvp_string_alloc(length);\n   s->length_hashed = 0;\n   memset(s->data, 0, length);\n+  s->data[length] = 0;\n   jv r = {JVP_FLAGS_STRING, 0, 0, 0, {&s->refcnt}};\n   return r;\n }\n"
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/jq/src/jv.c:1453; corpus 19 inputs (seed_corpus_zip); 13 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +2/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness fc9c270f -> e4dee602"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "make[1]: Entering directory '/src/jq'\nPASS: tests/utf8test\nPASS: tests/base64test\nPASS: tests/optionaltest\nPASS: tests/onigtest\nPASS: tests/manonigtest\nPASS: tests/mantest\nPASS: tests/jqtest\n============================================================================\nTestsuite summary for jq 1.7-48-gbfb7fd5-dirty\n============================================================================\n# TOTAL:"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "19 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "13 amplified variants clean; libFuzzer 90s rc=0 runs=97303, no crash"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "19 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause"
+     ],
+     "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1061,7 +1061,7 @@\n }\n \n static jvp_string* jvp_string_alloc(uint32_t size) {\n-  jvp_string* s = jv_mem_alloc(sizeof(jvp_string) + size + 1);\n+  jvp_string* s = jv_mem_alloc(sizeof(jvp_string) + (size > 0 ? size : 1) + 1);\n   s->refcnt.count = 1;\n   s->alloc_length = size;\n   return s;\n@@ -1106,6 +1106,7 @@\n   jvp_string* s = jvp_string_alloc(length);\n   s->length_hashed = 0;\n   memset(s->data, 0, length);\n+  s->data[0] = 0;\n   jv r = {JVP_FLAGS_STRING, 0, 0, 0, {&s->refcnt}};\n   return r;\n }\n"
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/jq/src/jv.c:1453; corpus 19 inputs (seed_corpus_zip); 13 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness fc9c270f -> 353110f7"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "make[1]: Entering directory '/src/jq'\nPASS: tests/utf8test\nPASS: tests/base64test\nPASS: tests/optionaltest\nPASS: tests/onigtest\nPASS: tests/manonigtest\nPASS: tests/mantest\nPASS: tests/jqtest\n============================================================================\nTestsuite summary for jq 1.7-48-gbfb7fd5-dirty\n============================================================================\n# TOTAL:"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "19 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "13 amplified variants clean; libFuzzer 90s rc=0 runs=98857, no crash"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "19 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk",
+      "behavior_change",
+      "error_handling"
+     ],
+     "diff": "--- a/src/jq/src/jv_aux.c\n+++ b/src/jq/src/jv_aux.c\n@@ -139,7 +139,7 @@\n      * similar, in which case putting it in the invalid msg may help the\n      * user.  The length 30 is arbitrary.\n      */\n-    if (jv_get_kind(k) == JV_KIND_STRING && jv_string_length_bytes(jv_copy(k)) < 30) {\n+    if (jv_get_kind(k) == JV_KIND_STRING && jv_string_length_bytes(jv_copy(k)) < 30 && jv_string_length_bytes(jv_copy(k)) > 0) {\n       v = jv_invalid_with_msg(jv_string_fmt(\"Cannot index %s with string \\\"%s\\\"\",\n                                             jv_kind_name(jv_get_kind(t)),\n                                             jv_string_value(k)));\n"
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "419216923",
+   "project": "quickjs",
+   "verdict": "rejected:still_crashes",
+   "raw": false,
+   "v0": false,
+   "finding": {
+    "kind": "use-after-free",
+    "location": "/src/quickjs/./list.h:75",
+    "cwe_guess": "CWE-416"
+   },
+   "root_cause": "The async function state (JSAsyncFunctionState) for a generator function is freed prematurely in `async_func_init` (line ~19508) during generator call setup/teardown, while the corresponding JSValue remains live on the interpreter stack. Later, when the bytecode interpreter unwinds and calls `JS_FreeValue` on this stale value (line 19266), `__JS_FreeValueRT` attempts `list_del(&p->link)` on the already-freed GC object header, causing a use-after-free. The premature free in `async_func_init` bypasses the normal refcount/GC lifecycle: the object is freed while still linked in `rt->gc_obj_list` and with refcount > 0.",
+   "planner": "ultra",
+   "usd": 0.050761,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.028006,
+    "nvidia/Nemotron-3_5-Lightning": 0.022755
+   },
+   "elapsed_s": 493.81,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/bellard/quickjs/commit/02a2643142a0522e9e2d0d60df19e72daa84bbc3",
+   "winner": null,
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "no_candidate:no_edit",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": "--- a/src/quickjs/quickjs.c\n+++ b/src/quickjs/quickjs.c\n@@ -696,6 +696,17 @@\n } JSTypedArray;\n \n typedef struct JSAsyncFunctionState {\n+    JSGCObjectHeader header;\n+    JSContext *ctx;\n+    JSValueConst func_obj;\n+    JSValueConst this_val;\n+    JSValue *sp;\n+    JSValue *cur_sp;\n+    JSValue *cur_pc;\n+    JSValue ret_val;\n+    int status;\n+    int flags;\n+};\n     JSGCObjectHeader header;\n     JSValue this_val; /* 'this' argument */\n     int argc; /* number of function arguments */\n@@ -1201,7 +1212,10 @@\n static JSValue JS_ThrowTypeErrorDetachedArrayBuffer(JSContext *ctx);\n static JSVarRef *get_var_ref(JSContext *ctx, JSStackFrame *sf, int var_idx,\n                              BOOL is_arg);\n-static void __async_func_free(JSRuntime *rt, JSAsyncFunctionState *s);\n+static void __async_func_free(JSRuntime *rt, JSAsyncFunctionState *s)\n+{\n+    js_free_rt(rt, s);\n+}\n static void async_func_free(JSRuntime *rt, JSAsyncFunctionState *s);\n static JSValue js_generator_function_call(JSContext *ctx, JSValueConst func_obj,\n                                           JSValueConst this_obj,\n"
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "rejected:still_crashes",
+     "v0": "rejected:still_crashes",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "use-after-free at /src/quickjs/./list.h:75; corpus 139 inputs (seed_corpus_zip); 31 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +7/-5"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness adc823d1 -> 85944248"
+      },
+      "patched": {
+       "s": "fail",
+       "d": "still_crashes: use-after-free at /src/quickjs/./list.h:75"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      }
+     },
+     "audit": [],
+     "diff": "--- a/src/quickjs/quickjs.c\n+++ b/src/quickjs/quickjs.c\n@@ -5834,11 +5834,13 @@\n         {\n             JSGCObjectHeader *p = JS_VALUE_GET_PTR(v);\n             if (rt->gc_phase != JS_GC_PHASE_REMOVE_CYCLES) {\n-                list_del(&p->link);\n-                list_add(&p->link, &rt->gc_zero_ref_count_list);\n-                p->mark = 1; /* indicate that the object is about to be freed */\n-                if (rt->gc_phase == JS_GC_PHASE_NONE) {\n-                    free_zero_refcount(rt);\n+                if (p->link.next != NULL && p->link.prev != NULL) {\n+                    list_del(&p->link);\n+                    list_add(&p->link, &rt->gc_zero_ref_count_list);\n+                    p->mark = 1; /* indicate that the object is about to be freed */\n+                    if (rt->gc_phase == JS_GC_PHASE_NONE) {\n+                        free_zero_refcount(rt);\n+                    }\n                 }\n             }\n         }\n"
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42482401",
+   "project": "c-ares",
+   "verdict": "verified",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "double-free",
+    "location": "/src/c-ares/ares_parse_soa_reply.c:91",
+    "cwe_guess": "CWE-415"
+   },
+   "root_cause": "In ares_parse_soa_reply(), the loop variable rr_name is freed at the end of each iteration (after processing a non-SOA record) but not set to NULL. If the next iteration's call to ares__expand_name_for_response() fails, the error handler calls ares_free(rr_name) again on the dangling pointer from the previous iteration, causing a double-free. The ares_expand_name() function does not modify its output pointer on failure, leaving rr_name pointing to already-freed memory.",
+   "planner": "ultra",
+   "usd": 0.02643,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.018719,
+    "nvidia/Nemotron-3_5-Lightning": 0.007711
+   },
+   "elapsed_s": 468.41,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/c-ares/c-ares/commit/910df394fc40d90dda233b27bf122e50357943e6",
+   "winner": "--- a/src/c-ares/ares_parse_soa_reply.c\n+++ b/src/c-ares/ares_parse_soa_reply.c\n@@ -160,9 +160,10 @@\n       return ARES_SUCCESS;\n     }\n     aptr += rr_len;\n-    \n+\n     ares_free(rr_name);\n-    \n+    rr_name = NULL;\n+\n     if (aptr > abuf + alen)\n       goto failed_stat;\n   }\n",
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "double-free at /src/c-ares/ares_parse_soa_reply.c:91; corpus 81 inputs (seed_corpus_zip); 8 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +3/-2"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness db6da408 -> c4ba82a8"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "81 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at ares_parse_soa_reply /src/c-ares/ares_parse_soa_reply.c from fuzzing:crash-f4f37e29216698a5be368b9770ce246838a0772c (16 bytes); baseline gives heap-buffer-overflow at ares_parse_soa_reply /src/c-ares/ares_parse_soa_reply.c; developer fix crashes identically (heap-buffer-overflow at ares_parse_soa_reply /src/c-ares/ares_parse_soa_reply.c): pre-existing, not attributed; libFu"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "81 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk",
+      "error_handling"
+     ],
+     "diff": "--- a/src/c-ares/ares_parse_soa_reply.c\n+++ b/src/c-ares/ares_parse_soa_reply.c\n@@ -160,9 +160,10 @@\n       return ARES_SUCCESS;\n     }\n     aptr += rr_len;\n-    \n+\n     ares_free(rr_name);\n-    \n+    rr_name = NULL;\n+\n     if (aptr > abuf + alen)\n       goto failed_stat;\n   }\n"
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H1\u00b7w3",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42500216",
+   "project": "libexif",
+   "verdict": "verified",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "heap-buffer-overflow",
+    "location": "/src/libexif/libexif/apple/exif-mnote-data-apple.c:235",
+    "cwe_guess": "CWE-122"
+   },
+   "root_cause": "In exif_mnote_data_apple_identify(), the code calls strcmp() on e->data assuming it is a null-terminated string containing \"Apple iOS\". However, the EXIF MAKER_NOTE tag data (e->data) is a raw buffer with a known size (e->size) that may not be null-terminated and may be shorter than the 10 bytes required for \"Apple iOS\\0\". This causes strcmp to read past the allocated heap buffer, triggering the heap-buffer-overflow.",
+   "planner": "ultra",
+   "usd": 0.021672,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.012108,
+    "nvidia/Nemotron-3_5-Lightning": 0.009564
+   },
+   "elapsed_s": 502.3,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/libexif/libexif/commit/22799320cc1187868d9a572661d12f0c3f9939b5",
+   "winner": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -232,7 +232,7 @@\n exif_mnote_data_apple_identify(const ExifData *ed, const ExifEntry *e) {\n     int variant;\n \n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 9 && memcmp((const char *) e->data, \"Apple iOS\", 9) == 0) {\n         variant = 1;\n     } else {\n         variant = 0;\n",
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/libexif/libexif/apple/exif-mnote-data-apple.c:235; corpus 44 inputs (seed_corpus_zip); 17 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness 54bed4ef -> b62edad5"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "44 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=938191, no crash"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "44 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [],
+     "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -232,7 +232,7 @@\n exif_mnote_data_apple_identify(const ExifData *ed, const ExifEntry *e) {\n     int variant;\n \n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 9 && memcmp((const char *) e->data, \"Apple iOS\", 9) == 0) {\n         variant = 1;\n     } else {\n         variant = 0;\n"
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/libexif/libexif/apple/exif-mnote-data-apple.c:235; corpus 44 inputs (seed_corpus_zip); 17 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +2/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness 54bed4ef -> c94da0a1"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "44 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=808442, no crash"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "44 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "behavior_change"
+     ],
+     "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -232,7 +232,8 @@\n exif_mnote_data_apple_identify(const ExifData *ed, const ExifEntry *e) {\n     int variant;\n \n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 10 && ((const char *)e->data)[9] == '\\0' &&\n+        !strcmp((const char *)e->data, \"Apple iOS\")) {\n         variant = 1;\n     } else {\n         variant = 0;\n"
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/libexif/libexif/apple/exif-mnote-data-apple.c:235; corpus 44 inputs (seed_corpus_zip); 17 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +3/-5"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness 54bed4ef -> 80494003"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "44 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=943088, no crash"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "44 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause"
+     ],
+     "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -230,12 +230,10 @@\n \n int\n exif_mnote_data_apple_identify(const ExifData *ed, const ExifEntry *e) {\n-    int variant;\n-\n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    int variant = 0;\n+\n+    if (e->size >= 10 && strncmp((const char *) e->data, \"Apple iOS\", 10) == 0) {\n         variant = 1;\n-    } else {\n-        variant = 0;\n     }\n \n     return variant;\n"
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "no_candidate:no_edit",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42500232",
+   "project": "libexif",
+   "verdict": "verified",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "heap-buffer-overflow",
+    "location": "/src/libexif/libexif/exif-utils.c:94",
+    "cwe_guess": "CWE-122"
+   },
+   "root_cause": "In exif_mnote_data_apple_load, the sanity check at line 83 uses an incorrect formula (buf_size < 6 + 16 + tcount * 6 + 4) that does not account for d->offset, underestimates per-entry header size (12 bytes, not 6), and does not validate the variable-sized data payloads. The loop then calls exif_get_short/exif_get_long on buf+ofs without per-iteration bounds checks, causing reads past the heap allocation when the crafted input makes tcount large or offsets point near/beyond buf_size.",
+   "planner": "ultra",
+   "usd": 0.038246,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.017622,
+    "nvidia/Nemotron-3_5-Lightning": 0.020624
+   },
+   "elapsed_s": 330.11,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/libexif/libexif/commit/eb452f533b2d906130a557ced3d6e38d7b064ff9",
+   "winner": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -84,8 +84,8 @@\n \n     tcount = (unsigned int) exif_get_short(buf + ofs + 14, d->order);\n \n-    /* Sanity check the offset */\n-    if (buf_size < 6 + 16 + tcount * 6 + 4) {\n+    /* Sanity check the offset and per-entry size */\n+    if (buf_size < d->offset + 26 + tcount * 12) {\n         exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n                  \"ExifMnoteDataApple\", \"Short MakerNote\");\n         /*printf(\"%s(%d)\\n\", __FUNCTION__, __LINE__);*/\n",
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "no_candidate:no_edit",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/libexif/libexif/exif-utils.c:94; corpus 44 inputs (seed_corpus_zip); 19 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +24/-3"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness 2892dcd7 -> f701929e"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "44 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at exif_get_slong /src/libexif/libexif/exif-utils.c from fuzzing:crash-2ccab2adffae1854b9f9e851a3d8fde39b74b273 (1591 bytes); baseline crashes identically (heap-buffer-overflow at exif_get_slong /src/libexif/libexif/exif-utils.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=18436"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "44 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "behavior_change",
+      "error_handling"
+     ],
+     "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -62,7 +62,7 @@\n \n     /*printf(\"%s\\n\", __FUNCTION__);*/\n \n-    if (!d || !buf || (buf_size < 6 + 16)) {\n+    if (!d || !buf || (buf_size < d->offset + 6 + 16)) {\n         exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n                  \"ExifMnoteDataApple\", \"Short MakerNote\");\n         return;\n@@ -70,6 +70,12 @@\n \n     /* Start of interesting data */\n     ofs = d->offset + 6;\n+\n+    if (ofs + 13 >= buf_size) {\n+        exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+                 \"ExifMnoteDataApple\", \"Short MakerNote\");\n+        return;\n+    }\n \n     if ((buf[ofs + 12] == 'M') && (buf[ofs + 13] == 'M')) {\n         d->order = EXIF_BYTE_ORDER_MOTOROLA;\n@@ -84,8 +90,8 @@\n \n     tcount = (unsigned int) exif_get_short(buf + ofs + 14, d->order);\n \n-    /* Sanity check the offset */\n-    if (buf_size < 6 + 16 + tcount * 6 + 4) {\n+    /* Sanity check the offset and minimum space for entry headers */\n+    if (buf_size < d->offset + 6 + 16 + tcount * 12 + 4) {\n         exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n                  \"ExifMnoteDataApple\", \"Short MakerNote\");\n         /*printf(\"%s(%d)\\n\", __FUNCTION__, __LINE__);*/\n@@ -107,6 +113,14 @@\n     }\n \n     for (i = 0; i < tcount; i++) {\n+        /* Bounds check for entry header */\n+        if (ofs + 12 > buf_size) {\n+            exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+                     \"ExifMnoteDataApple\", \"Short MakerNote entry\");\n+            exif_mnote_data_apple_free(md);\n+            return;\n+        }\n+\n         d->entries[i].tag = exif_get_short(buf + ofs, d->order);\n         d->entries[i].format = exif_get_short(buf + ofs + 2, d->order);\n         d->entries[i].components = exif_get_long(buf + ofs + 4, d->order);\n@@ -114,6 +128,13 @@\n         dsize = exif_format_get_size(d->entries[i].format) * d->entries[i].components;\n         if (dsize > 4) {\n             dofs = d->offset + exif_get_long(buf + ofs + 8, d->order);\n+            /* Bounds check for data payload */\n+            if (dofs + dsize > buf_size) {\n+                exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+                         \"ExifMnoteDataApple\", \"Short MakerNote data\");\n+                exif_mnote_data_apple_free(md);\n+                return;\n+            }\n         } else {\n             dofs = ofs + 8;\n         }\n"
+    },
+    {
+     "id": "H1\u00b7w3",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/libexif/libexif/exif-utils.c:94; corpus 44 inputs (seed_corpus_zip); 19 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +2/-2"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness 2892dcd7 -> d92cd456"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "44 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "segv at exif_mnote_data_apple_load /src/libexif/libexif/apple/exif-mnote-data-apple.c from fuzzing:crash-fedf23b8f820a863a2da5713a8a30c6cab5f4e21 (863 bytes); baseline crashes identically (segv at exif_mnote_data_apple_load /src/libexif/libexif/apple/exif-mnote-data-apple.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=213"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "44 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "silencing",
+      "new_memory_risk",
+      "behavior_change",
+      "error_handling"
+     ],
+     "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -84,8 +84,8 @@\n \n     tcount = (unsigned int) exif_get_short(buf + ofs + 14, d->order);\n \n-    /* Sanity check the offset */\n-    if (buf_size < 6 + 16 + tcount * 6 + 4) {\n+    /* Sanity check the offset and per-entry size */\n+    if (buf_size < d->offset + 26 + tcount * 12) {\n         exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n                  \"ExifMnoteDataApple\", \"Short MakerNote\");\n         /*printf(\"%s(%d)\\n\", __FUNCTION__, __LINE__);*/\n"
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42507297",
+   "project": "md4c",
+   "verdict": "rejected:still_crashes",
+   "raw": false,
+   "v0": false,
+   "finding": {
+    "kind": "heap-buffer-overflow",
+    "location": "/src/md4c/src/md4c.c:817",
+    "cwe_guess": "CWE-122"
+   },
+   "root_cause": "md_decode_utf8__ reads str[0] without checking that str_size > 0. When the caller passes a zero remaining size (size - off == 0), the function reads one byte past the end of the label buffer, causing a heap-buffer-overflow READ. The callers (md_link_label_hash, md_skip_unicode_whitespace, md_link_label_cmp_load_fold_info) have loop guards (off < size), but a crafted input can cause the label buffer to be smaller than the reported label_size, making the guards ineffective.",
+   "planner": "ultra",
+   "usd": 0.073419,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.056024,
+    "nvidia/Nemotron-3_5-Lightning": 0.017396
+   },
+   "elapsed_s": 193.84,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/mity/md4c/commit/62b60979f6a281b2b3cf883abc84299431fe2f76",
+   "winner": null,
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "rejected:still_crashes",
+     "v0": "rejected:still_crashes",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/md4c/src/md4c.c:817; corpus 16 inputs (test_files); 7 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +5/-0"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness abc6aa36 -> 858782c1"
+      },
+      "patched": {
+       "s": "fail",
+       "d": "still_crashes: heap-buffer-overflow at /src/md4c/src/md4c.c:822"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "behavior_change",
+      "error_handling"
+     ],
+     "diff": "--- a/src/md4c/src/md4c.c\n+++ b/src/md4c/src/md4c.c\n@@ -814,6 +814,11 @@\n     static unsigned\n     md_decode_utf8__(const CHAR* str, SZ str_size, SZ* p_size)\n     {\n+        if(str_size == 0) {\n+            if(p_size != NULL)\n+                *p_size = 1;\n+            return 0;\n+        }\n         if(!IS_UTF8_LEAD1(str[0])) {\n             if(IS_UTF8_LEAD2(str[0])) {\n                 if(1 < str_size && IS_UTF8_TAIL(str[1])) {\n"
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "rejected:still_crashes",
+     "v0": "rejected:still_crashes",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/md4c/src/md4c.c:817; corpus 16 inputs (test_files); 7 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +5/-0"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness abc6aa36 -> f798fdd0"
+      },
+      "patched": {
+       "s": "fail",
+       "d": "still_crashes: heap-buffer-overflow at /src/md4c/src/md4c.c:817"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      }
+     },
+     "audit": [
+      "root_cause"
+     ],
+     "diff": "--- a/src/md4c/src/md4c.c\n+++ b/src/md4c/src/md4c.c\n@@ -883,6 +883,11 @@\n     static inline unsigned\n     md_decode_unicode(const CHAR* str, OFF off, SZ str_size, SZ* p_char_size)\n     {\n+        if(str_size == 0) {\n+            if(p_char_size != NULL)\n+                *p_char_size = 0;\n+            return 0;\n+        }\n         return md_decode_utf8__(str+off, str_size-off, p_char_size);\n     }\n #else\n"
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "no_candidate:no_edit",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42507851",
+   "project": "libplist",
+   "verdict": "verified",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "heap-buffer-overflow",
+    "location": "/src/libplist/src/jplist.c:441",
+    "cwe_guess": "CWE-122"
+   },
+   "root_cause": "In parse_primitive(), strtol() is called on str_val which points into the JSON input buffer at tokens[*index].start. The token substring is not guaranteed to be null-terminated; if the numeric token ends at the end of the allocated heap buffer, strtol reads past the buffer boundary causing a heap-buffer-overflow READ.",
+   "planner": "ultra",
+   "usd": 0.020328,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.00868,
+    "nvidia/Nemotron-3_5-Lightning": 0.011648
+   },
+   "elapsed_s": 158.11,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/libimobiledevice/libplist/commit/8ea84caa3cba801c4f240648a6b7919e9b3e0b0d",
+   "winner": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -437,17 +437,21 @@\n         data->type = PLIST_NULL;\n         val = plist_new_node(data);\n     } else if (str_val[0] == '-' || isdigit(str_val[0])) {\n+        /* Create a null-terminated copy to avoid heap-buffer-overflow in strtol. */\n+        char tmp[str_len+1];\n+        memcpy(tmp, str_val, str_len);\n+        tmp[str_len] = '\\0';\n         char* endp = NULL;\n-        long long intpart = strtol(str_val, &endp, 10);\n-        if (endp >= str_end) {\n+        long long intpart = strtol(tmp, &endp, 10);\n+        if (endp >= tmp + str_len) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n+        } else if (*endp == '.' && endp+1 < tmp + str_len && isdigit(*(endp+1))) {\n             /* float */\n             char* fendp = endp+1;\n-            while (isdigit(*fendp) && fendp < str_end) fendp++;\n-            if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n-                double dval = atof(str_val);\n+            while (isdigit(*fendp) && fendp < tmp + str_len) fendp++;\n+            if ((fendp > endp+1 && fendp >= tmp + str_len) || (fendp+2 < tmp + str_len && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n+                double dval = atof(tmp);\n                 val = plist_new_real(dval);\n             } else {\n                 PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing floating point value\\n\", __func__, (int)(fendp - js));\n",
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/libplist/src/jplist.c:441; corpus 40 inputs (seed_corpus_zip); 3 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +11/-8"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness e0830ada -> c86fb565"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "40 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "null-deref at plist_dict_get_item /src/libplist/src/plist.c from fuzzing:crash-fc642d888edbf7faf87f67ef4810f7f74f27546b (109 bytes); baseline crashes identically (null-deref at plist_dict_get_item /src/libplist/src/plist.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=15409"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "40 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "behavior_change"
+     ],
+     "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -437,23 +437,26 @@\n         data->type = PLIST_NULL;\n         val = plist_new_node(data);\n     } else if (str_val[0] == '-' || isdigit(str_val[0])) {\n+        char tmp[str_len+1];\n+        memcpy(tmp, str_val, str_len);\n+        tmp[str_len] = '\\0';\n         char* endp = NULL;\n-        long long intpart = strtol(str_val, &endp, 10);\n-        if (endp >= str_end) {\n+        long long intpart = strtol(tmp, &endp, 10);\n+        if (endp >= tmp + str_len) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n+        } else if (*endp == '.' && endp+1 < tmp + str_len && isdigit(*(endp+1))) {\n             /* float */\n             char* fendp = endp+1;\n-            while (isdigit(*fendp) && fendp < str_end) fendp++;\n-            if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n-                double dval = atof(str_val);\n+            while (isdigit(*fendp) && fendp < tmp + str_len) fendp++;\n+            if ((fendp > endp+1 && fendp >= tmp + str_len) || (fendp+2 < tmp + str_len && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n+                double dval = atof(tmp);\n                 val = plist_new_real(dval);\n             } else {\n-                PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing floating point value\\n\", __func__, (int)(fendp - js));\n+                PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing floating point value\\n\", __func__, (int)(fendp - tmp));\n             }\n         } else {\n-            PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing numerical value\\n\", __func__, (int)(endp - js));\n+            PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing numerical value\\n\", __func__, (int)(endp - tmp));\n         }\n     } else {\n         PLIST_JSON_ERR(\"%s: invalid primitive value '%.*s' encountered\\n\", __func__, (int)str_len, str_val);\n"
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/libplist/src/jplist.c:441; corpus 40 inputs (seed_corpus_zip); 3 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +10/-6"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness e0830ada -> bca837db"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "40 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "null-deref at plist_dict_get_item /src/libplist/src/plist.c from fuzzing:crash-fc642d888edbf7faf87f67ef4810f7f74f27546b (109 bytes); baseline crashes identically (null-deref at plist_dict_get_item /src/libplist/src/plist.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=15409"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "40 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "behavior_change"
+     ],
+     "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -437,17 +437,21 @@\n         data->type = PLIST_NULL;\n         val = plist_new_node(data);\n     } else if (str_val[0] == '-' || isdigit(str_val[0])) {\n+        /* Create a null-terminated copy to avoid heap-buffer-overflow in strtol. */\n+        char tmp[str_len+1];\n+        memcpy(tmp, str_val, str_len);\n+        tmp[str_len] = '\\0';\n         char* endp = NULL;\n-        long long intpart = strtol(str_val, &endp, 10);\n-        if (endp >= str_end) {\n+        long long intpart = strtol(tmp, &endp, 10);\n+        if (endp >= tmp + str_len) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n+        } else if (*endp == '.' && endp+1 < tmp + str_len && isdigit(*(endp+1))) {\n             /* float */\n             char* fendp = endp+1;\n-            while (isdigit(*fendp) && fendp < str_end) fendp++;\n-            if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n-                double dval = atof(str_val);\n+            while (isdigit(*fendp) && fendp < tmp + str_len) fendp++;\n+            if ((fendp > endp+1 && fendp >= tmp + str_len) || (fendp+2 < tmp + str_len && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n+                double dval = atof(tmp);\n                 val = plist_new_real(dval);\n             } else {\n                 PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing floating point value\\n\", __func__, (int)(fendp - js));\n"
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42508524",
+   "project": "libplist",
+   "verdict": "verified",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "heap-buffer-overflow",
+    "location": "/src/libplist/src/jplist.c:470",
+    "cwe_guess": "CWE-122"
+   },
+   "root_cause": "In parse_primitive() at line 470, the floating-point detection condition checks `endp < str_end` before accessing `*(endp+1)` and `*(endp+2)`, but this allows reading one or two bytes past the token's end when the token ends with 'e', 'E', '.', 'e-', or 'E-'. The bounds checks are in the wrong order and miss the `endp+2` check for the negative exponent case.",
+   "planner": "ultra",
+   "usd": 0.027517,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.015052,
+    "nvidia/Nemotron-3_5-Lightning": 0.012465
+   },
+   "elapsed_s": 362.51,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/libimobiledevice/libplist/commit/106c4ee7f53ef800a82fce9638f29756e8b78640",
+   "winner": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,7 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2)))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n",
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "build_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,7 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n"
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/libplist/src/jplist.c:470; corpus 40 inputs (seed_corpus_zip); 11 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness e45c2cec -> e6cb499e"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "40 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c from fuzzing:crash-3bc15c8aae3e4124dd409035f32ea2fd6835efc9 (1 bytes); baseline gives heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c; developer fix crashes identically (heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=27552"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "40 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [],
+     "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,7 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2)))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n"
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/libplist/src/jplist.c:470; corpus 40 inputs (seed_corpus_zip); 11 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness e45c2cec -> e6cb499e"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "40 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c from fuzzing:crash-3bc15c8aae3e4124dd409035f32ea2fd6835efc9 (1 bytes); baseline gives heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c; developer fix crashes identically (heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=27552"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "40 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [],
+     "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,7 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2)))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n"
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/libplist/src/jplist.c:470; corpus 40 inputs (seed_corpus_zip); 11 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness e45c2cec -> 9302b1c1"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "40 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c from fuzzing:crash-3bc15c8aae3e4124dd409035f32ea2fd6835efc9 (1 bytes); baseline gives heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c; developer fix crashes identically (heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=21615"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "40 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [],
+     "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,7 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((endp+1 < str_end && *(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2)))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n"
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42519914",
+   "project": "libplist",
+   "verdict": "rejected:refuzz_new_crash",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "use-after-free",
+    "location": "/src/libplist/src/plist.c:331",
+    "cwe_guess": "CWE-416"
+   },
+   "root_cause": "plist_from_openstep (in oplist.c) frees the plist on error via plist_free but does not nullify the output pointer, causing a double-free when the caller (fuzzer) subsequently calls plist_free on the dangling pointer. The use-after-free occurs in plist_free_node when it accesses node->parent on the already-freed node.",
+   "planner": "ultra",
+   "usd": 0.053995,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.032708,
+    "nvidia/Nemotron-3_5-Lightning": 0.021287
+   },
+   "elapsed_s": 360.39,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/libimobiledevice/libplist/commit/62b03b85a56a7b98e6eef237deeff1a8b41f8fb8",
+   "winner": null,
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H1\u00b7w1",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H1\u00b7w2",
+     "verdict": "no_candidate:no_edit",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H1\u00b7w3",
+     "verdict": "rejected:refuzz_new_crash",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "use-after-free at /src/libplist/src/plist.c:331; corpus 44 inputs (seed_corpus_zip); 28 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "2 file(s), +35/-13"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness 623e7f75 -> 465a2490"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "44 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "fail",
+       "d": "use-after-free at plist_free_node /src/libplist/src/plist.c from fuzzing:crash-114fe23d323f201d73d0cf1263505778f368ee70 (448 bytes); baseline gives use-after-free at plist_free_node /src/libplist/src/plist.c; developer fix is clean on this input; libFuzzer 90s rc=1 runs=77"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "44 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "silencing",
+      "new_memory_risk",
+      "behavior_change"
+     ],
+     "diff": "--- a/src/libplist/libcnary/node.c\n+++ b/src/libplist/libcnary/node.c\n@@ -27,20 +27,38 @@\n #include \"node.h\"\n #include \"node_list.h\"\n \n+#define FREED_MAX 256\n+static void *freed_ptrs[FREED_MAX];\n+static int freed_cnt = 0;\n+\n+int freed_contains(node_t *node) {\n+    for (int i = 0; i < freed_cnt; i++) {\n+        if (freed_ptrs[i] == node) return 1;\n+    }\n+    return 0;\n+}\n+\n+void freed_add(node_t *node) {\n+    if (freed_cnt >= FREED_MAX) return;\n+    freed_ptrs[freed_cnt++] = node;\n+}\n+\n void node_destroy(node_t* node) {\n-\tif(!node) return;\n-\n-\tif (node->children && node->children->count > 0) {\n-\t\tnode_t* ch;\n-\t\twhile ((ch = node->children->begin)) {\n-\t\t\tnode_list_remove(node->children, ch);\n-\t\t\tnode_destroy(ch);\n-\t\t}\n-\t}\n-\tnode_list_destroy(node->children);\n-\tnode->children = NULL;\n-\n-\tfree(node);\n+    if(!node) return;\n+    if (freed_contains(node)) return;\n+\n+    if (node->children && node->children->count > 0) {\n+        node_t* ch;\n+        while ((ch = node->children->begin)) {\n+            node_list_remove(node->children, ch);\n+            node_destroy(ch);\n+        }\n+    }\n+    node_list_destroy(node->children);\n+    node->children = NULL;\n+\n+    freed_add(node);\n+    free(node);\n }\n \n node_t* node_create(node_t* parent, void* data) {\n--- a/src/libplist/src/plist.c\n+++ b/src/libplist/src/plist.c\n@@ -325,8 +325,12 @@\n     }\n }\n \n+int freed_contains(node_t *node);\n+\n static int plist_free_node(node_t* node)\n {\n+    if (freed_contains(node)) return 0;\n+\n     plist_data_t data = NULL;\n     int node_index = node_detach(node->parent, node);\n     data = plist_get_data(node);\n"
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42520377",
+   "project": "libzip",
+   "verdict": "build_failed",
+   "raw": false,
+   "v0": false,
+   "finding": {
+    "kind": "use-after-free",
+    "location": "/src/libzip/lib/zip_source_open.c:39",
+    "cwe_guess": "CWE-416"
+   },
+   "root_cause": "In `zip_source_layered_create` (/src/libzip/lib/zip_source_layered.c), a layered source is created with `zs->src = src` but the lower source's reference count is not incremented. When `zip_check_torrentzip` (/src/libzip/lib/zip_open.c:931) explicitly calls `zip_source_free(src_window)` after creating `src_crc = zip_source_crc_create(src_window, ...)`, the window source is destroyed while the CRC layered source still holds a dangling pointer to it. Later, `zip_source_open(src_crc)` recursively calls `zip_source_open(src_crc->src)` which accesses the freed memory at `src->source_closed` (zip_source_open.c:39).",
+   "planner": "ultra",
+   "usd": 0.041615,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.032938,
+    "nvidia/Nemotron-3_5-Lightning": 0.008677
+   },
+   "elapsed_s": 124.22,
+   "gate_version": "v0",
+   "dev_fix": "https://github.com/nih-at/libzip/commit/e907b0bda2f04c16eb7f10d5b2f41a3416a3e2b8",
+   "winner": null,
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "build_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": "--- a/src/libzip/lib/zip_source_layered.c\n+++ b/src/libzip/lib/zip_source_layered.c\n@@ -34,7 +34,7 @@\n \n #include <stdlib.h>\n \n-#include \"zipint.h\"\n+#include \"zip.h\"\n \n \n zip_source_t *\n@@ -64,6 +64,8 @@\n     }\n \n     zs->src = src;\n+    zip_source_addref(src);\n+    zip_source_addref(src);\n     zs->cb.l = cb;\n     zs->ud = ud;\n     zs->supports = supports;\n"
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42522195",
+   "project": "mosquitto",
+   "verdict": "verified",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "heap-buffer-overflow",
+    "location": "/src/mosquitto/src/../lib/memory_mosq.c:152",
+    "cwe_guess": "CWE-122"
+   },
+   "root_cause": "In config__read_file_core (conf.c:1843), when parsing \"log_dest file\", the code advances a token pointer into the line buffer (buf) past the \"file\" keyword and whitespace, then passes this pointer to mosquitto__strdup without verifying it remains within the valid, null-terminated portion of the buffer. The buffer is allocated at config__read_file:2493 with buflen=1000 and passed to config__read_file_core which may reallocate it. If an input line lacks a newline/null terminator within the allocated buffer (due to long lines, reallocation issues, or malicious input), the pointer arithmetic token = &token[strlen(token)+1] followed by whitespace skipping can advance token past valid data. Subsequent mosquitto__strdup(token) calls strlen which reads past the buffer boundary, causing the heap-buffer-overflow.",
+   "planner": "ultra",
+   "usd": 0.042494,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.015972,
+    "nvidia/Nemotron-3_5-Lightning": 0.026522
+   },
+   "elapsed_s": 268.88,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/eclipse/mosquitto/commit/3fd5ba5f186c6225e0c1dc9dd100d125d15ceda7",
+   "winner": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -2491,6 +2491,11 @@\n \n \tbuflen = 1000;\n \tbuf = mosquitto__malloc((size_t)buflen);\n+/* Ensure the buffer is null-terminated so that token pointers derived from it\n+   cannot run past the valid, null-terminated portion of the buffer. */\n+if (buflen > 0) {\n+    buf[buflen - 1] = '\\0';\n+}\n \tif(!buf){\n \t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Out of memory.\");\n \t\tfclose(fptr);\n",
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "no_candidate:no_edit",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -1829,26 +1829,30 @@\n \t\t\t\t\t\tcr->log_dest |= MQTT3_LOG_ANDROID;\n #endif\n \t\t\t\t\t}else if(!strcmp(token, \"file\")){\n-\t\t\t\t\t\tcr->log_dest |= MQTT3_LOG_FILE;\n-\t\t\t\t\t\tif(config->log_fptr || config->log_file){\n-\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Duplicate \\\"log_dest file\\\" value.\");\n-\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n-\t\t\t\t\t\t}\n-\t\t\t\t\t\t/* Get remaining string. */\n-\t\t\t\t\t\ttoken = &token[strlen(token)+1];\n-\t\t\t\t\t\twhile(token[0] == ' ' || token[0] == '\\t'){\n-\t\t\t\t\t\t\ttoken++;\n-\t\t\t\t\t\t}\n-\t\t\t\t\t\tif(token[0]){\n-\t\t\t\t\t\t\tconfig->log_file = mosquitto__strdup(token);\n-\t\t\t\t\t\t\tif(!config->log_file){\n-\t\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Out of memory.\");\n-\t\t\t\t\t\t\t\treturn MOSQ_ERR_NOMEM;\n-\t\t\t\t\t\t\t}\n-\t\t\t\t\t\t}else{\n-\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Empty \\\"log_dest file\\\" value in configuration.\");\n-\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n-\t\t\t\t\t\t}\n+\t\t\t\t\t    cr->log_dest |= MQTT3_LOG_FILE;\n+\t\t\t\t\t    if(config->log_fptr || config->log_file){\n+\t\t\t\t\t        log__printf(NULL, MOSQ_LOG_ERR, \"Error: Duplicate \\\"log_dest file\\\" value.\");\n+\t\t\t\t\t        return MOSQ_ERR_INVAL;\n+\t\t\t\t\t    }\n+\t\t\t\t\t    /* Get remaining string. */\n+\t\t\t\t\t    token = &token[strlen(token)+1];\n+\t\t\t\t\t    while(token[0] == ' ' || token[0] == '\\t'){\n+\t\t\t\t\t        token++;\n+\t\t\t\t\t    }\n+\t\t\t\t\t    if(token[0]){\n+\t\t\t\t\t        if(token < buf || token >= buf + buflen) {\n+\t\t\t\t\t            log__printf(NULL, MOSQ_LOG_ERR, \"Error: Invalid 'log_dest file' value.\");\n+\t\t\t\t\t            return MOSQ_ERR_INVAL;\n+\t\t\t\t\t        }\n+\t\t\t\t\t        config->log_file = mosquitto__strdup(token);\n+\t\t\t\t\t        if(!config->log_file){\n+\t\t\t\t\t            log__printf(NULL, MOSQ_LOG_ERR, \"Error: Out of memory.\");\n+\t\t\t\t\t            return MOSQ_ERR_NOMEM;\n+\t\t\t\t\t        }\n+\t\t\t\t\t    }else{\n+\t\t\t\t\t        log__printf(NULL, MOSQ_LOG_ERR, \"Error: Empty \\\"log_dest file\\\" value in configuration.\");\n+\t\t\t\t\t        return MOSQ_ERR_INVAL;\n+\t\t\t\t\t    }\n \t\t\t\t\t}else{\n \t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Invalid 'log_dest' value (%s).\", token);\n \t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n"
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "verified",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/mosquitto/src/../lib/memory_mosq.c:152; corpus 197 inputs (seed_corpus_zip); 14 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +5/-0"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness f90f8c28 -> 03d28a13"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "197 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "unknown at mosquitto__free /src/mosquitto/lib/memory_mosq.c from fuzzing:crash-f313f2999bcbd410a47e1fb00f053f979a641d6a (184 bytes); baseline crashes identically (unknown at mosquitto__free /src/mosquitto/lib/memory_mosq.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=1732"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "197 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "new_memory_risk",
+      "error_handling"
+     ],
+     "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -2491,6 +2491,11 @@\n \n \tbuflen = 1000;\n \tbuf = mosquitto__malloc((size_t)buflen);\n+/* Ensure the buffer is null-terminated so that token pointers derived from it\n+   cannot run past the valid, null-terminated portion of the buffer. */\n+if (buflen > 0) {\n+    buf[buflen - 1] = '\\0';\n+}\n \tif(!buf){\n \t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Out of memory.\");\n \t\tfclose(fptr);\n"
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "build_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -1849,6 +1849,14 @@\n \t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Empty \\\"log_dest file\\\" value in configuration.\");\n \t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n \t\t\t\t\t\t}\n+\t\t\t\t\t\t/* Bounds-safe: ensure token is still within the original buffer.\n+\t\t\t\t\t\t * The buffer was allocated with buflen and may have been reallocated\n+\t\t\t\t\t\t * during parsing. If token has advanced past the buffer end, strlen would\n+\t\t\t\t\t\t * read beyond the allocated memory, causing a heap-buffer-overflow. */\n+\t\t\t\t\t\tif(token >= *buf + buflen){\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Invalid 'log_dest file' value (path exceeds buffer).\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n+\t\t\t\t\t\t}\n \t\t\t\t\t}else{\n \t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Invalid 'log_dest' value (%s).\", token);\n \t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n"
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "no_candidate:no_edit",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42530604",
+   "project": "jq",
+   "verdict": "rejected:refuzz_new_crash",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "heap-buffer-overflow",
+    "location": "/src/jq/src/decNumber/decNumber.c:3764",
+    "cwe_guess": "CWE-122"
+   },
+   "root_cause": "In decToString (decNumber.c), scientific notation mode (eng=0) incorrectly calculates pre = e + 1 for positive exponents, where e is the decimal exponent. This causes the coefficient layout loop to write pre digits (padding with zeros after exhausting significant digits), producing up to e+1 output characters. The caller jvp_literal_number_literal (jv.c) allocates only digits + 14 bytes per the library's documented requirement, which is insufficient when e is large (up to 999999999 per library comments). The heap overflow occurs when writing the NUL terminator past the allocated buffer.",
+   "planner": "ultra",
+   "usd": 0.061291,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.041536,
+    "nvidia/Nemotron-3_5-Lightning": 0.019755
+   },
+   "elapsed_s": 292.8,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/jqlang/jq/commit/71c2ab509a8628dbbad4bc7b3f98a64aa90d3297",
+   "winner": null,
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "no_candidate:no_edit",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "rejected:refuzz_new_crash",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/jq/src/decNumber/decNumber.c:3764; corpus 33 inputs (test_files); 14 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness 9420886e -> 0a2d6612"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "make[1]: Entering directory '/src/jq'\nPASS: tests/utf8test\nPASS: tests/base64test\nPASS: tests/optionaltest\nPASS: tests/onigtest\nPASS: tests/manonigtest\nPASS: tests/mantest\nPASS: tests/jqtest\n============================================================================\nTestsuite summary for jq 1.7-43-gd14393f-dirty\n============================================================================\n# TOTAL:"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "33 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "fail",
+       "d": "heap-buffer-overflow at decToString /src/jq/src/decNumber/decNumber.c from amplification:digits_x2 (33 bytes); baseline is clean on this input; developer fix is clean on this input"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "33 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk",
+      "behavior_change"
+     ],
+     "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -650,7 +650,7 @@\n     // Preserve the actual precision as we have parsed it\n     // don't do decNumberTrim(pdec);\n \n-    decNumberToString(pdec, plit->literal_data);\n+    decNumberToEngString(pdec, plit->literal_data);\n   }\n \n   return plit->literal_data;\n"
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "build_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -644,13 +644,26 @@\n   }\n \n   if (plit->literal_data == NULL) {\n-    int len = jvp_dec_number_ptr(n)->digits + 14;\n-    plit->literal_data = jv_mem_alloc(len);\n-\n-    // Preserve the actual precision as we have parsed it\n-    // don't do decNumberTrim(pdec);\n-\n-    decNumberToString(pdec, plit->literal_data);\n+    int exp = pdec->exponent;\n+    int digits = jvp_dec_number_ptr(n)->digits;\n+    // If exponent magnitude is within a safe range, use the original method.\n+    if (exp >= -6 && exp <= 6) {\n+      int len = digits + 14;\n+      plit->literal_data = jv_mem_alloc(len);\n+      // Preserve the actual precision as we have parsed it\n+      // don't do decNumberTrim(pdec);\n+      decNumberToString(pdec, plit->literal_data);\n+    } else {\n+      // For large exponents, format using snprintf with %e to avoid buffer overflow.\n+      // Convert decNumber to double; may overflow to inf, but that is acceptable.\n+      decNumberDoublePrecision dprec;\n+      decNumberDoublePrecisionFromNumber(&dprec, pdec, DEC_CONTEXT());\n+      char buf[64];\n+      int needed = snprintf(buf, sizeof(buf), \"%e\", dprec.number);\n+      // needed includes NUL terminator.\n+      plit->literal_data = jv_mem_alloc(needed + 1);\n+      snprintf(plit->literal_data, needed + 1, \"%e\", dprec.number);\n+    }\n   }\n \n   return plit->literal_data;\n"
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "no_candidate:no_edit",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42531297",
+   "project": "jq",
+   "verdict": "rejected:refuzz_new_crash",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "heap-buffer-overflow",
+    "location": "/src/jq/src/jv.c:1453",
+    "cwe_guess": "CWE-122"
+   },
+   "root_cause": "The function jv_string_sized (in jv.c) creates jv strings from a raw buffer and length but does not guarantee the resulting string is null-terminated. When such a string is later passed as a %s argument to jv_string_fmt (e.g., in jv_get at jv_aux.c:143), vsnprintf reads past the buffer end, causing the heap-buffer-overflow READ. The offending string originates from jv_string_empty(16) in binop_multiply (builtin.c), but the missing null-termination likely occurs when jv_string_sized wraps or copies the buffer without writing a terminating NUL.",
+   "planner": "ultra",
+   "usd": 0.04055,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.033321,
+    "nvidia/Nemotron-3_5-Lightning": 0.007228
+   },
+   "elapsed_s": 307.78,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/jqlang/jq/commit/dc849e9bb74a7a164a3ea52f661cc712b1ffbd43",
+   "winner": null,
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "rejected:refuzz_new_crash",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/jq/src/jv.c:1453; corpus 19 inputs (seed_corpus_zip); 19 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-0"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness fc9c270f -> 8cce5771"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "make[1]: Entering directory '/src/jq'\nPASS: tests/utf8test\nPASS: tests/base64test\nPASS: tests/optionaltest\nPASS: tests/onigtest\nPASS: tests/manonigtest\nPASS: tests/mantest\nPASS: tests/jqtest\n============================================================================\nTestsuite summary for jq 1.7-48-gbfb7fd5-dirty\n============================================================================\n# TOTAL:"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "19 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "fail",
+       "d": "unknown at ? from fuzzing:slow-unit-c1d53233d38d11cdcfa0edc49d6c5e8e2f0a581b (107 bytes); baseline is clean on this input; developer fix is clean on this input; libFuzzer 90s rc=0 runs=6817"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "19 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk"
+     ],
+     "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1106,6 +1106,7 @@\n   jvp_string* s = jvp_string_alloc(length);\n   s->length_hashed = 0;\n   memset(s->data, 0, length);\n+  s->data[length] = 0;\n   jv r = {JVP_FLAGS_STRING, 0, 0, 0, {&s->refcnt}};\n   return r;\n }\n"
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "rejected:refuzz_new_crash",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/jq/src/jv.c:1453; corpus 19 inputs (seed_corpus_zip); 19 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-0"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness fc9c270f -> 8cce5771"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "make[1]: Entering directory '/src/jq'\nPASS: tests/utf8test\nPASS: tests/base64test\nPASS: tests/optionaltest\nPASS: tests/onigtest\nPASS: tests/manonigtest\nPASS: tests/mantest\nPASS: tests/jqtest\n============================================================================\nTestsuite summary for jq 1.7-48-gbfb7fd5-dirty\n============================================================================\n# TOTAL:"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "19 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "fail",
+       "d": "unknown at ? from fuzzing:slow-unit-c1d53233d38d11cdcfa0edc49d6c5e8e2f0a581b (107 bytes); baseline is clean on this input; developer fix is clean on this input; libFuzzer 90s rc=0 runs=6817"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "19 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk"
+     ],
+     "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1106,6 +1106,7 @@\n   jvp_string* s = jvp_string_alloc(length);\n   s->length_hashed = 0;\n   memset(s->data, 0, length);\n+  s->data[length] = 0;\n   jv r = {JVP_FLAGS_STRING, 0, 0, 0, {&s->refcnt}};\n   return r;\n }\n"
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "rejected:refuzz_new_crash",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/jq/src/jv.c:1453; corpus 19 inputs (seed_corpus_zip); 19 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-0"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness fc9c270f -> 8cce5771"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "pass",
+       "d": "make[1]: Entering directory '/src/jq'\nPASS: tests/utf8test\nPASS: tests/base64test\nPASS: tests/optionaltest\nPASS: tests/onigtest\nPASS: tests/manonigtest\nPASS: tests/mantest\nPASS: tests/jqtest\n============================================================================\nTestsuite summary for jq 1.7-48-gbfb7fd5-dirty\n============================================================================\n# TOTAL:"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "19 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "fail",
+       "d": "unknown at ? from fuzzing:slow-unit-c1d53233d38d11cdcfa0edc49d6c5e8e2f0a581b (107 bytes); baseline is clean on this input; developer fix is clean on this input; libFuzzer 90s rc=0 runs=6817"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "19 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk"
+     ],
+     "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1106,6 +1106,7 @@\n   jvp_string* s = jvp_string_alloc(length);\n   s->length_hashed = 0;\n   memset(s->data, 0, length);\n+  s->data[length] = 0;\n   jv r = {JVP_FLAGS_STRING, 0, 0, 0, {&s->refcnt}};\n   return r;\n }\n"
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42536108",
+   "project": "miniz",
+   "verdict": "inconclusive:patch_not_compiled",
+   "raw": false,
+   "v0": false,
+   "finding": {
+    "kind": "heap-buffer-overflow",
+    "location": "/src/miniz/build/amalgamation/miniz.c:4050",
+    "cwe_guess": "CWE-122"
+   },
+   "root_cause": "In mz_zip_reader_read_central_dir, the calculation `archive_ofs = eocd_ofs - (cdir_ofs + cdir_size)` uses unsigned arithmetic without validating that `cdir_ofs + cdir_size <= eocd_ofs`. When a malformed ZIP has a central directory offset+size larger than the EOCD offset, this subtraction underflows, producing a huge `archive_ofs`. That value is then subtracted from `m_archive_size` (which initially equals the input buffer size), causing `m_archive_size` to wrap to a very large value. Later, mz_zip_mem_read_func uses this inflated `m_archive_size` for its bounds check, so the check passes for any `file_ofs`, and memcpy reads past the end of the actual heap buffer.",
+   "planner": "ultra",
+   "usd": 0.037327,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.032304,
+    "nvidia/Nemotron-3_5-Lightning": 0.005023
+   },
+   "elapsed_s": 137.89,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/richgel999/miniz/commit/0283a1796edb3fee469a84d9421e8ec149a2fcea",
+   "winner": null,
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "inconclusive:patch_not_compiled",
+     "v0": "inconclusive:patch_not_compiled",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/miniz/build/amalgamation/miniz.c:4050; corpus 17 inputs (seed_corpus_zip); 11 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +2/-0"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "inconclusive",
+       "d": "harness unchanged (edc5ef693e8bfa8d8285580f4d2aa616)"
+      }
+     },
+     "audit": [],
+     "diff": "--- a/src/miniz/build/amalgamation/miniz.c\n+++ b/src/miniz/build/amalgamation/miniz.c\n@@ -3806,6 +3806,8 @@\n \n         /* The end of central dir follows the central dir, unless the zip file has\n          * some trailing data (e.g. it is appended to an executable file). */\n+        if (cdir_ofs > eocd_ofs || cdir_size > eocd_ofs - cdir_ofs)\n+            return mz_zip_set_error(pZip, MZ_ZIP_INVALID_HEADER_OR_CORRUPTED);\n         archive_ofs = eocd_ofs - (cdir_ofs + cdir_size);\n         if (pZip->m_pState->m_zip64)\n         {\n"
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "inconclusive:patch_not_compiled",
+     "v0": "inconclusive:patch_not_compiled",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/miniz/build/amalgamation/miniz.c:4050; corpus 17 inputs (seed_corpus_zip); 11 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +3/-0"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "inconclusive",
+       "d": "harness unchanged (edc5ef693e8bfa8d8285580f4d2aa616)"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "silencing",
+      "new_memory_risk",
+      "behavior_change",
+      "error_handling"
+     ],
+     "diff": "--- a/src/miniz/build/amalgamation/miniz.c\n+++ b/src/miniz/build/amalgamation/miniz.c\n@@ -3804,6 +3804,9 @@\n         if ((cdir_ofs + (mz_uint64)cdir_size) > pZip->m_archive_size)\n             return mz_zip_set_error(pZip, MZ_ZIP_INVALID_HEADER_OR_CORRUPTED);\n \n+        if (cdir_ofs + cdir_size > m_archive_size)\n+            return mz_zip_set_error(pZip, MZ_ZIP_INVALID_HEADER_OR_CORRUPTED);\n+\n         /* The end of central dir follows the central dir, unless the zip file has\n          * some trailing data (e.g. it is appended to an executable file). */\n         archive_ofs = eocd_ofs - (cdir_ofs + cdir_size);\n"
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "inconclusive:patch_not_compiled",
+     "v0": "inconclusive:patch_not_compiled",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/miniz/build/amalgamation/miniz.c:4050; corpus 17 inputs (seed_corpus_zip); 11 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +2/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "inconclusive",
+       "d": "harness unchanged (edc5ef693e8bfa8d8285580f4d2aa616)"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk",
+      "behavior_change"
+     ],
+     "diff": "--- a/src/miniz/build/amalgamation/miniz.c\n+++ b/src/miniz/build/amalgamation/miniz.c\n@@ -4046,7 +4046,8 @@\n     static size_t mz_zip_mem_read_func(void *pOpaque, mz_uint64 file_ofs, void *pBuf, size_t n)\n     {\n         mz_zip_archive *pZip = (mz_zip_archive *)pOpaque;\n-        size_t s = (file_ofs >= pZip->m_archive_size) ? 0 : (size_t)MZ_MIN(pZip->m_archive_size - file_ofs, n);\n+        file_ofs += pZip->m_pState->m_file_archive_start_ofs;\n+        size_t s = (file_ofs >= pZip->m_mem_size) ? 0 : (size_t)MZ_MIN(pZip->m_mem_size - file_ofs, n);\n         memcpy(pBuf, (const mz_uint8 *)pZip->m_pState->m_pMem + file_ofs, s);\n         return s;\n     }\n"
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "inconclusive:patch_not_compiled",
+     "v0": "inconclusive:patch_not_compiled",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "heap-buffer-overflow at /src/miniz/build/amalgamation/miniz.c:4050; corpus 17 inputs (seed_corpus_zip); 11 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +4/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "inconclusive",
+       "d": "harness unchanged (edc5ef693e8bfa8d8285580f4d2aa616)"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "silencing",
+      "behavior_change"
+     ],
+     "diff": "--- a/src/miniz/build/amalgamation/miniz.c\n+++ b/src/miniz/build/amalgamation/miniz.c\n@@ -3806,7 +3806,10 @@\n \n         /* The end of central dir follows the central dir, unless the zip file has\n          * some trailing data (e.g. it is appended to an executable file). */\n-        archive_ofs = eocd_ofs - (cdir_ofs + cdir_size);\n+        mz_uint32 cdir_end = cdir_ofs + cdir_size;\n+        if (cdir_end > eocd_ofs)\n+            return mz_zip_set_error(pZip, MZ_ZIP_INVALID_HEADER_OR_CORRUPTED);\n+        archive_ofs = eocd_ofs - cdir_end;\n         if (pZip->m_pState->m_zip64)\n         {\n             if (archive_ofs < MZ_ZIP64_END_OF_CENTRAL_DIR_HEADER_SIZE +\n"
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42536390",
+   "project": "libical",
+   "verdict": "rejected:refuzz_new_crash",
+   "raw": true,
+   "v0": true,
+   "finding": {
+    "kind": "use-after-free",
+    "location": "/src/libical/src/libical/icaltypes.c:162",
+    "cwe_guess": "CWE-416"
+   },
+   "root_cause": "icalreqstattype_from_string stores a pointer to a temporary ring buffer (via icalmemory_tmp_copy) in the stat.debug field of the returned icalreqstattype struct. This struct is embedded in an icalvalue and persists. Later, when icalproperty_get_value_as_string adds its result buffer to the same global temporary buffer ring (icalmemory_add_tmp_buffer), the ring wraps around and frees the older stat.debug buffer. Subsequent calls to icalreqstattype_as_string_r read the freed stat.debug pointer during snprintf, causing the use-after-free.",
+   "planner": "ultra",
+   "usd": 0.032835,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.021169,
+    "nvidia/Nemotron-3_5-Lightning": 0.011666
+   },
+   "elapsed_s": 238.12,
+   "gate_version": "v1",
+   "dev_fix": "https://github.com/libical/libical/commit/7d124da53fdacc13f02ba4b3fe4597a352effe77",
+   "winner": null,
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "rejected:safe_fix",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "use-after-free at /src/libical/src/libical/icaltypes.c:162; corpus 200 inputs (seed_corpus_zip); 31 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +1/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness 71cc05fd -> 64be7ede"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "200 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "pass",
+       "d": "null-deref at comp_compare /src/libical/src/libical/icalcomponent.c from fuzzing:crash-f23712f70c7f78d210c4262e6dbab00aa67097ad (8206 bytes); baseline crashes identically (null-deref at comp_compare /src/libical/src/libical/icalcomponent.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=591"
+      },
+      "safe_fix": {
+       "s": "fail",
+       "d": "new 999922ce4425e1c4: detected (developer fix: clean) vs developer fix (3 total)"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk",
+      "behavior_change",
+      "error_handling"
+     ],
+     "diff": "--- a/src/libical/src/libical/icaltypes.c\n+++ b/src/libical/src/libical/icaltypes.c\n@@ -131,7 +131,7 @@\n \n     p2 = strchr(p1 + 1, ';');\n     if (p2 != 0 && *p2 != 0) {\n-        stat.debug = icalmemory_tmp_copy(p2 + 1);\n+        stat.debug = icalmemory_strdup(p2 + 1);\n     }\n \n     return stat;\n"
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "rejected:refuzz_new_crash",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "use-after-free at /src/libical/src/libical/icaltypes.c:162; corpus 200 inputs (seed_corpus_zip); 31 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +5/-2"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness 71cc05fd -> 5f51936d"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "200 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "fail",
+       "d": "use-after-free at icalreqstattype_as_string_r /src/libical/src/libical/icaltypes.c from amplification:whole_x64 (125760 bytes); baseline gives use-after-free at icalreqstattype_as_string_r /src/libical/src/libical/icaltypes.c; developer fix is clean on this input"
+      },
+      "safe_fix": {
+       "s": "pass",
+       "d": "200 inputs under LeakSanitizer: no new leak/UAF/double free vs developer fix"
+      }
+     },
+     "audit": [
+      "new_memory_risk",
+      "error_handling"
+     ],
+     "diff": "--- a/src/libical/src/libical/icalcomponent.c\n+++ b/src/libical/src/libical/icalcomponent.c\n@@ -2510,8 +2510,11 @@\n         }\n \n         if (r == 0) {\n-            r = strcmpsafe(icalproperty_get_value_as_string(p1),\n-                           icalproperty_get_value_as_string(p2));\n+            const char *v1 = icalproperty_get_value_as_string_r(p1);\n+            const char *v2 = icalproperty_get_value_as_string_r(p2);\n+            r = strcmpsafe(v1, v2);\n+            icalmemory_free_buffer((void *)v1);\n+            icalmemory_free_buffer((void *)v2);\n         }\n     }\n \n"
+    },
+    {
+     "id": "H3\u00b7w2",
+     "verdict": "rejected:refuzz_new_crash",
+     "v0": "verified",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "use-after-free at /src/libical/src/libical/icaltypes.c:162; corpus 200 inputs (seed_corpus_zip); 31 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +0/-1"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness 71cc05fd -> 70dabcf4"
+      },
+      "patched": {
+       "s": "pass",
+       "d": "no sanitizer report, exit 0"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      },
+      "differential": {
+       "s": "pass",
+       "d": "200 inputs; 0 baseline crash(es) now clean; exit codes and stdout identical"
+      },
+      "refuzz": {
+       "s": "fail",
+       "d": "use-after-free at icalreqstattype_as_string_r /src/libical/src/libical/icaltypes.c from amplification:whole_x64 (125760 bytes); baseline gives use-after-free at icalreqstattype_as_string_r /src/libical/src/libical/icaltypes.c; developer fix is clean on this input"
+      },
+      "safe_fix": {
+       "s": "fail",
+       "d": "new 02ee6ffd0da909a6: detected (developer fix: clean) vs developer fix (21 total)"
+      }
+     },
+     "audit": [
+      "root_cause",
+      "new_memory_risk",
+      "behavior_change",
+      "error_handling"
+     ],
+     "diff": "--- a/src/libical/src/libical/icalproperty.c\n+++ b/src/libical/src/libical/icalproperty.c\n@@ -822,7 +822,6 @@\n     char *buf;\n \n     buf = icalproperty_get_value_as_string_r(prop);\n-    icalmemory_add_tmp_buffer(buf);\n     return buf;\n }\n \n"
+    },
+    {
+     "id": "H4\u00b7w3",
+     "verdict": "rejected:still_crashes",
+     "v0": "rejected:still_crashes",
+     "checks": {
+      "unpatched_trips": {
+       "s": "pass",
+       "d": "use-after-free at /src/libical/src/libical/icaltypes.c:162; corpus 200 inputs (seed_corpus_zip); 31 amplified PoC variants"
+      },
+      "diff_scope": {
+       "s": "pass",
+       "d": "1 file(s), +3/-2"
+      },
+      "build": {
+       "s": "pass",
+       "d": ""
+      },
+      "compiled": {
+       "s": "pass",
+       "d": "harness 71cc05fd -> dd99385b"
+      },
+      "patched": {
+       "s": "fail",
+       "d": "still_crashes: use-after-free at /src/libical/src/libical/icaltypes.c:162"
+      },
+      "tests": {
+       "s": "skipped",
+       "d": "no runnable project test suite in the image"
+      }
+     },
+     "audit": [
+      "new_memory_risk",
+      "behavior_change",
+      "error_handling"
+     ],
+     "diff": "--- a/src/libical/src/libical/icaltypes.c\n+++ b/src/libical/src/libical/icaltypes.c\n@@ -159,9 +159,10 @@\n     }\n \n     if (stat.debug != 0) {\n+        char *debug_copy = (char *)icalmemory_new_buffer(strlen(stat.debug) + 1);\n+        strcpy(debug_copy, stat.debug);\n         snprintf(temp, TMP_BUF_SIZE, \"%d.%d;%s;%s\", icalenum_reqstat_major(stat.code),\n-                 icalenum_reqstat_minor(stat.code), stat.desc, stat.debug);\n-\n+                 icalenum_reqstat_minor(stat.code), stat.desc, debug_copy);\n     } else {\n         snprintf(temp, TMP_BUF_SIZE, \"%d.%d;%s\", icalenum_reqstat_major(stat.code),\n                  icalenum_reqstat_minor(stat.code), stat.desc);\n"
+    }
+   ],
+   "lineage": []
+  },
+  {
+   "case": "42541221",
+   "project": "pcre2",
+   "verdict": "build_failed",
+   "raw": false,
+   "v0": false,
+   "finding": {
+    "kind": "heap-buffer-overflow",
+    "location": "/src/pcre2/src/pcre2_auto_possess.c:395",
+    "cwe_guess": "CWE-122"
+   },
+   "root_cause": "In pcre2_auto_possess.c, get_chr_property_list reads character operands via GETCHARINCTEST from the code pointer without verifying the pointer remains within the allocated compiled-code buffer. When auto_possessify processes a repeat opcode (e.g., OP_STAR) whose subsequent opcode is a character opcode (e.g., OP_CHAR) at the very end of the buffer, get_chr_property_list is called with code pointing to that character opcode; after incrementing past the opcode byte, GETCHARINCTEST reads the character operand from one byte past the buffer, causing a heap-buffer-overflow read (CWE-122).",
+   "planner": "ultra",
+   "usd": 0.057347,
+   "usd_by_model": {
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 0.035045,
+    "nvidia/Nemotron-3_5-Lightning": 0.022302
+   },
+   "elapsed_s": 403.52,
+   "gate_version": "v0",
+   "dev_fix": "https://github.com/PCRE2Project/pcre2/commit/7d97c226c72fd794295f311e101b3cdf67942092",
+   "winner": null,
+   "workers": [
+    {
+     "id": "H1\u00b7w0",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H2\u00b7w1",
+     "verdict": "build_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": "--- a/src/pcre2/src/pcre2_auto_possess.c\n+++ b/src/pcre2/src/pcre2_auto_possess.c\n@@ -1112,7 +1112,12 @@\n     c -= get_repeat_base(c) - OP_STAR;\n     end = (c <= OP_MINUPTO) ?\n       get_chr_property_list(code, utf, cb->fcc, list) : NULL;\n-    list[1] = c == OP_STAR || c == OP_PLUS || c == OP_QUERY || c == OP_UPTO;\n+    if (end == NULL)\n+      {\n+      c = *code;\n+      continue;\n+      }\n+    list[1] = c == OP_STAR || c == OP_PLUS || c == OP_QUERY || c == OP_UPto;\n \n     if (end != NULL && compare_opcodes(end, utf, cb, list, end, &rec_limit))\n       {\n"
+    },
+    {
+     "id": "H1\u00b7w2",
+     "verdict": "no_candidate:no_edit",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    },
+    {
+     "id": "H2\u00b7w3",
+     "verdict": "no_candidate:apply_failed",
+     "v0": null,
+     "checks": {},
+     "audit": [],
+     "diff": ""
+    }
+   ],
+   "lineage": []
+  }
+ ]
+}
