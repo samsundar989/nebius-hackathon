@@ -100,3 +100,34 @@ Green: runs #3 (c5bbf2a), #4 (a209e04), #5 (2b54e42), #6 (ab418da). #1–#2 were
 1. **Refuzz attribution is baseline-only** (D-0044): a patch that gets past the original crash and exposes a deeper pre-existing bug looks like a new crash. Seen once: first-run mosquitto w0–w2 hit a heap-use-after-free on a 1000-byte buffer freed in `config__read_file` (`conf.c:2505`); the baseline shows a different crash on that input. In the fixed re-run the fuzzer hit the known `memory_mosq.c:78` bug first instead, so the verdicts depend on which crash libFuzzer meets first. Plan (P1): use the developer fix (`-fix` image) as a second reference, and re-check that saved UAF input (`runs/p0_v1_arvo/42520955/e1_arvo2_v4/gate_artifacts/`) against it.
 2. mosquitto refuzz always ends at the pre-existing `memory_mosq.c:78` crash, so its effective fuzzing time is short. Option: `-fork=1 -ignore_crashes=1` and judge every distinct crash.
 3. Check 8 (LLM audit flag) not built yet.
+
+## Day 4 · Fri 2026-10-24 (P1: gate calibration with the developers' own fixes)
+
+### Done
+- `leakproof/calibrate.py` + `scripts/calibrate.py`: the upstream fix commit (`github.com/<repo>/commit/<sha>.patch`, fetched in preparation, cached outside the repo) applied to the -O0 baseline with `git apply`, gated **exactly like a model candidate** (same editable rule, no strategy exemption, baseline-only attribution). Its build on the baseline becomes a **reference image** for model candidates: refuzz crashes and leaks the developer fix also shows are not blamed on the model. Gate-side only; `tests/test_isolation.py` fails if the worker path imports it.
+- Gate hole closed: an edit to any file defining `LLVMFuzzerTestOneInput` fails diff_scope (oniguruma `harnesses/`, lz4 `ossfuzz/`, pcre2 `src/pcre2_fuzzsupport.c` were editable by path before); workers are never shown such files.
+- `scripts/calibration_report.py` + `cases/arvo/calibration_adjudication.json` (reviewed, evidence-linked note for each developer fix the gate did not verify).
+
+### Calibration — 26 ARVO Tier-1 cases (`runs/p1_calibration_v3`)
+| | raw | adjudicated |
+|---|---|---|
+| developer fixes gated | 19 | 18 (+1 out of scope) |
+| **accepted (verified)** | **15** | **15** |
+| true reject (the developer fix has the defect) | — | 1 |
+| false reject | 4 (21%) | **2 (11%)** |
+
+- **True reject:** mosquitto 42520883 — the developer's fix for the invalid free leaks: on 21 seed-corpus inputs the baseline is LSan-clean and the fix leaks 15 B allocated by `mosquitto__strdup` at `conf.c:993`, a line the fix adds.
+- **False rejects (known limits, not tuned away):** libzip 42520377 — the strict "removed a free ⇒ PoC must be LSan-clean" rule fires on a pre-existing leak (`_zip_read_cdir`, `zip_open.c:305`) that the UAF used to mask; quickjs 42531514 — an amplified input reaches an `assert` in `get_lvalue` that the original overflow masked on the baseline. With the developer fix as reference (the batch setting), model candidates are not exposed to the second one.
+- **Not calibratable (8):** fix only in the harness — oniguruma 42517784, lz4 42513177, pcre2 42533629, h3 375220555 (fix renames functions the harness calls); baseline build needs network (`apt` inside build.sh) — libssh2 42535924, 42523626, libbpf 42504164; fix commit does not apply — quickjs 413161375.
+- Model candidates re-gated with the reference: jq run 4 winner still `rejected:refuzz_new_crash` (the developer fix is clean on its crashing input); mosquitto 6/6 verified. The saved first-run mosquitto "UAF" inputs crash the developer fix too (`memory_mosq.c:78`): pre-existing.
+
+How the number moved (all three passes kept): v1 10/19 → v2 9/19 → v3 15/19. Causes found from saved evidence, not by loosening checks: (1) OSS-Fuzz `build.sh` is not re-runnable (`mkdir build` on the baseline that already built) → `mkdir` shim in the baseline (D-0047); (2) `/bin/arvo` hard-codes `FUZZING_ENGINE=afl|honggfuzz`, so AFL/honggfuzz harnesses were never really fuzzed (libplist 42519914 "passed" with 0 executions) → we call `compile` with libFuzzer, and no-execution refuzz is `inconclusive` (D-0046/47); (3) leaks behind a baseline crash are "unmasked", not new (D-0046). One rule was relaxed for ARVO only: dropping a `free` is judged by LSan instead of rejected outright.
+
+### Numbers that changed
+- Gate v1 → D-0047: jq/mosquitto model verdicts unchanged (jq run 4 winner rejected; run 2 + mosquitto ×6 verified).
+- New: gate accepts **15/18** developer fixes (adjudicated; raw 15/19) and rejects 1 developer fix that leaks.
+- Spend: $0 (no model calls); ledger still **$1.2201**.
+
+### Open
+1. Calibrate Tier-2 + reserves (15 cases) as replacements for the 8 uncalibratable Tier-1 cases → P3 case list.
+2. Check 8 (LLM audit flag) not built.
