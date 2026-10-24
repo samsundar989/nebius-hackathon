@@ -31,8 +31,13 @@ echo "## cunit"; ls /usr/include/CUnit 2>/dev/null | head -3 || echo none
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--ids", required=True)
-    ap.add_argument("--try", dest="try_cmd", action="append", default=[],
-                    help="id=command to run after an -O0 rebuild (repeatable)")
+    ap.add_argument(
+        "--try",
+        dest="try_cmd",
+        action="append",
+        default=[],
+        help="id=command to run after an -O0 rebuild (repeatable)",
+    )
     args = ap.parse_args()
     tries = dict(t.split("=", 1) for t in args.try_cmd)
     out_dir = RUNS_DIR / "arvo_inspect"
@@ -41,15 +46,30 @@ def main() -> int:
     for cid in args.ids.split(","):
         case = ArvoCase.load(cid)
         subprocess.run(["docker", "pull", "-q", case.image], check=True, capture_output=True)
-        workdir = subprocess.run(["docker", "image", "inspect", "-f", "{{.Config.WorkingDir}}", case.image],
-                                 capture_output=True, text=True, check=True).stdout.strip() or "/src"
+        workdir = (
+            subprocess.run(
+                ["docker", "image", "inspect", "-f", "{{.Config.WorkingDir}}", case.image],
+                capture_output=True,
+                text=True,
+                check=True,
+            ).stdout.strip()
+            or "/src"
+        )
         ref = ImageRef("docker", case.image)
-        res = runner.run(ref, INSPECT.format(project=case.project), cwd=workdir, network=False, timeout_s=120)
+        res = runner.run(
+            ref, INSPECT.format(project=case.project), cwd=workdir, network=False, timeout_s=120
+        )
         text = f"# {cid} {case.project} {case.image} workdir={workdir}\n{res.stdout}\n{res.stderr[-2000:]}"
         if cid in tries:
-            t = runner.run(ref, f"arvo compile > /tmp/c.log 2>&1 || {{ tail -30 /tmp/c.log; exit 97; }}; "
-                                f"arvo; echo ARVO_RC=$?; ( {tries[cid]} ) 2>&1 | tail -80; echo TEST_RC=$?",
-                           env=BUILD_ENV, cwd=workdir, network=False, timeout_s=2400)
+            t = runner.run(
+                ref,
+                f"arvo compile > /tmp/c.log 2>&1 || {{ tail -30 /tmp/c.log; exit 97; }}; "
+                f"arvo; echo ARVO_RC=$?; ( {tries[cid]} ) 2>&1 | tail -80; echo TEST_RC=$?",
+                env=BUILD_ENV,
+                cwd=workdir,
+                network=False,
+                timeout_s=2400,
+            )
             text += f"\n## try: {tries[cid]} (exit {t.exit_code}, {t.elapsed_s}s)\n{t.stdout[-12000:]}\n{t.stderr[-3000:]}"
         (out_dir / f"{cid}.txt").write_text(text)
         print(text[:3000], flush=True)
