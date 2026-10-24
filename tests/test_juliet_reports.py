@@ -31,4 +31,7 @@ def test_report_parses_to_expected_kind(case_path: Path) -> None:
 
 
 def test_smoke_set_size() -> None:
-    assert len(CASES) == 60
+    sel = json.loads((ROOT / "cases" / "juliet" / "selection.json").read_text())["cases"]
+    assert len(sel) == 60 and all(
+        (ROOT / "cases" / "juliet" / f"{c['id']}.json").exists() for c in sel
+    )

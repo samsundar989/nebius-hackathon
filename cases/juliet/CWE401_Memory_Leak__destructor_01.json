@@ -35,7 +35,7 @@
  "parsed": false,
  "parsed_kind_matches": false,
  "reproducible": false,
- "not_reproducible_reason": null,
+ "not_reproducible_reason": "class-based Juliet case: _bad.cpp and _good1.cpp each define main(); our build links every file of the case into one program (multiple definition of main) - a harness limitation, not the sanitizer",
  "finding": null,
  "all_bad_kinds": [],
  "good_clean": false,

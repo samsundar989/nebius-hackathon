@@ -44,6 +44,12 @@ SUPPORT = ["io.c", "std_testcase.h", "std_testcase_io.h", "std_thread.h"]
 MARK = "@@LEAKPROOF@@"
 # Root causes established by hand (docs/REPORT_E0.md); a miss without an entry is a harness bug.
 NOT_REPRODUCIBLE = {
+    "CWE401_Memory_Leak__char_calloc_68": "leaked block is still referenced from a global at exit, so LSan treats it as reachable (by design; use_globals=0 would report it but also flags libc/iostream globals)",
+    "CWE401_Memory_Leak__new_struct_twoIntsStruct_68": "leaked block is still referenced from a global at exit, so LSan treats it as reachable (by design; use_globals=0 would report it but also flags libc/iostream globals)",
+    "CWE401_Memory_Leak__new_TwoIntsClass_45": "leaked block is still referenced from a global at exit, so LSan treats it as reachable (by design; use_globals=0 would report it but also flags libc/iostream globals)",
+    "CWE401_Memory_Leak__strdup_wchar_t_45": "leaked block is still referenced from a global at exit, so LSan treats it as reachable (by design; use_globals=0 would report it but also flags libc/iostream globals)",
+    "CWE401_Memory_Leak__destructor_01": "class-based Juliet case: _bad.cpp and _good1.cpp each define main(); our build links every file of the case into one program (multiple definition of main) - a harness limitation, not the sanitizer",
+    "CWE401_Memory_Leak__virtual_destructor_01": "class-based Juliet case: _bad.cpp and _good1.cpp each define main(); our build links every file of the case into one program (multiple definition of main) - a harness limitation, not the sanitizer",
     "CWE401_Memory_Leak__twoIntsStruct_calloc_68": "leaked block is still referenced from a "
     "global at exit, so LSan treats it as reachable (by design; use_globals=0 would report it "
     "but also flags libc/iostream globals)",

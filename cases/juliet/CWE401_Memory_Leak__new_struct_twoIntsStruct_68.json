@@ -35,7 +35,7 @@
  "parsed": false,
  "parsed_kind_matches": false,
  "reproducible": false,
- "not_reproducible_reason": null,
+ "not_reproducible_reason": "leaked block is still referenced from a global at exit, so LSan treats it as reachable (by design; use_globals=0 would report it but also flags libc/iostream globals)",
  "finding": null,
  "all_bad_kinds": [],
  "good_clean": true,
