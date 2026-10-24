@@ -1,0 +1,1288 @@
+{
+ "seed": 112,
+ "cases": [
+  {
+   "id": "CWE401_Memory_Leak__char_calloc_18",
+   "cwe": "CWE-401",
+   "functional_variant": "char_calloc",
+   "flow_variant": "18",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__char_calloc_18.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__char_calloc_62",
+   "cwe": "CWE-401",
+   "functional_variant": "char_calloc",
+   "flow_variant": "62",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__char_calloc_62a.cpp",
+    "CWE401_Memory_Leak__char_calloc_62b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__char_calloc_68",
+   "cwe": "CWE-401",
+   "functional_variant": "char_calloc",
+   "flow_variant": "68",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__char_calloc_68a.c",
+    "CWE401_Memory_Leak__char_calloc_68b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__char_malloc_07",
+   "cwe": "CWE-401",
+   "functional_variant": "char_malloc",
+   "flow_variant": "07",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__char_malloc_07.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__char_malloc_22",
+   "cwe": "CWE-401",
+   "functional_variant": "char_malloc",
+   "flow_variant": "22",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__char_malloc_22a.c",
+    "CWE401_Memory_Leak__char_malloc_22b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__char_malloc_61",
+   "cwe": "CWE-401",
+   "functional_variant": "char_malloc",
+   "flow_variant": "61",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__char_malloc_61a.c",
+    "CWE401_Memory_Leak__char_malloc_61b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__char_realloc_13",
+   "cwe": "CWE-401",
+   "functional_variant": "char_realloc",
+   "flow_variant": "13",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__char_realloc_13.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__char_realloc_61",
+   "cwe": "CWE-401",
+   "functional_variant": "char_realloc",
+   "flow_variant": "61",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__char_realloc_61a.c",
+    "CWE401_Memory_Leak__char_realloc_61b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__char_realloc_67",
+   "cwe": "CWE-401",
+   "functional_variant": "char_realloc",
+   "flow_variant": "67",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__char_realloc_67a.c",
+    "CWE401_Memory_Leak__char_realloc_67b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__destructor_01",
+   "cwe": "CWE-401",
+   "functional_variant": "destructor",
+   "flow_variant": "01",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__destructor_01_bad.cpp",
+    "CWE401_Memory_Leak__destructor_01_good1.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_calloc_33",
+   "cwe": "CWE-401",
+   "functional_variant": "int64_t_calloc",
+   "flow_variant": "33",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int64_t_calloc_33.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_calloc_66",
+   "cwe": "CWE-401",
+   "functional_variant": "int64_t_calloc",
+   "flow_variant": "66",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int64_t_calloc_66a.c",
+    "CWE401_Memory_Leak__int64_t_calloc_66b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_calloc_82",
+   "cwe": "CWE-401",
+   "functional_variant": "int64_t_calloc",
+   "flow_variant": "82",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int64_t_calloc_82.h",
+    "CWE401_Memory_Leak__int64_t_calloc_82_bad.cpp",
+    "CWE401_Memory_Leak__int64_t_calloc_82_goodB2G.cpp",
+    "CWE401_Memory_Leak__int64_t_calloc_82_goodG2B.cpp",
+    "CWE401_Memory_Leak__int64_t_calloc_82a.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_malloc_44",
+   "cwe": "CWE-401",
+   "functional_variant": "int64_t_malloc",
+   "flow_variant": "44",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int64_t_malloc_44.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_malloc_63",
+   "cwe": "CWE-401",
+   "functional_variant": "int64_t_malloc",
+   "flow_variant": "63",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int64_t_malloc_63a.c",
+    "CWE401_Memory_Leak__int64_t_malloc_63b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_malloc_65",
+   "cwe": "CWE-401",
+   "functional_variant": "int64_t_malloc",
+   "flow_variant": "65",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int64_t_malloc_65a.c",
+    "CWE401_Memory_Leak__int64_t_malloc_65b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_realloc_02",
+   "cwe": "CWE-401",
+   "functional_variant": "int64_t_realloc",
+   "flow_variant": "02",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int64_t_realloc_02.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_realloc_65",
+   "cwe": "CWE-401",
+   "functional_variant": "int64_t_realloc",
+   "flow_variant": "65",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int64_t_realloc_65a.c",
+    "CWE401_Memory_Leak__int64_t_realloc_65b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int64_t_realloc_72",
+   "cwe": "CWE-401",
+   "functional_variant": "int64_t_realloc",
+   "flow_variant": "72",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int64_t_realloc_72a.cpp",
+    "CWE401_Memory_Leak__int64_t_realloc_72b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int_calloc_08",
+   "cwe": "CWE-401",
+   "functional_variant": "int_calloc",
+   "flow_variant": "08",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int_calloc_08.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int_calloc_17",
+   "cwe": "CWE-401",
+   "functional_variant": "int_calloc",
+   "flow_variant": "17",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int_calloc_17.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int_calloc_44",
+   "cwe": "CWE-401",
+   "functional_variant": "int_calloc",
+   "flow_variant": "44",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int_calloc_44.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int_malloc_21",
+   "cwe": "CWE-401",
+   "functional_variant": "int_malloc",
+   "flow_variant": "21",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int_malloc_21.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int_malloc_52",
+   "cwe": "CWE-401",
+   "functional_variant": "int_malloc",
+   "flow_variant": "52",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int_malloc_52a.c",
+    "CWE401_Memory_Leak__int_malloc_52b.c",
+    "CWE401_Memory_Leak__int_malloc_52c.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int_malloc_66",
+   "cwe": "CWE-401",
+   "functional_variant": "int_malloc",
+   "flow_variant": "66",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int_malloc_66a.c",
+    "CWE401_Memory_Leak__int_malloc_66b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int_realloc_03",
+   "cwe": "CWE-401",
+   "functional_variant": "int_realloc",
+   "flow_variant": "03",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int_realloc_03.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int_realloc_15",
+   "cwe": "CWE-401",
+   "functional_variant": "int_realloc",
+   "flow_variant": "15",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int_realloc_15.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__int_realloc_84",
+   "cwe": "CWE-401",
+   "functional_variant": "int_realloc",
+   "flow_variant": "84",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__int_realloc_84.h",
+    "CWE401_Memory_Leak__int_realloc_84_bad.cpp",
+    "CWE401_Memory_Leak__int_realloc_84_goodB2G.cpp",
+    "CWE401_Memory_Leak__int_realloc_84_goodG2B.cpp",
+    "CWE401_Memory_Leak__int_realloc_84a.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_TwoIntsClass_10",
+   "cwe": "CWE-401",
+   "functional_variant": "new_TwoIntsClass",
+   "flow_variant": "10",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_TwoIntsClass_10.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_TwoIntsClass_31",
+   "cwe": "CWE-401",
+   "functional_variant": "new_TwoIntsClass",
+   "flow_variant": "31",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_TwoIntsClass_31.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_TwoIntsClass_45",
+   "cwe": "CWE-401",
+   "functional_variant": "new_TwoIntsClass",
+   "flow_variant": "45",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_TwoIntsClass_45.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_TwoIntsClass_06",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_TwoIntsClass",
+   "flow_variant": "06",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_TwoIntsClass_06.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_TwoIntsClass_53",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_TwoIntsClass",
+   "flow_variant": "53",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_TwoIntsClass_53a.cpp",
+    "CWE401_Memory_Leak__new_array_TwoIntsClass_53b.cpp",
+    "CWE401_Memory_Leak__new_array_TwoIntsClass_53c.cpp",
+    "CWE401_Memory_Leak__new_array_TwoIntsClass_53d.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_char_21",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_char",
+   "flow_variant": "21",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__new_array_char_21.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_char_33",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_char",
+   "flow_variant": "33",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__new_array_char_33.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_char_67",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_char",
+   "flow_variant": "67",
+   "dir": "testcases\\CWE401_Memory_Leak\\s01",
+   "files": [
+    "CWE401_Memory_Leak__new_array_char_67a.cpp",
+    "CWE401_Memory_Leak__new_array_char_67b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_int64_t_41",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_int64_t",
+   "flow_variant": "41",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_int64_t_41.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_int64_t_73",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_int64_t",
+   "flow_variant": "73",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_int64_t_73a.cpp",
+    "CWE401_Memory_Leak__new_array_int64_t_73b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_int64_t_81",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_int64_t",
+   "flow_variant": "81",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_int64_t_81.h",
+    "CWE401_Memory_Leak__new_array_int64_t_81_bad.cpp",
+    "CWE401_Memory_Leak__new_array_int64_t_81_goodB2G.cpp",
+    "CWE401_Memory_Leak__new_array_int64_t_81_goodG2B.cpp",
+    "CWE401_Memory_Leak__new_array_int64_t_81a.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_int_04",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_int",
+   "flow_variant": "04",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_int_04.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_int_81",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_int",
+   "flow_variant": "81",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_int_81.h",
+    "CWE401_Memory_Leak__new_array_int_81_bad.cpp",
+    "CWE401_Memory_Leak__new_array_int_81_goodB2G.cpp",
+    "CWE401_Memory_Leak__new_array_int_81_goodG2B.cpp",
+    "CWE401_Memory_Leak__new_array_int_81a.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_struct_twoIntsStruct_01",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_struct_twoIntsStruct",
+   "flow_variant": "01",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_struct_twoIntsStruct_01.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_struct_twoIntsStruct_18",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_struct_twoIntsStruct",
+   "flow_variant": "18",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_struct_twoIntsStruct_18.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_struct_twoIntsStruct_32",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_struct_twoIntsStruct",
+   "flow_variant": "32",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_struct_twoIntsStruct_32.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_twointsStruct_05",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_twointsStruct",
+   "flow_variant": "05",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_twointsStruct_05.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_twointsStruct_32",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_twointsStruct",
+   "flow_variant": "32",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_twointsStruct_32.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_twointsStruct_74",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_twointsStruct",
+   "flow_variant": "74",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_twointsStruct_74a.cpp",
+    "CWE401_Memory_Leak__new_array_twointsStruct_74b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_wchar_t_11",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_wchar_t",
+   "flow_variant": "11",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_wchar_t_11.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_wchar_t_34",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_wchar_t",
+   "flow_variant": "34",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_wchar_t_34.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_array_wchar_t_54",
+   "cwe": "CWE-401",
+   "functional_variant": "new_array_wchar_t",
+   "flow_variant": "54",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_array_wchar_t_54a.cpp",
+    "CWE401_Memory_Leak__new_array_wchar_t_54b.cpp",
+    "CWE401_Memory_Leak__new_array_wchar_t_54c.cpp",
+    "CWE401_Memory_Leak__new_array_wchar_t_54d.cpp",
+    "CWE401_Memory_Leak__new_array_wchar_t_54e.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_char_15",
+   "cwe": "CWE-401",
+   "functional_variant": "new_char",
+   "flow_variant": "15",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_char_15.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_char_81",
+   "cwe": "CWE-401",
+   "functional_variant": "new_char",
+   "flow_variant": "81",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_char_81.h",
+    "CWE401_Memory_Leak__new_char_81_bad.cpp",
+    "CWE401_Memory_Leak__new_char_81_goodB2G.cpp",
+    "CWE401_Memory_Leak__new_char_81_goodG2B.cpp",
+    "CWE401_Memory_Leak__new_char_81a.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_int64_t_53",
+   "cwe": "CWE-401",
+   "functional_variant": "new_int64_t",
+   "flow_variant": "53",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_int64_t_53a.cpp",
+    "CWE401_Memory_Leak__new_int64_t_53b.cpp",
+    "CWE401_Memory_Leak__new_int64_t_53c.cpp",
+    "CWE401_Memory_Leak__new_int64_t_53d.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_int64_t_64",
+   "cwe": "CWE-401",
+   "functional_variant": "new_int64_t",
+   "flow_variant": "64",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_int64_t_64a.cpp",
+    "CWE401_Memory_Leak__new_int64_t_64b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_int_03",
+   "cwe": "CWE-401",
+   "functional_variant": "new_int",
+   "flow_variant": "03",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_int_03.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_int_10",
+   "cwe": "CWE-401",
+   "functional_variant": "new_int",
+   "flow_variant": "10",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_int_10.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_int_73",
+   "cwe": "CWE-401",
+   "functional_variant": "new_int",
+   "flow_variant": "73",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_int_73a.cpp",
+    "CWE401_Memory_Leak__new_int_73b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_struct_twoIntsStruct_10",
+   "cwe": "CWE-401",
+   "functional_variant": "new_struct_twoIntsStruct",
+   "flow_variant": "10",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_struct_twoIntsStruct_10.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_struct_twoIntsStruct_17",
+   "cwe": "CWE-401",
+   "functional_variant": "new_struct_twoIntsStruct",
+   "flow_variant": "17",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_struct_twoIntsStruct_17.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_struct_twoIntsStruct_68",
+   "cwe": "CWE-401",
+   "functional_variant": "new_struct_twoIntsStruct",
+   "flow_variant": "68",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_struct_twoIntsStruct_68a.cpp",
+    "CWE401_Memory_Leak__new_struct_twoIntsStruct_68b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_twoIntsStruct_02",
+   "cwe": "CWE-401",
+   "functional_variant": "new_twoIntsStruct",
+   "flow_variant": "02",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_twoIntsStruct_02.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_twoIntsStruct_09",
+   "cwe": "CWE-401",
+   "functional_variant": "new_twoIntsStruct",
+   "flow_variant": "09",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_twoIntsStruct_09.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_twoIntsStruct_64",
+   "cwe": "CWE-401",
+   "functional_variant": "new_twoIntsStruct",
+   "flow_variant": "64",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_twoIntsStruct_64a.cpp",
+    "CWE401_Memory_Leak__new_twoIntsStruct_64b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_wchar_t_05",
+   "cwe": "CWE-401",
+   "functional_variant": "new_wchar_t",
+   "flow_variant": "05",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_wchar_t_05.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_wchar_t_11",
+   "cwe": "CWE-401",
+   "functional_variant": "new_wchar_t",
+   "flow_variant": "11",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_wchar_t_11.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__new_wchar_t_22",
+   "cwe": "CWE-401",
+   "functional_variant": "new_wchar_t",
+   "flow_variant": "22",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__new_wchar_t_22a.cpp",
+    "CWE401_Memory_Leak__new_wchar_t_22b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__strdup_char_09",
+   "cwe": "CWE-401",
+   "functional_variant": "strdup_char",
+   "flow_variant": "09",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__strdup_char_09.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__strdup_char_62",
+   "cwe": "CWE-401",
+   "functional_variant": "strdup_char",
+   "flow_variant": "62",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__strdup_char_62a.cpp",
+    "CWE401_Memory_Leak__strdup_char_62b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__strdup_char_84",
+   "cwe": "CWE-401",
+   "functional_variant": "strdup_char",
+   "flow_variant": "84",
+   "dir": "testcases\\CWE401_Memory_Leak\\s02",
+   "files": [
+    "CWE401_Memory_Leak__strdup_char_84.h",
+    "CWE401_Memory_Leak__strdup_char_84_bad.cpp",
+    "CWE401_Memory_Leak__strdup_char_84_goodB2G.cpp",
+    "CWE401_Memory_Leak__strdup_char_84_goodG2B.cpp",
+    "CWE401_Memory_Leak__strdup_char_84a.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__strdup_wchar_t_04",
+   "cwe": "CWE-401",
+   "functional_variant": "strdup_wchar_t",
+   "flow_variant": "04",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__strdup_wchar_t_04.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__strdup_wchar_t_31",
+   "cwe": "CWE-401",
+   "functional_variant": "strdup_wchar_t",
+   "flow_variant": "31",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__strdup_wchar_t_31.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__strdup_wchar_t_45",
+   "cwe": "CWE-401",
+   "functional_variant": "strdup_wchar_t",
+   "flow_variant": "45",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__strdup_wchar_t_45.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_16",
+   "cwe": "CWE-401",
+   "functional_variant": "struct_twoIntsStruct_calloc",
+   "flow_variant": "16",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_16.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_51",
+   "cwe": "CWE-401",
+   "functional_variant": "struct_twoIntsStruct_calloc",
+   "flow_variant": "51",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_51a.c",
+    "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_51b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_83",
+   "cwe": "CWE-401",
+   "functional_variant": "struct_twoIntsStruct_calloc",
+   "flow_variant": "83",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_83.h",
+    "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_83_bad.cpp",
+    "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_83_goodB2G.cpp",
+    "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_83_goodG2B.cpp",
+    "CWE401_Memory_Leak__struct_twoIntsStruct_calloc_83a.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__struct_twoIntsStruct_malloc_05",
+   "cwe": "CWE-401",
+   "functional_variant": "struct_twoIntsStruct_malloc",
+   "flow_variant": "05",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__struct_twoIntsStruct_malloc_05.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__struct_twoIntsStruct_malloc_42",
+   "cwe": "CWE-401",
+   "functional_variant": "struct_twoIntsStruct_malloc",
+   "flow_variant": "42",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__struct_twoIntsStruct_malloc_42.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__struct_twoIntsStruct_malloc_63",
+   "cwe": "CWE-401",
+   "functional_variant": "struct_twoIntsStruct_malloc",
+   "flow_variant": "63",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__struct_twoIntsStruct_malloc_63a.c",
+    "CWE401_Memory_Leak__struct_twoIntsStruct_malloc_63b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__struct_twoIntsStruct_realloc_06",
+   "cwe": "CWE-401",
+   "functional_variant": "struct_twoIntsStruct_realloc",
+   "flow_variant": "06",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__struct_twoIntsStruct_realloc_06.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__struct_twoIntsStruct_realloc_43",
+   "cwe": "CWE-401",
+   "functional_variant": "struct_twoIntsStruct_realloc",
+   "flow_variant": "43",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__struct_twoIntsStruct_realloc_43.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__struct_twoIntsStruct_realloc_74",
+   "cwe": "CWE-401",
+   "functional_variant": "struct_twoIntsStruct_realloc",
+   "flow_variant": "74",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__struct_twoIntsStruct_realloc_74a.cpp",
+    "CWE401_Memory_Leak__struct_twoIntsStruct_realloc_74b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__twoIntsStruct_calloc_07",
+   "cwe": "CWE-401",
+   "functional_variant": "twoIntsStruct_calloc",
+   "flow_variant": "07",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__twoIntsStruct_calloc_07.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__twoIntsStruct_calloc_14",
+   "cwe": "CWE-401",
+   "functional_variant": "twoIntsStruct_calloc",
+   "flow_variant": "14",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__twoIntsStruct_calloc_14.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__twoIntsStruct_calloc_52",
+   "cwe": "CWE-401",
+   "functional_variant": "twoIntsStruct_calloc",
+   "flow_variant": "52",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__twoIntsStruct_calloc_52a.c",
+    "CWE401_Memory_Leak__twoIntsStruct_calloc_52b.c",
+    "CWE401_Memory_Leak__twoIntsStruct_calloc_52c.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__twoIntsStruct_malloc_34",
+   "cwe": "CWE-401",
+   "functional_variant": "twoIntsStruct_malloc",
+   "flow_variant": "34",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__twoIntsStruct_malloc_34.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__twoIntsStruct_malloc_51",
+   "cwe": "CWE-401",
+   "functional_variant": "twoIntsStruct_malloc",
+   "flow_variant": "51",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__twoIntsStruct_malloc_51a.c",
+    "CWE401_Memory_Leak__twoIntsStruct_malloc_51b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__twoIntsStruct_malloc_72",
+   "cwe": "CWE-401",
+   "functional_variant": "twoIntsStruct_malloc",
+   "flow_variant": "72",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__twoIntsStruct_malloc_72a.cpp",
+    "CWE401_Memory_Leak__twoIntsStruct_malloc_72b.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__twoIntsStruct_realloc_16",
+   "cwe": "CWE-401",
+   "functional_variant": "twoIntsStruct_realloc",
+   "flow_variant": "16",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__twoIntsStruct_realloc_16.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__twoIntsStruct_realloc_41",
+   "cwe": "CWE-401",
+   "functional_variant": "twoIntsStruct_realloc",
+   "flow_variant": "41",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__twoIntsStruct_realloc_41.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__twoIntsStruct_realloc_83",
+   "cwe": "CWE-401",
+   "functional_variant": "twoIntsStruct_realloc",
+   "flow_variant": "83",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__twoIntsStruct_realloc_83.h",
+    "CWE401_Memory_Leak__twoIntsStruct_realloc_83_bad.cpp",
+    "CWE401_Memory_Leak__twoIntsStruct_realloc_83_goodB2G.cpp",
+    "CWE401_Memory_Leak__twoIntsStruct_realloc_83_goodG2B.cpp",
+    "CWE401_Memory_Leak__twoIntsStruct_realloc_83a.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__virtual_destructor_01",
+   "cwe": "CWE-401",
+   "functional_variant": "virtual_destructor",
+   "flow_variant": "01",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__virtual_destructor_01_bad.cpp",
+    "CWE401_Memory_Leak__virtual_destructor_01_good1.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__wchar_t_calloc_08",
+   "cwe": "CWE-401",
+   "functional_variant": "wchar_t_calloc",
+   "flow_variant": "08",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__wchar_t_calloc_08.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__wchar_t_calloc_17",
+   "cwe": "CWE-401",
+   "functional_variant": "wchar_t_calloc",
+   "flow_variant": "17",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__wchar_t_calloc_17.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__wchar_t_calloc_54",
+   "cwe": "CWE-401",
+   "functional_variant": "wchar_t_calloc",
+   "flow_variant": "54",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__wchar_t_calloc_54a.c",
+    "CWE401_Memory_Leak__wchar_t_calloc_54b.c",
+    "CWE401_Memory_Leak__wchar_t_calloc_54c.c",
+    "CWE401_Memory_Leak__wchar_t_calloc_54d.c",
+    "CWE401_Memory_Leak__wchar_t_calloc_54e.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__wchar_t_malloc_43",
+   "cwe": "CWE-401",
+   "functional_variant": "wchar_t_malloc",
+   "flow_variant": "43",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__wchar_t_malloc_43.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__wchar_t_malloc_64",
+   "cwe": "CWE-401",
+   "functional_variant": "wchar_t_malloc",
+   "flow_variant": "64",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__wchar_t_malloc_64a.c",
+    "CWE401_Memory_Leak__wchar_t_malloc_64b.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__wchar_t_malloc_82",
+   "cwe": "CWE-401",
+   "functional_variant": "wchar_t_malloc",
+   "flow_variant": "82",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__wchar_t_malloc_82.h",
+    "CWE401_Memory_Leak__wchar_t_malloc_82_bad.cpp",
+    "CWE401_Memory_Leak__wchar_t_malloc_82_goodB2G.cpp",
+    "CWE401_Memory_Leak__wchar_t_malloc_82_goodG2B.cpp",
+    "CWE401_Memory_Leak__wchar_t_malloc_82a.cpp"
+   ],
+   "lang": "c++",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__wchar_t_realloc_13",
+   "cwe": "CWE-401",
+   "functional_variant": "wchar_t_realloc",
+   "flow_variant": "13",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__wchar_t_realloc_13.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__wchar_t_realloc_14",
+   "cwe": "CWE-401",
+   "functional_variant": "wchar_t_realloc",
+   "flow_variant": "14",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__wchar_t_realloc_14.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  },
+  {
+   "id": "CWE401_Memory_Leak__wchar_t_realloc_42",
+   "cwe": "CWE-401",
+   "functional_variant": "wchar_t_realloc",
+   "flow_variant": "42",
+   "dir": "testcases\\CWE401_Memory_Leak\\s03",
+   "files": [
+    "CWE401_Memory_Leak__wchar_t_realloc_42.c"
+   ],
+   "lang": "c",
+   "expected_kind": "leak"
+  }
+ ]
+}

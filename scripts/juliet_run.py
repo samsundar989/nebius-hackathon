@@ -28,6 +28,8 @@ from leakproof.runner import ImageRef, get_runner
 ROOT = Path(__file__).resolve().parent.parent
 JULIET = Path.home() / ".cache" / "leakproof" / "juliet" / "C"
 IMAGE = ImageRef("docker", "leakproof/cpp-sanitizers:e0")
+# Same toolchain on Sandboxes (scripts/sandboxes_setup.py); D-0053.
+IMAGES = {"docker": IMAGE, "sandboxes": ImageRef("sandboxes", "tag:lp-cpp-sanitizers")}
 # -O0, not the kickoff's -O1: at -O1 clang deletes malloc/free/free sequences, hiding double
 # frees (2/15 CWE-415 cases), and -O1 -fno-omit-frame-pointer makes LSan miss leaks. Measured;
 # see docs/REPORT_E0.md and D-0021.
@@ -101,7 +103,7 @@ def run_case(runner, case: dict, extra: str = "") -> dict:  # noqa: ANN001 - any
     files.update({f"support/{f}": JULIET / "testcasesupport" / f for f in SUPPORT})
     t0 = time.monotonic()
     res = runner.run(
-        IMAGE,
+        IMAGES[getattr(runner, "name", "docker")],
         case_script(case, extra),
         files=files,
         env=RUN_ENV,
@@ -158,11 +160,13 @@ def main() -> int:
     ap.add_argument("--only")
     ap.add_argument("--jobs", type=int, default=3)
     ap.add_argument("--runner", default="docker")
+    ap.add_argument("--selection", type=Path, default=ROOT / "cases" / "juliet" / "selection.json")
+    ap.add_argument("--summary-suffix", default="", help="runs/juliet_summary<suffix>.json")
     ap.add_argument(
         "--extra-cflags", default="", help="sensitivity runs; results not written to cases/"
     )
     args = ap.parse_args()
-    selection = json.loads((ROOT / "cases" / "juliet" / "selection.json").read_text())["cases"]
+    selection = json.loads(args.selection.read_text())["cases"]
     if args.only:
         selection = [c for c in selection if c["id"] == args.only]
     runner = (
@@ -210,7 +214,7 @@ def main() -> int:
         "per_cwe": {k: dict(v) for k, v in sorted(table.items())},
         "mean_case_wall_s": round(sum(r["wall_s"] for r in results) / max(len(results), 1), 2),
     }
-    suffix = "_extra" if args.extra_cflags else ""
+    suffix = "_extra" if args.extra_cflags else args.summary_suffix
     summary["cflags"] = f"{CFLAGS} {args.extra_cflags}".strip()
     (ROOT / "runs" / f"juliet_summary{suffix}.json").write_text(json.dumps(summary, indent=1))
     print(json.dumps(summary, indent=1))

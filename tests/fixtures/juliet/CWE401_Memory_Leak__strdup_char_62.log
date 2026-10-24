@@ -1,0 +1,14 @@
+
+=================================================================
+==22==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 9 byte(s) in 1 object(s) allocated from:
+    #0 0x555555603efe in strdup (/work/bin/bad+0xafefe) (BuildId: 745b3bb25b02820aeff108c49b21a8cbd6cf6fef)
+    #1 0x55555565ce71 in CWE401_Memory_Leak__strdup_char_62::badSource(char*&) /work/case/CWE401_Memory_Leak__strdup_char_62b.cpp:32:16
+    #2 0x55555565cc61 in CWE401_Memory_Leak__strdup_char_62::bad() /work/case/CWE401_Memory_Leak__strdup_char_62a.cpp:34:5
+    #3 0x55555565ccfe in main /work/case/CWE401_Memory_Leak__strdup_char_62a.cpp:99:5
+    #4 0x7ffff782a1c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #5 0x7ffff782a28a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #6 0x5555555813a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: 745b3bb25b02820aeff108c49b21a8cbd6cf6fef)
+
+SUMMARY: AddressSanitizer: 9 byte(s) leaked in 1 allocation(s).

@@ -1,0 +1,46 @@
+{
+ "id": "CWE401_Memory_Leak__new_TwoIntsClass_45",
+ "cwe": "CWE-401",
+ "functional_variant": "new_TwoIntsClass",
+ "flow_variant": "45",
+ "dir": "testcases\\CWE401_Memory_Leak\\s02",
+ "files": [
+  "CWE401_Memory_Leak__new_TwoIntsClass_45.cpp"
+ ],
+ "lang": "c++",
+ "expected_kind": "leak",
+ "source_root": "juliet-1.3/C",
+ "support_files": [
+  "testcasesupport/io.c",
+  "testcasesupport/std_testcase.h",
+  "testcasesupport/std_testcase_io.h",
+  "testcasesupport/std_thread.h"
+ ],
+ "image": "leakproof/cpp-sanitizers:e0",
+ "env": {
+  "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=0:symbolize=1",
+  "LSAN_OPTIONS": "use_stacks=0",
+  "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=0"
+ },
+ "build_cmd_bad": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITGOOD -Isupport -Icase -c support/io.c -o bin/io_bad.o && clang++ -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITGOOD -Isupport -Icase case/CWE401_Memory_Leak__new_TwoIntsClass_45.cpp bin/io_bad.o  -o bin/bad",
+ "run_cmd_bad": "timeout 30 ./bin/bad < /dev/null",
+ "build_cmd_good": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITBAD -Isupport -Icase -c support/io.c -o bin/io_good.o && clang++ -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITBAD -Isupport -Icase case/CWE401_Memory_Leak__new_TwoIntsClass_45.cpp bin/io_good.o  -o bin/good",
+ "run_cmd_good": "timeout 30 ./bin/good < /dev/null",
+ "build_bad_ok": true,
+ "build_good_ok": true,
+ "bad_exit": 0,
+ "good_exit": 0,
+ "detected": false,
+ "parsed": false,
+ "parsed_kind_matches": false,
+ "reproducible": false,
+ "not_reproducible_reason": null,
+ "finding": null,
+ "all_bad_kinds": [],
+ "good_clean": true,
+ "good_clean_target": true,
+ "good_findings": [],
+ "build_log_bad_tail": "",
+ "wall_s": 2.61,
+ "container_peak_kb": 91432
+}

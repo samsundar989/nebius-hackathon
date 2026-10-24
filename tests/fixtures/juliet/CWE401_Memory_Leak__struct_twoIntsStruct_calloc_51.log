@@ -1,0 +1,13 @@
+
+=================================================================
+==20==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 800 byte(s) in 1 object(s) allocated from:
+    #0 0x55555561b3ed in calloc (/work/bin/bad+0xc73ed) (BuildId: fd73d74b2f76e2280573a63d81777f95eac3c438)
+    #1 0x55555565ae66 in CWE401_Memory_Leak__struct_twoIntsStruct_calloc_51_bad /work/case/CWE401_Memory_Leak__struct_twoIntsStruct_calloc_51a.c:32:37
+    #2 0x55555565b0fe in main /work/case/CWE401_Memory_Leak__struct_twoIntsStruct_calloc_51a.c:104:5
+    #3 0x7ffff7c2a1c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #4 0x7ffff7c2a28a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #5 0x5555555803b4 in _start (/work/bin/bad+0x2c3b4) (BuildId: fd73d74b2f76e2280573a63d81777f95eac3c438)
+
+SUMMARY: AddressSanitizer: 800 byte(s) leaked in 1 allocation(s).

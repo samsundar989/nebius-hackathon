@@ -35,6 +35,9 @@ def case_ids(spec: str) -> list[str]:
     if spec == "juliet-smoke":
         sel = json.loads((ROOT / "cases" / "juliet" / "selection.json").read_text())["cases"]
         return [c["id"] for c in sel]
+    if spec.startswith("selection:"):  # any Juliet selection file, e.g. selection_cwe401_100
+        path = ROOT / "cases" / "juliet" / f"{spec.split(':', 1)[1]}.json"
+        return [c["id"] for c in json.loads(path.read_text())["cases"]]
     if spec == "batch_p3":
         sel = json.loads((ROOT / "cases" / "arvo" / "batch_p3.json").read_text())["cases"]
         return [str(c["localId"]) for c in sel]

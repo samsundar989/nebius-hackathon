@@ -1,0 +1,13 @@
+
+=================================================================
+==20==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 100 byte(s) in 1 object(s) allocated from:
+    #0 0x55555565a931 in operator new[](unsigned long) (/work/bin/bad+0x106931) (BuildId: 3362b6c641df0aa807a47438f881d85a81ad41d5)
+    #1 0x55555565cbb1 in CWE401_Memory_Leak__new_array_char_67::bad() /work/case/CWE401_Memory_Leak__new_array_char_67a.cpp:43:12
+    #2 0x55555565cc9e in main /work/case/CWE401_Memory_Leak__new_array_char_67a.cpp:120:5
+    #3 0x7ffff782a1c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #4 0x7ffff782a28a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #5 0x5555555813a4 in _start (/work/bin/bad+0x2d3a4) (BuildId: 3362b6c641df0aa807a47438f881d85a81ad41d5)
+
+SUMMARY: AddressSanitizer: 100 byte(s) leaked in 1 allocation(s).

@@ -1,0 +1,15 @@
+
+=================================================================
+==19==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 36 byte(s) in 1 object(s) allocated from:
+    #0 0x55555561b1f3 in malloc (/work/bin/bad+0xc71f3) (BuildId: e08b2a04714f6426036e53e0c5883819c908d61c)
+    #1 0x7ffff7ccbaf2 in wcsdup (/lib/x86_64-linux-gnu/libc.so.6+0xcbaf2) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #2 0x5555555e73b7 in wcsdup (/work/bin/bad+0x933b7) (BuildId: e08b2a04714f6426036e53e0c5883819c908d61c)
+    #3 0x55555565af35 in CWE401_Memory_Leak__strdup_wchar_t_04_bad /work/case/CWE401_Memory_Leak__strdup_wchar_t_04.c:39:20
+    #4 0x55555565affe in main /work/case/CWE401_Memory_Leak__strdup_wchar_t_04.c:180:5
+    #5 0x7ffff7c2a1c9  (/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #6 0x7ffff7c2a28a in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28a) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #7 0x5555555803a4 in _start (/work/bin/bad+0x2c3a4) (BuildId: e08b2a04714f6426036e53e0c5883819c908d61c)
+
+SUMMARY: AddressSanitizer: 36 byte(s) leaked in 1 allocation(s).

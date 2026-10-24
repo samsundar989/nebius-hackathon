@@ -98,11 +98,19 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--seed", type=int, default=112)
     ap.add_argument("--out", type=Path, default=ROOT / "cases" / "juliet" / "selection.json")
+    ap.add_argument("--quota", help="e.g. 401=100 (default: the smoke-set quotas)")
+    ap.add_argument("--exclude", type=Path, action="append", default=[], help="selection files")
     args = ap.parse_args()
     rng = random.Random(args.seed)
+    quotas = (
+        {k: int(v) for k, v in (p.split("=") for p in args.quota.split(","))}
+        if args.quota
+        else QUOTAS
+    )
+    taken = {c["id"] for p in args.exclude for c in json.loads(p.read_text())["cases"]}
     selection = []
-    for cwe, k in QUOTAS.items():
-        cands = discover(cwe)
+    for cwe, k in quotas.items():
+        cands = [c for c in discover(cwe) if c["id"] not in taken]
         picked = select(cands, k, rng)
         langs = Counter(c["lang"] for c in picked)
         print(

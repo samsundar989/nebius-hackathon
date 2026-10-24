@@ -1,0 +1,192 @@
+{
+ "id": "CWE401_Memory_Leak__strdup_char_62",
+ "cwe": "CWE-401",
+ "functional_variant": "strdup_char",
+ "flow_variant": "62",
+ "dir": "testcases\\CWE401_Memory_Leak\\s02",
+ "files": [
+  "CWE401_Memory_Leak__strdup_char_62a.cpp",
+  "CWE401_Memory_Leak__strdup_char_62b.cpp"
+ ],
+ "lang": "c++",
+ "expected_kind": "leak",
+ "source_root": "juliet-1.3/C",
+ "support_files": [
+  "testcasesupport/io.c",
+  "testcasesupport/std_testcase.h",
+  "testcasesupport/std_testcase_io.h",
+  "testcasesupport/std_thread.h"
+ ],
+ "image": "leakproof/cpp-sanitizers:e0",
+ "env": {
+  "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=0:symbolize=1",
+  "LSAN_OPTIONS": "use_stacks=0",
+  "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=0"
+ },
+ "build_cmd_bad": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITGOOD -Isupport -Icase -c support/io.c -o bin/io_bad.o && clang++ -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITGOOD -Isupport -Icase case/CWE401_Memory_Leak__strdup_char_62a.cpp case/CWE401_Memory_Leak__strdup_char_62b.cpp bin/io_bad.o  -o bin/bad",
+ "run_cmd_bad": "timeout 30 ./bin/bad < /dev/null",
+ "build_cmd_good": "clang -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITBAD -Isupport -Icase -c support/io.c -o bin/io_good.o && clang++ -fsanitize=address,undefined -g -O0 -DINCLUDEMAIN -DOMITBAD -Isupport -Icase case/CWE401_Memory_Leak__strdup_char_62a.cpp case/CWE401_Memory_Leak__strdup_char_62b.cpp bin/io_good.o  -o bin/good",
+ "run_cmd_good": "timeout 30 ./bin/good < /dev/null",
+ "build_bad_ok": true,
+ "build_good_ok": true,
+ "bad_exit": 1,
+ "good_exit": 0,
+ "detected": true,
+ "parsed": true,
+ "parsed_kind_matches": true,
+ "reproducible": true,
+ "not_reproducible_reason": null,
+ "finding": {
+  "tool": "lsan",
+  "kind": "leak",
+  "cwe_guess": "CWE-401",
+  "summary": "Direct leak of 9 byte(s) in 1 object(s) allocated from:",
+  "frames": [
+   {
+    "index": 0,
+    "function": "strdup",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x555555603efe"
+   },
+   {
+    "index": 1,
+    "function": "CWE401_Memory_Leak__strdup_char_62::badSource(char*&)",
+    "file": "/work/case/CWE401_Memory_Leak__strdup_char_62b.cpp",
+    "line": 32,
+    "column": 16,
+    "module": null,
+    "pc": "0x55555565ce71"
+   },
+   {
+    "index": 2,
+    "function": "CWE401_Memory_Leak__strdup_char_62::bad()",
+    "file": "/work/case/CWE401_Memory_Leak__strdup_char_62a.cpp",
+    "line": 34,
+    "column": 5,
+    "module": null,
+    "pc": "0x55555565cc61"
+   },
+   {
+    "index": 3,
+    "function": "main",
+    "file": "/work/case/CWE401_Memory_Leak__strdup_char_62a.cpp",
+    "line": 99,
+    "column": 5,
+    "module": null,
+    "pc": "0x55555565ccfe"
+   },
+   {
+    "index": 4,
+    "function": "<unknown>",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/lib/x86_64-linux-gnu/libc.so.6",
+    "pc": "0x7ffff782a1c9"
+   },
+   {
+    "index": 5,
+    "function": "__libc_start_main",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/lib/x86_64-linux-gnu/libc.so.6",
+    "pc": "0x7ffff782a28a"
+   },
+   {
+    "index": 6,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5555555813a4"
+   }
+  ],
+  "alloc_stack": [
+   {
+    "index": 0,
+    "function": "strdup",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x555555603efe"
+   },
+   {
+    "index": 1,
+    "function": "CWE401_Memory_Leak__strdup_char_62::badSource(char*&)",
+    "file": "/work/case/CWE401_Memory_Leak__strdup_char_62b.cpp",
+    "line": 32,
+    "column": 16,
+    "module": null,
+    "pc": "0x55555565ce71"
+   },
+   {
+    "index": 2,
+    "function": "CWE401_Memory_Leak__strdup_char_62::bad()",
+    "file": "/work/case/CWE401_Memory_Leak__strdup_char_62a.cpp",
+    "line": 34,
+    "column": 5,
+    "module": null,
+    "pc": "0x55555565cc61"
+   },
+   {
+    "index": 3,
+    "function": "main",
+    "file": "/work/case/CWE401_Memory_Leak__strdup_char_62a.cpp",
+    "line": 99,
+    "column": 5,
+    "module": null,
+    "pc": "0x55555565ccfe"
+   },
+   {
+    "index": 4,
+    "function": "<unknown>",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/lib/x86_64-linux-gnu/libc.so.6",
+    "pc": "0x7ffff782a1c9"
+   },
+   {
+    "index": 5,
+    "function": "__libc_start_main",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/lib/x86_64-linux-gnu/libc.so.6",
+    "pc": "0x7ffff782a28a"
+   },
+   {
+    "index": 6,
+    "function": "_start",
+    "file": null,
+    "line": null,
+    "column": null,
+    "module": "/work/bin/bad",
+    "pc": "0x5555555813a4"
+   }
+  ],
+  "free_stack": [],
+  "access": null,
+  "access_size": null,
+  "leaked_bytes": 9,
+  "leak_type": "direct",
+  "location": "/work/case/CWE401_Memory_Leak__strdup_char_62b.cpp:32",
+  "alloc_site": "/work/case/CWE401_Memory_Leak__strdup_char_62b.cpp:32",
+  "free_site": null
+ },
+ "all_bad_kinds": [
+  "leak"
+ ],
+ "good_clean": true,
+ "good_clean_target": true,
+ "good_findings": [],
+ "build_log_bad_tail": "",
+ "wall_s": 3.78,
+ "container_peak_kb": 91488
+}
