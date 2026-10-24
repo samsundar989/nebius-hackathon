@@ -41,6 +41,7 @@ FORBIDDEN_DIRS = re.compile(
     r"/(tests?|testsuite|fuzz|fuzzing|fuzzers?|oss-?fuzz|harness(es)?|regress)/", re.I
 )
 HARNESS_ENTRY = "LLVMFuzzerTestOneInput"
+BUILD_ERROR = re.compile(r"\berror\b|\bError \d|undefined reference|No rule to make", re.I)
 FORBIDDEN_ADDED = [
     (
         re.compile(
@@ -501,7 +502,14 @@ class ArvoGate:
         )
         sec = split(res.stdout)
         if sec.get("rc_build", "").strip() != "0":
-            checks["build"] = Check("fail", sec.get("compile.log", "")[-800:])
+            log = sec.get("compile.log", "")
+            # The tail of an OSS-Fuzz build is environment noise; the compiler errors say why.
+            errors = [ln for ln in log.splitlines() if BUILD_ERROR.search(ln)][:15]
+            checks["build"] = Check("fail", "\n".join(errors)[:1500] + "\n...\n" + log[-400:])
+            if self.artifacts is not None:
+                self.artifacts.mkdir(parents=True, exist_ok=True)
+                name = f"{cand['hypothesis_id']}_w{cand['worker_index']}_compile.log"
+                (self.artifacts / name).write_text(log, encoding="utf-8")
             return ""
         checks["build"] = Check("pass")
         # Proof the patch is in the binary under test: an unchanged harness means the build
