@@ -458,6 +458,7 @@ class ArvoGate:
             if len(self.base_diff) and patched_diff
             else {},
             "poc_under_lsan": poc_leak or "clean",
+            "poc_leak_report": sec.get("poc_leak_report", "")[:4000] if poc_leak else "",
             "leak_reports": {
                 k.split("_rep_", 1)[1]: v
                 for k, v in sec.items()

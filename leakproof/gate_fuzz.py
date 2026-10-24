@@ -183,7 +183,8 @@ def poc_leak_script(harness: str) -> str:
     return (
         f"ASAN_OPTIONS={ASAN_LEAK} timeout 60 {shlex.quote(harness)} {FUZZ_FLAGS} -detect_leaks=1 "
         f"/tmp/poc > /dev/null 2> {LP}/pl; printf '\\n@@LPGATE@@ poc_leak\\n'; "
-        f"{SIG} {LP}/pl | tr ' ' '_'"
+        f"{SIG} {LP}/pl | tr ' ' '_'; printf '\\n@@LPGATE@@ poc_leak_report\\n'; "
+        f"{report_cmd(f'{LP}/pl')} | head -c 4000"
     )
 
 
