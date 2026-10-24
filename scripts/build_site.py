@@ -137,6 +137,17 @@ def main() -> int:
     ):
         if src.exists():
             (SITE / f"{name}.json").write_text(src.read_text())
+    # The demo service's recorded results: real verified Juliet runs, served (and labelled
+    # "recorded") whenever live runs are off or a cap is hit.
+    rec_dir = REPO_ROOT / "service" / "recorded"
+    rec_dir.mkdir(parents=True, exist_ok=True)
+    juliet = RUNS_DIR / "p2_sandboxes_juliet3"
+    for p in sorted(juliet.glob("CWE*.json"))[:5] if juliet.exists() else []:
+        c = case_view(json.loads(p.read_text()))
+        keep = {k: c[k] for k in ("case", "verdict", "usd", "elapsed_s", "finding", "winner")}
+        keep["workers"] = [{"id": w["id"], "verdict": w["verdict"]} for w in c["workers"]]
+        keep["source"] = f"runs/{juliet.name}/{p.name}"
+        (rec_dir / p.name).write_text(json.dumps(keep, indent=1), encoding="utf-8")
     print(json.dumps(index, indent=1))
     return 0
 

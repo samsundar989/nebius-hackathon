@@ -1,0 +1,31 @@
+{
+ "case": "CWE401_Memory_Leak__char_calloc_66",
+ "verdict": "verified",
+ "usd": 0.008857,
+ "elapsed_s": 55.25,
+ "finding": {
+  "kind": "leak",
+  "location": "/work/case/CWE401_Memory_Leak__char_calloc_66a.c:33",
+  "cwe_guess": "CWE-401"
+ },
+ "winner": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -26,7 +26,7 @@\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
+ "workers": [
+  {
+   "id": "H1\u00b7w0",
+   "verdict": "verified"
+  },
+  {
+   "id": "H1\u00b7w1",
+   "verdict": "verified"
+  },
+  {
+   "id": "H1\u00b7w2",
+   "verdict": "verified"
+  },
+  {
+   "id": "H1\u00b7w3",
+   "verdict": "verified"
+  }
+ ],
+ "source": "runs/p2_sandboxes_juliet3/CWE401_Memory_Leak__char_calloc_66.json"
+}

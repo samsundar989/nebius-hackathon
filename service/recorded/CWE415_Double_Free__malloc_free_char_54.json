@@ -1,0 +1,31 @@
+{
+ "case": "CWE415_Double_Free__malloc_free_char_54",
+ "verdict": "verified",
+ "usd": 0.013245,
+ "elapsed_s": 48.03,
+ "finding": {
+  "kind": "double-free",
+  "location": "/work/case/CWE415_Double_Free__malloc_free_char_54e.c:27",
+  "cwe_guess": "CWE-415"
+ },
+ "winner": "--- a/CWE415_Double_Free__malloc_free_char_54e.c\n+++ b/CWE415_Double_Free__malloc_free_char_54e.c\n@@ -24,7 +24,6 @@\n void CWE415_Double_Free__malloc_free_char_54e_badSink(char * data)\n {\n     /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n }\n \n #endif /* OMITBAD */\n",
+ "workers": [
+  {
+   "id": "H1\u00b7w0",
+   "verdict": "verified"
+  },
+  {
+   "id": "H2\u00b7w1",
+   "verdict": "verified"
+  },
+  {
+   "id": "H3\u00b7w2",
+   "verdict": "verified"
+  },
+  {
+   "id": "H1\u00b7w3",
+   "verdict": "verified"
+  }
+ ],
+ "source": "runs/p2_sandboxes_juliet3/CWE415_Double_Free__malloc_free_char_54.json"
+}
