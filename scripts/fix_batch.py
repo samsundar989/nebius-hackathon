@@ -113,6 +113,9 @@ def summarize(recs: list[dict], args: argparse.Namespace, wall: float) -> dict:
         "raw_crash_gone": raw,
         "raw_crash_gone_rate": round(raw / max(len(recs), 1), 3),
         "v0_verified": v0,
+        # Round 1 vs after the repair round, never merged silently (B2).
+        "verified_round1": sum(r.get("verdict_round1", r["verdict"]) == "verified" for r in recs),
+        "verified_in_round2": sum(r.get("verified_in_round") == 2 for r in recs),
         "v0_verified_rate": round(v0 / max(len(recs), 1), 3),
         "per_cwe": {k: dict(v) for k, v in sorted(by_cwe.items())},
         "usd_total": round(usd, 4),
@@ -142,6 +145,7 @@ def main() -> int:
     )
     ap.add_argument("--audit-model", default="lightning", help="'none' disables check 8")
     ap.add_argument("--runner", default="docker", choices=["docker", "sandboxes"])
+    ap.add_argument("--repair-rounds", type=int, default=0, help="B2: one repair round = 1")
     args = ap.parse_args()
     load_dotenv()
     os.environ.setdefault("LEAKPROOF_LEDGER_CAP_USD", "25")
@@ -178,6 +182,7 @@ def main() -> int:
             n_workers=args.workers,
             audit_model=None if args.audit_model == "none" else args.audit_model,
             reference_builder=developer_reference if args.reference == "developer" else None,
+            repair_rounds=args.repair_rounds,
         )
 
     # Resume: a case with a finished record (not an infrastructure error) is not re-run, so a

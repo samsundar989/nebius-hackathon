@@ -329,6 +329,7 @@ class ArvoGate:
         self.artifact = case.artifact_path
         self.harness_hash = ""
         self.artifacts, self.fuzz_seconds = artifacts, fuzz_seconds
+        self.fuzz_seed = 1  # libFuzzer -seed; a repair round re-gates with a fresh one
         self.poc = b""
         self.corpus_tgz = b""
         self.corpus_source = ""
@@ -426,6 +427,7 @@ class ArvoGate:
                     clean,
                     self.fuzz_seconds,
                     max(8 * len(self.poc), 4096),
+                    self.fuzz_seed,
                 ),
             ]
         )
@@ -622,6 +624,7 @@ def run_gate(
     fuzz_seconds: int = 90,
     reference: ImageRef | None = None,
     runner_name: str = "docker",
+    fuzz_seed: int = 1,
 ) -> dict[str, Any]:
     # Every gate run has networking off whichever backend runs it (Docker --network=none,
     # Sandboxes networking.enabled=false).
@@ -638,6 +641,7 @@ def run_gate(
         gate: JulietGate | ArvoGate = ArvoGate(
             case, runner, baseline, artifacts, fuzz_seconds, reference
         )
+        gate.fuzz_seed = fuzz_seed
         allowed, src_root = None, case.src_root
     else:
         jcase = JulietCase.load(case_id)
@@ -708,6 +712,9 @@ def main() -> int:
     ap.add_argument("--fuzz-seconds", type=int, default=90)
     ap.add_argument("--reference", help="image with the developer's fix (refuzz attribution)")
     ap.add_argument("--runner", default="docker", choices=["docker", "sandboxes"])
+    ap.add_argument(
+        "--fuzz-seed", type=int, default=1, help="libFuzzer -seed (repair rounds: fresh)"
+    )
     args = ap.parse_args()
     payload = json.loads(args.candidates.read_text())
     out = run_gate(
@@ -720,6 +727,7 @@ def main() -> int:
         args.fuzz_seconds,
         ImageRef(args.runner, args.reference) if args.reference else None,
         args.runner,
+        args.fuzz_seed,
     )
     args.out.write_text(json.dumps(out, indent=1))
     return 0

@@ -81,8 +81,21 @@ class Plan:
         return self.__dict__.copy()
 
 
+REPAIR = (
+    "\n\nThis is a repair round: earlier attempts were not verified. Their diffs and the "
+    "reasons are below. Do not repeat a rejected approach; explain in root_cause what the "
+    "earlier attempts missed, and propose hypotheses that address it."
+)
+WHOLE_FILE_CHARS = 240_000  # ~60K tokens of whole files on repair rounds (Ultra: 1M context)
+
+
 def build_messages(
-    finding: dict[str, Any], windows: list[Window], files: list[str], build: str
+    finding: dict[str, Any],
+    windows: list[Window],
+    files: list[str],
+    build: str,
+    history: str | None = None,
+    whole_files: dict[str, str] | None = None,
 ) -> list[dict[str, str]]:
     user = (
         f"## Finding\n{render_finding(finding)}\n\n## Build and tests\n{build}\n\n"
@@ -90,7 +103,19 @@ def build_messages(
         + "\n".join(f"- {f}" for f in files)
         + f"\n\n## Source\n{render_windows(windows)}"
     )
-    return [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]
+    budget = WHOLE_FILE_CHARS
+    for path, text in (whole_files or {}).items():
+        if len(text) > budget:
+            text = text[:budget] + "\n/* [file truncated: context budget] */"
+        budget -= len(text)
+        numbered = "\n".join(f"{i:>5}| {ln}" for i, ln in enumerate(text.splitlines(), 1))
+        user += f"\n\n## Whole file {path}\n{numbered}"
+        if budget <= 0:
+            break
+    if history:
+        user += f"\n\n## Earlier attempts and why they were not verified\n{history}"
+    system = SYSTEM + (REPAIR if history else "")
+    return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
 
 def plan(
@@ -102,12 +127,14 @@ def plan(
     *,
     model: str = "ultra",
     max_completion_tokens: int = 16_000,
+    history: str | None = None,
+    whole_files: dict[str, str] | None = None,
 ) -> Plan:
     value, res = client.structured(
         model,
-        build_messages(finding, windows, files, build),
+        build_messages(finding, windows, files, build, history, whole_files),
         SCHEMA,
-        purpose="planner",
+        purpose="planner:repair" if history else "planner",
         thinking=True,
         max_completion_tokens=max_completion_tokens,
     )

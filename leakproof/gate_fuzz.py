@@ -194,7 +194,12 @@ def unpack_corpus_cmd() -> str:
 
 
 def refuzz_script(
-    harness: str, amp_names: list[str], seeds: list[str], seconds: int, max_len: int
+    harness: str,
+    amp_names: list[str],
+    seeds: list[str],
+    seconds: int,
+    max_len: int,
+    seed: int = 1,
 ) -> str:
     """Amplified inputs one by one; if none crashes, libFuzzer seeded with `seeds` + PoC + amp."""
     h = shlex.quote(harness)
@@ -213,7 +218,7 @@ if [ -z "$ampcrash" ]; then
   mkdir -p {LP}/seeds {LP}/fz {LP}/art; cp /tmp/poc {LP}/seeds/poc; cp {LP}/amp/* {LP}/seeds/ 2>/dev/null
   for s in {keep}; do cp {LP}/corpus/$s {LP}/seeds/; done
   ASAN_OPTIONS={ASAN_DIFF} timeout {seconds + 120} {h} -max_total_time={seconds} -max_len={max_len} \\
-    -seed=1 {FUZZ_FLAGS} -artifact_prefix={LP}/art/ -print_final_stats=1 {LP}/fz {LP}/seeds \\
+    -seed={seed} {FUZZ_FLAGS} -artifact_prefix={LP}/art/ -print_final_stats=1 {LP}/fz {LP}/seeds \\
     > /dev/null 2> {LP}/fuzz.log; echo $? > {LP}/fuzz_rc
   printf '\\n@@LPGATE@@ fuzz_rc\\n'; cat {LP}/fuzz_rc
   printf '\\n@@LPGATE@@ fuzz_stats\\n'; grep -E '^(stat::|#[0-9]+.*(DONE|cov))' {LP}/fuzz.log | tail -12

@@ -4,7 +4,16 @@ import ast
 from pathlib import Path
 
 PKG = Path(__file__).resolve().parent.parent / "leakproof"
-WORKER_PATH = ["planner.py", "worker.py", "branch.py", "context.py", "edits.py", "fix.py"]
+WORKER_PATH = [
+    "planner.py",
+    "worker.py",
+    "branch.py",
+    "context.py",
+    "edits.py",
+    "fix.py",
+    "feedback.py",
+    "audit.py",
+]
 GATE_SIDE = {"leakproof.gate", "leakproof.gate_fuzz", "leakproof.calibrate"}
 
 
