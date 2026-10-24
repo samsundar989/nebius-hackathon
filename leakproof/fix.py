@@ -21,7 +21,7 @@ from leakproof.runner import ImageRef, Runner
 
 # Juliet keeps the kickoff's 6K. Real files are 1-3K lines and Lightning's reasoning ran into
 # 6K mid-fix on 3/4 ARVO workers (mosquitto 42520955, E1 run 1), hence 12K there (D-0040).
-WORKER_MAX_TOKENS = {"juliet": 6_000, "arvo": 12_000}
+WORKER_MAX_TOKENS = {"juliet": 6_000, "arvo": 12_000, "project": 12_000}
 
 # Best outcome first; a case's verdict is its best candidate's.
 VERDICT_RANK = [
@@ -33,6 +33,13 @@ VERDICT_RANK = [
     "inconclusive",
     "error",
 ]
+
+
+def case_slug(case_id: str) -> str:
+    """File-system name for a case: `project:<path>/leakproof.toml` -> `project_<dir>`."""
+    if case_id.startswith("project:"):
+        return "project_" + Path(case_id.removeprefix("project:")).resolve().parent.name
+    return case_id
 
 
 def rank(verdict: str) -> int:
@@ -97,7 +104,7 @@ def fix_case(
     """
     reference: str | None = None
     t0 = time.monotonic()
-    case_dir = run_dir / case_id
+    case_dir = run_dir / case_slug(case_id)
     case_dir.mkdir(parents=True, exist_ok=True)
     spent0 = client.ledger.spent
     rec: dict[str, Any] = {
@@ -118,15 +125,15 @@ def fix_case(
             note=case.data.get("not_reproducible_reason"),
             elapsed_s=round(time.monotonic() - t0, 2),
         )
-        (run_dir / f"{case_id}.json").write_text(json.dumps(rec, indent=1))
+        (run_dir / f"{case_slug(case_id)}.json").write_text(json.dumps(rec, indent=1))
         return rec
     gate: dict[str, Any] | None = None
     try:
         p0 = time.monotonic()
         baseline = case.prepare(runner)
         rec["baseline"] = {"image": baseline.ref, "prepare_s": round(time.monotonic() - p0, 2)}
-        if case.suite == "arvo":
-            rec["arvo"] = case.record()
+        if case.suite in ("arvo", "project"):
+            rec[case.suite] = case.record()
         rec["finding"] = case.finding
         sources = case.visible_sources(runner)
         windows = case.windows(runner)
@@ -250,5 +257,5 @@ def fix_case(
     rec["usd"] = round(client.ledger.spent - spent0, 6)
     rec["usd_by_model"] = {m: round(v, 6) for m, v in client.ledger.by_model.items()}
     rec["elapsed_s"] = round(time.monotonic() - t0, 2)
-    (run_dir / f"{case_id}.json").write_text(json.dumps(rec, indent=1))
+    (run_dir / f"{case_slug(case_id)}.json").write_text(json.dumps(rec, indent=1))
     return rec

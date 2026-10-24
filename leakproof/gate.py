@@ -30,8 +30,9 @@ from pathlib import Path
 from typing import Any
 
 from leakproof import gate_fuzz as gf
-from leakproof.cases.arvo import BUILD_ENV, COMPILE_CMD, ArvoCase, rebuild_prep_cmd
+from leakproof.cases.arvo import ArvoCase
 from leakproof.cases.juliet import JulietCase
+from leakproof.cases.project import ProjectCase
 from leakproof.findings import parse_report, primary
 from leakproof.runner import ImageRef, LocalDockerRunner, get_runner
 
@@ -322,7 +323,10 @@ class ArvoGate:
         # reference when attributing a refuzz crash. Never shown to workers.
         self.reference = reference
         self.tests_baseline: Check | None = None
-        self.harness = f"/out/{case.fuzz_target}"
+        # Suite hooks (ArvoCase, ProjectCase): harness for checks 5-7 (None = skip them),
+        # artifact whose hash proves the patch was compiled, reproduce and build commands.
+        self.harness = case.harness_path
+        self.artifact = case.artifact_path
         self.harness_hash = ""
         self.artifacts, self.fuzz_seconds = artifacts, fuzz_seconds
         self.poc = b""
@@ -340,24 +344,30 @@ class ArvoGate:
             t = self.runner.run(
                 self.baseline,
                 f"( {tests} ) > /tmp/t.log 2>&1; rc=$?; tail -40 /tmp/t.log; exit $rc",
-                env=BUILD_ENV,
+                env=self.case.build_env,
                 cwd=self.case.workdir,
                 timeout_s=3600,
                 network=False,
             )
             self.tests_baseline = Check("pass" if t.exit_code == 0 else "fail", t.stdout[-600:])
+        hash_cmd = f"md5sum {self.artifact} > /tmp/hash; " if self.artifact else ": > /tmp/hash; "
         res = self.runner.run(
             self.baseline,
-            f"md5sum {self.harness} > /tmp/hash; arvo; rc=$?; cat /tmp/hash; exit $rc",
+            hash_cmd + f"{self.case.reproduce_cmd}; rc=$?; cat /tmp/hash; exit $rc",
+            env=getattr(self.case, "reproduce_env", None),
             cwd=self.case.workdir,
             timeout_s=300,
             network=False,
         )
-        self.harness_hash = res.stdout.strip().split("\n")[-1].split(" ")[0]
+        self.harness_hash = (
+            res.stdout.strip().split("\n")[-1].split(" ")[0] if self.artifact else ""
+        )
         p = primary(parse_report(res.stderr + res.stdout))
         want = self.case.finding.get("kind")
         if p is None or p.kind != want:
             return Check("fail", f"unpatched run: {p.kind if p else 'no report'} (expected {want})")
+        if self.harness is None:
+            return Check("pass", f"{p.kind} at {p.location}; no fuzz harness configured")
         self._baseline_corpus()
         return Check(
             "pass",
@@ -519,12 +529,12 @@ class ArvoGate:
 
     def candidate(self, cand: dict[str, Any], checks: dict[str, Check]) -> str:
         tests = self.case.tests_cmd
+        hash_cmd = f"md5sum {self.artifact} > /tmp/hash 2>&1" if self.artifact else ": > /tmp/hash"
         script = [
-            rebuild_prep_cmd(self.case.project, self.case.fuzz_target, cand["files"])
-            + f"{COMPILE_CMD} > /tmp/compile.log 2>&1; echo $? > /tmp/rc_build; "
-            f"md5sum {self.harness} > /tmp/hash 2>&1",
-            "if [ $(cat /tmp/rc_build) = 0 ]; then arvo > /tmp/out_run 2> /tmp/err_run; "
-            "echo $? > /tmp/rc_run; fi",
+            f"{{ {self.case.gate_build_cmd(cand['files'])} ; }} > /tmp/compile.log 2>&1; "
+            f"echo $? > /tmp/rc_build; {hash_cmd}",
+            f"if [ $(cat /tmp/rc_build) = 0 ]; then {self.case.reproduce_cmd} > /tmp/out_run "
+            "2> /tmp/err_run; echo $? > /tmp/rc_run; fi",
         ]
         if tests:
             script.append(
@@ -532,9 +542,10 @@ class ArvoGate:
                 "echo $? > /tmp/rc_tests; fi"
             )
         # Checks 5-7 only judge a patch that already survives its own PoC.
-        script.append(
-            "if [ $(cat /tmp/rc_run 2>/dev/null) = 0 ]; then\n" + self._fuzz_script() + "\nfi"
-        )
+        if self.harness is not None:
+            script.append(
+                "if [ $(cat /tmp/rc_run 2>/dev/null) = 0 ]; then\n" + self._fuzz_script() + "\nfi"
+            )
         for name in (
             "rc_build",
             "rc_run",
@@ -550,7 +561,7 @@ class ArvoGate:
             self.baseline,
             "\n".join(script),
             files={k: v.encode() for k, v in cand["files"].items()} | self._fuzz_files(),
-            env=BUILD_ENV,
+            env=self.case.build_env | (getattr(self.case, "reproduce_env", None) or {}),
             cwd=self.case.workdir,
             timeout_s=3600,
             network=False,
@@ -570,12 +581,15 @@ class ArvoGate:
         # Proof the patch is in the binary under test: an unchanged harness means the build
         # system skipped the edited files, and any result from it says nothing about the patch.
         new_hash = sec.get("hash", "").split(" ")[0].strip()
-        if not new_hash or new_hash == self.harness_hash:
+        if self.artifact is None:
+            checks["compiled"] = Check("skipped", "no build artifact configured to hash")
+        elif not new_hash or new_hash == self.harness_hash:
             checks["compiled"] = Check(
                 "inconclusive", f"harness unchanged ({new_hash or 'no hash'})"
             )
             return ""
-        checks["compiled"] = Check("pass", f"harness {self.harness_hash[:8]} -> {new_hash[:8]}")
+        else:
+            checks["compiled"] = Check("pass", f"harness {self.harness_hash[:8]} -> {new_hash[:8]}")
         rc_raw = sec.get("rc_run", "").strip()
         report = sec.get("err_run", "") + sec.get("out_run", "")
         checks["patched"] = patched_check(
@@ -590,8 +604,11 @@ class ArvoGate:
             checks["tests"] = Check(
                 "pass" if rc_t == "0" else "fail", sec.get("tests.log", "")[-800:]
             )
-        if checks["patched"].status == "pass":
+        if checks["patched"].status == "pass" and self.harness is not None:
             cand["_artifacts"] = self._judge_fuzz(sec, cand, checks)
+        elif self.harness is None:
+            for name in ("differential", "refuzz", "safe_fix"):
+                checks[name] = Check("skipped", "no fuzz harness configured for this project")
         return report
 
 
@@ -614,8 +631,8 @@ def run_gate(
         else get_runner(runner_name, run_id=f"gate:{case_id}")
     )
     t0 = time.monotonic()
-    if case_id.isdigit():
-        case = ArvoCase.load(case_id)
+    if case_id.isdigit() or case_id.startswith("project:"):
+        case = ArvoCase.load(case_id) if case_id.isdigit() else ProjectCase.load(case_id)
         case.workdir = workdir or case.workdir
         case.finding = finding or {}
         gate: JulietGate | ArvoGate = ArvoGate(
@@ -640,7 +657,8 @@ def run_gate(
             cand.get("strategy", "other"),
             kind,
             cand["files"],
-            defer_removed_free=src_root is not None,  # ARVO has the LSan checks to decide it
+            # Only where the LSan checks that decide it run (a fuzz harness: ARVO, projects).
+            defer_removed_free=src_root is not None and getattr(gate, "harness", None) is not None,
         )
         report = ""
         if unpatched.status == "pass" and checks["diff_scope"].status == "pass":

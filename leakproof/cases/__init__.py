@@ -8,5 +8,10 @@ __all__ = ["ArvoCase", "BuildResult", "Case", "JulietCase", "Window", "load_case
 
 
 def load_case(case_id: str) -> Case:
-    """Numeric ids are ARVO localIds; everything else is a Juliet case id."""
+    """`project:<leakproof.toml>` is a bring-your-own project; numeric ids are ARVO localIds;
+    everything else is a Juliet case id."""
+    if case_id.startswith("project:"):
+        from leakproof.cases.project import ProjectCase
+
+        return ProjectCase.load(case_id)
     return ArvoCase.load(case_id) if case_id.isdigit() else JulietCase.load(case_id)

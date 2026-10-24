@@ -144,6 +144,22 @@ class ArvoCase:
     def src_root(self) -> str:
         return f"/src/{self.project}/"
 
+    # ---------------------------------------------------------------- gate hooks (gate side)
+    # The gate drives every suite with a harness the same way; these say how for ARVO.
+    build_env = BUILD_ENV
+    reproduce_cmd = "arvo"
+
+    @property
+    def harness_path(self) -> str | None:
+        return f"/out/{self.fuzz_target}"
+
+    @property
+    def artifact_path(self) -> str | None:
+        return self.harness_path
+
+    def gate_build_cmd(self, files: dict[str, str]) -> str:
+        return rebuild_prep_cmd(self.project, self.fuzz_target, files) + COMPILE_CMD
+
     # ---------------------------------------------------------------- baseline
     def prepare(self, runner: Runner) -> ImageRef:
         t0 = time.monotonic()

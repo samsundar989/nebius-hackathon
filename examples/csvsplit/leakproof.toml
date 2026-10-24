@@ -1,0 +1,10 @@
+# Leakproof bring-your-own project config (see leakproof/cases/project.py).
+[project]
+name = "csvsplit"
+src = "."
+build = "make all"
+reproduce = "./csvsplit_fuzz /tmp/poc"
+test = "make test"
+harness = "csvsplit_fuzz"
+poc = "poc.csv"
+editable = ["src/*.c", "src/*.h"]
