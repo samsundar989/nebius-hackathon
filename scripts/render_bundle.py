@@ -63,6 +63,24 @@ def bundle(rec: dict, case_dir: Path) -> str:
     )
     title = arvo.get("project") or rec.get("suite", "")
     out = [f"# {title} {case}: {rec['verdict']}", ""]
+    if rec["verdict"] != "verified":
+        # Refused cases lead with why (strategist order D): the first failed check of each
+        # distinct gated candidate, or what stopped the workers before the gate.
+        why = []
+        for w in gated:
+            failed = [
+                (k, v)
+                for k, v in w["gate"]["checks"].items()
+                if v["status"] in ("fail", "inconclusive")
+            ]
+            if failed:
+                k, v = failed[0]
+                why.append(f"w{w['worker_index']} {k}: {_one_line(v['detail'], 160)}")
+        if not why:
+            why = sorted({w["verdict"] for w in workers}) or [
+                rec.get("error", "no candidate")[:160]
+            ]
+        out += [f"**Not fixed — no candidate passed the gate.** {'; '.join(why[:3])}", ""]
     out += [
         f"- **Defect:** {finding.get('kind', '?')} at `{finding.get('location', '?')}`"
         + (f" (ARVO crash type: {arvo['crash_type']})" if arvo.get("crash_type") else ""),

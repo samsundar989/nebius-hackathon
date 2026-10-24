@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Planner root-cause accuracy against the developers' fixes (strategist order C1), a proxy.
 
-  scripts/root_cause_accuracy.py p3_arvo27_r1      -> runs/<run>/root_cause_accuracy.json
+  scripts/root_cause_accuracy.py p3_arvo27_r1      -> runs/root_cause_accuracy_<run>.json
 
 Per ARVO case with a plan and a developer-fix reference:
   file match      a hypothesis names a file the developer's fix changed
@@ -45,7 +45,7 @@ def main(argv: list[str]) -> int:
     run = RUNS_DIR / argv[0]
     rows = []
     for path in sorted(run.glob("*.json")):
-        if path.name in ("summary.json", "root_cause_accuracy.json"):
+        if path.name == "summary.json":
             continue
         rec = json.loads(path.read_text())
         ref, plan, arvo = rec.get("reference") or {}, rec.get("plan") or {}, rec.get("arvo") or {}
@@ -77,7 +77,7 @@ def main(argv: list[str]) -> int:
         "function_cases": len(fm),
         "rows": rows,
     }
-    (run / "root_cause_accuracy.json").write_text(json.dumps(out, indent=1))
+    (RUNS_DIR / f"root_cause_accuracy_{argv[0]}.json").write_text(json.dumps(out, indent=1))
     print(
         f"{argv[0]}: file match {out['file_match']}/{out['cases']}, function match "
         f"{out['function_match']}/{out['function_cases']} (proxy, see docstring)"
