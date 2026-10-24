@@ -4,18 +4,19 @@
    "run": "p3_arvo27_r1",
    "label": "ARVO: 27 calibrated real OSS-Fuzz cases",
    "suite": "arvo",
-   "cases": 17,
-   "raw": 11,
-   "v0": 11,
-   "verified": 7,
+   "cases": 27,
+   "raw": 18,
+   "v0": 18,
+   "verified": 14,
    "verdicts": {
-    "rejected": 7,
-    "verified": 7,
+    "rejected": 9,
+    "verified": 14,
     "build_failed": 2,
+    "no_candidate": 1,
     "inconclusive": 1
    },
-   "usd": 0.7005,
-   "usd_per_verified": 0.1001,
+   "usd": 1.0456,
+   "usd_per_verified": 0.0747,
    "gate_version": "v1"
   },
   {
@@ -41,16 +42,15 @@
    "label": "Juliet CWE-401 sample: 100 cases",
    "suite": "juliet",
    "cases": 100,
-   "raw": 72,
-   "v0": 72,
-   "verified": 72,
+   "raw": 94,
+   "v0": 94,
+   "verified": 94,
    "verdicts": {
-    "verified": 72,
-    "inconclusive": 6,
-    "error": 22
+    "verified": 94,
+    "inconclusive": 6
    },
-   "usd": 0.8663,
-   "usd_per_verified": 0.012,
+   "usd": 1.0139,
+   "usd_per_verified": 0.0108,
    "gate_version": "v1"
   },
   {
