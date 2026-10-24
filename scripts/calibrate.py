@@ -3,7 +3,7 @@
 
 Per ARVO case:
   1 prepare the -O0 baseline (as the fix loop does)
-  2 derive the developer's fix from the `-fix` image (leakproof.calibrate) and gate it with
+  2 apply the upstream fix commit to the baseline (leakproof.calibrate) and gate it with
     baseline-only attribution, i.e. exactly as a model candidate is judged -> `dev` verdict
   3 build the developer fix as a reference image; re-gate saved model candidates from --runs
     with it (refuzz crashes the developer fix also shows are not blamed)
@@ -65,17 +65,16 @@ def calibrate_case(
     case = ArvoCase.load(cid)
     rec: dict = {"case": cid, "project": case.project, "crash_type": case.crash_type}
     ref: ImageRef | None = None
-    fix_image = None
     try:
         baseline = case.prepare(runner)
         rec["prep"] = case.prep | {"finding_location": case.finding.get("location")}
         dev, meta = dev_fix_candidate(case, runner, baseline)
-        fix_image = meta.get("fix_image")
         rec["dev_fix"] = meta
         if dev is None:
             rec["dev"] = {"verdict": "no_candidate:" + meta.get("error", "?")}
             return rec
         meta["diff_lines"] = dev["diff"].count("\n")
+        (out / cid / "dev").mkdir(parents=True, exist_ok=True)
         gate = run_gate_process(
             cid, baseline.ref, case.workdir, case.finding, [dev], out / cid / "dev"
         )
@@ -87,6 +86,7 @@ def calibrate_case(
             if not src.exists() or ref is None:
                 continue
             payload = json.loads(src.read_text())
+            (out / cid / run).mkdir(parents=True, exist_ok=True)
             g = run_gate_process(
                 cid,
                 baseline.ref,
@@ -118,8 +118,6 @@ def calibrate_case(
     finally:
         if ref is not None:
             runner.remove_image(ref)
-        if fix_image:
-            runner.remove_image(ImageRef("docker", fix_image))
         case.cleanup(runner)
         rec["elapsed_s"] = round(time.monotonic() - t0, 1)
     return rec

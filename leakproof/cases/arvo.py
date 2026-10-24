@@ -51,7 +51,7 @@ def rebuild_prep_cmd(
     return cmd
 
 
-HARNESS_DIRS = re.compile(r"/(tests?|fuzz|fuzzing|oss-fuzz)/", re.I)
+HARNESS_DIRS = re.compile(r"/(tests?|fuzz|fuzzing|fuzzers?|oss-?fuzz|harness(es)?)/", re.I)
 MAX_CRASH_FRAMES = 5
 # Project test commands, run from the case workdir inside the rebuilt image (gate check 3).
 # Filled per project after inspecting its image; None = no runnable suite found (stated).
@@ -199,9 +199,12 @@ class ArvoCase:
             assert self._baseline is not None, "prepare() first"
             for path in dict.fromkeys(fr["file"] for _, fr in self._frames()):
                 try:
-                    self._sources[path] = runner.read(self._baseline, path).decode(errors="replace")
+                    text = runner.read(self._baseline, path).decode(errors="replace")
                 except (RuntimeError, IsADirectoryError):
                     continue
+                # Harnesses outside a fuzz/ directory (pcre2's src/pcre2_fuzzsupport.c).
+                if "LLVMFuzzerTestOneInput" not in text:
+                    self._sources[path] = text
         return self._sources
 
     def windows(self, runner: Runner) -> list[Window]:

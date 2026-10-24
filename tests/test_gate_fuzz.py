@@ -86,6 +86,21 @@ def test_attribute_with_developer_fix_reference() -> None:
     assert blame is True and "developer fix is clean" in why
 
 
+def test_diff_scope_rejects_harness_files_wherever_they_live() -> None:
+    from leakproof.gate import diff_scope
+
+    diff = "--- a/x\n+++ b/x\n-a\n+b\n"
+    for path in ("/src/lz4/ossfuzz/f.c", "/src/onig/harnesses/base.c", "/src/h3/apps/fuzzers/f.c"):
+        root = "/".join(path.split("/")[:3]) + "/"
+        assert diff_scope(diff, [path], None, root, "other", "x").status == "fail"
+    pcre = "/src/pcre2/src/pcre2_fuzzsupport.c"
+    body = {pcre: "int LLVMFuzzerTestOneInput(const uint8_t *d, size_t n) { return 0; }"}
+    st = diff_scope(diff, [pcre], None, "/src/pcre2/", "other", "x", body)
+    assert st.status == "fail" and "fuzz_harness_file" in st.detail
+    ok = diff_scope(diff, [pcre], None, "/src/pcre2/", "other", "x", {pcre: "int f(void);"})
+    assert ok.status == "pass"
+
+
 def test_crash_key_libfuzzer_timeout() -> None:
     assert gf.crash_key("==7== ERROR: libFuzzer: timeout after 25 seconds") == ("timeout", "")
 

@@ -37,7 +37,10 @@ from leakproof.runner import ImageRef, LocalDockerRunner
 
 MARK = "@@LPGATE@@"
 SOURCE_EXT = (".c", ".h", ".cc", ".cpp", ".cxx", ".hpp", ".hh", ".inc")
-FORBIDDEN_DIRS = re.compile(r"/(tests?|testsuite|fuzz|fuzzing|oss-fuzz|regress)/", re.I)
+FORBIDDEN_DIRS = re.compile(
+    r"/(tests?|testsuite|fuzz|fuzzing|fuzzers?|oss-?fuzz|harness(es)?|regress)/", re.I
+)
+HARNESS_ENTRY = "LLVMFuzzerTestOneInput"
 FORBIDDEN_ADDED = [
     (
         re.compile(
@@ -93,10 +96,15 @@ def diff_scope(
     src_root: str | None,
     strategy: str,
     kind: str,
+    contents: dict[str, str] | None = None,
 ) -> Check:
     for p in paths:
         if allowed is not None and p not in allowed:
             return Check("fail", f"edited {p}, not an editable source file")
+        # The harness is part of the gate wherever it lives (`harnesses/`, `ossfuzz/`,
+        # `src/pcre2_fuzzsupport.c`): judge by content, not only by directory name.
+        if contents and HARNESS_ENTRY in contents.get(p, ""):
+            return Check("fail", f"fuzz_harness_file: edited {p}, which defines the fuzz entry")
         if src_root is not None and (
             not p.startswith(src_root)
             or not p.endswith(SOURCE_EXT)
@@ -561,6 +569,7 @@ def run_gate(
             src_root,
             cand.get("strategy", "other"),
             kind,
+            cand["files"],
         )
         report = ""
         if unpatched.status == "pass" and checks["diff_scope"].status == "pass":

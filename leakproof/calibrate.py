@@ -3,91 +3,166 @@
 The developer's fix is the answer key: nothing on the worker path (planner, worker, branch,
 context, edits, fix) may import this module (tests/test_isolation.py).
 
-dev_fix_candidate(): compare the project's source files in `n132/arvo:<id>-fix` against our
-baseline (git-tracked files when the tree has .git, else every source file), keep the ones a
-candidate may edit, and emit them as an ordinary gate candidate. build_reference(): the same
-files built on the baseline, saved as an image the gate uses to attribute refuzz crashes.
+dev_fix_candidate(): fetch the fix commit's patch from the upstream repo (preparation step, on
+the host, network on), apply it to the baseline tree in a container with `git apply --reject`,
+and emit the editable files it touched as an ordinary gate candidate. The `-fix` image is not
+used: it sits at a later revision, so its tree differs from the baseline in unrelated files
+(jq 42530604: 10 source files). build_reference(): the same files built on the baseline, saved
+as an image the gate uses to attribute refuzz crashes.
 """
 
 from __future__ import annotations
 
+import base64
 import difflib
-import subprocess
-import time
+import re
+import shlex
+import sqlite3
+import urllib.request
 from typing import Any
 
-from leakproof.cases.arvo import BUILD_ENV, ArvoCase, rebuild_prep_cmd
-from leakproof.gate import SOURCE_EXT
+from leakproof.cases.arvo import BUILD_ENV, DB, ArvoCase, rebuild_prep_cmd
+from leakproof.config import CACHE_DIR
+from leakproof.gate import HARNESS_ENTRY, MARK, SOURCE_EXT, split
 from leakproof.runner import ImageRef, LocalDockerRunner
 
-MAX_FILES = 40  # more than this is generated code or a refactor, not a fix; recorded, not gated
+PATCH_CACHE = CACHE_DIR / "arvo" / "dev_patches"
+COMMIT_URL = re.compile(r"https://github\.com/([^/]+/[^/]+)/commit/([0-9a-f]{7,40})")
+MAX_FILES = 40  # more than this is a refactor, not a fix; recorded, not gated
+_PLUS = re.compile(r"^\+\+\+ b/(\S+)", re.M)
 
 
-def _list_cmd(project: str) -> str:
-    ext = "|".join(e.lstrip(".") for e in SOURCE_EXT)
-    return (
-        f"cd /src/{project} && if git rev-parse --git-dir >/dev/null 2>&1; then echo '#git'; "
-        "git ls-files; else echo '#find'; find . -type f; fi | sed 's#^\\./##' "
-        f"| grep -E '^#|\\.({ext})$' | while read -r f; do case $f in '#'*) echo \"$f\";; "
-        '*) [ -f "$f" ] && md5sum "$f";; esac; done'
-    )
+def fix_commits(case_id: str) -> tuple[str | None, list[list[str]]]:
+    """(github owner/repo, commit sets to try in order): ARVO's located patch, then every
+    commit ARVO lists as the fix range (oldest first)."""
+    con = sqlite3.connect(DB)
+    row = con.execute(
+        "select patch_url, fix_commit, repo_addr from arvo where localId = ?", (int(case_id),)
+    ).fetchone()
+    patch_url, fix_commit, repo_addr = row
+    m = COMMIT_URL.match(patch_url or "")
+    rm = re.match(r"https://github\.com/([^/]+/[^/.]+)", repo_addr or "")
+    repo = m.group(1) if m else (rm.group(1) if rm else None)
+    sets = [[m.group(2)]] if m else []
+    listed = [c for c in (fix_commit or "").split() if c]
+    if listed and listed not in sets:
+        sets.append(listed)
+    return repo, sets
 
 
-def sources(runner: LocalDockerRunner, image: ImageRef, project: str) -> tuple[str, dict[str, str]]:
-    res = runner.run(image, _list_cmd(project), cwd="/", timeout_s=600, network=False)
-    method, out = "none", {}
-    for line in res.stdout.splitlines():
-        if line.startswith("#"):
-            method = line[1:]
-            continue
-        md5, _, path = line.partition("  ")
-        if path:
-            out[f"/src/{project}/{path}"] = md5
-    return method, out
+def fetch_patch(repo: str, sha: str) -> str:
+    path = PATCH_CACHE / f"{repo.replace('/', '__')}__{sha}.patch"
+    if not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        req = urllib.request.Request(
+            f"https://github.com/{repo}/commit/{sha}.patch", headers={"User-Agent": "leakproof"}
+        )
+        with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310 - fixed https host
+            path.write_bytes(resp.read())
+    return path.read_text(encoding="utf-8", errors="replace")
+
+
+def _apply_script(project: str, n: int, editable: list[str]) -> str:
+    lines = [f"cd /src/{shlex.quote(project)}"]
+    for i in range(n):
+        # Whole patch when it applies cleanly; otherwise the hunks that do (--reject leaves
+        # <file>.rej for the rest, which marks the candidate partial).
+        p = f"/tmp/dev/{i}.patch"
+        lines.append(
+            f"if git apply --check --whitespace=nowarn {p} > /tmp/dev/{i}.log 2>&1; "
+            f"then git apply --whitespace=nowarn {p}; echo clean >> /tmp/dev/{i}.log; "
+            f"else git apply --reject --whitespace=nowarn {p} >> /tmp/dev/{i}.log 2>&1; fi; "
+            f"printf '\\n{MARK} apply_{i}\\n'; tail -c 3000 /tmp/dev/{i}.log"
+        )
+    for j, rel in enumerate(editable):
+        q = shlex.quote(rel)
+        lines.append(
+            f"printf '\\n{MARK} file_{j}\\n'; [ -f {q} ] && base64 -w0 {q}; "
+            f"printf '\\n{MARK} rej_{j}\\n'; [ -f {q}.rej ] && echo rejected"
+        )
+    return "\n".join(lines)
 
 
 def dev_fix_candidate(
     case: ArvoCase, runner: LocalDockerRunner, baseline: ImageRef
 ) -> tuple[dict[str, Any] | None, dict[str, Any]]:
-    """(candidate or None, metadata). The fix image is pulled here and removed by the caller."""
-    fix = ImageRef("docker", case.image.replace("-vul", "-fix"))
-    meta: dict[str, Any] = {"fix_image": fix.ref}
-    t0 = time.monotonic()
-    pulled = subprocess.run(["docker", "pull", "-q", fix.ref], capture_output=True, text=True)
-    meta["pull_s"] = round(time.monotonic() - t0, 1)
-    if pulled.returncode != 0:
-        meta["error"] = f"pull failed: {pulled.stderr.strip()[-300:]}"
+    """(candidate or None, metadata). meta['partial'] = some editable hunk did not apply."""
+    repo, sets = fix_commits(case.id)
+    meta: dict[str, Any] = {"repo": repo, "commit_sets": sets}
+    if not repo or not sets:
+        meta["error"] = "no GitHub fix commit recorded"
         return None, meta
-    m_fix, fix_src = sources(runner, fix, case.project)
-    m_base, base_src = sources(runner, baseline, case.project)
-    meta["method"] = {"fix": m_fix, "baseline": m_base}
-    changed = sorted(p for p, h in fix_src.items() if base_src.get(p) != h)
-    meta["removed"] = sorted(set(base_src) - set(fix_src))
-    editable = [p for p in changed if case._editable(p)]
-    meta["changed"] = changed[:200]
-    meta["excluded"] = [p for p in changed if p not in editable][:200]
+    patches: list[str] = []
+    editable: list[str] = []
+    for commits in sets:
+        try:
+            patches = [fetch_patch(repo, c) for c in commits]
+        except OSError as exc:
+            meta.setdefault("fetch_errors", []).append(f"{commits[0][:10]}: {exc}")
+            continue
+        touched = list(dict.fromkeys(p for text in patches for p in _PLUS.findall(text)))
+        # The gate's own rule (diff_scope): project sources with a source extension, outside
+        # tests/fuzz/harness directories. Docs and changelogs in a fix commit are dropped.
+        editable = [
+            p for p in touched if case._editable(f"{case.src_root}{p}") and p.endswith(SOURCE_EXT)
+        ]
+        meta.update(
+            commits=commits,
+            touched=touched[:200],
+            excluded=[p for p in touched if p not in editable][:200],
+        )
+        if editable:
+            break
     if not editable:
-        meta["error"] = "no editable source file differs between -fix and the baseline"
+        meta["error"] = "no fix commit touches an editable source file (or none could be fetched)"
         return None, meta
     if len(editable) > MAX_FILES:
-        meta["error"] = (
-            f"{len(editable)} editable files differ (> {MAX_FILES}): not a fix-sized diff"
-        )
+        meta["error"] = f"{len(editable)} editable files touched (> {MAX_FILES})"
         return None, meta
+    res = runner.run(
+        baseline,
+        _apply_script(case.project, len(patches), editable),
+        files={f"/tmp/dev/{i}.patch": p.encode() for i, p in enumerate(patches)},
+        cwd="/",
+        timeout_s=300,
+        network=False,
+    )
+    sec = split(res.stdout)
+    meta["apply_log"] = {k: v[-600:] for k, v in sec.items() if k.startswith("apply_")}
     files: dict[str, str] = {}
     diff: list[str] = []
-    for path in editable:
-        new = runner.read(fix, path).decode(errors="replace")
-        old = runner.read(baseline, path).decode(errors="replace") if path in base_src else ""
+    rejected = []
+    for j, rel in enumerate(editable):
+        path = f"{case.src_root}{rel}"
+        if sec.get(f"rej_{j}", "").strip():
+            rejected.append(rel)
+        raw = sec.get(f"file_{j}", "").strip()
+        if not raw:
+            continue  # deleted by the fix: not expressible as a file map; recorded below
+        new = base64.b64decode(raw).decode(errors="replace")
+        if HARNESS_ENTRY in new:
+            meta.setdefault("harness_files", []).append(rel)
+            continue
+        try:
+            old = runner.read(baseline, path).decode(errors="replace")
+        except (RuntimeError, IsADirectoryError):
+            old = ""
+        if new == old:
+            continue
         files[path] = new
         diff += difflib.unified_diff(
-            old.splitlines(keepends=True),
-            new.splitlines(keepends=True),
-            f"a{path}",
-            f"b{path}",
-            n=3,
+            old.splitlines(keepends=True), new.splitlines(keepends=True), f"a{path}", f"b{path}"
         )
-    meta["files"] = editable
+    meta["files"] = sorted(files)
+    meta["rejected_hunks_in"] = rejected
+    meta["partial"] = bool(rejected) or len(files) < len(editable)
+    if not files:
+        meta["error"] = (
+            "out_of_scope: the fix is in the fuzz harness"
+            if meta.get("harness_files")
+            else "fix commit did not apply to the baseline"
+        )
+        return None, meta
     cand = {
         "hypothesis_id": "DEV",
         "worker_index": 0,
