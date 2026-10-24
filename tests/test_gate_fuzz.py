@@ -63,6 +63,39 @@ def test_safe_fix_only_counts_new_memory_safety_kinds() -> None:
     assert gf.safe_fix(base, timeout)[0] == "pass"
 
 
+def test_safe_fix_masked_leak_is_not_new_and_reference_decides() -> None:
+    # mosquitto 42520883: the baseline dies of the invalid free before LSan can run.
+    base = gf.parse_rows("a 1 x ERROR:_AddressSanitizer:_attempting\nb 0 x ")
+    leak = gf.parse_rows("a 1 x ERROR:_LeakSanitizer:_detected\nb 0 x ")
+    st, detail = gf.safe_fix(base, leak)
+    assert st == "pass" and "unmasked" in detail
+    # With the developer fix as reference: same leak there -> fine; reference clean -> new.
+    assert gf.safe_fix(base, leak, ref=leak)[0] == "pass"
+    clean = gf.parse_rows("a 0 x \nb 0 x ")
+    assert gf.safe_fix(base, leak, ref=clean)[0] == "fail"
+
+
+def test_diff_scope_defers_removed_free_for_arvo_only() -> None:
+    from leakproof.gate import REMOVED_FREE_DEFERRED, diff_scope
+
+    diff = "--- a/x\n+++ b/x\n-        zip_source_free(src_window);\n"
+    p = ["/src/libzip/lib/zip_open.c"]
+    assert diff_scope(diff, p, None, "/src/libzip/", "other", "use-after-free").status == "fail"
+    ok = diff_scope(
+        diff, p, None, "/src/libzip/", "other", "use-after-free", defer_removed_free=True
+    )
+    assert ok.status == "pass" and ok.detail.startswith(REMOVED_FREE_DEFERRED)
+
+
+def test_crash_key_deadly_signal_takes_first_project_frame() -> None:
+    rep = (
+        "==476== ERROR: libFuzzer: deadly signal\n"
+        "    #7 0x7f in __assert_fail (/lib/x86_64-linux-gnu/libc.so.6+0x33fd5)\n"
+        "    #8 0x73f6ca in get_lvalue /src/quickjs/quickjs.c\n"
+    )
+    assert gf.crash_key(rep) == ("deadly signal", "get_lvalue /src/quickjs/quickjs.c")
+
+
 def test_attribute_pre_existing_bug_elsewhere_is_not_blamed() -> None:
     key = gf.crash_key(ASAN_SBO)
     assert key is not None and key[0] == "stack-buffer-overflow"

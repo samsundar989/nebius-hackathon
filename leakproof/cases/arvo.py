@@ -25,7 +25,13 @@ from leakproof.runner import ImageRef, Runner
 DB = CACHE_DIR / "arvo" / "arvo.db"
 SHORTLIST = REPO_ROOT / "cases" / "arvo" / "shortlist_2026-10-22.json"
 OUR_FLAGS = "-O0 -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION"
-BUILD_ENV = {"CFLAGS": OUR_FLAGS, "CXXFLAGS": f"{OUR_FLAGS} -stdlib=libc++"}
+# libFuzzer for every case (D-0046): the gate's refuzz drives the harness with libFuzzer flags,
+# which an AFL++/honggfuzz build silently ignores (libplist 42519914 "fuzzed" 0 executions).
+BUILD_ENV = {
+    "CFLAGS": OUR_FLAGS,
+    "CXXFLAGS": f"{OUR_FLAGS} -stdlib=libc++",
+    "FUZZING_ENGINE": "libfuzzer",
+}
 WINDOW = 80
 
 

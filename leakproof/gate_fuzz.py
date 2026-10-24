@@ -45,6 +45,7 @@ def report_cmd(path: str) -> str:
     )
 
 
+_PROJECT_FRAME = re.compile(r"#\d+ 0x[0-9a-f]+ in (\S+) (/src/(?!llvm-project/)\S+)")
 _DIGITS = re.compile(rb"[0-9]+")
 _ALPHA = re.compile(rb"[A-Za-z]+")
 _TOKEN = re.compile(rb"[^\s{}\[\]()<>,;:\"'=]+")
@@ -171,6 +172,15 @@ printf '\\n@@LPGATE@@ {section}\\n'; cat {LP}/{section}
 """
 
 
+def poc_leak_script(harness: str) -> str:
+    """The patched harness on the PoC with LeakSanitizer on: its signature, '' if clean."""
+    return (
+        f"ASAN_OPTIONS={ASAN_LEAK} timeout 60 {shlex.quote(harness)} {FUZZ_FLAGS} -detect_leaks=1 "
+        f"/tmp/poc > /dev/null 2> {LP}/pl; printf '\\n@@LPGATE@@ poc_leak\\n'; "
+        f"{SIG} {LP}/pl | tr ' ' '_'"
+    )
+
+
 def unpack_corpus_cmd() -> str:
     return f"mkdir -p {LP} && tar xzf {LP}/corpus.tgz -C {LP}"
 
@@ -270,18 +280,39 @@ def _sig_kind(sig: str) -> str:
     return sig.rsplit(":_", 1)[-1] if sig else ""
 
 
-def safe_fix(base: dict[str, Row], patched: dict[str, Row]) -> tuple[str, str]:
+def safe_fix(
+    base: dict[str, Row], patched: dict[str, Row], ref: dict[str, Row] | None = None
+) -> tuple[str, str]:
+    """New leak/UAF/double free under LeakSanitizer.
+
+    With a reference (the developer's fix) a report counts unless the reference shows the
+    same one. Without, it counts only where the baseline ran clean: where the baseline crashed
+    first, LeakSanitizer never ran, so a leak there is unmasked, not shown to be new.
+    """
     if not base:
         return "skipped", "no corpus inputs"
-    new = []
+    new, unmasked = [], []
     for name, p in patched.items():
-        b = base.get(name)
         kind = _sig_kind(p.sig)
-        if p.sig and (b is None or p.sig != b.sig) and _norm(kind) in SAFE_FIX_KINDS:
-            new.append(f"{name}: {kind}")
+        if not p.sig or _norm(kind) not in SAFE_FIX_KINDS:
+            continue
+        b = base.get(name)
+        if ref is not None:
+            r = ref.get(name)
+            if r is None or r.sig != p.sig:
+                new.append(f"{name}: {kind} (developer fix: {(r.sig if r else '') or 'clean'})")
+        elif b is None or not b.sig:
+            new.append(f"{name}: {kind} (baseline clean)")
+        elif b.sig != p.sig:
+            unmasked.append(f"{name}: baseline {b.sig} -> {p.sig}")
+    against = "developer fix" if ref is not None else "baseline"
+    note = f"{len(unmasked)} unmasked (baseline crashed first)" if unmasked else ""
     if new:
-        return "fail", f"new {new[0]} under LeakSanitizer ({len(new)} total)"
-    return "pass", f"{len(base)} inputs under LeakSanitizer: no new leak/UAF/double free"
+        return "fail", f"new {new[0]} vs {against} ({len(new)} total){'; ' + note if note else ''}"
+    return "pass", (
+        f"{len(base)} inputs under LeakSanitizer: no new leak/UAF/double free vs {against}"
+        + (f"; {note}, e.g. {unmasked[0]}" if note else "")
+    )
 
 
 def _norm(kind: str) -> str:
@@ -300,7 +331,9 @@ def crash_key(report: str, rc: str = "") -> tuple[str, str] | None:
         return p.kind, p.location or ""
     for k in ("timeout", "out-of-memory", "deadly signal"):
         if f"libFuzzer: {k}" in report:
-            return k, ""
+            # Location = first frame in project code (an assert's caller, say), if any.
+            m = _PROJECT_FRAME.search(report)
+            return k, (f"{m.group(1)} {m.group(2)}" if m else "")
     if rc and rc not in ("0", "124"):
         return f"exit_{rc}", ""
     return None

@@ -41,6 +41,7 @@ FORBIDDEN_DIRS = re.compile(
     r"/(tests?|testsuite|fuzz|fuzzing|fuzzers?|oss-?fuzz|harness(es)?|regress)/", re.I
 )
 HARNESS_ENTRY = "LLVMFuzzerTestOneInput"
+REMOVED_FREE_DEFERRED = "removed_free_deferred"
 BUILD_ERROR = re.compile(r"\berror\b|\bError \d|undefined reference|No rule to make", re.I)
 FORBIDDEN_ADDED = [
     (
@@ -82,6 +83,7 @@ class GateResult:
     elapsed_s: float = 0.0
     artifacts: list[str] = field(default_factory=list)
     amplification: dict[str, dict[str, str]] = field(default_factory=dict)
+    evidence: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         d = self.__dict__.copy()
@@ -98,6 +100,7 @@ def diff_scope(
     strategy: str,
     kind: str,
     contents: dict[str, str] | None = None,
+    defer_removed_free: bool = False,
 ) -> Check:
     for p in paths:
         if allowed is not None and p not in allowed:
@@ -132,13 +135,21 @@ def diff_scope(
             return Check("fail", f"{reason}: {hit.strip()[:120]}")
     frees_removed = sum(len(FREE_CALL.findall(ln)) for ln in removed)
     frees_added = sum(len(FREE_CALL.findall(ln)) for ln in added)
-    if frees_removed > frees_added and strategy != "remove_free" and kind != "double-free":
+    removed_free = (
+        frees_removed > frees_added and strategy != "remove_free" and kind != "double-free"
+    )
+    if removed_free and not defer_removed_free:
         return Check(
             "fail", f"removed_free: {frees_removed} free/delete removed, {frees_added} added"
         )
     if not added and not removed:
         return Check("fail", "empty diff")
-    return Check("pass", f"{len(paths)} file(s), +{len(added)}/-{len(removed)}")
+    detail = f"{len(paths)} file(s), +{len(added)}/-{len(removed)}"
+    if removed_free:
+        # ARVO (D-0046): an ownership transfer legitimately drops a free (libzip 42520377);
+        # whether it leaks is measured instead - the PoC must then be clean under LSan.
+        detail = f"{REMOVED_FREE_DEFERRED}: {frees_removed} removed, {frees_added} added; " + detail
+    return Check("pass", detail)
 
 
 def patched_check(exit_code: int, timed_out: bool, report: str, target_kind: str) -> Check:
@@ -320,6 +331,7 @@ class ArvoGate:
         self.base_diff: dict[str, gf.Row] = {}
         self.base_leak: dict[str, gf.Row] = {}
         self.amp: list[tuple[str, bytes]] = []
+        self.ref_leak: dict[str, gf.Row] | None = None
 
     def unpatched(self) -> Check:
         tests = self.case.tests_cmd
@@ -368,6 +380,18 @@ class ArvoGate:
         self.base_diff = gf.parse_rows(sec.get("corpus_diff", ""))
         self.base_leak = gf.parse_rows(sec.get("corpus_leak", ""))
         self.amp = gf.amplify(self.poc)
+        if self.reference is not None:
+            # The developer fix's own leak profile: what safe_fix compares candidates against.
+            res = self.runner.run(
+                self.reference,
+                (gf.unpack_corpus_cmd() if self.corpus_tgz else f"mkdir -p {gf.LP}/corpus")
+                + gf.corpus_run_script(h, gf.ASAN_LEAK, "corpus_leak", "-detect_leaks=1"),
+                files={f"{gf.LP}/corpus.tgz": self.corpus_tgz} if self.corpus_tgz else None,
+                cwd=self.case.workdir,
+                timeout_s=3600,
+                network=False,
+            )
+            self.ref_leak = gf.parse_rows(split(res.stdout).get("corpus_leak", ""))
 
     def _fuzz_files(self) -> dict[str, bytes]:
         files = {f"{gf.LP}/amp/{n}": d for n, d in self.amp}
@@ -385,6 +409,7 @@ class ArvoGate:
                 gf.unpack_corpus_cmd() if self.corpus_tgz else f"mkdir -p {gf.LP}/corpus",
                 gf.corpus_run_script(h, gf.ASAN_DIFF, "corpus_diff"),
                 gf.corpus_run_script(h, gf.ASAN_LEAK, "corpus_leak", "-detect_leaks=1"),
+                gf.poc_leak_script(h),
                 gf.refuzz_script(
                     h,
                     [n for n, _ in self.amp],
@@ -413,8 +438,30 @@ class ArvoGate:
         """Checks 5-7 from the candidate run's sections; returns saved artifact paths."""
         st, detail = gf.differential(self.base_diff, gf.parse_rows(sec.get("corpus_diff", "")))
         checks["differential"] = Check(st, detail)
-        st, detail = gf.safe_fix(self.base_leak, gf.parse_rows(sec.get("corpus_leak", "")))
+        patched_diff = gf.parse_rows(sec.get("corpus_diff", ""))
+        patched_leak = gf.parse_rows(sec.get("corpus_leak", ""))
+        st, detail = gf.safe_fix(self.base_leak, patched_leak, self.ref_leak)
+        poc_leak = sec.get("poc_leak", "").strip()
+        if checks["diff_scope"].detail.startswith(REMOVED_FREE_DEFERRED) and poc_leak:
+            st, detail = "fail", f"removed a free and the PoC now reports {poc_leak}; " + detail
         checks["safe_fix"] = Check(st, detail)
+        cand["_evidence"] = {
+            "corpus_rows_differing": {
+                n: {
+                    "baseline": [b.rc, b.sig, self.base_leak.get(n, gf.Row("", "", "")).sig],
+                    "patched": [p.rc, p.sig, patched_leak.get(n, gf.Row("", "", "")).sig],
+                }
+                for n, b in self.base_diff.items()
+                if (p := patched_diff.get(n, gf.Row("?", "?", "?"))) != b
+                or self.base_leak.get(n) != patched_leak.get(n)
+            }
+            if len(self.base_diff) and patched_diff
+            else {},
+            "poc_under_lsan": poc_leak or "clean",
+        }
+        rows = cand["_evidence"]["corpus_rows_differing"]
+        if len(rows) > 20:
+            cand["_evidence"]["corpus_rows_differing"] = dict(list(rows.items())[:20])
         amp_rows = gf.parse_amp(sec.get("amp_res", ""))
         cand["_amplification"] = {n: {"rc": rc, "sig": sig} for n, (rc, sig) in amp_rows.items()}
         crash: tuple[str, bytes, str, str] | None = None  # source, input, report, rc
@@ -436,6 +483,10 @@ class ArvoGate:
                 return []
             elif rc != "0":
                 checks["refuzz"] = Check("inconclusive", f"{fuzz_note} without an artifact")
+                return []
+            elif not runs.isdigit() or int(runs) == 0:
+                # Exit 0 with no execution count: not a libFuzzer binary, nothing was fuzzed.
+                checks["refuzz"] = Check("inconclusive", f"{fuzz_note}: no executions reported")
                 return []
             else:
                 checks["refuzz"] = Check(
@@ -578,6 +629,7 @@ def run_gate(
             cand.get("strategy", "other"),
             kind,
             cand["files"],
+            defer_removed_free=src_root is not None,  # ARVO has the LSan checks to decide it
         )
         report = ""
         if unpatched.status == "pass" and checks["diff_scope"].status == "pass":
@@ -591,6 +643,7 @@ def run_gate(
             round(time.monotonic() - c0, 2),
             cand.pop("_artifacts", []),
             cand.pop("_amplification", {}),
+            cand.pop("_evidence", {}),
         )
         results.append(r.to_dict())
     return {
