@@ -77,6 +77,7 @@ class GateResult:
     patched_report_tail: str = ""
     elapsed_s: float = 0.0
     artifacts: list[str] = field(default_factory=list)
+    amplification: dict[str, dict[str, str]] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         d = self.__dict__.copy()
@@ -390,6 +391,7 @@ class ArvoGate:
         st, detail = gf.safe_fix(self.base_leak, gf.parse_rows(sec.get("corpus_leak", "")))
         checks["safe_fix"] = Check(st, detail)
         amp_rows = gf.parse_amp(sec.get("amp_res", ""))
+        cand["_amplification"] = {n: {"rc": rc, "sig": sig} for n, (rc, sig) in amp_rows.items()}
         crash: tuple[str, bytes, str, str] | None = None  # source, input, report, rc
         for name, data in self.amp:
             rc, sig = amp_rows.get(name, ("0", ""))
@@ -557,6 +559,7 @@ def run_gate(
             report[-4000:],
             round(time.monotonic() - c0, 2),
             cand.pop("_artifacts", []),
+            cand.pop("_amplification", {}),
         )
         results.append(r.to_dict())
     return {
@@ -568,7 +571,8 @@ def run_gate(
             "source": getattr(gate, "corpus_source", None),
             "inputs": len(getattr(gate, "base_diff", {})),
             "amplified_variants": [n for n, _ in getattr(gate, "amp", [])],
-            "poc_bytes": len(getattr(gate, "poc", b"")),
+            "poc_bytes": len(poc := getattr(gate, "poc", b"")),
+            "poc_b64": gf.b64(poc) if len(poc) <= 4096 else None,
         },
         "tests_baseline": tb.to_dict() if (tb := getattr(gate, "tests_baseline", None)) else None,
         "results": results,
