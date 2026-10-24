@@ -67,3 +67,36 @@ None. Open: `NEBIUS_AI_PROJECT` in `.env` holds the AI Cloud id although CLAUDE.
 2. Sandboxes REST backend (≤ 2 h, behind a flag; access is live).
 3. Juliet CWE-401 sample (100) and the ARVO Tier-1 batch (26 cases, 20 min box each), then the model leaderboard.
 4. Edit format: keep comment lines the model omitted from SEARCH in the code-lines fallback (bundles should not delete upstream comments).
+
+## Day 3 · Thu 2026-10-23 night (Phase 2 start: housekeeping + P0 gate v1)
+
+### Done
+- Strategy docs untracked (`docs/research/`, `docs/kickoff/` gitignored; files stay local); QUESTION 0012 (one-time history rewrite before going public) asked, default no.
+- CI red → green: `ruff format` on `scripts/arvo_inspect.py`; 4 cp1252 bytes in `docs/FEEDBACK.md` re-encoded; `tests/test_docs_encoding.py` fails on invalid UTF-8 / U+FFFD in tracked `README.md` + `docs/**/*.md`.
+- **Gate v1** (D-0043, D-0044): checks 5 differential corpus, 6 refuzz (amplified PoC variants first, then libFuzzer 90 s, `-max_len ≥ 8×PoC`), 7 safe-fix (corpus under LSan). A refuzz crash is blamed on the patch unless the baseline crashes identically on that input away from the target; the input + report are saved under `gate_artifacts/`. `scripts/rejudge.py` re-gates saved candidates at $0.
+- Machine note: the host ran out of commit charge (another project's jobs held ~25 GB) and WSL2/Docker crashed; nothing of ours was running. All gate runs since went through workerq.
+
+### P0 acceptance (kickoff addendum §3)
+| case · candidate | v0 | v1 | evidence |
+|---|---|---|---|
+| jq 42530604 · run 4 winner (`char buffer[JVP_DTOA_FMT_MAX_LEN]`) | verified | **rejected:refuzz_new_crash** | stack-buffer-overflow `decNumber.c:3724` from **amplification `digits1_x64`** (149 B; baseline gives the original heap overflow there) — `runs/p0_v1b_arvo` |
+| jq 42530604 · run 2 (`digits + 17`) | verified | **verified** | 14 variants clean; libFuzzer 90 s, 2.6M execs, no crash; 33 corpus inputs identical; LSan clean |
+| mosquitto 42520955 · run 4, 4 candidates | verified ×4 | **verified ×4** | 197 seed-corpus inputs identical, LSan clean; refuzz hit only the pre-existing `memory_mosq.c:78` crash (baseline identical, not attributed) |
+| mosquitto 42520955 · run 2, 2 candidates | rejected:still_crashes (void, D-0041) | **verified ×2** | same as above; v0 verdicts were void (patch never linked) |
+| Juliet 60 (57 cases with candidates, 152 candidates) | 56 verified | **56 verified** | 151/152 verdicts unchanged; checks 5–7 skipped (no input). The one change (`malloc_free_int_15` H4: diff_scope → new_leak) is 75a4b9c's alloc-guard rule, not v1 — `runs/p0_v1_juliet60` |
+
+How we got there (honest order): the first v1 run (`runs/p0_rejudge_jq`, `runs/p0_v1_arvo`) also rejected jq run 4, but **via libFuzzer** (116-byte input after 1,975 execs), not amplification: the PoC is `-16E-1061947065` and only its longest digit run (the exponent) was amplified. The same run rejected 3 of 4 mosquitto run-4 candidates because a 6 KB log tail cut the `==ERROR:` header off a long UAF report (`exit_1 at ?`). Both fixed in D-0044 (every digit/alpha run amplified; reports captured from the ERROR line), then re-run.
+
+### Numbers that changed
+- jq 42530604 case verdict (run 4): verified → **verified via the run-2 fix only**; run 4's winner is now rejected:refuzz_new_crash.
+- mosquitto 42520955 run 2: void → 2/2 verified under v1.
+- Juliet 60: unchanged (56/60 verified).
+- Gate time per ARVO candidate: v0 ~21 s → v1 24–114 s (jq; refuzz 90 s when nothing crashes). Spend: $0 (ledger still **$1.2201**).
+
+### CI
+Green: runs #3 (c5bbf2a), #4 (a209e04), #5 (2b54e42), #6 (ab418da). #1–#2 were red (format only).
+
+### Open issues
+1. **Refuzz attribution is baseline-only** (D-0044): a patch that gets past the original crash and exposes a deeper pre-existing bug looks like a new crash. Seen once: first-run mosquitto w0–w2 hit a heap-use-after-free on a 1000-byte buffer freed in `config__read_file` (`conf.c:2505`); the baseline shows a different crash on that input. In the fixed re-run the fuzzer hit the known `memory_mosq.c:78` bug first instead, so the verdicts depend on which crash libFuzzer meets first. Plan (P1): use the developer fix (`-fix` image) as a second reference, and re-check that saved UAF input (`runs/p0_v1_arvo/42520955/e1_arvo2_v4/gate_artifacts/`) against it.
+2. mosquitto refuzz always ends at the pre-existing `memory_mosq.c:78` crash, so its effective fuzzing time is short. Option: `-fork=1 -ignore_crashes=1` and judge every distinct crash.
+3. Check 8 (LLM audit flag) not built yet.
