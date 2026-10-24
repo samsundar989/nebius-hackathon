@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Any
 
 from leakproof import gate_fuzz as gf
-from leakproof.cases.arvo import BUILD_ENV, ArvoCase, rebuild_prep_cmd
+from leakproof.cases.arvo import BUILD_ENV, COMPILE_CMD, ArvoCase, rebuild_prep_cmd
 from leakproof.cases.juliet import JulietCase
 from leakproof.findings import parse_report, primary
 from leakproof.runner import ImageRef, LocalDockerRunner
@@ -408,7 +408,7 @@ class ArvoGate:
             [
                 gf.unpack_corpus_cmd() if self.corpus_tgz else f"mkdir -p {gf.LP}/corpus",
                 gf.corpus_run_script(h, gf.ASAN_DIFF, "corpus_diff"),
-                gf.corpus_run_script(h, gf.ASAN_LEAK, "corpus_leak", "-detect_leaks=1"),
+                gf.corpus_run_script(h, gf.ASAN_LEAK, "corpus_leak", "-detect_leaks=1", 3),
                 gf.poc_leak_script(h),
                 gf.refuzz_script(
                     h,
@@ -458,6 +458,11 @@ class ArvoGate:
             if len(self.base_diff) and patched_diff
             else {},
             "poc_under_lsan": poc_leak or "clean",
+            "leak_reports": {
+                k.split("_rep_", 1)[1]: v
+                for k, v in sec.items()
+                if k.startswith("corpus_leak_rep_")
+            },
         }
         rows = cand["_evidence"]["corpus_rows_differing"]
         if len(rows) > 20:
@@ -517,7 +522,7 @@ class ArvoGate:
         tests = self.case.tests_cmd
         script = [
             rebuild_prep_cmd(self.case.project, self.case.fuzz_target, cand["files"])
-            + "arvo compile > /tmp/compile.log 2>&1; echo $? > /tmp/rc_build; "
+            + f"{COMPILE_CMD} > /tmp/compile.log 2>&1; echo $? > /tmp/rc_build; "
             f"md5sum {self.harness} > /tmp/hash 2>&1",
             "if [ $(cat /tmp/rc_build) = 0 ]; then arvo > /tmp/out_run 2> /tmp/err_run; "
             "echo $? > /tmp/rc_run; fi",

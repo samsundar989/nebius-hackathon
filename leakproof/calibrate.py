@@ -21,7 +21,7 @@ import sqlite3
 import urllib.request
 from typing import Any
 
-from leakproof.cases.arvo import BUILD_ENV, DB, ArvoCase, rebuild_prep_cmd
+from leakproof.cases.arvo import BUILD_ENV, COMPILE_CMD, DB, ArvoCase, rebuild_prep_cmd
 from leakproof.config import CACHE_DIR
 from leakproof.gate import HARNESS_ENTRY, MARK, SOURCE_EXT, split
 from leakproof.runner import ImageRef, LocalDockerRunner
@@ -181,7 +181,7 @@ def build_reference(
     res = runner.run(
         baseline,
         rebuild_prep_cmd(case.project, case.fuzz_target, files)
-        + "arvo compile > /tmp/compile.log 2>&1; rc=$?; tail -20 /tmp/compile.log; exit $rc",
+        + f"{COMPILE_CMD} > /tmp/compile.log 2>&1; rc=$?; tail -20 /tmp/compile.log; exit $rc",
         files={k: v.encode() for k, v in files.items()},
         env=BUILD_ENV,
         cwd=case.workdir,

@@ -25,13 +25,15 @@ from leakproof.runner import ImageRef, Runner
 DB = CACHE_DIR / "arvo" / "arvo.db"
 SHORTLIST = REPO_ROOT / "cases" / "arvo" / "shortlist_2026-10-22.json"
 OUR_FLAGS = "-O0 -gline-tables-only -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION"
-# libFuzzer for every case (D-0046): the gate's refuzz drives the harness with libFuzzer flags,
-# which an AFL++/honggfuzz build silently ignores (libplist 42519914 "fuzzed" 0 executions).
-BUILD_ENV = {
-    "CFLAGS": OUR_FLAGS,
-    "CXXFLAGS": f"{OUR_FLAGS} -stdlib=libc++",
-    "FUZZING_ENGINE": "libfuzzer",
-}
+BUILD_ENV = {"CFLAGS": OUR_FLAGS, "CXXFLAGS": f"{OUR_FLAGS} -stdlib=libc++"}
+# libFuzzer for every case (D-0046/D-0047): the gate's refuzz drives the harness with libFuzzer
+# flags, which an AFL++/honggfuzz build ignores (libplist 42519914 "fuzzed" 0 executions).
+# `arvo compile` cannot be told: /bin/arvo hard-codes `export FUZZING_ENGINE=afl|honggfuzz`
+# before calling OSS-Fuzz's `compile`, so we call `compile` ourselves with ARVO's language.
+COMPILE_CMD = (
+    "( eval \"$(grep -E '^export FUZZING_LANGUAGE=' /bin/arvo)\"; "
+    "export FUZZING_ENGINE=libfuzzer SANITIZER=address ARCHITECTURE=x86_64; compile )"
+)
 WINDOW = 80
 
 
@@ -57,6 +59,22 @@ def rebuild_prep_cmd(
     return cmd
 
 
+# OSS-Fuzz build scripts are written to run once (`mkdir build`, `mkdir /src/seeds`), and the
+# baseline has already run them, so every later rebuild would die there (D-0047: md4c, miniz,
+# libzip, h3, jq 42531297). Installed into the baseline: a mkdir whose already-existing
+# directory arguments are no error; everything else goes to the real /bin/mkdir unchanged.
+MKDIR_SHIM = r"""mkdir -p /usr/local/bin && cat > /usr/local/bin/mkdir <<'LPEOF'
+#!/bin/bash
+args=()
+for a in "$@"; do
+  if [[ $a != -* && -d $a ]]; then continue; fi
+  args+=("$a")
+done
+for a in "${args[@]}"; do [[ $a == -* ]] || exec /bin/mkdir "${args[@]}"; done
+exit 0
+LPEOF
+chmod +x /usr/local/bin/mkdir
+"""
 HARNESS_DIRS = re.compile(r"/(tests?|fuzz|fuzzing|fuzzers?|oss-?fuzz|harness(es)?)/", re.I)
 MAX_CRASH_FRAMES = 5
 # Project test commands, run from the case workdir inside the rebuilt image (gate check 3).
@@ -150,8 +168,9 @@ class ArvoCase:
             )
         rebuilt = runner.run(
             ref,
-            rebuild_prep_cmd(self.project, self.fuzz_target, {}, clean=True)
-            + "arvo compile > /tmp/compile.log 2>&1; rc=$?; tail -20 /tmp/compile.log; "
+            MKDIR_SHIM
+            + rebuild_prep_cmd(self.project, self.fuzz_target, {}, clean=True)
+            + f"{COMPILE_CMD} > /tmp/compile.log 2>&1; rc=$?; tail -20 /tmp/compile.log; "
             "[ $rc = 0 ] || exit 97; arvo",
             env=BUILD_ENV,
             cwd=self.workdir,
@@ -264,7 +283,7 @@ class ArvoCase:
         res = runner.run(
             baseline,
             rebuild_prep_cmd(self.project, self.fuzz_target, files)
-            + "arvo compile > /tmp/compile.log 2>&1; rc=$?; grep -E 'error|Error' /tmp/compile.log "
+            + f"{COMPILE_CMD} > /tmp/compile.log 2>&1; rc=$?; grep -E 'error|Error' /tmp/compile.log "
             "| head -30; tail -15 /tmp/compile.log; exit $rc",
             files={k: v.encode() for k, v in files.items()},
             env=BUILD_ENV,

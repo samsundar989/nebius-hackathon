@@ -159,14 +159,20 @@ printf '\\n@@LPGATE@@ poc_b64\\n'; base64 -w0 /tmp/poc
 """
 
 
-def corpus_run_script(harness: str, asan: str, section: str, extra: str = "") -> str:
-    """One line per input: `name rc stdout_md5 signature`."""
+def corpus_run_script(
+    harness: str, asan: str, section: str, extra: str = "", reports: int = 0
+) -> str:
+    """One line per input: `name rc stdout_md5 signature`; plus the first `reports` sanitizer
+    reports as sections `<section>_rep_<name>` (evidence for a safe_fix verdict)."""
     h = shlex.quote(harness)
     return f"""
-: > {LP}/{section}
+: > {LP}/{section}; nrep=0
 for f in $(ls {LP}/corpus 2>/dev/null | sort); do
   ASAN_OPTIONS={asan} timeout 60 {h} {FUZZ_FLAGS} {extra} {LP}/corpus/$f > {LP}/o 2> {LP}/e; rc=$?
-  echo "$f $rc $(md5sum < {LP}/o | cut -c1-12) $({SIG} {LP}/e | tr ' ' '_')" >> {LP}/{section}
+  sig=$({SIG} {LP}/e | tr ' ' '_')
+  echo "$f $rc $(md5sum < {LP}/o | cut -c1-12) $sig" >> {LP}/{section}
+  if [ -n "$sig" ] && [ $nrep -lt {reports} ]; then nrep=$((nrep+1))
+    printf '\\n@@LPGATE@@ {section}_rep_%s\\n' "$f"; {report_cmd(f"{LP}/e")} | head -c 4000; fi
 done
 printf '\\n@@LPGATE@@ {section}\\n'; cat {LP}/{section}
 """

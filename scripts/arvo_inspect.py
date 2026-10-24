@@ -25,6 +25,9 @@ echo "## test dirs"; find /src/$P -maxdepth 2 -iname '*test*' | head -40
 echo "## make targets"; grep -hoE '^(check|test|tests|unittest)[a-zA-Z_-]*:' /src/$P/Makefile* /src/$P/*/Makefile* 2>/dev/null | sort -u
 echo "## tools"; for t in make cmake python3 autoreconf ctest valgrind pkg-config; do printf '%s: ' $t; command -v $t || echo missing; done
 echo "## cunit"; ls /usr/include/CUnit 2>/dev/null | head -3 || echo none
+echo "## /bin/arvo"; cat /bin/arvo
+echo "## engine env"; env | grep -E '^(FUZZING_ENGINE|SANITIZER|CC|CXX|LIB_FUZZING_ENGINE|ARCHITECTURE|FUZZING_LANGUAGE)=' | sort
+echo "## compile"; command -v compile; head -60 "$(command -v compile)" 2>/dev/null
 """
 
 
