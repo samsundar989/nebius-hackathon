@@ -22,6 +22,13 @@ def test_amplify_is_generic_and_deterministic() -> None:
     assert len(set(out.values())) == len(out)
 
 
+def test_amplify_grows_every_digit_run_not_only_the_longest() -> None:
+    # jq 42530604's PoC: the exponent is the longest run; the mantissa is what overflows.
+    out = dict(gf.amplify(b"        -16E-1061947065"))
+    assert out["digits_x2"] == b"        -16E-10619470651061947065"
+    assert out["digits1_x8"] == b"        -" + b"16" * 8 + b"E-1061947065"
+
+
 def test_amplify_binary_input_without_runs() -> None:
     out = dict(gf.amplify(b"\x00\x01\x02"))
     assert "digits_x2" not in out and "alpha_x2" not in out

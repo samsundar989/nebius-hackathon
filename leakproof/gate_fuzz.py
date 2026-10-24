@@ -30,9 +30,20 @@ CORPUS_MAX_BYTES = 64 * 1024
 GEN_RUNS = 5000  # libFuzzer-generated corpus when the project ships none
 AMP_FACTORS = (2, 8, 64)
 AMP_MAX_BYTES = 1 << 20
+AMP_MAX_RUNS = 4  # digit/alpha runs amplified per input, longest first
 SAFE_FIX_KINDS = {"leak", "use-after-free", "double-free", "invalid-free"}
 LP = "/tmp/lp"
 SIG = r"grep -m1 -oE '(ERROR|WARNING): ([A-Za-z]+Sanitizer|libFuzzer): [A-Za-z-]+'"
+
+
+def report_cmd(path: str) -> str:
+    """The report from its first ERROR line on (a plain tail can cut the header off long
+    use-after-free stacks); the whole tail when there is no ERROR line."""
+    return (
+        f"if grep -q 'ERROR: ' {path}; then sed -n '/ERROR: /,$p' {path} | head -c 12000; "
+        f"else tail -c 6000 {path}; fi"
+    )
+
 
 _DIGITS = re.compile(rb"[0-9]+")
 _ALPHA = re.compile(rb"[A-Za-z]+")
@@ -80,11 +91,14 @@ def amplify(poc: bytes) -> list[tuple[str, bytes]]:
     def splice(name: str, start: int, end: int, piece: bytes) -> None:
         out.append((name, poc[:start] + piece + poc[end:]))
 
+    # Every run, longest first (not just the longest): in `-16E-1061947065` the size that
+    # matters is the 2-digit mantissa, and growing the exponent only overflows to infinity.
     for label, pattern in (("digits", _DIGITS), ("alpha", _ALPHA)):
-        m = _longest(pattern, poc)
-        if m:
+        runs = sorted(pattern.finditer(poc), key=lambda m: (-len(m.group()), m.start()))
+        for i, m in enumerate(runs[:AMP_MAX_RUNS]):
             for k in AMP_FACTORS:
-                splice(f"{label}_x{k}", m.start(), m.end(), m.group() * k)
+                name = f"{label}_x{k}" if i == 0 else f"{label}{i}_x{k}"
+                splice(name, m.start(), m.end(), m.group() * k)
     for k in AMP_FACTORS:
         out.append((f"whole_x{k}", poc * k))
     m = _longest(_TOKEN, poc)
@@ -173,7 +187,7 @@ def refuzz_script(
 for n in {names}; do
   ASAN_OPTIONS={ASAN_DIFF} timeout 60 {h} {FUZZ_FLAGS} {LP}/amp/$n > /dev/null 2> {LP}/e; rc=$?
   sig=$({SIG} {LP}/e | tr ' ' '_'); echo "$n $rc $sig" >> {LP}/amp_res
-  if [ -z "$ampcrash" ] && {{ [ -n "$sig" ] || [ $rc != 0 ]; }}; then ampcrash=$n; tail -c 6000 {LP}/e > {LP}/amp_report; fi
+  if [ -z "$ampcrash" ] && {{ [ -n "$sig" ] || [ $rc != 0 ]; }}; then ampcrash=$n; {{ {report_cmd(f"{LP}/e")}; }} > {LP}/amp_report; fi
 done
 printf '\\n@@LPGATE@@ amp_res\\n'; cat {LP}/amp_res
 printf '\\n@@LPGATE@@ amp_report\\n'; cat {LP}/amp_report 2>/dev/null
@@ -185,7 +199,7 @@ if [ -z "$ampcrash" ]; then
     > /dev/null 2> {LP}/fuzz.log; echo $? > {LP}/fuzz_rc
   printf '\\n@@LPGATE@@ fuzz_rc\\n'; cat {LP}/fuzz_rc
   printf '\\n@@LPGATE@@ fuzz_stats\\n'; grep -E '^(stat::|#[0-9]+.*(DONE|cov))' {LP}/fuzz.log | tail -12
-  printf '\\n@@LPGATE@@ fuzz_report\\n'; grep -v '^#[0-9]' {LP}/fuzz.log | tail -c 6000
+  printf '\\n@@LPGATE@@ fuzz_report\\n'; {report_cmd(f"{LP}/fuzz.log")}
   a=$(ls {LP}/art | head -1)
   if [ -n "$a" ]; then printf '\\n@@LPGATE@@ fuzz_artifact\\n%s ' "$a"; head -c 262144 "{LP}/art/$a" | base64 -w0; fi
 fi
@@ -197,7 +211,7 @@ def confirm_script(harness: str) -> str:
     return (
         f"ASAN_OPTIONS={ASAN_DIFF} timeout 60 {shlex.quote(harness)} {FUZZ_FLAGS} "
         f"{LP}/confirm/input > /dev/null 2> {LP}/e; printf '\\n@@LPGATE@@ confirm\\n'; "
-        f"tail -c 6000 {LP}/e"
+        f"{report_cmd(f'{LP}/e')}"
     )
 
 
