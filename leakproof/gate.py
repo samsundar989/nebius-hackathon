@@ -33,7 +33,7 @@ from leakproof import gate_fuzz as gf
 from leakproof.cases.arvo import BUILD_ENV, COMPILE_CMD, ArvoCase, rebuild_prep_cmd
 from leakproof.cases.juliet import JulietCase
 from leakproof.findings import parse_report, primary
-from leakproof.runner import ImageRef, LocalDockerRunner
+from leakproof.runner import ImageRef, LocalDockerRunner, get_runner
 
 MARK = "@@LPGATE@@"
 SOURCE_EXT = (".c", ".h", ".cc", ".cpp", ".cxx", ".hpp", ".hh", ".inc")
@@ -604,8 +604,15 @@ def run_gate(
     artifacts: Path | None = None,
     fuzz_seconds: int = 90,
     reference: ImageRef | None = None,
+    runner_name: str = "docker",
 ) -> dict[str, Any]:
-    runner = LocalDockerRunner(memory="4g", cpus=2)
+    # Every gate run has networking off whichever backend runs it (Docker --network=none,
+    # Sandboxes networking.enabled=false).
+    runner = (
+        LocalDockerRunner(memory="4g", cpus=2)
+        if runner_name == "docker"
+        else get_runner(runner_name, run_id=f"gate:{case_id}")
+    )
     t0 = time.monotonic()
     if case_id.isdigit():
         case = ArvoCase.load(case_id)
@@ -666,6 +673,9 @@ def run_gate(
         "tests_baseline": tb.to_dict() if (tb := getattr(gate, "tests_baseline", None)) else None,
         "results": results,
         "elapsed_s": round(time.monotonic() - t0, 2),
+        "runner": runner_name,
+        # Sandboxes: every saved run (parent image -> child image), for the lineage view.
+        "lineage": getattr(runner, "lineage", None),
     }
 
 
@@ -679,17 +689,19 @@ def main() -> int:
     ap.add_argument("--artifacts", type=Path, help="refuzz crash inputs (default: next to --out)")
     ap.add_argument("--fuzz-seconds", type=int, default=90)
     ap.add_argument("--reference", help="image with the developer's fix (refuzz attribution)")
+    ap.add_argument("--runner", default="docker", choices=["docker", "sandboxes"])
     args = ap.parse_args()
     payload = json.loads(args.candidates.read_text())
     out = run_gate(
         args.case,
-        ImageRef("docker", args.baseline),
+        ImageRef(args.runner, args.baseline),
         payload["candidates"],
         args.workdir,
         payload.get("finding"),
         args.artifacts or args.out.parent / "gate_artifacts",
         args.fuzz_seconds,
-        ImageRef("docker", args.reference) if args.reference else None,
+        ImageRef(args.runner, args.reference) if args.reference else None,
+        args.runner,
     )
     args.out.write_text(json.dumps(out, indent=1))
     return 0

@@ -21,4 +21,8 @@ def get_runner(name: str = "docker", **kwargs: object) -> Runner:
         from leakproof.runner.contree import ContreeRunner
 
         return ContreeRunner(**kwargs)  # type: ignore[arg-type]
+    if name == "sandboxes":
+        from leakproof.runner.sandboxes_rest import SandboxesRestRunner
+
+        return SandboxesRestRunner(**kwargs)  # type: ignore[arg-type]
     raise ValueError(f"unknown runner {name!r}")

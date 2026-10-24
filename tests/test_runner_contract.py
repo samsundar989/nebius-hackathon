@@ -31,8 +31,18 @@ def _snapshots() -> list[str]:
     return out.split()
 
 
-@pytest.fixture(scope="module", params=["docker", "contree"])
+@pytest.fixture(scope="module", params=["docker", "contree", "sandboxes"])
 def backend(request: pytest.FixtureRequest) -> Iterator[tuple[Runner, ImageRef]]:
+    if request.param == "sandboxes":
+        from leakproof.runner.contree import access_status
+        from leakproof.runner.sandboxes_rest import SandboxesRestRunner
+
+        ok, why = access_status()
+        if not ok:
+            pytest.skip(f"Sandboxes not usable: {why}")
+        runner = SandboxesRestRunner(run_id="contract_test")
+        yield runner, runner.import_image(BASE)
+        return
     if request.param == "docker":
         if not _docker_available():
             pytest.skip("docker engine not available")
@@ -73,7 +83,7 @@ def test_list_command_is_quoted(backend: tuple[Runner, ImageRef]) -> None:
 def test_files_env_cwd(backend: tuple[Runner, ImageRef], tmp_path: Path) -> None:
     runner, image = backend
     local = tmp_path / "host.txt"
-    local.write_text("from-path\n")
+    local.write_bytes(b"from-path\n")  # write_text would add \r on Windows (the old "failure")
     r = runner.run(
         image,
         "pwd; cat rel.txt /etc/abs.txt sub/host.txt; echo $LP_VAR",
@@ -134,6 +144,11 @@ def test_build_image(backend: tuple[Runner, ImageRef], tmp_path: Path) -> None:
         f"FROM {BASE}\nENV LP_BUILT=yes\nCOPY payload.txt /opt/payload.txt\n"
         "RUN echo built > /opt/marker\nWORKDIR /work\n"
     )
-    ref = runner.build_image(tmp_path / "Dockerfile", tmp_path, "leakproof/contract-test:latest")
+    try:
+        ref = runner.build_image(
+            tmp_path / "Dockerfile", tmp_path, "leakproof/contract-test:latest"
+        )
+    except NotImplementedError:
+        pytest.skip(f"{runner.name} imports OCI images instead of building Dockerfiles")
     r = runner.run(ref, "cat /opt/marker /opt/payload.txt; echo $LP_BUILT", timeout_s=60)
     assert r.ok and r.stdout.split() == ["built", "copied", "yes"]

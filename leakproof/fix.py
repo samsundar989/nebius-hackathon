@@ -48,6 +48,7 @@ def run_gate_process(
     candidates: list[dict[str, Any]],
     case_dir: Path,
     reference: str | None = None,
+    runner_name: str = "docker",
 ) -> dict[str, Any]:
     cpath, vpath = case_dir / "candidates.json", case_dir / "gate.json"
     cpath.write_text(json.dumps({"finding": finding, "candidates": candidates}, indent=1))
@@ -68,6 +69,8 @@ def run_gate_process(
         cmd += ["--workdir", workdir]
     if reference:
         cmd += ["--reference", reference]
+    if runner_name != "docker":
+        cmd += ["--runner", runner_name]
     proc = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True, check=False)
     if proc.returncode != 0 or not vpath.exists():
         raise RuntimeError(f"gate process failed ({proc.returncode}): {proc.stderr[-2000:]}")
@@ -117,6 +120,7 @@ def fix_case(
         )
         (run_dir / f"{case_id}.json").write_text(json.dumps(rec, indent=1))
         return rec
+    gate: dict[str, Any] | None = None
     try:
         p0 = time.monotonic()
         baseline = case.prepare(runner)
@@ -169,7 +173,6 @@ def fix_case(
                     "files": c.files,
                     "diff": c.diff,
                 }
-        gate = None
         if unique and reference_builder is not None:
             # Only now, with every candidate final: the gate side builds its reference (the
             # developer's fix) for attribution. Workers have finished and never see it.
@@ -183,6 +186,7 @@ def fix_case(
                 list(unique.values()),
                 case_dir,
                 reference=reference,
+                runner_name=getattr(runner, "name", "docker"),
             )
             rec["gate"] = {k: v for k, v in gate.items() if k != "results"}
         by_diff = {}
@@ -233,10 +237,16 @@ def fix_case(
     finally:
         try:
             if reference and hasattr(runner, "remove_image"):
-                runner.remove_image(ImageRef("docker", reference))
+                runner.remove_image(ImageRef(getattr(runner, "name", "docker"), reference))
             case.cleanup(runner)
         except Exception as exc:  # noqa: BLE001 - cleanup must not mask the result
             rec["cleanup_error"] = str(exc)
+    if getattr(runner, "lineage", None) is not None:
+        # Worker side (baseline + branch builds); the gate's own runs are in gate.json.
+        rec["lineage"] = {
+            "workers": runner.lineage,
+            "gate": (gate or {}).get("lineage"),
+        }
     rec["usd"] = round(client.ledger.spent - spent0, 6)
     rec["usd_by_model"] = {m: round(v, 6) for m, v in client.ledger.by_model.items()}
     rec["elapsed_s"] = round(time.monotonic() - t0, 2)

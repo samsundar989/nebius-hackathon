@@ -26,7 +26,7 @@ from pathlib import Path
 from leakproof.config import RUNS_DIR, load_dotenv
 from leakproof.fix import fix_case
 from leakproof.llm import CostLedger, LLMClient
-from leakproof.runner import LocalDockerRunner
+from leakproof.runner import LocalDockerRunner, get_runner
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -138,6 +138,7 @@ def main() -> int:
         help="ARVO: build the developer fix as the gate's attribution reference (P3)",
     )
     ap.add_argument("--audit-model", default="lightning", help="'none' disables check 8")
+    ap.add_argument("--runner", default="docker", choices=["docker", "sandboxes"])
     args = ap.parse_args()
     load_dotenv()
     os.environ.setdefault("LEAKPROOF_LEDGER_CAP_USD", "25")
@@ -145,19 +146,30 @@ def main() -> int:
     args.run_id = args.run_id or f"fix_{time.strftime('%Y%m%d_%H%M%S')}"
     run_dir = RUNS_DIR / args.run_id
     run_dir.mkdir(parents=True, exist_ok=True)
-    runner = LocalDockerRunner(memory="4g", cpus=2)
-    jobs = 1 if any(i.isdigit() for i in ids) else args.jobs
+    runner = (
+        LocalDockerRunner(memory="4g", cpus=2)
+        if args.runner == "docker"
+        else get_runner(args.runner, run_id=args.run_id)
+    )
+    # ARVO on Docker: one case at a time (D-0027). Sandboxes runs remotely: parallel is fine.
+    jobs = 1 if args.runner == "docker" and any(i.isdigit() for i in ids) else args.jobs
     t0, recs, spent = time.monotonic(), [], 0.0
 
     def one(cid: str) -> dict:
         client = LLMClient(
             ledger=CostLedger(budget=args.case_budget), run_id=f"{args.run_id}:{cid}"
         )
+        # Sandboxes: a runner per case, so each record carries only its own lineage.
+        case_runner = (
+            runner
+            if args.runner == "docker"
+            else get_runner(args.runner, run_id=f"{args.run_id}:{cid}")
+        )
         return fix_case(
             cid,
             run_dir,
             client,
-            runner,
+            case_runner,
             planner_model=None if args.planner == "none" else args.planner,
             worker_model=args.worker_model,
             n_workers=args.workers,

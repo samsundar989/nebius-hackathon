@@ -22,6 +22,8 @@ JULIET = CACHE_DIR / "juliet" / "C"
 CASES_DIR = REPO_ROOT / "cases" / "juliet"
 SUPPORT = ["io.c", "std_testcase.h", "std_testcase_io.h", "std_thread.h"]
 IMAGE = ImageRef("docker", "leakproof/cpp-sanitizers:e0")
+# The same toolchain on Nebius Sandboxes, built once by scripts/sandboxes_setup.py (D-0053).
+IMAGES = {"docker": IMAGE, "sandboxes": ImageRef("sandboxes", "tag:lp-cpp-sanitizers")}
 HIDDEN = {
     "good": (
         re.compile(r"^#ifndef OMITGOOD\b.*?^#endif /\* OMITGOOD \*/[^\n]*\n?", re.M | re.S),
@@ -132,7 +134,7 @@ class JulietCase:
 
     def prepare(self, runner: Runner) -> ImageRef:
         res = runner.run(
-            IMAGE,
+            IMAGES[getattr(runner, "name", "docker")],
             "mkdir -p bin out",
             files=self.base_files(),
             cwd="/work",
