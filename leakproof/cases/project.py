@@ -44,13 +44,17 @@ class ProjectCase(ArvoCase):
 
     @classmethod
     def load(cls, case_id: str) -> ProjectCase:  # type: ignore[override]
-        path = Path(case_id.removeprefix("project:")).resolve()
+        # `project:<toml>#poc=<file>`: a batch fixes one cluster representative at a time.
+        spec, _, poc = case_id.removeprefix("project:").partition("#poc=")
+        path = Path(spec).resolve()
         cfg = tomllib.loads(path.read_text(encoding="utf-8"))["project"]
+        if poc:
+            cfg["poc"] = str(Path(poc).resolve())
         for key in ("name", "build", "reproduce"):
             if not cfg.get(key):
                 raise ValueError(f"{path}: [project].{key} is required")
         return cls(
-            id=f"project:{path}",
+            id=f"project:{path}" + (f"#poc={Path(poc).resolve()}" if poc else ""),
             project=cfg["name"],
             image=cfg.get("image", ""),
             fuzz_target=cfg.get("harness") or "",
@@ -136,7 +140,7 @@ class ProjectCase(ArvoCase):
         image = ImageRef(kind, self.image or TOOLCHAIN[kind])
         files: dict[str, Path | bytes] = dict(self._tree())
         if self.cfg.get("poc"):
-            files["/tmp/poc"] = self.root / self.cfg["poc"]
+            files["/tmp/poc"] = self.root / self.cfg["poc"]  # absolute paths stay absolute
         res = runner.run(
             image,
             f"{{ {self.cfg['build']} ; }} > /tmp/build.log 2>&1; rc=$?; tail -20 /tmp/build.log; "

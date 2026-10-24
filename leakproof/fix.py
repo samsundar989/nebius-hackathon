@@ -39,7 +39,9 @@ VERDICT_RANK = [
 def case_slug(case_id: str) -> str:
     """File-system name for a case: `project:<path>/leakproof.toml` -> `project_<dir>`."""
     if case_id.startswith("project:"):
-        return "project_" + Path(case_id.removeprefix("project:")).resolve().parent.name
+        spec, _, poc = case_id.removeprefix("project:").partition("#poc=")
+        slug = "project_" + Path(spec).resolve().parent.name
+        return slug + (f"__{Path(poc).stem}" if poc else "")
     return case_id
 
 
