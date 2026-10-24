@@ -134,6 +134,21 @@ def test_diff_scope_rejects_harness_files_wherever_they_live() -> None:
     assert ok.status == "pass"
 
 
+def test_crash_key_survives_line_shift_in_the_patched_file() -> None:
+    # libucl 42512369: the patch inserts lines above a pre-existing overflow.
+    base = ASAN_HBO.replace("decNumber.c:3900:5", "decNumber.c:3898:5")
+    patched = gf.crash_key(ASAN_HBO)
+    assert patched == gf.crash_key(base)
+    assert (
+        patched is not None and patched[1] == "decNumberToString /src/jq/src/decNumber/decNumber.c"
+    )
+    target = gf.finding_site(
+        {"frames": [{"function": "ucl_hash_insert", "file": "/src/x/ucl_hash.c"}]}
+    )
+    assert gf.attribute(patched, base, target)[0] is False  # same pre-existing bug, not blamed
+    assert gf.attribute(patched, base, patched[1])[0] is True  # ...unless it is the target
+
+
 def test_crash_key_libfuzzer_timeout() -> None:
     assert gf.crash_key("==7== ERROR: libFuzzer: timeout after 25 seconds") == ("timeout", "")
 

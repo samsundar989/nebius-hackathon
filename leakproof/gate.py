@@ -503,9 +503,7 @@ class ArvoGate:
         key = gf.crash_key(report, rc) or ("unknown", "")
         base_report = self.probe(self.baseline, data)
         ref_report = self.probe(self.reference, data) if self.reference else None
-        blame, why = gf.attribute(
-            key, base_report, self.case.finding.get("location") or "", ref_report
-        )
+        blame, why = gf.attribute(key, base_report, gf.finding_site(self.case.finding), ref_report)
         detail = f"{key[0]} at {key[1] or '?'} from {source} ({len(data)} bytes); {why}"
         if fuzz_note:
             detail += f"; {fuzz_note}"

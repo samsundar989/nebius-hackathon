@@ -13,6 +13,7 @@ the size of the PoC is the bug class they target.
 from __future__ import annotations
 
 import base64
+import posixpath
 import re
 import shlex
 from dataclasses import dataclass
@@ -331,16 +332,32 @@ def _norm(kind: str) -> str:
     return {"heap-use-after-free": "use-after-free"}.get(k, k)
 
 
+def site(function: str | None, file: str | None) -> str:
+    """A crash site without its line number: patches shift lines in the files they edit
+    (libucl 42512369: the same overflow at ucl_parser.c:2152 on the baseline, :2154 patched)."""
+    return f"{function or '?'} {posixpath.normpath(file)}" if file else ""
+
+
+def finding_site(finding: dict[str, Any]) -> str:
+    """Site of the target defect, from a Finding dict (first frame outside the runtime)."""
+    for fr in finding.get("frames") or []:
+        f = fr.get("file") or ""
+        if f.startswith("/src/") and not f.startswith("/src/llvm-project/"):
+            return site(fr.get("function"), f)
+    return ""
+
+
 def crash_key(report: str, rc: str = "") -> tuple[str, str] | None:
-    """(kind, location) of a report; libFuzzer timeouts/OOMs have no location."""
+    """(kind, site) of a report; site = function + file of the first user frame, no line."""
     p = primary(parse_report(report))
     if p is not None:
-        return p.kind, p.location or ""
+        fr = p.first_user_frame(p.frames)
+        return p.kind, (site(fr.function, fr.file) if fr else "")
     for k in ("timeout", "out-of-memory", "deadly signal"):
         if f"libFuzzer: {k}" in report:
             # Location = first frame in project code (an assert's caller, say), if any.
             m = _PROJECT_FRAME.search(report)
-            return k, (f"{m.group(1)} {m.group(2)}" if m else "")
+            return k, (site(m.group(1), m.group(2).rsplit(":", 2)[0]) if m else "")
     if rc and rc not in ("0", "124"):
         return f"exit_{rc}", ""
     return None
@@ -349,7 +366,7 @@ def crash_key(report: str, rc: str = "") -> tuple[str, str] | None:
 def attribute(
     patched: tuple[str, str],
     baseline_report: str,
-    target_location: str,
+    target_site: str,
     reference_report: str | None = None,
 ) -> tuple[bool, str]:
     """True when the crash is the patch's responsibility (not a pre-existing unrelated bug).
@@ -359,7 +376,7 @@ def attribute(
     fix also has is not this patch's doing.
     """
     b = crash_key(baseline_report)
-    if b is not None and b == patched and patched[1] and patched[1] != target_location:
+    if b is not None and b == patched and patched[1] and patched[1] != target_site:
         return (
             False,
             f"baseline crashes identically ({b[0]} at {b[1]}): pre-existing, not attributed",
