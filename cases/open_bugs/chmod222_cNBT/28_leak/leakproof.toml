@@ -1,0 +1,10 @@
+# chmod222/cNBT issue #28 (bug 1): leak via errno poisoning in parse_named_tag.
+# Upstream source in ../src (not committed).
+[project]
+name = "cnbt_28_leak"
+src = ".."
+build = '''clang $CFLAGS -fsanitize=fuzzer -Isrc -o fuzz_cnbt fuzz_cnbt.c src/buffer.c src/nbt_parsing.c src/nbt_treeops.c src/nbt_util.c'''
+reproduce = '''./fuzz_cnbt /tmp/poc'''
+harness = "fuzz_cnbt"
+poc = "28_leak/poc.nbt"
+editable = ["src/*.c", "src/*.h"]

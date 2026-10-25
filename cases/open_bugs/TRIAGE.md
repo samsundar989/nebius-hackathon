@@ -32,3 +32,22 @@ Build notes: the clones must have LF line endings (`git -c core.autocrlf=false c
 
 The nanosvg and yajl configs stay in the tree (they reproduce or not at HEAD, which is still a
 data point), but no fix is attempted for issues with an open PR.
+
+## Round 2 (review #7 order 5)
+
+Same rules: open, public, reproducer written from the issue text, no open fix PR, never post.
+
+| issue | defect | status | AI policy |
+|---|---|---|---|
+| [chmod222/cNBT#28](https://github.com/chmod222/cNBT/issues/28) (bug 1) | leak in `parse_named_tag` (unchecked `read_string` failure) | reproduces at HEAD (`nbt_parsing.c:182`) → fix attempted (`chmod222_cNBT/28_leak`) | none stated |
+| [chmod222/cNBT#28](https://github.com/chmod222/cNBT/issues/28) (bug 2) | unbounded length in `read_int_array` | not a sanitizer trip at HEAD: libFuzzer stops the oversized `malloc` first (exit 71); a denial-of-service shape the gate does not judge | none stated |
+| [htacg/tidy-html5#1177](https://github.com/htacg/tidy-html5/issues/1177) | `prvTidynewStack` allocations never freed | reproduces at HEAD (leak, `alloc.c:64`) → fix attempted | none stated |
+| [zserge/jsmn#249](https://github.com/zserge/jsmn/issues/249) | out-of-bounds read in `example/jsondump.c` | reproduces at HEAD (`jsondump.c:34`) → fix attempted (PR #250 was closed unmerged) | none stated |
+| [armink/struct2json#38](https://github.com/armink/struct2json/issues/38) | leak in the demo's `s2j_test2()` | demo needs `-Wno-error=int-conversion` with clang 18; reproduce re-run pending | none stated |
+| [uclouvain/openjpeg#1641](https://github.com/uclouvain/openjpeg/issues/1641), [#1642](https://github.com/uclouvain/openjpeg/issues/1642) | `-OutFor` stack overflows | excluded: open PRs #1664, #1653/#1665 | — |
+| [lloyd/yajl#261](https://github.com/lloyd/yajl/issues/261) | leak in `yajl_tree_parse` on failure | excluded: open PR #264 | — |
+| [liblouis/liblouis#2096](https://github.com/liblouis/liblouis/issues/2096) | `typebuf` sized by caller's `outlen` | excluded: open PR #2104 (and the PoC passes a length larger than its buffer) | — |
+| [liblouis/liblouis#2094](https://github.com/liblouis/liblouis/issues/2094) | heap overflow | excluded: the "reproducer" is a template with placeholder bytes | — |
+| [madler/zlib#1299](https://github.com/madler/zlib/issues/1299), [rxi/fe#34](https://github.com/rxi/fe/issues/34), [OpenDMARC#441](https://github.com/trusteddomainproject/OpenDMARC/issues/441), [vincenthz/libjson#31](https://github.com/vincenthz/libjson/issues/31), [antirez/gguf-tools#25](https://github.com/antirez/gguf-tools/issues/25), [cesanta/mjs#104/#108/#158/#167/#170](https://github.com/cesanta/mjs/issues) | various | excluded: the reproducer is an attachment, a crafted binary, or a link to another repository (not downloaded) | — |
+| [cesanta/elk#81](https://github.com/cesanta/elk/issues/81) | missing `nargs` check in the ESP32 example's `delay()` | skipped: the code is an Arduino example the offline toolchain does not build | — |
+| [nothings/stb#1860](https://github.com/nothings/stb/issues/1860) | 16-bit PNG conversion overflow | skipped: needs a 23171×23171 PNG and attachments | — |

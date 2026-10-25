@@ -1,0 +1,8 @@
+# armink/struct2json issue #38: cJSON_Parse result leaked in the demo's s2j_test2().
+# Upstream source in ./src (not committed). The build is the issue's command.
+[project]
+name = "struct2json_38"
+src = "."
+build = '''cd src/demo && clang $CFLAGS -Wno-error=int-conversion ../cJSON/cJSON.c ../struct2json/src/*.c ./*.c -I ../cJSON/ -I ../struct2json/inc/ -lm -DDEBUGS2J -o tests2j'''
+reproduce = '''cd src/demo && ./tests2j'''
+editable = ["src/demo/*.c", "src/demo/*.h", "src/struct2json/src/*.c"]

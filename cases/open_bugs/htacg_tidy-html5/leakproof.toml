@@ -1,0 +1,8 @@
+# htacg/tidy-html5 issue #1177: allocations from prvTidynewStack are never freed.
+# Upstream source in ./src (not committed); repro.c is the issue's program.
+[project]
+name = "tidy_1177"
+src = "."
+build = '''clang $CFLAGS -w -Isrc/include -Isrc/src -o repro repro.c src/src/*.c'''
+reproduce = '''./repro'''
+editable = ["src/src/*.c", "src/src/*.h"]
