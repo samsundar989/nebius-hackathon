@@ -82,7 +82,8 @@ def detect(repo: Path) -> dict[str, Any]:
     CMakeLists.txt sits next to it), CMake.
     """
     has = lambda name: (repo / name).exists()  # noqa: E731
-    # Exec bits get lost on some checkouts: every file that starts with a shebang gets one back.
+    # Exec bits get lost on some checkouts: files with a shebang line get one back (a stray text
+    # file marked executable is harmless).
     prep = "grep -rlI --exclude-dir=.git '^#!' . | xargs -r chmod +x ; "
     if has("meson.build"):
         tests = "test(" in (repo / "meson.build").read_text(errors="replace")
