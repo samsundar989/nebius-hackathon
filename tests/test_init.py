@@ -14,7 +14,10 @@ def _repo(tmp_path: Path, files: dict[str, str]) -> Path:
 def test_detect_order_and_tests(tmp_path: Path) -> None:
     repo = _repo(
         tmp_path,
-        {"Makefile": "all:\n\tcc x.c\ncheck: all\n", "CMakeLists.txt": "add_test(x x)\n"},
+        {
+            "Makefile": "CFLAGS = -O2\nall:\n\tcc x.c\ncheck: all\n",
+            "CMakeLists.txt": "add_test(x x)\n",
+        },
     )
     d = init.detect(repo)
     assert d["system"] == "make" and d["test"] == "make check"
@@ -25,6 +28,7 @@ def test_hand_written_configure_is_not_autotools(tmp_path: Path) -> None:
     repo = _repo(tmp_path, {"configure": "#!/bin/sh\necho hi\n", "Makefile": "defconfig:\n"})
     d = init.detect(repo)
     assert d["system"] == "make" and "make defconfig" in d["build"]
+    assert "CC=" not in d["build"]  # no CFLAGS assignment: the environment's flags reach make
 
 
 def test_cmake_ctest(tmp_path: Path) -> None:
