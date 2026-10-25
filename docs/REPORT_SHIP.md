@@ -226,3 +226,23 @@ Strategist notes 2026-10-24 22:05 CDT (review #4): acknowledged; executed orders
 
 ### Note
 A Windows `uv run` without `UV_PROJECT_ENVIRONMENT=.venv-win` tried to replace the WSL `.venv` and may have removed part of it; WSL rebuilds it with `uv sync`.
+
+## Day 5 (cont.) · Sun 2026-10-25, 01:20–04:00 CDT — review #5 orders 1–4, 6
+
+Strategist notes 2026-10-25 01:20 CDT (review #5): acknowledged; orders 1, 2, 3, 4 and 6 done, order 5 (Pages fallback) is due Mon 12:00 only if Render is still not applied.
+
+### 1 — real tests in the gate (D-0073, D-0075)
+- mosquitto: CUnit installed in baseline prep (network on for that step only), the unit suite linked with the sanitizer and coverage flags: ~210–240 tests per case, 1 already failing on the baseline. The gate now compares per test when a suite fails on the baseline.
+- libexif (12 pass + 1 skip) and libplist (28/28) run `make check` offline. Stopped at 2 extra projects as ordered.
+- Re-judged every verified candidate of those 11 cases in all runs ($0): **all still verified, now with tests passing**; headline numbers unchanged (15/27, 14 strict). A first re-judge without the developer-fix reference wrongly rejected libplist 42508524 (a crash the developer's fix shares); `rejudge.py --reference developer` fixed that. The same run caught the wrong libexif 8-byte `memcmp` fix on a fuzz input, which the next run missed: refuzz is a sample.
+
+### 2 — evidence strength (D-0074)
+- In 26 of 27 ARVO cases the fuzz harness prints nothing: on real code the differential sees exit codes and crashes only. Evidence is medium where project tests ran, weak elsewhere; none strong.
+- Wrong/defensive fixes do **not** concentrate in weak (wrong 6 medium / 2 weak; correct 43 / 9). So per the order's condition the label stays descriptive ("verified, needs human review" on weak) rather than a correctness rule; README "How a gate lies" #7 says so and links NUMBERS.
+
+### 3, 4, 6
+- Dashboard: compact diff boxes (changed lines ±2), "Other verified candidates (2): both wrong", evidence badge + legend on case pages (checked in the browser).
+- DEVPOST: "Who it's for", updated "What's next". Video: B-roll list; planner strict numbers synced (2/3/5).
+
+### Model spend
+$0 since review #5 (all Docker work through workerq, jobs 3820–3828).
