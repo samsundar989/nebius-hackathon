@@ -52,6 +52,7 @@ OPEN = {
     "toybox_572": (
         "cases/open_bugs/landley_toybox/572/leakproof.toml",
         [
+            ("M1", "patch:cases/open_bugs/landley_toybox/572/one_line.diff"),
             ("H2w1", "runs/open_bugs_fix2/project_572.json:H2:1"),
             ("H3w2", "runs/open_bugs_fix2/project_572.json:H3:2"),
             ("H1w0", "runs/open_bugs_fix2/project_572.json:H1:0"),
@@ -246,6 +247,12 @@ def main() -> int:
             case = ProjectCase.load(f"project:{root / cfg}")
             loaded = []
             for cid, src in cands:
+                if src.startswith("patch:"):
+                    from gate_manual import from_patch
+
+                    path = root / src.removeprefix("patch:")
+                    loaded.append((cid, from_patch(case, path), path.read_text(encoding="utf-8")))
+                    continue
                 rec, hyp, idx = (
                     src.rsplit(":", 2) if src.count(":") >= 2 else (*src.rsplit(":", 1), "")
                 )
