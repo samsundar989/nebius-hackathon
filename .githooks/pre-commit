@@ -1,3 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 python3 scripts/check_secrets.py
+# The same lint CI runs, so a red push cannot happen. Windows shells use .venv-win.
+case "$(uname -s)" in
+  MINGW* | MSYS* | CYGWIN*) export UV_PROJECT_ENVIRONMENT=.venv-win ;;
+esac
+uv run --quiet ruff format --check .
+uv run --quiet ruff check .

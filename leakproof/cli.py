@@ -48,7 +48,9 @@ def _fix(args: argparse.Namespace) -> int:
         print(rec["error"][:1500])
     for w in workers:
         flags = ",".join((w.get("audit") or {}).get("flags", [])) or "-"
-        print(f"  {w['hypothesis_id']} w{w['worker_index']}: {w['verdict']:<36} reviewer notes: {flags}")
+        print(
+            f"  {w['hypothesis_id']} w{w['worker_index']}: {w['verdict']:<36} reviewer notes: {flags}"
+        )
     if rec.get("winner"):
         print("\nwinning diff:\n" + rec["winner"]["diff"])
     print(f"\nrecord: {run_dir / (case_slug(rec['case']) + '.json')}")
