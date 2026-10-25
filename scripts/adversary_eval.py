@@ -29,7 +29,8 @@ from leakproof.llm import CostLedger, LLMClient
 from leakproof.results import records, strict
 from leakproof.runner import LocalDockerRunner
 
-# variant -> (model, thinking). super_think runs on the open-bugs set only (cost).
+# variant -> (model, thinking). super_think ran once on the open bugs (prompt v1): it spent its
+# 32k-token budget reasoning and cost ~$0.03 a call, so it is not in the default set.
 VARIANTS = {"super": ("super", False), "ultra": ("ultra", False), "super_think": ("super", True)}
 MODELS = ("super", "ultra")
 BUDGET = 1.50
@@ -265,9 +266,7 @@ def main() -> int:
     for case, cands, mode in jobs:
         try:
             if mode is None:
-                summary += attack_case(
-                    runner, client, case, out, cands, models=(*MODELS, "super_think")
-                )
+                summary += attack_case(runner, client, case, out, cands)
                 continue
             c = load_case(case)
             # The developer's fix comes from the upstream commit (preparation step, network on).

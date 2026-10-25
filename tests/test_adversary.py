@@ -34,6 +34,7 @@ def test_behaviour_change_compares_with_reference_when_present() -> None:
 
 
 def test_decode() -> None:
-    assert adv.decode({"encoding": "hex", "data": "41 42"}) == b"AB"
-    assert adv.decode({"encoding": "hex", "data": "zz"}) is None
-    assert adv.decode({"encoding": "text", "data": "a\nb"}) == b"a\nb"
+    hexed = {"encoding": "hex", "prefix": "41", "repeat": "42", "count": 3, "suffix": "0a"}
+    assert adv.decode(hexed) == b"ABBB\n"
+    assert adv.decode({"encoding": "hex", "prefix": "zz"}) is None
+    assert adv.decode({"encoding": "text", "prefix": "a", "repeat": "", "count": 0}) == b"a"

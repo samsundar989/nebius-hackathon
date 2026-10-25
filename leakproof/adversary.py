@@ -33,7 +33,7 @@ from leakproof import gate_cli as gc
 from leakproof import gate_fuzz as gf
 
 MAX_INPUTS = 8
-PROMPT_VERSION = 2  # part of the answer cache key: a new prompt asks the models again
+PROMPT_VERSION = 3  # part of the answer cache key: a new prompt asks the models again
 MAX_INPUT_BYTES = 1 << 16
 CONTEXT = 40  # unpatched lines shown around each hunk
 
@@ -47,14 +47,17 @@ SCHEMA = {
                 "type": "object",
                 "properties": {
                     "encoding": {"type": "string", "enum": ["text", "hex"]},
-                    "data": {"type": "string"},
+                    "prefix": {"type": "string"},
+                    "repeat": {"type": "string"},
+                    "count": {"type": "integer", "minimum": 0, "maximum": 100000},
+                    "suffix": {"type": "string"},
                     "expect": {
                         "type": "string",
                         "enum": ["still_triggers", "new_crash", "unchanged_output"],
                     },
                     "reason": {"type": "string"},
                 },
-                "required": ["encoding", "data", "expect", "reason"],
+                "required": ["encoding", "prefix", "repeat", "count", "suffix", "expect", "reason"],
             },
         }
     },
@@ -75,8 +78,10 @@ PoC, changing only the part the patch handles; a fragment such as a bare string 
 field is useless, because the program never reaches the patched code with it. Give at most 8 \
 inputs, each different. Use encoding "hex" (two hex digits per byte, no separators) whenever an \
 input contains a backslash, a quote, a newline or any control or non-ASCII byte; use "text" \
-only for plain printable ASCII without those characters. Keep each input under 4 KB unless size \
-matters. For each, say what you expect and why in one sentence. \
+only for plain printable ASCII without those characters. An input is prefix + repeat x count \
++ suffix (all in the same encoding): write a long run once in "repeat" with its count instead \
+of spelling it out, and leave repeat empty with count 0 when there is no run. Keep prefix and \
+suffix under 512 bytes. For each input, say what you expect and why in one sentence. \
 Answer with the JSON object only."""
 
 
@@ -126,13 +131,19 @@ def prompt(
 
 
 def decode(item: dict[str, Any]) -> bytes | None:
-    data = item.get("data", "")
-    if item.get("encoding") == "hex":
-        try:
-            return binascii.unhexlify("".join(data.split()))[:MAX_INPUT_BYTES]
-        except (binascii.Error, ValueError):
-            return None
-    return data.encode("utf-8", "surrogateescape")[:MAX_INPUT_BYTES]
+    """prefix + repeat x count + suffix, each hex or text; None when the hex does not parse."""
+    parts = []
+    for key in ("prefix", "repeat", "suffix"):
+        s = item.get(key, "") or ""
+        if item.get("encoding") == "hex":
+            try:
+                parts.append(binascii.unhexlify("".join(s.split())))
+            except (binascii.Error, ValueError):
+                return None
+        else:
+            parts.append(s.encode("utf-8", "surrogateescape"))
+    count = max(0, min(int(item.get("count") or 0), MAX_INPUT_BYTES))
+    return (parts[0] + parts[1] * count + parts[2])[:MAX_INPUT_BYTES]
 
 
 def attack(
@@ -148,7 +159,7 @@ def attack(
         SCHEMA,
         purpose="adversary",
         thinking=thinking,
-        max_completion_tokens=32000 if thinking else 6000,
+        max_completion_tokens=32000 if thinking else 12000,
     )
     out = []
     for i, item in enumerate(value.get("inputs", [])[:MAX_INPUTS]):
