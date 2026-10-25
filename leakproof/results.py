@@ -16,6 +16,7 @@ from functools import cache
 from typing import Any
 
 from leakproof.config import REPO_ROOT, RUNS_DIR
+from leakproof.evidence import strength
 from leakproof.fix import rank
 from leakproof.semantic import CORRECT, change
 
@@ -36,6 +37,20 @@ def _semantic() -> dict[tuple[str, str], str]:
 def semantic_class(case: str, diff: str) -> str | None:
     """Hand class of a verified diff, or None when it was never adjudicated."""
     return _semantic().get((case, change(diff)))
+
+
+def output_stats(rec: dict[str, Any]) -> dict[str, int] | None:
+    """The case's baseline corpus output stats: from the record (gate >= D-0074) or from
+    runs/harness_output/ (measured afterwards for older runs); None when never measured."""
+    corpus = (rec.get("gate") or {}).get("corpus") or {}
+    if "stdout_distinct" in corpus:
+        return {k: corpus[k] for k in ("clean_inputs", "stdout_distinct")}
+    p = RUNS_DIR / "harness_output" / f"{rec['case']}.json"
+    if p.exists():
+        d = json.loads(p.read_text())
+        if "stdout_distinct" in d:
+            return {k: d[k] for k in ("clean_inputs", "stdout_distinct")}
+    return None
 
 
 @cache
@@ -89,9 +104,15 @@ def load(run: str, case_file: str) -> dict[str, Any]:
         rec["ambiguous"] = sel.get("ambiguous", False)
     if rec.get("winner"):
         rec["winner"]["semantic"] = semantic_class(rec["case"], rec["winner"]["diff"])
+    stats = output_stats(rec)
     for w in rec.get("workers", []):
         if w.get("verdict") == "verified":
             w["semantic"] = semantic_class(rec["case"], w["diff"])
+            w["evidence"] = strength((w.get("gate") or {}).get("checks") or {}, stats)
+    if rec.get("winner"):
+        win = _find(rec["workers"], rec["winner"])
+        if win is not None and "evidence" in win:
+            rec["winner"]["evidence"] = win["evidence"]
     return rec
 
 
