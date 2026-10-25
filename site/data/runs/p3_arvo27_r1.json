@@ -177,8 +177,8 @@
     "level": "medium",
     "label": "verified",
     "tests": true,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 91512,
     "safe_fix": "pass"
    },
@@ -236,8 +236,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 91512,
       "safe_fix": "pass"
      },
@@ -293,8 +293,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 99923,
       "safe_fix": "pass"
      },
@@ -350,8 +350,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 97303,
       "safe_fix": "pass"
      },
@@ -410,8 +410,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 98857,
       "safe_fix": "pass"
      },
@@ -544,8 +544,8 @@
     "level": "weak",
     "label": "verified, needs human review",
     "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 8095,
     "safe_fix": "pass"
    },
@@ -604,8 +604,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 8095,
       "safe_fix": "pass"
      },
@@ -669,16 +669,18 @@
    "winner_id": "H1\u00b7w0",
    "winner_semantic": "different_but_correct",
    "winner_evidence": {
-    "level": "weak",
-    "label": "verified, needs human review",
-    "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
-    "refuzz_runs": 938191,
+    "level": "medium",
+    "label": "verified",
+    "tests": true,
+    "output_varies": false,
+    "stdout_distinct": 0,
+    "refuzz_runs": 916914,
     "safe_fix": "pass"
    },
    "ambiguous": false,
-   "rejudged": null,
+   "rejudged": [
+    "D-0075"
+   ],
    "workers": [
     {
      "id": "H1\u00b7w0",
@@ -706,8 +708,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "'\nMaking check in contrib\nmake[1]: Entering directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exi"
       },
       "differential": {
        "s": "pass",
@@ -715,7 +717,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=938191, no crash"
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=916914, no crash"
       },
       "safe_fix": {
        "s": "pass",
@@ -725,12 +727,12 @@
      "audit": [],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 938191,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 916914,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -232,7 +232,7 @@\n exif_mnote_data_apple_identify(const ExifData *ed, const ExifEntry *e) {\n     int variant;\n \n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 9 && memcmp((const char *) e->data, \"Apple iOS\", 9) == 0) {\n         variant = 1;\n     } else {\n         variant = 0;\n"
@@ -761,8 +763,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "'\nMaking check in contrib\nmake[1]: Entering directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exi"
       },
       "differential": {
        "s": "pass",
@@ -770,7 +772,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=808442, no crash"
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=935738, no crash"
       },
       "safe_fix": {
        "s": "pass",
@@ -782,12 +784,12 @@
      ],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 808442,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 935738,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -232,7 +232,8 @@\n exif_mnote_data_apple_identify(const ExifData *ed, const ExifEntry *e) {\n     int variant;\n \n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 10 && ((const char *)e->data)[9] == '\\0' &&\n+        !strcmp((const char *)e->data, \"Apple iOS\")) {\n         variant = 1;\n     } else {\n         variant = 0;\n"
@@ -818,8 +820,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "'\nMaking check in contrib\nmake[1]: Entering directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exi"
       },
       "differential": {
        "s": "pass",
@@ -827,7 +829,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=943088, no crash"
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=921843, no crash"
       },
       "safe_fix": {
        "s": "pass",
@@ -839,12 +841,12 @@
      ],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 943088,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 921843,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -230,12 +230,10 @@\n \n int\n exif_mnote_data_apple_identify(const ExifData *ed, const ExifEntry *e) {\n-    int variant;\n-\n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    int variant = 0;\n+\n+    if (e->size >= 10 && strncmp((const char *) e->data, \"Apple iOS\", 10) == 0) {\n         variant = 1;\n-    } else {\n-        variant = 0;\n     }\n \n     return variant;\n"
@@ -887,16 +889,18 @@
    "winner_id": "H3\u00b7w2",
    "winner_semantic": "different_but_correct",
    "winner_evidence": {
-    "level": "weak",
-    "label": "verified, needs human review",
-    "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
-    "refuzz_runs": 18436,
+    "level": "medium",
+    "label": "verified",
+    "tests": true,
+    "output_varies": false,
+    "stdout_distinct": 0,
+    "refuzz_runs": 22365,
     "safe_fix": "pass"
    },
    "ambiguous": true,
-   "rejudged": null,
+   "rejudged": [
+    "D-0075"
+   ],
    "workers": [
     {
      "id": "H1\u00b7w0",
@@ -944,8 +948,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "'\nMaking check in contrib\nmake[1]: Entering directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exi"
       },
       "differential": {
        "s": "pass",
@@ -953,7 +957,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "heap-buffer-overflow at exif_get_slong /src/libexif/libexif/exif-utils.c from fuzzing:crash-2ccab2adffae1854b9f9e851a3d8fde39b74b273 (1591 bytes); baseline crashes identically (heap-buffer-overflow at exif_get_slong /src/libexif/libexif/exif-utils.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=18436"
+       "d": "heap-buffer-overflow at exif_get_slong /src/libexif/libexif/exif-utils.c from fuzzing:crash-3b3c12600676d59ba7833ee5eea6a2c18e61f507 (3572 bytes); baseline crashes identically (heap-buffer-overflow at exif_get_slong /src/libexif/libexif/exif-utils.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=22365"
       },
       "safe_fix": {
        "s": "pass",
@@ -966,12 +970,12 @@
      ],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 18436,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 22365,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -62,7 +62,7 @@\n \n     /*printf(\"%s\\n\", __FUNCTION__);*/\n \n-    if (!d || !buf || (buf_size < 6 + 16)) {\n+    if (!d || !buf || (buf_size < d->offset + 6 + 16)) {\n         exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n                  \"ExifMnoteDataApple\", \"Short MakerNote\");\n         return;\n@@ -70,6 +70,12 @@\n \n     /* Start of interesting data */\n     ofs = d->offset + 6;\n+\n+    if (ofs + 13 >= buf_size) {\n+        exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+                 \"ExifMnoteDataApple\", \"Short MakerNote\");\n+        return;\n+    }\n \n     if ((buf[ofs + 12] == 'M') && (buf[ofs + 13] == 'M')) {\n         d->order = EXIF_BYTE_ORDER_MOTOROLA;\n@@ -84,8 +90,8 @@\n \n     tcount = (unsigned int) exif_get_short(buf + ofs + 14, d->order);\n \n-    /* Sanity check the offset */\n-    if (buf_size < 6 + 16 + tcount * 6 + 4) {\n+    /* Sanity check the offset and minimum space for entry headers */\n+    if (buf_size < d->offset + 6 + 16 + tcount * 12 + 4) {\n         exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n                  \"ExifMnoteDataApple\", \"Short MakerNote\");\n         /*printf(\"%s(%d)\\n\", __FUNCTION__, __LINE__);*/\n@@ -107,6 +113,14 @@\n     }\n \n     for (i = 0; i < tcount; i++) {\n+        /* Bounds check for entry header */\n+        if (ofs + 12 > buf_size) {\n+            exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+                     \"ExifMnoteDataApple\", \"Short MakerNote entry\");\n+            exif_mnote_data_apple_free(md);\n+            return;\n+        }\n+\n         d->entries[i].tag = exif_get_short(buf + ofs, d->order);\n         d->entries[i].format = exif_get_short(buf + ofs + 2, d->order);\n         d->entries[i].components = exif_get_long(buf + ofs + 4, d->order);\n@@ -114,6 +128,13 @@\n         dsize = exif_format_get_size(d->entries[i].format) * d->entries[i].components;\n         if (dsize > 4) {\n             dofs = d->offset + exif_get_long(buf + ofs + 8, d->order);\n+            /* Bounds check for data payload */\n+            if (dofs + dsize > buf_size) {\n+                exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+                         \"ExifMnoteDataApple\", \"Short MakerNote data\");\n+                exif_mnote_data_apple_free(md);\n+                return;\n+            }\n         } else {\n             dofs = ofs + 8;\n         }\n"
@@ -1002,8 +1006,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "'\nMaking check in contrib\nmake[1]: Entering directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exi"
       },
       "differential": {
        "s": "pass",
@@ -1027,11 +1031,11 @@
      ],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 213,
       "safe_fix": "pass"
      },
@@ -1192,16 +1196,18 @@
    "winner_id": "H3\u00b7w2",
    "winner_semantic": "different_but_correct",
    "winner_evidence": {
-    "level": "weak",
-    "label": "verified, needs human review",
-    "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "level": "medium",
+    "label": "verified",
+    "tests": true,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 15409,
     "safe_fix": "pass"
    },
    "ambiguous": false,
-   "rejudged": null,
+   "rejudged": [
+    "D-0075"
+   ],
    "workers": [
     {
      "id": "H1\u00b7w0",
@@ -1249,8 +1255,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "est\nPASS: json3.test\nPASS: json-invalid-types.test\n============================================================================\nTestsuite summary for libplist 2.2.0-62-g7e45a2e\n============================================================================\n# TOTAL: 28\n# PASS:  28\n# SKIP:  0\n# XFAIL: 0\n# FAIL:  0\n# XPASS: 0\n# ERROR: 0\n==================================================================="
       },
       "differential": {
        "s": "pass",
@@ -1271,11 +1277,11 @@
      ],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 15409,
       "safe_fix": "pass"
      },
@@ -1307,8 +1313,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "est\nPASS: json3.test\nPASS: json-invalid-types.test\n============================================================================\nTestsuite summary for libplist 2.2.0-62-g7e45a2e\n============================================================================\n# TOTAL: 28\n# PASS:  28\n# SKIP:  0\n# XFAIL: 0\n# FAIL:  0\n# XPASS: 0\n# ERROR: 0\n==================================================================="
       },
       "differential": {
        "s": "pass",
@@ -1329,11 +1335,11 @@
      ],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 15409,
       "safe_fix": "pass"
      },
@@ -1367,16 +1373,18 @@
    "winner_id": "H2\u00b7w1",
    "winner_semantic": "equivalent",
    "winner_evidence": {
-    "level": "weak",
-    "label": "verified, needs human review",
-    "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
-    "refuzz_runs": 27552,
+    "level": "medium",
+    "label": "verified",
+    "tests": true,
+    "output_varies": false,
+    "stdout_distinct": 0,
+    "refuzz_runs": 21657,
     "safe_fix": "pass"
    },
    "ambiguous": false,
-   "rejudged": null,
+   "rejudged": [
+    "D-0075"
+   ],
    "workers": [
     {
      "id": "H1\u00b7w0",
@@ -1414,8 +1422,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "est\nPASS: json3.test\nPASS: json-invalid-types.test\n============================================================================\nTestsuite summary for libplist 2.2.0-77-g7bc4d2f\n============================================================================\n# TOTAL: 28\n# PASS:  28\n# SKIP:  0\n# XFAIL: 0\n# FAIL:  0\n# XPASS: 0\n# ERROR: 0\n==================================================================="
       },
       "differential": {
        "s": "pass",
@@ -1423,7 +1431,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c from fuzzing:crash-3bc15c8aae3e4124dd409035f32ea2fd6835efc9 (1 bytes); baseline gives heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c; developer fix crashes identically (heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=27552"
+       "d": "heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c from fuzzing:crash-3bc15c8aae3e4124dd409035f32ea2fd6835efc9 (1 bytes); baseline gives heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c; developer fix crashes identically (heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=21657"
       },
       "safe_fix": {
        "s": "pass",
@@ -1433,12 +1441,12 @@
      "audit": [],
      "semantic": "equivalent",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 27552,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 21657,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,7 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2)))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n"
@@ -1491,8 +1499,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 27552,
       "safe_fix": "pass"
      },
@@ -1524,8 +1532,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "est\nPASS: json3.test\nPASS: json-invalid-types.test\n============================================================================\nTestsuite summary for libplist 2.2.0-77-g7bc4d2f\n============================================================================\n# TOTAL: 28\n# PASS:  28\n# SKIP:  0\n# XFAIL: 0\n# FAIL:  0\n# XPASS: 0\n# ERROR: 0\n==================================================================="
       },
       "differential": {
        "s": "pass",
@@ -1543,11 +1551,11 @@
      "audit": [],
      "semantic": "equivalent",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 21615,
       "safe_fix": "pass"
      },
@@ -1581,16 +1589,18 @@
    "winner_id": "H1\u00b7w2",
    "winner_semantic": "different_but_correct",
    "winner_evidence": {
-    "level": "weak",
-    "label": "verified, needs human review",
-    "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
-    "refuzz_runs": 497387,
+    "level": "medium",
+    "label": "verified",
+    "tests": true,
+    "output_varies": false,
+    "stdout_distinct": 0,
+    "refuzz_runs": 431747,
     "safe_fix": "pass"
    },
    "ambiguous": false,
-   "rejudged": null,
+   "rejudged": [
+    "D-0075"
+   ],
    "workers": [
     {
      "id": "H1\u00b7w0",
@@ -1618,8 +1628,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exif\nmake[3]: Leaving directory '/src/libexif/c"
       },
       "differential": {
        "s": "pass",
@@ -1627,7 +1637,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=525614, no crash"
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=437540, no crash"
       },
       "safe_fix": {
        "s": "pass",
@@ -1637,12 +1647,12 @@
      "audit": [],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 525614,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 437540,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libexif/libexif/fuji/exif-mnote-data-fuji.c\n+++ b/src/libexif/libexif/fuji/exif-mnote-data-fuji.c\n@@ -163,7 +163,7 @@\n \t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\treturn;\n \t}\n-\tif (CHECKOVERFLOW(n->offset, buf_size, 6+8+4)) {\n+\tif (n->offset >= buf_size || buf_size - n->offset < 6+8+4) {\n \t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\treturn;\n@@ -173,7 +173,7 @@\n \tn->order = EXIF_BYTE_ORDER_INTEL;\n \n \tdatao += exif_get_long (buf + datao + 8, EXIF_BYTE_ORDER_INTEL);\n-\tif (CHECKOVERFLOW(datao, buf_size, 2)) {\n+\tif (datao >= buf_size || buf_size - datao < 2) {\n \t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\treturn;\n@@ -207,9 +207,9 @@\n \t\tsize_t s;\n \n \t\tmemset(&n->entries[tcount], 0, sizeof(MnoteFujiEntry));\n-\t\tif (CHECKOVERFLOW(o, buf_size, 12)) {\n+\t\tif (o >= buf_size || buf_size - o < 12) {\n \t\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n-\t\t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n+\t\t\t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\t\tbreak;\n \t\t}\n \n@@ -243,10 +243,10 @@\n \t\t\t\t/* The data in this case is merely a pointer */\n \t\t\t\tdataofs = exif_get_long (buf + dataofs, n->order) + 6 + n->offset;\n \n-\t\t\tif (CHECKOVERFLOW(dataofs, buf_size, s)) {\n+\t\t\tif (dataofs >= buf_size || buf_size - dataofs < s) {\n \t\t\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n-\t\t\t\t\t\t  \"ExifMnoteDataFuji\", \"Tag data past end of \"\n-\t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);\n+\t\t\t\t\t\t\t  \"ExifMnoteDataFuji\", \"Tag data past end of \"\n+\t\t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);\n \t\t\t\tcontinue;\n \t\t\t}\n \n"
@@ -1673,8 +1683,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exif\nmake[3]: Leaving directory '/src/libexif/c"
       },
       "differential": {
        "s": "pass",
@@ -1682,7 +1692,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=497305, no crash"
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=428894, no crash"
       },
       "safe_fix": {
        "s": "pass",
@@ -1694,12 +1704,12 @@
      ],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 497305,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 428894,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libexif/libexif/fuji/exif-mnote-data-fuji.c\n+++ b/src/libexif/libexif/fuji/exif-mnote-data-fuji.c\n@@ -163,7 +163,7 @@\n \t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\treturn;\n \t}\n-\tif (CHECKOVERFLOW(n->offset, buf_size, 6+8+4)) {\n+\tif (buf_size < 6+8+4 || n->offset > buf_size - (6+8+4)) {\n \t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\treturn;\n@@ -173,7 +173,7 @@\n \tn->order = EXIF_BYTE_ORDER_INTEL;\n \n \tdatao += exif_get_long (buf + datao + 8, EXIF_BYTE_ORDER_INTEL);\n-\tif (CHECKOVERFLOW(datao, buf_size, 2)) {\n+\tif (buf_size < 2 || datao > buf_size - 2) {\n \t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\treturn;\n@@ -207,7 +207,7 @@\n \t\tsize_t s;\n \n \t\tmemset(&n->entries[tcount], 0, sizeof(MnoteFujiEntry));\n-\t\tif (CHECKOVERFLOW(o, buf_size, 12)) {\n+\t\tif (buf_size < 12 || o > buf_size - 12) {\n \t\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\t\tbreak;\n@@ -243,10 +243,10 @@\n \t\t\t\t/* The data in this case is merely a pointer */\n \t\t\t\tdataofs = exif_get_long (buf + dataofs, n->order) + 6 + n->offset;\n \n-\t\t\tif (CHECKOVERFLOW(dataofs, buf_size, s)) {\n+\t\t\tif (s > buf_size || dataofs > buf_size - s) {\n \t\t\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t\t\t\t  \"ExifMnoteDataFuji\", \"Tag data past end of \"\n-\t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);\n+\t\t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);\n \t\t\t\tcontinue;\n \t\t\t}\n \n"
@@ -1730,8 +1740,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exif\nmake[3]: Leaving directory '/src/libexif/c"
       },
       "differential": {
        "s": "pass",
@@ -1739,7 +1749,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=497387, no crash"
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=431747, no crash"
       },
       "safe_fix": {
        "s": "pass",
@@ -1752,12 +1762,12 @@
      ],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 497387,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 431747,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libexif/libexif/fuji/exif-mnote-data-fuji.c\n+++ b/src/libexif/libexif/fuji/exif-mnote-data-fuji.c\n@@ -163,7 +163,7 @@\n \t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\treturn;\n \t}\n-\tif (CHECKOVERFLOW(n->offset, buf_size, 6+8+4)) {\n+\tif (buf_size < 6+8+4 || n->offset > buf_size - (6+8+4)) {\n \t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\treturn;\n@@ -173,7 +173,7 @@\n \tn->order = EXIF_BYTE_ORDER_INTEL;\n \n \tdatao += exif_get_long (buf + datao + 8, EXIF_BYTE_ORDER_INTEL);\n-\tif (CHECKOVERFLOW(datao, buf_size, 2)) {\n+\tif (buf_size < 2 || datao > buf_size - 2) {\n \t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\treturn;\n@@ -207,7 +207,7 @@\n \t\tsize_t s;\n \n \t\tmemset(&n->entries[tcount], 0, sizeof(MnoteFujiEntry));\n-\t\tif (CHECKOVERFLOW(o, buf_size, 12)) {\n+\t\tif (buf_size < 12 || o > buf_size - 12) {\n \t\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\t\tbreak;\n@@ -243,7 +243,7 @@\n \t\t\t\t/* The data in this case is merely a pointer */\n \t\t\t\tdataofs = exif_get_long (buf + dataofs, n->order) + 6 + n->offset;\n \n-\t\t\tif (CHECKOVERFLOW(dataofs, buf_size, s)) {\n+\t\t\tif (s > buf_size || dataofs > buf_size - s) {\n \t\t\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t\t\t\t  \"ExifMnoteDataFuji\", \"Tag data past end of \"\n \t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);\n"
@@ -1788,8 +1798,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exif\nmake[3]: Leaving directory '/src/libexif/c"
       },
       "differential": {
        "s": "pass",
@@ -1797,7 +1807,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=512180, no crash"
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=429342, no crash"
       },
       "safe_fix": {
        "s": "pass",
@@ -1809,12 +1819,12 @@
      ],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 512180,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 429342,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libexif/libexif/fuji/exif-mnote-data-fuji.c\n+++ b/src/libexif/libexif/fuji/exif-mnote-data-fuji.c\n@@ -163,7 +163,7 @@\n \t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\treturn;\n \t}\n-\tif (CHECKOVERFLOW(n->offset, buf_size, 6+8+4)) {\n+\tif (buf_size < (size_t)(6+8+4) || n->offset > buf_size - (size_t)(6+8+4)) {\n \t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\treturn;\n@@ -173,7 +173,7 @@\n \tn->order = EXIF_BYTE_ORDER_INTEL;\n \n \tdatao += exif_get_long (buf + datao + 8, EXIF_BYTE_ORDER_INTEL);\n-\tif (CHECKOVERFLOW(datao, buf_size, 2)) {\n+\tif (buf_size < (size_t)2 || datao > buf_size - (size_t)2) {\n \t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n \t\treturn;\n@@ -207,11 +207,11 @@\n \t\tsize_t s;\n \n \t\tmemset(&n->entries[tcount], 0, sizeof(MnoteFujiEntry));\n-\t\tif (CHECKOVERFLOW(o, buf_size, 12)) {\n-\t\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+\tif (buf_size < (size_t)12 || o > buf_size - (size_t)12) {\n+\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n \t\t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n-\t\t\tbreak;\n-\t\t}\n+\t\tbreak;\n+\t}\n \n \t\tn->entries[tcount].tag        = exif_get_short (buf + o, n->order);\n \t\tn->entries[tcount].format     = exif_get_short (buf + o + 2, n->order);\n@@ -243,12 +243,12 @@\n \t\t\t\t/* The data in this case is merely a pointer */\n \t\t\t\tdataofs = exif_get_long (buf + dataofs, n->order) + 6 + n->offset;\n \n-\t\t\tif (CHECKOVERFLOW(dataofs, buf_size, s)) {\n-\t\t\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n-\t\t\t\t\t\t  \"ExifMnoteDataFuji\", \"Tag data past end of \"\n-\t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);\n-\t\t\t\tcontinue;\n-\t\t\t}\n+\tif (buf_size < (size_t)s || dataofs > buf_size - (size_t)s) {\n+\t\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+\t\t\t\t\t\t\t  \"ExifMnoteDataFuji\", \"Tag data past end of \"\n+\t\t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);\n+\t\t\tcontinue;\n+\t}\n \n \t\t\tn->entries[tcount].data = exif_mem_alloc (en->mem, s);\n \t\t\tif (!n->entries[tcount].data) {\n"
@@ -2230,8 +2240,8 @@
     "level": "medium",
     "label": "verified",
     "tests": true,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 7643,
     "safe_fix": "pass"
    },
@@ -2288,8 +2298,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 7643,
       "safe_fix": "pass"
      },
@@ -2345,8 +2355,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 4086,
       "safe_fix": "pass"
      },
@@ -2403,8 +2413,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 4086,
       "safe_fix": "pass"
      },
@@ -2451,8 +2461,8 @@
     "level": "medium",
     "label": "verified",
     "tests": true,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 76165638,
     "safe_fix": "pass"
    },
@@ -2511,8 +2521,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 76165638,
       "safe_fix": "pass"
      },
@@ -2568,8 +2578,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 88956979,
       "safe_fix": "pass"
      },
@@ -2625,8 +2635,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 73432478,
       "safe_fix": "pass"
      },
@@ -2680,8 +2690,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 87169972,
       "safe_fix": "pass"
      },
@@ -2718,8 +2728,8 @@
     "level": "medium",
     "label": "verified",
     "tests": true,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 4066,
     "safe_fix": "pass"
    },
@@ -2779,8 +2789,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 4066,
       "safe_fix": "pass"
      },
@@ -2837,8 +2847,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 4066,
       "safe_fix": "pass"
      },
@@ -2895,8 +2905,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 4066,
       "safe_fix": "pass"
      },
@@ -2943,8 +2953,8 @@
     "level": "medium",
     "label": "verified",
     "tests": true,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 1732,
     "safe_fix": "pass"
    },
@@ -3014,8 +3024,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 1732,
       "safe_fix": "pass"
      },
@@ -3072,8 +3082,8 @@
     "level": "medium",
     "label": "verified",
     "tests": true,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 1098551,
     "safe_fix": "pass"
    },
@@ -3134,8 +3144,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 1083352,
       "safe_fix": "pass"
      },
@@ -3191,8 +3201,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 1098551,
       "safe_fix": "pass"
      },
@@ -3250,8 +3260,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 1093454,
       "safe_fix": "pass"
      },
@@ -3308,8 +3318,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 1106929,
       "safe_fix": "pass"
      },
@@ -3346,8 +3356,8 @@
     "level": "weak",
     "label": "verified, needs human review",
     "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 404978,
     "safe_fix": "pass"
    },
@@ -3406,8 +3416,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 404978,
       "safe_fix": "pass"
      },
@@ -3486,8 +3496,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 427494,
       "safe_fix": "pass"
      },
@@ -3636,8 +3646,8 @@
     "level": "medium",
     "label": "verified",
     "tests": true,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 5637,
     "safe_fix": "pass"
    },
@@ -3697,8 +3707,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 5637,
       "safe_fix": "pass"
      },
@@ -3958,8 +3968,8 @@
     "level": "medium",
     "label": "verified",
     "tests": true,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 1833152,
     "safe_fix": "pass"
    },
@@ -4020,8 +4030,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 1833152,
       "safe_fix": "pass"
      },
@@ -4079,8 +4089,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 2516777,
       "safe_fix": "pass"
      },
@@ -4138,8 +4148,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 2516777,
       "safe_fix": "pass"
      },
@@ -4197,8 +4207,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 2516777,
       "safe_fix": "pass"
      },

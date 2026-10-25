@@ -215,8 +215,8 @@
     "level": "medium",
     "label": "verified",
     "tests": true,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 97577,
     "safe_fix": "pass"
    },
@@ -273,8 +273,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 97577,
       "safe_fix": "pass"
      },
@@ -364,8 +364,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 97577,
       "safe_fix": "pass"
      },
@@ -579,8 +579,8 @@
     "level": "weak",
     "label": "verified, needs human review",
     "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 8095,
     "safe_fix": "pass"
    },
@@ -637,8 +637,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 8095,
       "safe_fix": "pass"
      },
@@ -695,8 +695,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 8095,
       "safe_fix": "pass"
      },
@@ -752,8 +752,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 5786,
       "safe_fix": "pass"
      },
@@ -809,8 +809,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 8095,
       "safe_fix": "pass"
      },
@@ -844,16 +844,18 @@
    "winner_id": "H3\u00b7w2",
    "winner_semantic": "different_but_correct",
    "winner_evidence": {
-    "level": "weak",
-    "label": "verified, needs human review",
-    "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
-    "refuzz_runs": 1120049,
+    "level": "medium",
+    "label": "verified",
+    "tests": true,
+    "output_varies": false,
+    "stdout_distinct": 0,
+    "refuzz_runs": 857624,
     "safe_fix": "pass"
    },
    "ambiguous": false,
-   "rejudged": null,
+   "rejudged": [
+    "D-0075"
+   ],
    "workers": [
     {
      "id": "H1\u00b7w0",
@@ -881,8 +883,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "'\nMaking check in contrib\nmake[1]: Entering directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exi"
       },
       "differential": {
        "s": "pass",
@@ -890,7 +892,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=778729, no crash"
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=965547, no crash"
       },
       "safe_fix": {
        "s": "pass",
@@ -902,12 +904,12 @@
      ],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 778729,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 965547,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -232,7 +232,7 @@\n exif_mnote_data_apple_identify(const ExifData *ed, const ExifEntry *e) {\n     int variant;\n \n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 10 && !strcmp((const char *) e->data, \"Apple iOS\")) {\n         variant = 1;\n     } else {\n         variant = 0;\n"
@@ -938,8 +940,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "'\nMaking check in contrib\nmake[1]: Entering directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exi"
       },
       "differential": {
        "s": "pass",
@@ -947,7 +949,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=981876, no crash"
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=914877, no crash"
       },
       "safe_fix": {
        "s": "pass",
@@ -961,12 +963,12 @@
      ],
      "semantic": "defensive",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 981876,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 914877,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libexif/libexif/exif-data.c\n+++ b/src/libexif/libexif/exif-data.c\n@@ -795,7 +795,12 @@\n \tExifEntry* e = exif_data_get_entry (data, EXIF_TAG_MAKER_NOTE);\n \tif (!e)\n \t\treturn;\n-\t\n+\n+\t/* Validate MakerNote entry data length to prevent out-of-bounds read\n+\t * in identify functions that assume null-terminated strings. */\n+\tif (e->size < 10)\n+\t\treturn;\n+\n \tif ((mnoteid = exif_mnote_data_olympus_identify (data, e)) != 0) {\n \t\texif_log (data->priv->log, EXIF_LOG_CODE_DEBUG,\n \t\t\t\"ExifData\", \"Olympus MakerNote variant type %d\", mnoteid);\n"
@@ -997,8 +999,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "'\nMaking check in contrib\nmake[1]: Entering directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exi"
       },
       "differential": {
        "s": "pass",
@@ -1006,7 +1008,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=1120049, no crash"
+       "d": "17 amplified variants clean; libFuzzer 90s rc=0 runs=857624, no crash"
       },
       "safe_fix": {
        "s": "pass",
@@ -1016,12 +1018,12 @@
      "audit": [],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 1120049,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 857624,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -232,7 +232,7 @@\n exif_mnote_data_apple_identify(const ExifData *ed, const ExifEntry *e) {\n     int variant;\n \n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 9 && !strncmp((const char *) e->data, \"Apple iOS\", 9)) {\n         variant = 1;\n     } else {\n         variant = 0;\n"
@@ -1064,16 +1066,18 @@
    "winner_id": "H2\u00b7w1",
    "winner_semantic": "different_but_correct",
    "winner_evidence": {
-    "level": "weak",
-    "label": "verified, needs human review",
-    "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "level": "medium",
+    "label": "verified",
+    "tests": true,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 213,
     "safe_fix": "pass"
    },
    "ambiguous": false,
-   "rejudged": null,
+   "rejudged": [
+    "D-0075"
+   ],
    "workers": [
     {
      "id": "H1\u00b7w0",
@@ -1111,8 +1115,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "'\nMaking check in contrib\nmake[1]: Entering directory '/src/libexif/contrib'\nMaking check in examples\nmake[2]: Entering directory '/src/libexif/contrib/examples'\nmake  photographer thumbnail write-exif\nmake[3]: Entering directory '/src/libexif/contrib/examples'\n  CC       photographer.o\n  CCLD     photographer\n  CC       thumbnail.o\n  CCLD     thumbnail\n  CC       write-exif.o\n  CCLD     write-exi"
       },
       "differential": {
        "s": "pass",
@@ -1132,11 +1136,11 @@
      ],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 213,
       "safe_fix": "pass"
      },
@@ -1193,8 +1197,8 @@
     "level": "weak",
     "label": "verified, needs human review",
     "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 6409,
     "safe_fix": "pass"
    },
@@ -1366,8 +1370,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 6409,
       "safe_fix": "pass"
      },
@@ -1489,8 +1493,8 @@
     "level": "weak",
     "label": "verified, needs human review",
     "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 4585,
     "safe_fix": "pass"
    },
@@ -1590,8 +1594,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 4585,
       "safe_fix": "pass"
      },
@@ -1684,8 +1688,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 1968,
       "safe_fix": "pass"
      },
@@ -1758,16 +1762,18 @@
    "winner_id": "H2\u00b7w1",
    "winner_semantic": "different_but_correct",
    "winner_evidence": {
-    "level": "weak",
-    "label": "verified, needs human review",
-    "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "level": "medium",
+    "label": "verified",
+    "tests": true,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 20237,
     "safe_fix": "pass"
    },
    "ambiguous": true,
-   "rejudged": null,
+   "rejudged": [
+    "D-0075"
+   ],
    "workers": [
     {
      "id": "H1\u00b7w0",
@@ -1795,8 +1801,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "est\nPASS: json3.test\nPASS: json-invalid-types.test\n============================================================================\nTestsuite summary for libplist 2.2.0-77-g7bc4d2f\n============================================================================\n# TOTAL: 28\n# PASS:  28\n# SKIP:  0\n# XFAIL: 0\n# FAIL:  0\n# XPASS: 0\n# ERROR: 0\n==================================================================="
       },
       "differential": {
        "s": "pass",
@@ -1816,11 +1822,11 @@
      ],
      "semantic": "equivalent",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 21657,
       "safe_fix": "pass"
      },
@@ -1852,8 +1858,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "est\nPASS: json3.test\nPASS: json-invalid-types.test\n============================================================================\nTestsuite summary for libplist 2.2.0-77-g7bc4d2f\n============================================================================\n# TOTAL: 28\n# PASS:  28\n# SKIP:  0\n# XFAIL: 0\n# FAIL:  0\n# XPASS: 0\n# ERROR: 0\n==================================================================="
       },
       "differential": {
        "s": "pass",
@@ -1873,11 +1879,11 @@
      ],
      "semantic": "different_but_correct",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 20237,
       "safe_fix": "pass"
      },
@@ -1919,8 +1925,8 @@
        "d": "no sanitizer report, exit 0"
       },
       "tests": {
-       "s": "skipped",
-       "d": "no runnable project test suite in the image"
+       "s": "pass",
+       "d": "est\nPASS: json3.test\nPASS: json-invalid-types.test\n============================================================================\nTestsuite summary for libplist 2.2.0-77-g7bc4d2f\n============================================================================\n# TOTAL: 28\n# PASS:  28\n# SKIP:  0\n# XFAIL: 0\n# FAIL:  0\n# XPASS: 0\n# ERROR: 0\n==================================================================="
       },
       "differential": {
        "s": "pass",
@@ -1928,7 +1934,7 @@
       },
       "refuzz": {
        "s": "pass",
-       "d": "heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c from fuzzing:crash-3bc15c8aae3e4124dd409035f32ea2fd6835efc9 (1 bytes); baseline gives heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c; developer fix crashes identically (heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=27552"
+       "d": "heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c from fuzzing:crash-3bc15c8aae3e4124dd409035f32ea2fd6835efc9 (1 bytes); baseline gives heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c; developer fix crashes identically (heap-buffer-overflow at parse_primitive /src/libplist/src/jplist.c): pre-existing, not attributed; libFuzzer 90s rc=1 runs=21657"
       },
       "safe_fix": {
        "s": "pass",
@@ -1938,12 +1944,12 @@
      "audit": [],
      "semantic": "wrong",
      "evidence": {
-      "level": "weak",
-      "label": "verified, needs human review",
-      "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
-      "refuzz_runs": 27552,
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": false,
+      "stdout_distinct": 0,
+      "refuzz_runs": 21657,
       "safe_fix": "pass"
      },
      "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,7 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n"
@@ -2232,8 +2238,8 @@
     "level": "weak",
     "label": "verified, needs human review",
     "tests": false,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 0,
     "refuzz_runs": 471521,
     "safe_fix": "pass"
    },
@@ -2290,8 +2296,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 471521,
       "safe_fix": "pass"
      },
@@ -2347,8 +2353,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 471521,
       "safe_fix": "pass"
      },
@@ -2404,8 +2410,8 @@
       "level": "weak",
       "label": "verified, needs human review",
       "tests": false,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 0,
       "refuzz_runs": 471521,
       "safe_fix": "pass"
      },
@@ -2880,8 +2886,8 @@
     "level": "medium",
     "label": "verified",
     "tests": true,
-    "output_varies": null,
-    "stdout_distinct": null,
+    "output_varies": false,
+    "stdout_distinct": 1,
     "refuzz_runs": 2449232,
     "safe_fix": "pass"
    },
@@ -2948,8 +2954,8 @@
       "level": "medium",
       "label": "verified",
       "tests": true,
-      "output_varies": null,
-      "stdout_distinct": null,
+      "output_varies": false,
+      "stdout_distinct": 1,
       "refuzz_runs": 2449232,
       "safe_fix": "pass"
      },

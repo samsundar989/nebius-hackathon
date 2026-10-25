@@ -131,6 +131,24 @@
    "wrong": 8
   }
  },
+ "evidence_by_class": {
+  "different_but_correct": {
+   "medium": 30,
+   "weak": 6
+  },
+  "equivalent": {
+   "medium": 13,
+   "weak": 3
+  },
+  "defensive": {
+   "medium": 6,
+   "weak": 1
+  },
+  "wrong": {
+   "medium": 6,
+   "weak": 2
+  }
+ },
  "cross_diff": {
   "cases": 13,
   "split": 2,

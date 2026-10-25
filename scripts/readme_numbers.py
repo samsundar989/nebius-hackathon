@@ -195,6 +195,47 @@ def main() -> int:
             f"guards the symptom); **wrong {cls.get('wrong', 0)}** (no crash on any input the gate "
             "tried, but a residual over-read or changed behaviour).",
         ]
+        # Evidence strength (D-0074) by semantic class, over the same distinct diffs.
+        by: dict[str, Counter] = {}
+        seen = set()
+        for r in allrecs:
+            for w in r.get("workers", []):
+                k = (r["case"], _ch(w["diff"]))
+                if w.get("verdict") == "verified" and k not in seen and "evidence" in w:
+                    seen.add(k)
+                    by.setdefault(w.get("semantic") or "unreviewed", Counter())[
+                        w["evidence"]["level"]
+                    ] += 1
+        nums["evidence_by_class"] = {k: dict(v) for k, v in by.items()}
+        ho = [
+            json.loads(p.read_text()) for p in sorted((RUNS_DIR / "harness_output").glob("*.json"))
+        ]
+        ho = [d for d in ho if "stdout_distinct" in d]
+        silent = sum(d["stdout_distinct"] <= 1 for d in ho)
+        out += [
+            "",
+            "### What could the gate observe? Evidence strength (D-0074)",
+            "",
+            f"- Harness output: in {silent} of {len(ho)} ARVO cases measured, the fuzz harness "
+            "prints nothing or one constant line for every clean corpus input "
+            "(`runs/harness_output/`). On real OSS-Fuzz code the differential corpus check compares "
+            "exit codes and crashes only; it cannot see behaviour.",
+            "- So evidence is **medium** when the project's tests ran (jq, mosquitto, libexif, "
+            "libplist) and **weak** otherwise; no ARVO fix reaches strong.",
+            "",
+            "| class | strong | medium | weak |",
+            "|---|---|---|---|",
+        ]
+        for k in ("equivalent", "different_but_correct", "defensive", "wrong"):
+            c = by.get(k, Counter())
+            out.append(f"| {k} | {c['strong']} | {c['medium']} | {c['weak']} |")
+        out += [
+            "",
+            "The wrong and defensive fixes do not concentrate in the weak level: the tests that ran "
+            "do not cover those defects. The label describes what the gate could observe and is "
+            'shown on every verified fix (weak = "verified, needs human review"); it does not '
+            "predict correctness, which is why the semantic review above exists.",
+        ]
     cross = sorted((RUNS_DIR / "cross_diff").glob("*.json"))
     if cross:
         cds = [json.loads(p.read_text()) for p in cross]

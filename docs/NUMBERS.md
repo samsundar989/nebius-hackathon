@@ -23,6 +23,20 @@ Every distinct verified diff in the ARVO runs (p3_arvo27_r1, p3_arvo27_r2, lb_ar
 
 - **Gate precision: 52/67 (77.6%)** of verified diffs are correct (equivalent 16, different but correct 36); defensive 7 (safe, guards the symptom); **wrong 8** (no crash on any input the gate tried, but a residual over-read or changed behaviour).
 
+### What could the gate observe? Evidence strength (D-0074)
+
+- Harness output: in 26 of 27 ARVO cases measured, the fuzz harness prints nothing or one constant line for every clean corpus input (`runs/harness_output/`). On real OSS-Fuzz code the differential corpus check compares exit codes and crashes only; it cannot see behaviour.
+- So evidence is **medium** when the project's tests ran (jq, mosquitto, libexif, libplist) and **weak** otherwise; no ARVO fix reaches strong.
+
+| class | strong | medium | weak |
+|---|---|---|---|
+| equivalent | 0 | 13 | 3 |
+| different_but_correct | 0 | 30 | 6 |
+| defensive | 0 | 6 | 1 |
+| wrong | 0 | 6 | 2 |
+
+The wrong and defensive fixes do not concentrate in the weak level: the tests that ran do not cover those defects. The label describes what the gate could observe and is shown on every verified fix (weak = "verified, needs human review"); it does not predict correctness, which is why the semantic review above exists.
+
 - Cross-candidate differential (D-0070): 13 cases with several distinct verified diffs; in 11 every candidate behaves identically on corpus, PoC, amplified variants and 30 s of fuzz finds per candidate, wrong ones included (the harnesses print too little to separate them). 2 split (42500232, 42508524); in 2 of them the unpatched program **and the developer's fix** crash on the separating inputs: some candidates also fixed a second, pre-existing bug, and the pairwise review chose one of those.
 
 ## Gate calibration: the developers' own fixes through the same gate
