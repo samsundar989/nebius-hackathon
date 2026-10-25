@@ -83,10 +83,7 @@ def detect(repo: Path) -> dict[str, Any]:
     """
     has = lambda name: (repo / name).exists()  # noqa: E731
     # Exec bits get lost on some checkouts: every file that starts with a shebang gets one back.
-    prep = (
-        "find . -type f -not -path './.git/*' -size -1M "
-        "-exec awk 'FNR==1 {if (/^#!/) print FILENAME; nextfile}' {} + | xargs -r chmod +x ; "
-    )
+    prep = "grep -rlI --exclude-dir=.git '^#!' . | xargs -r chmod +x ; "
     if has("meson.build"):
         tests = "test(" in (repo / "meson.build").read_text(errors="replace")
         return {
