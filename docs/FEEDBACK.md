@@ -24,6 +24,8 @@ Measured 2026-10-14 with `scripts/smoke_tf.py` (raw output in `runs/smoke_tf_*.j
 ## Nemotron 3 Ultra
 `nvidia/Nemotron-3-Ultra-550b-a55b` — planner/root-cause. Hello 1.5 s; reasoning on by default (181 reasoning tokens for a two-step probability question, 0.98 s, correct `5/14`). Thinking off: 5 tokens, 0.37 s, still correct via `chat_template_kwargs`, but **wrong (`2/7`) via `reasoning_effort=none`** on the same prompt — thinking-off answers are not reliable for reasoning. json_schema numeric runaway 1/5. Tool calls fine.
 
+- Update 2026-10-25, Ultra as a reviewer (thinking on, structured output): classifying 67 verified patches against the upstream developer fix took $0.67 (≈ $0.01 per call) with no schema failures. A hand review overrode 8 of 67 classes; 7 were Ultra being too strict (it called bounded checks inside the right function "defensive"), 1 was too lenient: it called a patch "different but correct" that silently skips the first line of every config file. Good as a first pass, not as a judge of record. Pairwise ranking ("which patch preserves the original intent", asked in both orders, $0.68 for 37 comparisons) was consistent enough to use: it replaced all 3 wrong smallest-diff winners and never picked a wrong one over a correct one.
+
 ## Nemotron 3.5 Lightning
 `nvidia/Nemotron-3_5-Lightning` — patch worker. Verbose thinker: **846 reasoning tokens for "Say hello in five words."** (3.0 s). Reasoning question: 345 reasoning tokens, 1.3 s, correct; thinking off: 0.26 s but **wrong both ways (`5/28`, `8/14`)**. Implication for workers: keep thinking on for patch reasoning, off only for mechanical formatting. json_schema numeric fields run away 4/4. 20-way concurrency clean.
 - E1 worker runs (2026-10-23, Juliet, thinking on, `max_completion_tokens=6000`): when asked for search/replace edits that "must match character for character", Lightning spent the whole 6,000-token budget counting indentation spaces in 5 of 7 failed calls (`finish_reason=length`, reasoning text quoted the same code block repeatedly). Telling it that matching ignores whitespace and to "think briefly" took successful replies to 2.2–5.7K completion tokens and 5/6 smoke cases to verified. It also copied the prompt example's file path (`src/example.c`) and once wrote the literal path `filename`. With thinking **off**, one retry fell into a repetition loop (the same 20-line block repeated until the token cap). Usable, but budget its tokens and never trust exact quoting.
@@ -53,10 +55,13 @@ Measured 2026-10-14 with `scripts/smoke_tf.py` (raw output in `runs/smoke_tf_*.j
   - Build again?: yes for anything that runs untrusted builds offline and needs cheap branching from a checkpoint — the checkpoint-per-run model is exactly the "baseline → N candidate branches → gate" shape. Not yet for ARVO-era images until the importer handles those layers.
 
 ## Token Factory Batch API
+- Tried on 2026-10-14 for cheap bulk triage; `POST /v1/batches` returned `HTTP 403: {'detail': 'Creating new batch job is temporarily unavailable'}` after the file upload succeeded (details under Token Factory). We did not retry it later: synchronous calls with 600 RPM were fast and cheap enough (a 27-case ARVO run cost about $1). Would use again for offline evaluation if it is enabled and documented.
 
 ## Nebius AI Cloud — Serverless Jobs
+- Not used. Our heavy work is Docker builds of OSS-Fuzz images (local) and offline gate runs (Sandboxes); nothing needed a GPU job on Nebius. The CUDA arm ran on Kaggle because compute-sanitizer cannot attach under WSL2 (see below).
 
 ## Nebius CLI
+- Not used: everything went through the Token Factory and Sandboxes HTTP APIs with one key. The only place the CLI's world leaked in was the project id: the console and CLI use `project-…` ids, Sandboxes needs the Token Factory `aiproject-…` id (see Sandboxes).
 
 ## NVIDIA compute-sanitizer (and ncu/nsys where attempted)
 - Used for: the CUDA arm of the gate (memcheck for out-of-bounds, `--leak-check full` for `cudaMalloc` leaks). Two injected-defect samples in `cases/cuda/`, run by `cases/cuda/run_samples.sh`.
@@ -70,6 +75,7 @@ Measured 2026-10-14 with `scripts/smoke_tf.py` (raw output in `runs/smoke_tf_*.j
 - Would build again: yes, on native Linux GPUs (Kaggle, L40S). Not on WSL2 without the debugger interface and a CUDA ≥ 12.8 image.
 
 ## Tavily (if used)
+- Not used. The kickoff kept web grounding optional, and the planner gets everything it needs from the sanitizer report and the source.
 
 ## Docs and onboarding (cross-cutting)
 - Thinking control, reasoning-field names, json_schema behaviour and the batch outage are all learnable only by probing. One "Nemotron on Token Factory" page covering request knobs (`chat_template_kwargs` vs `reasoning_effort`, which models honour effort levels, where reasoning text lands, whether `reasoning_tokens` is reported) would have saved most of our first hour.
