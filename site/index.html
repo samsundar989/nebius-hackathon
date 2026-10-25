@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leakproof Results</title>
 <meta name="description" content="Leakproof: an agent that fixes memory-safety defects in C/C++ and only reports the fixes an evidence gate verifies.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f7a4d'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11' stroke='white' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
 :root {
   --bg: #f7f7f5; --panel: #ffffff; --ink: #1d1f23; --muted: #5d6470; --line: #e3e4e8;
@@ -71,6 +72,14 @@ pre { font: 12.5px/1.45 var(--mono); background: var(--bg); border: 1px solid va
 .muted { color: var(--muted); }
 .row { display: flex; flex-wrap: wrap; gap: 8px 18px; }
 footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
+.cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-top: 12px; }
+.card h3 { margin-top: 0; }
+.card pre { font-size: 12px; max-height: 120px; }
+.steps { display: grid; gap: 6px; margin: 8px 0; }
+.steps .bar { grid-template-columns: 170px 1fr 52px; }
+details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
+.stat .n.ok { color: var(--ok); }
+#headline { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 @media (max-width: 560px) { .bar { grid-template-columns: 1fr 56px; } .bar .lab { grid-column: 1 / -1; } }
 </style>
 </head>
@@ -78,13 +87,20 @@ footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
 <main>
   <header>
     <h1>Leakproof</h1>
-    <p class="lede">An agent that fixes memory-safety defects in C/C++ code and reports a fix only when an evidence gate verifies it: the crash is gone, the program still behaves the same on a corpus, re-fuzzing with amplified inputs finds nothing new, LeakSanitizer is clean, and the tests pass. Verified fixes, or nothing.</p>
+    <p class="lede">An agent that fixes memory-safety defects in C/C++ code and reports a fix only when an evidence gate verifies it: the crash is gone, the program still behaves the same on a corpus, re-fuzzing with amplified inputs finds nothing new, LeakSanitizer is clean, and the tests pass. Verified fixes, or nothing. Nemotron 3 Ultra and 3.5 Lightning on Nebius Token Factory.</p>
     <div class="row" id="demo-row"></div>
   </header>
 
   <section>
-    <h2>Headline: real OSS-Fuzz bugs (ARVO)</h2>
+    <h2>Real OSS-Fuzz bugs (ARVO), run 1</h2>
     <div class="grid" id="headline"></div>
+    <div class="cards">
+      <div class="panel card" id="refusal"></div>
+      <div class="panel card" id="planner"></div>
+    </div>
+  </section>
+
+  <section>
     <div class="panel" style="margin-top:12px">
       <h3 style="margin-top:0">From "the crash went away" to "verified"</h3>
       <p class="muted">Most repair agents stop at the first bar. Each later bar is a stricter check of the same candidate patches.</p>
@@ -150,8 +166,8 @@ function diffHtml(d) {
 async function demo() {
   const cfg = await get("config.json");
   const row = $("#demo-row");
-  if (!cfg || !cfg.service_url) { row.innerHTML = '<span class="muted">Live demo coming soon. Recorded runs below.</span>'; return; }
-  row.innerHTML = `<button class="btn" id="run-live">Run one Juliet case live</button><span class="muted" id="live-state"></span>`;
+  if (!cfg || !cfg.service_url) { row.innerHTML = '<button class="btn" disabled>Run a live fix</button><span class="muted">The live demo service is not deployed yet; the recorded runs below are real.</span>'; return; }
+  row.innerHTML = `<button class="btn" id="run-live">Run a live fix (one Juliet case)</button><span class="muted" id="live-state"></span>`;
   $("#run-live").onclick = async () => {
     const st = $("#live-state"); st.textContent = "waking up the service (~1 min if idle)…";
     try {
@@ -162,6 +178,15 @@ async function demo() {
       st.innerHTML = ` ${chip(j.verdict || "error")} ${esc(j.case || "")} ${j.recorded ? "(recorded result: demo cap reached)" : ""} ${money(j.usd)}`;
     } catch (e) { st.textContent = "service unavailable; recorded runs below"; }
   };
+}
+
+const SEM = { equivalent: "equivalent", different_but_correct: "different but correct", defensive: "defensive (safe, guards the symptom)", wrong: "wrong (no crash, but incorrect)" };
+
+function otherVerified(c) {
+  const seen = new Set([c.winner]);
+  const rest = c.workers.filter((w) => w.verdict === "verified" && !seen.has(w.diff) && seen.add(w.diff));
+  if (!rest.length) return "";
+  return `<details><summary>Other verified candidates (${rest.length})</summary>${rest.map((w) => `<p><code>${esc(w.id)}</code> · ${esc(SEM[w.semantic] || "not reviewed")}</p><pre>${diffHtml(w.diff)}</pre>`).join("")}</details>`;
 }
 
 function renderCase(c) {
@@ -178,7 +203,8 @@ function renderCase(c) {
     ${c.root_cause ? `<h3>Root cause (planner)</h3><p>${esc(c.root_cause)}</p>` : ""}
     <h3>Gate matrix</h3>${matrix}
     ${others.length ? `<p class="muted">Not gated: ${others.map((w) => `${esc(w.id)} ${chip(w.verdict)}`).join(" ")}</p>` : ""}
-    ${c.winner ? `<h3>Verified fix</h3><pre>${diffHtml(c.winner)}</pre>` : ""}
+    ${c.winner ? `<h3>Verified fix <span class="muted">(${esc(c.winner_id)}${c.winner_semantic ? ` · compared with the developer's fix: ${esc(SEM[c.winner_semantic] || c.winner_semantic)}` : ""})</span></h3>${c.ambiguous ? '<p class="muted">Verified candidates behave differently on some inputs (cross-candidate differential): ambiguous.</p>' : ""}<pre>${diffHtml(c.winner)}</pre>` : ""}
+    ${otherVerified(c)}
     ${lineage}</div>`;
 }
 
@@ -203,17 +229,35 @@ async function showRun(run, btn) {
   const runs = idx.runs;
   const arvo = runs.find((r) => r.suite === "arvo");
   const cal = await get("data/calibration.json");
+  const num = await get("data/numbers.json");
+  const r1 = num && num.arvo && num.arvo.p3_arvo27_r1;
   const stats = [];
-  if (arvo) {
-    stats.push([`${arvo.verified}/${arvo.cases}`, "ARVO cases with a verified fix (gate v1)"]);
-    stats.push([money(arvo.usd_per_verified), "model cost per verified ARVO fix"]);
+  if (r1) {
+    stats.push([`${r1.verified}/${r1.cases}`, "real bugs with a verified fix", "ok"]);
+    stats.push([`${r1.strict}/${r1.cases}`, "verified, and the fix is correct when compared with the developer's (hand-reviewed)"]);
+    stats.push(["$" + Number(r1.per_fix).toFixed(3), "model cost per verified fix"]);
   }
-  if (cal) stats.push([`${cal.adjudicated.classes.accepted}/${cal.adjudicated.judged}`, "developer fixes the gate accepts (calibration)"]);
-  const jul = runs.find((r) => r.run === "e1_juliet60_v1");
-  if (jul) stats.push([`${jul.verified}/${jul.cases}`, "Juliet smoke cases verified"]);
-  $("#headline").innerHTML = stats.map(([n, l]) => `<div class="panel stat"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join("");
+  if (num && num.precision) stats.push([`${num.precision.correct}/${num.precision.judged}`, "verified diffs that are correct (gate precision, all ARVO runs)"]);
+  if (cal) stats.push([`${cal.adjudicated.classes.accepted}/${cal.adjudicated.judged}`, "developers' own fixes the gate accepts"]);
+  $("#headline").innerHTML = stats.map(([n, l, cls]) => `<div class="panel stat"><div class="n ${cls || ""}">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join("");
+  if (num && num.jq_refusal) {
+    const j = num.jq_refusal;
+    $("#refusal").innerHTML = `<h3>What a refusal looks like: jq ${esc(j.case)}</h3>
+      <p>The model's patch passed jq's own tests ${chip(j.tests)} and the original crash input ${chip(j.patched)}. Leakproof doubled the longest digit run in that input: the patched jq overflowed a heap buffer, where the unpatched program and the developer's fix are clean. ${chip("rejected:refuzz_new_crash")}</p>
+      <pre>${diffHtml(j.refused_diff)}</pre>
+      ${j.verified_diff ? `<p>In run 2, a one-line buffer-size fix passed every check ${chip("verified")} (compared with the developer's fix: ${esc(SEM[j.verified_semantic] || "–")}).</p><pre>${diffHtml(j.verified_diff)}</pre>` : ""}`;
+  }
+  if (num && num.planners_arvo) {
+    const order = ["lightning", "super", "ultra"].filter((k) => num.planners_arvo[k]);
+    const n = num.planners_arvo[order[0]].cases;
+    $("#planner").innerHTML = `<h3>Which model does what: the planner on real bugs</h3>
+      <p class="muted">${n} calibrated ARVO cases; the four workers are always Nemotron 3.5 Lightning. Only the planner changes.</p>
+      <div class="steps">${order.map((k) => { const p = num.planners_arvo[k]; return `<div class="bar"><div class="lab">${esc(p.label)}</div><div class="track"><div class="fill v1" style="width:${(100 * p.verified) / n}%"></div></div><div class="num">${p.verified}/${n}</div></div>`; }).join("")}</div>
+      <p>Verified and correct: ${order.map((k) => `${esc(num.planners_arvo[k].label)} ${num.planners_arvo[k].strict}`).join(" · ")}. With Ultra's plan each verified fix also cost less (${money(num.planners_arvo.ultra && num.planners_arvo.ultra.usd_per_verified)} vs ${money(num.planners_arvo.lightning && num.planners_arvo.lightning.usd_per_verified)} without a planner): failed attempts cost money too. One repeat.</p>`;
+  }
   if (arvo) {
     const bars = [["Crash gone (what most agents report)", arvo.raw, ""], ["Gate checks 1–4 (v0)", arvo.v0, ""], ["Verified by gate v1", arvo.verified, "v1"]];
+    if (r1) bars.push(["Verified and correct (hand review)", r1.strict, "v1"]);
     $("#funnel").innerHTML = bars.map(([l, n, cls]) => `<div class="bar"><div class="lab">${esc(l)}</div><div class="track"><div class="fill ${cls}" style="width:${(100 * n) / Math.max(arvo.cases, 1)}%"></div></div><div class="num">${n}/${arvo.cases}</div></div>`).join("");
   }
   $("#runs tbody").innerHTML = runs.map((r) => `<tr><td>${esc(r.label)}</td><td>${r.cases}</td><td>${r.raw} (${pct(r.raw, r.cases)})</td><td>${r.v0}</td><td>${chip(`verified ${r.verified}`)} ${pct(r.verified, r.cases)}</td><td>${money(r.usd_per_verified)}</td><td>${esc(r.gate_version)}</td></tr>`).join("");
@@ -222,9 +266,11 @@ async function showRun(run, btn) {
   const first = $("#run-tabs button"); if (first) showRun(first.dataset.run, first);
   if (cal) {
     const a = cal.adjudicated, raw = cal.raw;
-    $("#calibration").innerHTML = `<p>For each ARVO case we applied the developer's real fix commit and ran it through the same gate, judged exactly like a model patch. <strong>${a.classes.accepted} of ${a.judged}</strong> developer fixes are accepted (raw, before review: ${raw.classes.accepted}/${raw.judged}); ${a.classes.true_reject || 0} is rejected because it really leaks; ${a.classes.false_reject || 0} are false rejects from known limits.</p>
-      <div class="scroll"><table><thead><tr><th>case</th><th>project</th><th>gate on the developer fix</th><th>class</th><th>note</th></tr></thead><tbody>${
-      cal.rows.map((r) => `<tr><td><code>${esc(r.case)}</code></td><td>${esc(r.project)}</td><td>${chip(String(r.verdict).split("\n")[0].slice(0, 40))}</td><td>${esc(r.class)}</td><td class="muted">${esc(r.why || "")}</td></tr>`).join("")}</tbody></table></div>`;
+    const counts = Object.entries(a.classes).sort((x, y) => y[1] - x[1]);
+    $("#calibration").innerHTML = `<p>For each ARVO case we applied the developer's real fix commit and ran it through the same gate, judged exactly like a model patch. <strong>${a.classes.accepted} of ${a.judged}</strong> countable developer fixes are accepted (raw, before review: ${raw.classes.accepted}/${raw.judged}); ${a.classes.true_reject || 0} is rejected because it really leaks; ${a.classes.false_reject || 0} are false rejects from known limits.</p>
+      <table><tbody>${counts.map(([k, v]) => `<tr><td>${esc((cal.labels || {})[k] || k)}</td><td class="num">${v}</td></tr>`).join("")}</tbody></table>
+      <details><summary>All ${cal.rows.length} cases</summary><div class="scroll"><table><thead><tr><th>case</th><th>project</th><th>result</th><th>why</th></tr></thead><tbody>${
+      cal.rows.map((r) => `<tr><td><code>${esc(r.case)}</code></td><td>${esc(r.project)}</td><td>${esc(r.label)}</td><td class="muted">${esc(r.why || "")}</td></tr>`).join("")}</tbody></table></div></details>`;
   }
   const cu = await get("data/cuda.json");
   if (cu) {
@@ -233,8 +279,14 @@ async function showRun(run, btn) {
       names.map((n) => `<tr><td><code>${esc(n)}</code></td><td>${esc(cu[n].baseline_kind)}</td><td>${chip(cu[n].verdict)}</td><td>${cu[n].candidates.map((c) => chip(c.verdict)).join(" ")}</td></tr>`).join("")}</tbody></table></div>`;
   }
   const lb = await get("data/leaderboard.json");
+  let arvoLb = "";
+  if (num && num.planners_arvo) {
+    const pa = num.planners_arvo;
+    arvoLb = `<h3 style="margin-top:0">Real code: ${pa.ultra ? pa.ultra.cases : ""} calibrated ARVO cases, one repeat</h3><div class="scroll"><table><thead><tr><th>planner</th><th>verified</th><th>verified and correct</th><th>$ / verified</th></tr></thead><tbody>${
+      ["lightning", "super", "ultra"].filter((k) => pa[k]).map((k) => `<tr><td>${esc(pa[k].label)}</td><td>${pa[k].verified}/${pa[k].cases}</td><td>${pa[k].strict}/${pa[k].cases}</td><td>${money(pa[k].usd_per_verified)}</td></tr>`).join("")}</tbody></table></div><h3>Synthetic: Juliet</h3>`;
+  }
   if (lb && lb.configs && Object.keys(lb.configs).length) {
-    $("#leaderboard").innerHTML = `<p class="muted">${lb.cases} Juliet cases, repeated runs per configuration; workers are always 4 × Nemotron Lightning.</p><div class="scroll"><table><thead><tr><th>planner</th><th>repeats</th><th>verified (mean, min–max)</th><th>$ / verified</th><th>p50 latency</th></tr></thead><tbody>${
+    $("#leaderboard").innerHTML = arvoLb + `<p class="muted">${lb.cases} Juliet cases, repeated runs per configuration; workers are always 4 × Nemotron Lightning.</p><div class="scroll"><table><thead><tr><th>planner</th><th>repeats</th><th>verified (mean, min–max)</th><th>$ / verified</th><th>p50 latency</th></tr></thead><tbody>${
       Object.entries(lb.configs).map(([k, r]) => `<tr><td>${esc(k)}</td><td>${r.repeats}</td><td>${pct(r.verified_rate_mean, 1)} (${pct(r.verified_rate_min, 1)}–${pct(r.verified_rate_max, 1)})</td><td>${money(r.usd_per_verified)}</td><td>${r.p50_latency_s} s</td></tr>`).join("")}</tbody></table></div>`;
   }
 })();

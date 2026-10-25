@@ -1,8 +1,19 @@
 # Leakproof
 
+[![CI](https://github.com/samsundar989/nebius-hackathon/actions/workflows/ci.yml/badge.svg)](https://github.com/samsundar989/nebius-hackathon/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+**Live dashboard** (link when deployed) · **3-minute video** (link when recorded) · **Devpost** (link when submitted)
+
 **Verified fixes, or nothing.** Leakproof is an agent that fixes memory-safety defects in C, C++ and CUDA code — leaks, use-after-free, double free, buffer overflows, data races — and reports a fix only when an evidence gate verifies it. NVIDIA Nemotron models on Nebius Token Factory find the root cause and write the patches; a separate gate process, with the network off, decides.
 
-Every number below is generated from run records by scripts; the full tables are in [docs/NUMBERS.md](docs/NUMBERS.md).
+> **jq, OSS-Fuzz bug 42530604.** The model's patch passed jq's own test suite and stopped the original crash.
+> Leakproof doubled the longest run of digits in the proof-of-concept input, and the patched jq overflowed a heap buffer in `decToString`.
+> The unpatched program and the developer's real fix are both clean on that input, so the patch was refused.
+> In another run, a one-line buffer-size fix passed every check and was verified.
+
+It is for maintainers of C/C++ projects that fuzz: OSS-Fuzz alone reports having helped find and fix "over 13,000 vulnerabilities and 50,000 bugs across 1,000 projects" as of May 2025 ([OSS-Fuzz README](https://github.com/google/oss-fuzz)). A fix that only silences the crash is the known failure mode: PatchBench finds that checking only the original proof-of-concept inflates repair agents' solve rates by 1.83× on average ([arXiv 2609.04075](https://arxiv.org/abs/2609.04075)). Its cases and validation differ from ours, so that figure is context, not a comparison.
+
+Every number below is generated from run records by scripts; the full tables are in [docs/NUMBERS.md](docs/NUMBERS.md). Two evidence bundles show what the output looks like: [a verified fix](docs/bundles/42520955.md) (mosquitto: equivalent to the developer's fix, with the two verified-but-wrong candidates it was chosen over) and [a refusal](docs/bundles/42530604.md) (jq).
 
 ## The problem
 
@@ -10,19 +21,25 @@ Sanitizers and fuzzers find memory bugs faster than teams can fix them: a projec
 
 ## Results
 
-| | cases | crash gone ("raw") | **verified** | model $ per verified fix |
-|---|---|---|---|---|
-| ARVO — real OSS-Fuzz bugs in 13 projects (r1) | 27 | 18 | **15** | $0.070 |
-| Juliet CWE-401 sample (synthetic) | 100 | 94 | **94** (every reproducible case) | $0.011 |
-| CUDA on a Kaggle T4 (compute-sanitizer) | 3 | 3 | **3** | $0.007 |
+| | cases | crash gone ("raw") | **verified** | verified and correct | model $ per verified fix |
+|---|---|---|---|---|---|
+| ARVO — real OSS-Fuzz bugs in 13 projects, run 1 | 27 | 18 | **15** | **14** | $0.070 |
+| Juliet CWE-401 sample (synthetic) | 100 | 94 | **94** (every reproducible case) | – | $0.011 |
+| CUDA on a Kaggle T4 (compute-sanitizer) | 3 | 3 | **3** | – | $0.007 |
 
-- **The gap between "crash gone" and "verified" is the point.** On ARVO, 18 candidates made the proof-of-concept stop crashing; 3 of those cases were still not fixed — re-fuzzing with enlarged inputs found the same bug again (libplist, jq, libical), and in each case the developer's real fix is clean on that same input.
+- **The gap between "crash gone" and "verified" is the point.** On ARVO, candidates made the proof-of-concept stop crashing in 18 cases; 3 of those were still not fixed: re-fuzzing with enlarged inputs found a crash the developer's real fix does not have (libplist, jq, libical).
+- **"Verified" is not yet "correct", so we measure the difference.** Every distinct verified ARVO diff (67, across all runs) was compared with the developer's fix: Nemotron 3 Ultra classified each one, then each was reviewed by hand. **52 of 67 (78%) are correct** (equivalent or a different correct fix), 7 are defensive (safe, but they guard the symptom) and 8 are wrong (no crash on any input tried, but a residual over-read or changed behaviour). This is the gate's precision. Per case, the chosen fix is correct in 14 of the 15 verified cases.
+- **Choosing among several verified fixes matters.** When more than one candidate verifies, Ultra compares them pairwise ("which preserves the original intent", asked in both orders), with diff size as the last tiebreak. The old rule, smallest diff, picked a wrong fix in 3 of 20 such cases; the pairwise review replaced all 3 with a correct one and never the reverse.
+- **Runs:** run 1 verified 15/27. Run 2 (edit fallbacks plus one repair round) stopped at its spending cap after 18 cases and verified 9 of them (run 1: 8 of the same 18). Verified in either run (pass@2): 18/27. That is two attempts, not a single-run rate.
 - **The gate accepts the developers' own fixes**: 24 of 27 upstream fix commits verify when run through the identical gate; one more is rejected *correctly* — it leaks (mosquitto, the leak is allocated on a line that fix adds); 2 are false rejects (7.4%), both from known limits listed below. Raw before review: 24/33.
 - **CUDA:** of four candidate patches for an out-of-bounds write, two silenced compute-sanitizer — one clamped the bound, one allocated an extra element — and printed the wrong checksum. Only the output check caught them.
 - **Ultra's diagnosis** names a file the developer changed in 22 of 24 ARVO cases (a proxy measure; see NUMBERS.md).
-- A second ARVO run with edit fallbacks and one repair round (r2) is reported separately, never merged into r1: see [docs/NUMBERS.md](docs/NUMBERS.md).
 
 ## How it works
+
+![Leakproof architecture: finding, baseline, Ultra plan, four Lightning workers, evidence gate, verified or refused](docs/architecture.svg)
+
+Text version:
 
 ```
 finding ──► baseline build + reproduction (ASan/LSan/UBSan, or compute-sanitizer)
@@ -58,6 +75,15 @@ A candidate is **verified** only if every check passes:
 - *Line numbers moved.* A pre-existing bug two lines below the developer's edit was blamed on the fix; crashes are now compared by kind + function + file.
 - *The model could edit the harness.* Harnesses outside `fuzz/` directories were editable; files defining the fuzz entry point are now off limits wherever they live.
 - *Build scripts run once.* OSS-Fuzz `build.sh` scripts fail the second time (`mkdir build`), so every candidate "failed to build".
+- *The harness can only see what it prints.* mosquitto 42520955: `realloc` moves the listener array and leaves `config->default_listener` dangling. The developer saves the default listener's **index** before the `realloc` and restores the pointer after it. Two of three verified candidates point it at the **new** listener instead:
+
+  ```diff
+  +	if(config->default_listener){
+  +		config->default_listener = &config->listeners[config->listener_count-1];
+  +	}
+  ```
+
+  Neither crashes, and every input ran the same as the baseline, because the config-parsing harness never prints which listener got which settings, and the project's tests could not run in the image. Both are wrong: the default listener's settings land on the wrong listener. The gate's "verified" means *safe on every input we tried*, not *correct*. So every verified ARVO fix is also compared with the developer's fix (Ultra's classification, then a human review), and the stricter "verified and correct" tier is reported next to it (see Results).
 
 The gate was calibrated on the developers' own fixes after each change; the numbers above are from the final gate.
 
@@ -65,11 +91,11 @@ The gate was calibrated on the developers' own fixes after each change; the numb
 
 | model (Nebius Token Factory) | role |
 |---|---|
-| Nemotron 3 Ultra | root cause and fix hypotheses; repair round with each attempt's failure and the whole hot files |
+| Nemotron 3 Ultra | root cause and fix hypotheses; repair round with each attempt's failure and the whole hot files; ranking of several verified fixes; advisory comparison with the developer's fix (evaluation only) |
 | Nemotron 3.5 Lightning | the four parallel workers that write edits; advisory reviewer notes |
 | Nemotron 3 Super | alternative planner (leaderboard) |
 
-On the synthetic Juliet subset the planner barely matters (Lightning-only 93%, Ultra 95%, Super 93% verified). **On real code it does:** on 10 calibrated ARVO cases, workers without a plan verified 2, with Super 4, with Ultra 7 — and Ultra was cheaper per verified fix than no planner ($0.059 vs $0.112), because failed attempts cost money too (one repeat; see NUMBERS.md). The advisory reviewer flags verified and rejected candidates at about the same rate, so it is shown as notes and never counted as evidence.
+On the synthetic Juliet subset the planner barely matters (Lightning-only 93%, Ultra 95%, Super 93% verified). **On real code it does:** on 10 calibrated ARVO cases, workers without a plan verified 2, with Super 4, with Ultra 7 (verified and correct: 2, 3, 5). Ultra was also cheaper per verified fix than no planner ($0.059 vs $0.112), because failed attempts cost money too (one repeat; see NUMBERS.md). Ultra also ranks candidates when several verify, and drafts the advisory comparison with the developer's fix that our review starts from. The advisory reviewer flags verified and rejected candidates at about the same rate, so it is shown as notes and never counted as evidence.
 
 ## How we use Nebius
 

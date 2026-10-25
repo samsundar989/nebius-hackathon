@@ -1,0 +1,157 @@
+{
+ "arvo": {
+  "p3_arvo27_r1": {
+   "strict": 14,
+   "strict_d0039": 13,
+   "ambiguous": 0,
+   "verified_ids": [
+    "417323384",
+    "42482401",
+    "42500216",
+    "42500232",
+    "42507851",
+    "42508524",
+    "42510992",
+    "42520955",
+    "42521026",
+    "42521092",
+    "42522195",
+    "42523423",
+    "42526932",
+    "42531297",
+    "42534812"
+   ],
+   "case_ids": [
+    "372515086",
+    "417323384",
+    "419216923",
+    "42482401",
+    "42500216",
+    "42500232",
+    "42507297",
+    "42507851",
+    "42508524",
+    "42510992",
+    "42512369",
+    "42519914",
+    "42520377",
+    "42520883",
+    "42520955",
+    "42521026",
+    "42521092",
+    "42522195",
+    "42523423",
+    "42526932",
+    "42530604",
+    "42531297",
+    "42531514",
+    "42534812",
+    "42536108",
+    "42536390",
+    "42541221"
+   ],
+   "cases": 27,
+   "raw": 18,
+   "v0": 18,
+   "verified": 15,
+   "round1": 15,
+   "round2": 0,
+   "usd": 1.045634,
+   "per_fix": 0.06970893333333333
+  },
+  "p3_arvo27_r2": {
+   "strict": 8,
+   "strict_d0039": 7,
+   "ambiguous": 0,
+   "verified_ids": [
+    "417323384",
+    "42482401",
+    "42500216",
+    "42500232",
+    "42507297",
+    "42507851",
+    "42508524",
+    "42520377",
+    "42530604"
+   ],
+   "case_ids": [
+    "372515086",
+    "417323384",
+    "419216923",
+    "42482401",
+    "42500216",
+    "42500232",
+    "42507297",
+    "42507851",
+    "42508524",
+    "42519914",
+    "42520377",
+    "42520883",
+    "42522195",
+    "42530604",
+    "42531297",
+    "42536108",
+    "42536390",
+    "42541221"
+   ],
+   "cases": 18,
+   "raw": 12,
+   "v0": 12,
+   "verified": 9,
+   "round1": 7,
+   "round2": 2,
+   "usd": 2.015602,
+   "per_fix": 0.22395577777777775
+  },
+  "either": {
+   "verified": 18,
+   "cases": 27,
+   "r2_cases": 18,
+   "r1_on_r2_cases": 8
+  }
+ },
+ "jq_refusal": {
+  "case": "42530604",
+  "refused_diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -650,7 +650,7 @@\n     // Preserve the actual precision as we have parsed it\n     // don't do decNumberTrim(pdec);\n \n-    decNumberToString(pdec, plit->literal_data);\n+    decNumberToEngString(pdec, plit->literal_data);\n   }\n \n   return plit->literal_data;\n",
+  "tests": "pass",
+  "patched": "pass",
+  "refuzz": "heap-buffer-overflow at decToString /src/jq/src/decNumber/decNumber.c from amplification:digits_x2 (33 bytes); baseline is clean on this input; developer fix is clean on this input",
+  "verified_run": "p3_arvo27_r2",
+  "verified_diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -644,7 +644,7 @@\n   }\n \n   if (plit->literal_data == NULL) {\n-    int len = jvp_dec_number_ptr(n)->digits + 14;\n+    int len = jvp_dec_number_ptr(n)->digits + 20;\n     plit->literal_data = jv_mem_alloc(len);\n \n     // Preserve the actual precision as we have parsed it\n",
+  "verified_semantic": "equivalent"
+ },
+ "precision": {
+  "correct": 52,
+  "judged": 67,
+  "verified": 67,
+  "classes": {
+   "different_but_correct": 36,
+   "equivalent": 16,
+   "defensive": 7,
+   "wrong": 8
+  }
+ },
+ "planners_arvo": {
+  "lightning": {
+   "label": "none (Lightning workers only)",
+   "verified": 2,
+   "strict": 2,
+   "cases": 10,
+   "usd_per_verified": 0.112
+  },
+  "ultra": {
+   "label": "Nemotron 3 Ultra",
+   "verified": 7,
+   "strict": 5,
+   "cases": 10,
+   "usd_per_verified": 0.0589
+  },
+  "super": {
+   "label": "Nemotron 3 Super",
+   "verified": 4,
+   "strict": 3,
+   "cases": 10,
+   "usd_per_verified": 0.0466
+  }
+ }
+}

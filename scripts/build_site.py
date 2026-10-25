@@ -15,11 +15,17 @@ import sys
 from collections import Counter
 
 from leakproof.config import REPO_ROOT, RUNS_DIR
+from leakproof.results import records
 
 SITE = REPO_ROOT / "site" / "data"
 RUNS = [
-    ("p3_arvo27_r1", "ARVO: 27 calibrated real OSS-Fuzz cases", "arvo"),
-    ("e1_juliet60_v1", "Juliet smoke set: 60 cases (CWE-401/415/416)", "juliet"),
+    ("p3_arvo27_r1", "ARVO run 1: 27 calibrated real OSS-Fuzz cases", "arvo"),
+    ("p3_arvo27_r2", "ARVO run 2 (edit fallbacks + repair round): first 18 cases", "arvo"),
+    (
+        "e1_juliet60_v1",
+        "Juliet smoke set: 60 cases (run under gate v0; re-judged under v1: no verdict changed)",
+        "juliet",
+    ),
     ("p4_juliet401x100_r1", "Juliet CWE-401 sample: 100 cases", "juliet"),
     ("p2_sandboxes_juliet3", "Nebius Sandboxes: 3 Juliet cases, gate offline", "juliet"),
 ]
@@ -65,6 +71,7 @@ def case_view(rec: dict) -> dict:
                     if k in checks
                 },
                 "audit": (w.get("audit") or {}).get("flags", []),
+                "semantic": w.get("semantic"),
                 "diff": (w.get("diff") or "")[:6000],
             }
         )
@@ -88,12 +95,57 @@ def case_view(rec: dict) -> dict:
         "gate_version": (rec.get("gate") or {}).get("gate_version", "v0"),
         "dev_fix": arvo.get("patch_url"),
         "winner": (rec.get("winner") or {}).get("diff"),
+        "winner_id": f"{rec['winner']['hypothesis_id']}·w{rec['winner']['worker_index']}"
+        if rec.get("winner")
+        else None,
+        "winner_semantic": (rec.get("winner") or {}).get("semantic"),
+        "ambiguous": rec.get("ambiguous", False),
+        "rejudged": rec.get("rejudged"),
         "workers": workers,
         "lineage": [
             {k: e.get(k) for k in ("op", "parent", "image", "network", "exit", "s", "usd")}
             for e in (lineage.get("workers") or []) + (lineage.get("gate") or [])
         ],
     }
+
+
+CAL_LABELS = {
+    "accepted": "accepted: the developer's fix verifies",
+    "true_reject": "rejected correctly: the developer's fix leaks",
+    "false_reject": "false reject (a known gate limit)",
+    "not_standalone": "not countable: the fix commit needs earlier commits",
+    "partial": "not countable: the fix commit applies only in part",
+    "out_of_scope": "not countable: the fix is in the fuzz harness",
+    "no_candidate": "not countable: no usable fix commit or the build needs network",
+}
+
+
+def calibration_view(c: dict) -> dict:
+    """Readable calibration rows: a class label and a one-line reason, never raw exceptions."""
+    rows = []
+    for r in c["rows"]:
+        why = (r.get("why") or "").strip()
+        if not why and r["class"] != "accepted":
+            v = str(r.get("verdict", ""))
+            why = (
+                "OSS-Fuzz rebuild needs network access, which the gate does not have"
+                if "rebuild with our flags" in v
+                else "no fix commit touches a file the agent may edit"
+                if "no fix commit touches" in v
+                else "the fix commit does not apply to the ARVO baseline"
+                if "did not apply" in v
+                else v.split("\n")[0][:120]
+            )
+        rows.append(
+            {
+                "case": r["case"],
+                "project": r["project"],
+                "class": r["class"],
+                "label": CAL_LABELS.get(r["class"], r["class"]),
+                "why": why,
+            }
+        )
+    return {"adjudicated": c["adjudicated"], "raw": c["raw"], "labels": CAL_LABELS, "rows": rows}
 
 
 def main() -> int:
@@ -103,11 +155,7 @@ def main() -> int:
         run_dir = RUNS_DIR / run
         if not run_dir.exists():
             continue
-        cases = [
-            case_view(json.loads(p.read_text()))
-            for p in sorted(run_dir.glob("*.json"))
-            if p.name != "summary.json"
-        ]
+        cases = [case_view(r) for r in records(run)]
         verdicts = Counter(c["verdict"].split(":", 1)[0] for c in cases)
         usd = sum(c["usd"] for c in cases)
         verified = verdicts.get("verified", 0)
@@ -132,13 +180,17 @@ def main() -> int:
         )
     (SITE / "index.json").write_text(json.dumps({"runs": index}, indent=1))
     for name, src in (
-        ("calibration", RUNS_DIR / "p1_calibration_v3" / "summary.json"),
         ("leaderboard", RUNS_DIR / "leaderboard.json"),
         ("cuda", RUNS_DIR / "p5_cuda" / "verdicts.json"),
         ("leaderboard_arvo", RUNS_DIR / "leaderboard_arvo.json"),
     ):
         if src.exists():
             (SITE / f"{name}.json").write_text(src.read_text())
+    cal = RUNS_DIR / "p1_calibration_v3" / "summary.json"
+    if cal.exists():
+        (SITE / "calibration.json").write_text(
+            json.dumps(calibration_view(json.loads(cal.read_text())), indent=1)
+        )
     # The demo service's recorded results: real verified Juliet runs, served (and labelled
     # "recorded") whenever live runs are off or a cap is hit.
     rec_dir = REPO_ROOT / "service" / "recorded"

@@ -2,26 +2,44 @@
  "runs": [
   {
    "run": "p3_arvo27_r1",
-   "label": "ARVO: 27 calibrated real OSS-Fuzz cases",
+   "label": "ARVO run 1: 27 calibrated real OSS-Fuzz cases",
    "suite": "arvo",
    "cases": 27,
    "raw": 18,
    "v0": 18,
-   "verified": 14,
+   "verified": 15,
    "verdicts": {
-    "rejected": 9,
-    "verified": 14,
+    "rejected": 8,
+    "verified": 15,
     "build_failed": 2,
     "no_candidate": 1,
     "inconclusive": 1
    },
    "usd": 1.0456,
-   "usd_per_verified": 0.0747,
+   "usd_per_verified": 0.0697,
+   "gate_version": "v1"
+  },
+  {
+   "run": "p3_arvo27_r2",
+   "label": "ARVO run 2 (edit fallbacks + repair round): first 18 cases",
+   "suite": "arvo",
+   "cases": 18,
+   "raw": 12,
+   "v0": 12,
+   "verified": 9,
+   "verdicts": {
+    "rejected": 7,
+    "verified": 9,
+    "silenced_only": 1,
+    "no_candidate": 1
+   },
+   "usd": 2.0156,
+   "usd_per_verified": 0.224,
    "gate_version": "v1"
   },
   {
    "run": "e1_juliet60_v1",
-   "label": "Juliet smoke set: 60 cases (CWE-401/415/416)",
+   "label": "Juliet smoke set: 60 cases (run under gate v0; re-judged under v1: no verdict changed)",
    "suite": "juliet",
    "cases": 60,
    "raw": 56,

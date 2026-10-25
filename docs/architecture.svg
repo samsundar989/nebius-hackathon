@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 430" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14">
+  <title>Leakproof architecture</title>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#555"/></marker>
+  </defs>
+  <rect width="960" height="430" fill="#ffffff"/>
+  <!-- finding -->
+  <rect x="20" y="150" width="150" height="80" rx="8" fill="#f3f4f6" stroke="#6b7280"/>
+  <text x="95" y="180" text-anchor="middle" font-weight="600">Finding</text>
+  <text x="95" y="200" text-anchor="middle" font-size="12">sanitizer report</text>
+  <text x="95" y="216" text-anchor="middle" font-size="12">+ crash input</text>
+  <!-- baseline -->
+  <rect x="200" y="150" width="160" height="80" rx="8" fill="#f3f4f6" stroke="#6b7280"/>
+  <text x="280" y="180" text-anchor="middle" font-weight="600">Baseline</text>
+  <text x="280" y="200" text-anchor="middle" font-size="12">build + reproduce</text>
+  <text x="280" y="216" text-anchor="middle" font-size="12">checkpoint image</text>
+  <!-- planner -->
+  <rect x="390" y="40" width="190" height="80" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="485" y="70" text-anchor="middle" font-weight="600">Nemotron 3 Ultra</text>
+  <text x="485" y="90" text-anchor="middle" font-size="12">root cause +</text>
+  <text x="485" y="106" text-anchor="middle" font-size="12">up to 4 fix hypotheses</text>
+  <!-- workers -->
+  <rect x="390" y="150" width="190" height="110" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="485" y="178" text-anchor="middle" font-weight="600">4 × Nemotron 3.5 Lightning</text>
+  <text x="485" y="198" text-anchor="middle" font-size="12">one branch of the checkpoint each</text>
+  <text x="485" y="214" text-anchor="middle" font-size="12">sees finding, plan, editable files</text>
+  <text x="485" y="230" text-anchor="middle" font-size="12">never the gate, tests or dev fix</text>
+  <text x="485" y="248" text-anchor="middle" font-size="11" fill="#6b7280">Nebius Token Factory</text>
+  <!-- gate -->
+  <rect x="620" y="110" width="200" height="200" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="720" y="136" text-anchor="middle" font-weight="600">Evidence gate</text>
+  <text x="720" y="153" text-anchor="middle" font-size="11" fill="#2563eb">own process · network off</text>
+  <text x="636" y="176" font-size="12">diff scope · build · compiled</text>
+  <text x="636" y="194" font-size="12">PoC clean · project tests</text>
+  <text x="636" y="212" font-size="12">behaviour · differential corpus</text>
+  <text x="636" y="230" font-size="12">amplified PoC + 90 s re-fuzz</text>
+  <text x="636" y="248" font-size="12">LeakSanitizer safe-fix</text>
+  <text x="636" y="270" font-size="11" fill="#6b7280">Docker or Nebius Sandboxes</text>
+  <text x="636" y="286" font-size="11" fill="#6b7280">reference: developer fix (calibration)</text>
+  <!-- outcomes -->
+  <rect x="850" y="120" width="96" height="60" rx="8" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="898" y="155" text-anchor="middle" font-weight="600">verified</text>
+  <rect x="850" y="230" width="96" height="60" rx="8" fill="#fee2e2" stroke="#dc2626"/>
+  <text x="898" y="256" text-anchor="middle" font-weight="600">refused</text>
+  <text x="898" y="274" text-anchor="middle" font-size="11">+ reason</text>
+  <!-- repair -->
+  <rect x="390" y="320" width="300" height="70" rx="8" fill="#fffbeb" stroke="#d97706" stroke-dasharray="5 4"/>
+  <text x="540" y="348" text-anchor="middle" font-weight="600">Repair round (optional, once)</text>
+  <text x="540" y="368" text-anchor="middle" font-size="12">Ultra sees each attempt's diff + failure kind and stack</text>
+  <!-- arrows -->
+  <path d="M170 190H198" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M360 175L388 95" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M485 120V148" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M360 200H388" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M580 205H618" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M820 165L848 155" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M820 250L848 258" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M720 310V355H692" stroke="#d97706" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#a)"/>
+  <path d="M390 355H185V60H388" stroke="#d97706" stroke-width="1.6" stroke-dasharray="5 4" fill="none" marker-end="url(#a)"/>
+</svg>

@@ -202,3 +202,27 @@ Same 18 cases: r1 8 verified → **r2 9** (7 in round 1 + 2 recovered by the rep
 
 ### CI
 Not verifiable from here since the Actions page went 404 in the browser; 266 tests pass locally on every push.
+
+## Day 5 · Sat night 2026-10-24 → Sun 2026-10-25 — review #4 orders 1–3, 5, 6
+
+Strategist notes 2026-10-24 22:05 CDT (review #4): acknowledged; executed orders 1 (CI), 2a–d and 2f (semantic audit, adjudication, strict tier, winner selection, README item), 3 (dashboard), 5 (README) and 6 (video script v2); 2e (test suites) and 4 (headline naming) in progress.
+
+### CI
+`leakproof/cli.py` reformatted; `.githooks/pre-commit` now runs `ruff format --check` and `ruff check` after the secret scan, so a lint-red push cannot happen from this checkout.
+
+### Is a verified fix correct? (D-0069, D-0071)
+- 67 distinct verified ARVO diffs (95 candidates; P3 run 1, run 2, three `lb_arvo_*` runs) classified by Ultra against the developer's fix ($0.67), then all reviewed by hand: **52/67 correct** (16 equivalent, 36 different but correct), 7 defensive, **8 wrong**. Gate precision 78%.
+- Ultra was overridden 8 times; the important one: mosquitto 42522195 (Ultra planner run) — Ultra called it "different but correct", but the patch reads and throws away the first line of every config file before parsing, which is why the PoC stops crashing. Four "defensive" calls were in fact bounded fixes in the developer's own function.
+- Strict tier ("verified, and the chosen fix is correct"): run 1 **14/27**, run 2 8/18; planners on real code: none 2, Super 3, Ultra 5 of 10.
+
+### Winner selection (D-0070)
+- Pairwise Ultra review in both orders, diff size last ($0.68 for 20 cases with several verified diffs): 10 winners changed; the 3 cases where the smallest-diff rule picked a wrong fix (mosquitto 42520955, libplist 42507851 run 2, libexif 42500216 Super) now pick a correct one; no correct winner was replaced by a wrong one. Without it strict would be 13 (run 1) and 7 (run 2).
+- Cross-candidate differential (`scripts/cross_diff.py`, workerq): pcre2 42526932 — 358 inputs (corpus, PoC, amplified, 150 fuzz finds per candidate), candidates agree. The remaining cases are running (job 3818).
+
+### Dashboard and README
+- One source: `leakproof/results.py` applies the D-0056 re-judge, D-0070 winners and D-0069 classes; `readme_numbers.py` writes NUMBERS.md and `site/data/numbers.json`, which the dashboard headline reads — the site now says 15/27 and $0.070, like the README.
+- First screen (checked at 1440×900): five headline numbers, the jq refusal card, the planner card, "Run a live fix" (disabled until QUESTION 0011). ARVO leaderboard table; calibration as counts with readable labels, cases collapsed; case pages show the semantic class and "other verified candidates"; inline favicon.
+- README: links row and badges, the jq "aha" (corrected: the doubled input overflows the *patched* jq; the baseline is clean on it), OSS-Fuzz scale (quoted from its README) and PatchBench's 1.83× (verified on arXiv; the 45–60% figure was not in the abstract and is left out), architecture SVG, strict tier, "The harness can only see what it prints", two showcase bundles.
+
+### Note
+A Windows `uv run` without `UV_PROJECT_ENVIRONMENT=.venv-win` tried to replace the WSL `.venv` and may have removed part of it; WSL rebuilds it with `uv sync`.

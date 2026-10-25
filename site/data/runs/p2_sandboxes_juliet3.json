@@ -37,6 +37,10 @@
    "gate_version": "v1",
    "dev_fix": null,
    "winner": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -26,7 +26,7 @@\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
+   "winner_id": "H1\u00b7w2",
+   "winner_semantic": null,
+   "ambiguous": false,
+   "rejudged": null,
    "workers": [
     {
      "id": "H1\u00b7w0",
@@ -81,6 +85,7 @@
       }
      },
      "audit": [],
+     "semantic": null,
      "diff": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -25,8 +25,7 @@\n {\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -126,6 +131,7 @@
       }
      },
      "audit": [],
+     "semantic": null,
      "diff": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -25,8 +25,7 @@\n {\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -175,6 +181,7 @@
       "new_memory_risk",
       "behavior_change"
      ],
+     "semantic": null,
      "diff": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -26,7 +26,7 @@\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -220,6 +227,7 @@
       }
      },
      "audit": [],
+     "semantic": null,
      "diff": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -25,8 +25,7 @@\n {\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -329,6 +337,10 @@
    "gate_version": "v1",
    "dev_fix": null,
    "winner": "--- a/CWE415_Double_Free__malloc_free_char_54e.c\n+++ b/CWE415_Double_Free__malloc_free_char_54e.c\n@@ -24,7 +24,6 @@\n void CWE415_Double_Free__malloc_free_char_54e_badSink(char * data)\n {\n     /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n }\n \n #endif /* OMITBAD */\n",
+   "winner_id": "H2\u00b7w1",
+   "winner_semantic": null,
+   "ambiguous": false,
+   "rejudged": null,
    "workers": [
     {
      "id": "H1\u00b7w0",
@@ -375,6 +387,7 @@
      "audit": [
       "root_cause"
      ],
+     "semantic": null,
      "diff": "--- a/CWE415_Double_Free__malloc_free_char_54a.c\n+++ b/CWE415_Double_Free__malloc_free_char_54a.c\n@@ -32,7 +32,6 @@\n     data = (char *)malloc(100*sizeof(char));\n     if (data == NULL) {exit(-1);}\n     /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-    free(data);\n     CWE415_Double_Free__malloc_free_char_54b_badSink(data);\n }\n \n"
     },
     {
@@ -424,6 +437,7 @@
       "silencing",
       "behavior_change"
      ],
+     "semantic": null,
      "diff": "--- a/CWE415_Double_Free__malloc_free_char_54e.c\n+++ b/CWE415_Double_Free__malloc_free_char_54e.c\n@@ -24,7 +24,6 @@\n void CWE415_Double_Free__malloc_free_char_54e_badSink(char * data)\n {\n     /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -469,6 +483,7 @@
       }
      },
      "audit": [],
+     "semantic": null,
      "diff": "--- a/CWE415_Double_Free__malloc_free_char_54a.c\n+++ b/CWE415_Double_Free__malloc_free_char_54a.c\n@@ -33,6 +33,7 @@\n     if (data == NULL) {exit(-1);}\n     /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n     free(data);\n+    data = NULL;\n     CWE415_Double_Free__malloc_free_char_54b_badSink(data);\n }\n \n--- a/CWE415_Double_Free__malloc_free_char_54e.c\n+++ b/CWE415_Double_Free__malloc_free_char_54e.c\n@@ -23,8 +23,10 @@\n \n void CWE415_Double_Free__malloc_free_char_54e_badSink(char * data)\n {\n-    /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n+    if (data != NULL) {\n+        free(data);\n+        data = NULL;\n+    }\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -517,6 +532,7 @@
       "root_cause",
       "behavior_change"
      ],
+     "semantic": null,
      "diff": "--- a/CWE415_Double_Free__malloc_free_char_54a.c\n+++ b/CWE415_Double_Free__malloc_free_char_54a.c\n@@ -31,8 +31,7 @@\n     data = NULL;\n     data = (char *)malloc(100*sizeof(char));\n     if (data == NULL) {exit(-1);}\n-    /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-    free(data);\n+    /* Data deallocated by the sink function */\n     CWE415_Double_Free__malloc_free_char_54b_badSink(data);\n }\n \n"
     }
    ],
@@ -635,6 +651,10 @@
    "gate_version": "v1",
    "dev_fix": null,
    "winner": "--- a/CWE416_Use_After_Free__malloc_free_char_03.c\n+++ b/CWE416_Use_After_Free__malloc_free_char_03.c\n@@ -32,14 +32,11 @@\n         if (data == NULL) {exit(-1);}\n         memset(data, 'A', 100-1);\n         data[100-1] = '\\0';\n-        /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n-        free(data);\n     }\n     if(5==5)\n     {\n-        /* POTENTIAL FLAW: Use of data that may have been freed */\n         printLine(data);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n+        free(data);\n     }\n }\n \n",
+   "winner_id": "H1\u00b7w2",
+   "winner_semantic": null,
+   "ambiguous": false,
+   "rejudged": null,
    "workers": [
     {
      "id": "H1\u00b7w0",
@@ -642,6 +662,7 @@
      "v0": null,
      "checks": {},
      "audit": [],
+     "semantic": null,
      "diff": ""
     },
     {
@@ -650,6 +671,7 @@
      "v0": null,
      "checks": {},
      "audit": [],
+     "semantic": null,
      "diff": ""
     },
     {
@@ -701,6 +723,7 @@
       "error_handling",
       "scope"
      ],
+     "semantic": null,
      "diff": "--- a/CWE416_Use_After_Free__malloc_free_char_03.c\n+++ b/CWE416_Use_After_Free__malloc_free_char_03.c\n@@ -32,14 +32,11 @@\n         if (data == NULL) {exit(-1);}\n         memset(data, 'A', 100-1);\n         data[100-1] = '\\0';\n-        /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n-        free(data);\n     }\n     if(5==5)\n     {\n-        /* POTENTIAL FLAW: Use of data that may have been freed */\n         printLine(data);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n+        free(data);\n     }\n }\n \n"
     },
     {
@@ -751,6 +774,7 @@
       "behavior_change",
       "error_handling"
      ],
+     "semantic": null,
      "diff": "--- a/CWE416_Use_After_Free__malloc_free_char_03.c\n+++ b/CWE416_Use_After_Free__malloc_free_char_03.c\n@@ -28,18 +28,18 @@\n     data = NULL;\n     if(5==5)\n     {\n+        /* POTENTIAL FLAW: Use of data that may have been freed */\n+        printLine(data);\n+        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n+    }\n+    if(5==5)\n+    {\n         data = (char *)malloc(100*sizeof(char));\n         if (data == NULL) {exit(-1);}\n         memset(data, 'A', 100-1);\n         data[100-1] = '\\0';\n         /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n         free(data);\n-    }\n-    if(5==5)\n-    {\n-        /* POTENTIAL FLAW: Use of data that may have been freed */\n-        printLine(data);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n }\n \n"
     }
    ],
