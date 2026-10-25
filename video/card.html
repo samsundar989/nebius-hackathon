@@ -23,12 +23,20 @@
   .cal ul { list-style: none; padding: 0; margin: 0; font-size: 36px; line-height: 1.45; }
   .cal li { margin: 0 0 18px; }
   .cal li b { color: #f2cc60; }
+  .ob { width: 1760px; text-align: left; }
+  .ob h2 { font-size: 46px; margin: 0 0 14px; }
+  .ob .flow { font-size: 40px; margin: 0 0 26px; color: #c3c8d1; }
+  .ob .flow b { color: #6fd39e; }
+  .ob table { border-collapse: collapse; width: 100%; font-size: 27px; }
+  .ob th { text-align: left; color: #a0a7b3; font-weight: 600; padding: 6px 12px; border-bottom: 2px solid #2b3038; }
+  .ob td { padding: 7px 12px; border-bottom: 1px solid #2b3038; vertical-align: top; }
+  .ob td.hit { color: #6fd39e; font-weight: 700; } .ob td.miss { color: #f2cc60; }
 </style>
 </head>
 <body>
 <div id="card"></div>
 <script>
-// ?type=title | ?type=end ; the end card reads the headline numbers from site/data/numbers.json.
+// ?type=title | end | calibration | openbugs ; the end card reads the headline numbers from site/data/numbers.json.
 (async () => {
   const type = new URLSearchParams(location.search).get("type");
   const card = document.getElementById("card");
@@ -40,6 +48,22 @@
   const n = await fetch("../site/data/numbers.json").then((r) => r.json());
   const cal = await fetch("../site/data/calibration.json").then((r) => r.json());
   const r1 = n.arvo.p3_arvo27_r1, p = n.planners_arvo, a = cal.adjudicated;
+  if (type === "openbugs") {
+    // The open-bugs funnel and the review-finding table, read from cases/open_bugs/REVIEW.md.
+    const md = await fetch("../cases/open_bugs/REVIEW.md").then((r) => r.text());
+    const flow = md.split("## Both rounds")[1].trim().split("\n")[0];
+    const table = md.split("## Review finding")[1].split("\n\n")[2].split("\n")
+      .map((l) => l.replace(/^\||\|$/g, "").split("|").map((c) => c.trim().replace(/`/g, "")))
+      .filter((r) => !r.join("").match(/^-+$/));
+    const cell = (c) => c.replace(/\*\*(.+?)\*\*/g, "$1");
+    const cls = (c) => /^\*\*(generated|adversary|UBSan)/.test(c) ? "hit" : /still missed|inconclusive/.test(c) ? "miss" : "";
+    card.innerHTML = `<div class="ob"><h2>Open bugs: still-open GitHub issues, fixed and gated</h2>
+      <p class="flow">${flow.replace(/(\d+ ready to propose)/, "<b>$1</b>").split(". Model spend")[0]}</p>
+      <p class="flow" style="font-size:34px">toybox #572: a one-line fix that passes all 13 of toybox's own <code>patch</code> tests.</p>
+      <table><tr><th>case</th><th>candidate</th><th>human review said</th><th>caught by</th></tr>
+      ${table.slice(1).map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="${cls(r[4])}">${cell(r[4]).split(":")[0]}</td></tr>`).join("")}</table></div>`;
+    return;
+  }
   if (type === "calibration") {
     // A summary, not the per-case table: what the gate does with the developers' own fixes.
     const cls = a.classes, rej = a.judged - cls.accepted;
@@ -60,7 +84,7 @@
       <div><b>${a.classes.accepted}/${a.judged}</b><span>developers' fixes the gate accepts</span></div>
       <div><b>${p.lightning.verified} → ${p.ultra.verified}</b><span>of 10 with Ultra's plan</span></div>
     </div>
-    <div class="links">github.com/samsundar989/nebius-hackathon<br>dashboard: (link when deployed)</div>`;
+    <div class="links">github.com/samsundar989/nebius-hackathon</div>`;
 })();
 </script>
 </body>

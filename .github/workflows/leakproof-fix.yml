@@ -1,0 +1,86 @@
+# Leakproof in CI on this repository's own demo (review #9 order 3): when demo-fuzz fails with a
+# crash, run `leakproof fix` on examples/csvsplit with the first crash input and publish the
+# evidence bundle as the job summary and an artifact. It never pushes code.
+#
+# Secret NEBIUS_API_KEY and variable NEBIUS_PROJECT_ID are set by the repository owner. Only
+# workflow_run and workflow_dispatch trigger it (no pull_request), and it only runs in this
+# repository, so forks never get the secret. Model spend is capped at $0.10 a run.
+name: leakproof-fix
+
+on:
+  workflow_run:
+    workflows: ["demo-fuzz"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Run id of a failed demo-fuzz run (its artifact holds the crash inputs)"
+        required: true
+
+permissions:
+  contents: read
+  actions: read                  # to download the fuzz run's artifact
+
+jobs:
+  fix:
+    if: >-
+      github.repository == 'samsundar989/nebius-hackathon' &&
+      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'failure')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      NEBIUS_API_KEY: ${{ secrets.NEBIUS_API_KEY }}
+      NEBIUS_PROJECT_ID: ${{ vars.NEBIUS_PROJECT_ID }}
+      LEAKPROOF_BUDGET_USD: "0.10"
+      LEAKPROOF_RUNS: ${{ github.workspace }}/leakproof-runs
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Toolchain image for the gate (clang 18 + sanitizers)
+        run: docker build -q -t leakproof/cpp-sanitizers:e0 images/cpp-sanitizers
+
+      - name: Download the crash inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: crashes
+          path: crashes
+          run-id: ${{ github.event.workflow_run.id || inputs.run_id }}
+          github-token: ${{ github.token }}
+
+      - name: leakproof fix
+        id: fix
+        run: |
+          set -euo pipefail
+          test -n "$NEBIUS_API_KEY" || { echo "::error::repository secret NEBIUS_API_KEY is not set"; exit 1; }
+          poc=$(find crashes -type f | sort | head -1)
+          echo "fixing $poc"
+          set +e
+          uv run leakproof fix --config examples/csvsplit/leakproof.toml --poc "$poc" \
+            --run-id ci --budget 0.10
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Evidence bundle
+        if: always()
+        run: |
+          uv run python scripts/render_bundle.py ci --all --out bundle || true
+          cat bundle/*.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "no bundle" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: leakproof-evidence
+          path: |
+            bundle/
+            leakproof-runs/ci/
+
+      - name: Verdict
+        if: always()
+        run: |
+          if [ "${{ steps.fix.outputs.exit }}" = "0" ]; then
+            echo "::notice::Leakproof verified a fix: see the job summary and the leakproof-evidence artifact."
+          else
+            echo "::warning::No verified fix (the bundle says why). Nothing was changed."
+            exit 1
+          fi

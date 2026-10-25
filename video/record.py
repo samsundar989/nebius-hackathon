@@ -109,7 +109,14 @@ SCENES = [
         20,
         "Where it falls short: two mosquitto fixes passed every check yet were wrong. We report verified and correct.",
     ),
-    ("11_end", "card", "end", 6, ""),
+    (
+        "11_open_bugs",
+        "card",
+        "openbugs",
+        14,
+        "Still-open GitHub issues: 30 triaged, 7 reproduce, 5 verified, 1 ready to propose.",
+    ),
+    ("12_end", "card", "end", 6, ""),
 ]
 
 # Stage width per dashboard card: narrower stages zoom further, so short cards fill the frame.

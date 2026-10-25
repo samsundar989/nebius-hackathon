@@ -1,0 +1,47 @@
+# Demo fuzzing run for examples/csvsplit (review #9 order 3): fuzz the CSV splitter for at most
+# 120 s; when libFuzzer finds a crash, upload the crash inputs as artifact `crashes` and fail, so
+# leakproof-fix.yml picks them up. Manual only.
+name: demo-fuzz
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the fuzzer (clang, libFuzzer + ASan)
+        working-directory: examples/csvsplit
+        run: make csvsplit_fuzz CC=clang CFLAGS="-g -O1 -fsanitize=address,undefined,fuzzer-no-link"
+
+      - name: Fuzz for at most 120 s
+        id: fuzz
+        working-directory: examples/csvsplit
+        run: |
+          mkdir -p ../../crashes work
+          cp corpus/* work/
+          set +e
+          ./csvsplit_fuzz -max_total_time=120 -artifact_prefix=../../crashes/ work 2>&1 | tail -40
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+          ls -l ../../crashes
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: crashes
+          path: crashes/
+          if-no-files-found: ignore
+
+      - name: Fail when a crash was found
+        run: |
+          if [ -n "$(ls -A crashes)" ]; then
+            echo "::error::libFuzzer found $(ls crashes | wc -l) crash input(s); leakproof-fix will try to fix it."
+            exit 1
+          fi
+          echo "no crash in 120 s"

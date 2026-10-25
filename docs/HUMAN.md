@@ -123,3 +123,13 @@ Options: (a) you submit it (or the one-line version) under your name with that d
 **Update 2026-10-25 (review #7):** the one-line version is now packaged and tested: `cases/open_bugs/landley_toybox/572/SUBMISSION.md` (format-patch file with your git identity as author, commit message, and a two-sentence AI-assistance disclosure). Gate run with no model calls (`runs/open_bugs_572_manual/gate.json`): the one-liner and H2·w1 both clear the reproducer, both are proven compiled into the binary, and both pass all 13 of toybox's own `patch` tests (13/13 on the unpatched build too, with an ASan-only test build; with UBSan, 12 tests fail at HEAD from an unrelated report in `lib/xwrap.c:428`). Recommendation: send the one-liner. Still your decision; I post nothing.
 
 **Update 2026-10-25 (review #8, before the repo goes public):** the committed `.patch` now says `From: <your git identity>` and `SUBMISSION.md` no longer names your email; the copy with your real identity is `0001-patch.private.patch` in the same directory (gitignored, `*.private.*`). If you send the patch, use that copy or set the author with `git commit --amend --reset-author`. Note: your email is still the author email of all existing commits, and in one earlier version of the patch file in history; removing it would need the history rewrite in QUESTION 0012 (default: no rewrite).
+
+## QUESTION 0018 — Leakproof in GitHub Actions: please add the secret and press Run (about 3 minutes)
+2026-10-25, per strategist review #9 order 3. Two workflows are in the repo: `demo-fuzz` (builds the csvsplit fuzzer, fuzzes it for at most 120 s, uploads the crash inputs, fails when it finds one) and `leakproof-fix` (runs after a failed `demo-fuzz`: builds the gate's toolchain image, runs `leakproof fix` on the first crash input, publishes the evidence bundle as the job summary). Only this repository can run it, no pull-request trigger exists, the key is never printed, and model spend is capped at $0.10 per run (the local demo costs $0.01).
+
+Your clicks on github.com/samsundar989/nebius-hackathon:
+1. **Settings → Secrets and variables → Actions → New repository secret.** Name `NEBIUS_API_KEY`, value: your Token Factory key (the same one as in `.env`). Add secret.
+2. Same page, **Variables** tab → **New repository variable.** Name `NEBIUS_PROJECT_ID`, value: the `aiproject-…` id from `.env`. Add variable.
+3. **Actions → demo-fuzz → Run workflow** (branch `main`) → Run workflow. When it finishes red ("found a crash"), `leakproof-fix` starts by itself; it takes about 10 minutes.
+
+Then tell me (`## ANSWER 0018`), or I will see the run when the repo is public. Default if not done: the README keeps saying the template has not run on GitHub.

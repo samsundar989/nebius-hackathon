@@ -41,6 +41,9 @@ jobs:
 
       - uses: astral-sh/setup-uv@v6
 
+      - name: Toolchain image for the gate (clang 18 + sanitizers)
+        run: docker build -q -t leakproof/cpp-sanitizers:e0 .leakproof/images/cpp-sanitizers
+
       - name: Download the crash inputs
         uses: actions/download-artifact@v4
         with:
