@@ -4,7 +4,9 @@
 Per id: pull -> print build.sh, the source tree's test layout and available tools -> optionally
 rebuild with our flags and try a candidate test command -> docker rmi. Output:
 runs/arvo_inspect/<id>.txt. Needs Docker (submit through workerq).
-Usage: scripts/arvo_inspect.py --ids 42530604,42520955 [--try "make check"]
+Usage: scripts/arvo_inspect.py --ids 42530604,42520955 [--try "id=make check"]
+  [--net-prep "id=apt-get install -y libcunit1-dev"]  (network on for that try: inspection only,
+  never the gate; a suite found this way is installed in the baseline prep, D-0071)
 """
 
 from __future__ import annotations
@@ -41,7 +43,9 @@ def main() -> int:
         default=[],
         help="id=command to run after an -O0 rebuild (repeatable)",
     )
+    ap.add_argument("--net-prep", action="append", default=[], help="id=command, network on")
     args = ap.parse_args()
+    preps = dict(t.split("=", 1) for t in args.net_prep)
     tries = dict(t.split("=", 1) for t in args.try_cmd)
     out_dir = RUNS_DIR / "arvo_inspect"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -66,11 +70,16 @@ def main() -> int:
         if cid in tries:
             t = runner.run(
                 ref,
-                f"arvo compile > /tmp/c.log 2>&1 || {{ tail -30 /tmp/c.log; exit 97; }}; "
+                (
+                    f"( {preps[cid]} ) > /tmp/prep.log 2>&1; echo PREP_RC=$?; tail -5 /tmp/prep.log; "
+                    if cid in preps
+                    else ""
+                )
+                + f"arvo compile > /tmp/c.log 2>&1 || {{ tail -30 /tmp/c.log; exit 97; }}; "
                 f"arvo; echo ARVO_RC=$?; ( {tries[cid]} ) 2>&1 | tail -80; echo TEST_RC=$?",
                 env=BUILD_ENV,
                 cwd=workdir,
-                network=False,
+                network=cid in preps,
                 timeout_s=2400,
             )
             text += f"\n## try: {tries[cid]} (exit {t.exit_code}, {t.elapsed_s}s)\n{t.stdout[-12000:]}\n{t.stderr[-3000:]}"

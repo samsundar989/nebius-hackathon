@@ -11,17 +11,11 @@ import sys
 from collections import Counter
 
 from leakproof.config import REPO_ROOT, RUNS_DIR
+from leakproof.results import precision, records, semantic_class, strict
+from leakproof.semantic import CORRECT
 
 OUT = REPO_ROOT / "docs" / "NUMBERS.md"
-
-
-def records(run: str) -> list[dict]:
-    d = RUNS_DIR / run
-    return [
-        json.loads(p.read_text())
-        for p in sorted(d.glob("*.json"))
-        if p.name != "summary.json" and d.exists()
-    ]
+SITE = REPO_ROOT / "site" / "data" / "numbers.json"  # the dashboard's headline: same numbers
 
 
 def funnel(run: str) -> dict | None:
@@ -49,6 +43,16 @@ def funnel(run: str) -> dict | None:
     usd = sum(r.get("usd", 0.0) for r in recs)
     ver = sum(r["verdict"] == "verified" for r in recs)
     return {
+        "strict": sum(strict(r) for r in recs),
+        # The same, had the winner stayed D-0039's smallest verified diff.
+        "strict_d0039": sum(
+            r["verdict"] == "verified"
+            and semantic_class(r["case"], (r.get("winner_d0039") or r["winner"])["diff"]) in CORRECT
+            for r in recs
+        ),
+        "ambiguous": sum(bool(r.get("ambiguous")) for r in recs if r["verdict"] == "verified"),
+        "verified_ids": sorted(r["case"] for r in recs if r["verdict"] == "verified"),
+        "case_ids": sorted(r["case"] for r in recs),
         "cases": len(recs),
         "raw": raw,
         "v0": sum(any(v0(w) for w in r.get("workers", [])) for r in recs),
@@ -60,6 +64,15 @@ def funnel(run: str) -> dict | None:
         "verdicts": Counter(r["verdict"].split(":", 1)[0] for r in recs),
         "workers": Counter(w["status"] for r in recs for w in r.get("workers", [])),
     }
+
+
+SEMANTIC_RUNS = (
+    "p3_arvo27_r1",
+    "p3_arvo27_r2",
+    "lb_arvo_lightning_r1",
+    "lb_arvo_super_r1",
+    "lb_arvo_ultra_r1",
+)
 
 
 def pct(a: int, b: int) -> str:
@@ -75,35 +88,113 @@ def main() -> int:
         "## ARVO: real OSS-Fuzz bugs, 27 calibrated cases",
         "",
         "| run | cases | crash gone (raw) | gate checks 1–4 (v0) | **verified (gate v1)** | "
-        "verified in round 1 | added by repair round | model $ | $ / verified fix |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "verified and correct (strict) | verified in round 1 | added by repair round | "
+        "model $ | $ / verified fix |",
+        "|---|---|---|---|---|---|---|---|---|---|",
     ]
+    nums: dict = {"arvo": {}}
     for run, label in (
-        ("p3_arvo27_r1", "r1"),
-        ("p3_arvo27_r2", "r2 (edit fallbacks + repair round)"),
+        ("p3_arvo27_r1", "run 1"),
+        ("p3_arvo27_r2", "run 2 (edit fallbacks + repair round)"),
     ):
         f = funnel(run)
         if f:
+            nums["arvo"][run] = {k: v for k, v in f.items() if k not in ("verdicts", "workers")}
             out.append(
                 f"| {label} | {f['cases']} | {f['raw']} ({pct(f['raw'], f['cases'])}) | {f['v0']} | "
-                f"**{f['verified']} ({pct(f['verified'], f['cases'])})** | {f['round1']} | {f['round2']} | "
-                f"${f['usd']:.4f} | ${f['per_fix']:.4f} |"
+                f"**{f['verified']} ({pct(f['verified'], f['cases'])})** | {f['strict']} | "
+                f"{f['round1']} | {f['round2']} | ${f['usd']:.4f} | ${f['per_fix']:.4f} |"
                 if f["per_fix"]
                 else f"| {label} | {f['cases']} | … |"
             )
-    out += [
-        "",
-        "r1 as run counted 14 verified; jq 42531297 was rejected on a libFuzzer slow-unit artifact "
-        "(D-0056) and is verified on re-judge, so r1 is 15/27.",
-        "",
-    ]
-    for run, label in (("p3_arvo27_r1", "r1"), ("p3_arvo27_r2", "r2")):
+    r1, r2 = funnel("p3_arvo27_r1"), funnel("p3_arvo27_r2")
+    if r1 and r2:
+        both = set(r2["case_ids"])
+        either = set(r1["verified_ids"]) | set(r2["verified_ids"])
+        same18 = len(set(r1["verified_ids"]) & both)
+        nums["arvo"]["either"] = {
+            "verified": len(either),
+            "cases": r1["cases"],
+            "r2_cases": len(both),
+            "r1_on_r2_cases": same18,
+        }
+        out += [
+            "",
+            f"- **pass@1** (one run): run 1 verified {r1['verified']}/{r1['cases']}; run 2 verified "
+            f"{r2['verified']}/{r2['cases']} (stopped at its $1.95 cap after {r2['cases']} cases; "
+            f"run 1 verified {same18} of those same {r2['cases']}).",
+            f"- **pass@2** (verified in either run): {len(either)}/{r1['cases']} — two attempts, "
+            "not a single-run rate.",
+            "- Run 1 as run counted 14 verified; jq 42531297 was rejected on a libFuzzer slow-unit "
+            "artifact (D-0056) and is verified on re-judge; every table here uses the re-judged "
+            "verdict.",
+            "- **strict**: verified, and the chosen fix is adjudicated equivalent to the developer's "
+            "fix or different but correct (D-0069, `cases/arvo/semantic_adjudication.json`); winners "
+            "re-selected among several verified candidates by D-0070. With the old smallest-diff "
+            f"winners (D-0039) strict would be {r1['strict_d0039']} (run 1) and "
+            f"{r2['strict_d0039']} (run 2): the pairwise review replaced every wrong winner "
+            "(mosquitto 42520955 run 1, libplist 42507851 run 2, libexif 42500216 Super) with a "
+            "correct one and never the reverse (`runs/winners.json`).",
+            "",
+        ]
+    for run, label in (("p3_arvo27_r1", "run 1"), ("p3_arvo27_r2", "run 2")):
         f = funnel(run)
         if f:
             out.append(
                 f"- Worker outcomes {label}: "
                 + ", ".join(f"{k} {v}" for k, v in f["workers"].most_common())
             )
+    # The dashboard's refusal card: jq 42530604, run 1 refused, run 2 verified (from records).
+    jq1 = next((r for r in records("p3_arvo27_r1") if r["case"] == "42530604"), None)
+    jq2 = next((r for r in records("p3_arvo27_r2") if r["case"] == "42530604"), None)
+    if jq1 and jq2:
+        refused = next(w for w in jq1["workers"] if w["verdict"].startswith("rejected:refuzz"))
+        checks = refused["gate"]["checks"]
+        nums["jq_refusal"] = {
+            "case": "42530604",
+            "refused_diff": refused["diff"],
+            "tests": checks["tests"]["status"],
+            "patched": checks["patched"]["status"],
+            "refuzz": checks["refuzz"]["detail"],
+            "verified_run": "p3_arvo27_r2",
+            "verified_diff": (jq2.get("winner") or {}).get("diff"),
+            "verified_semantic": (jq2.get("winner") or {}).get("semantic"),
+        }
+    allrecs = [r for run in SEMANTIC_RUNS for r in records(run)]
+    ok, judged, total = precision(allrecs)
+    if judged:
+        from collections import Counter as _C
+
+        from leakproof.semantic import change as _ch
+
+        cls = _C()
+        seen = set()
+        for r in allrecs:
+            for w in r.get("workers", []):
+                k = (r["case"], _ch(w["diff"]))
+                if w.get("verdict") == "verified" and k not in seen:
+                    seen.add(k)
+                    cls[w.get("semantic")] += 1
+        nums["precision"] = {
+            "correct": ok,
+            "judged": judged,
+            "verified": total,
+            "classes": dict(cls),
+        }
+        out += [
+            "",
+            "## Is a verified fix correct? Semantic review against the developer's fix",
+            "",
+            f"Every distinct verified diff in the ARVO runs ({', '.join(SEMANTIC_RUNS)}): "
+            f"{total}. Nemotron 3 Ultra classified each against the developer's fix; every one was "
+            "then reviewed by hand (8 of Ultra's classes overridden, D-0069).",
+            "",
+            f"- **Gate precision: {ok}/{judged} ({pct(ok, judged)})** of verified diffs are correct "
+            f"(equivalent {cls.get('equivalent', 0)}, different but correct "
+            f"{cls.get('different_but_correct', 0)}); defensive {cls.get('defensive', 0)} (safe, "
+            f"guards the symptom); **wrong {cls.get('wrong', 0)}** (no crash on any input the gate "
+            "tried, but a residual over-read or changed behaviour).",
+        ]
     cal = RUNS_DIR / "p1_calibration_v3" / "summary.json"
     if cal.exists():
         c = json.loads(cal.read_text())
@@ -155,12 +246,25 @@ def main() -> int:
             f"## Planner leaderboard on real code ({d['cases']} calibrated ARVO cases, round 1 only, "
             "1 repeat; workers 4 × Lightning)",
             "",
-            "| planner | verified | $ / verified fix | p50 latency |",
-            "|---|---|---|---|",
+            "| planner | verified | verified and correct (strict) | $ / verified fix | p50 latency |",
+            "|---|---|---|---|---|",
         ]
+        nums["planners_arvo"] = {}
         for k, v in d["configs"].items():
+            recs = [r for x in v["runs"] for r in records(x["run"])]
+            name = (
+                "none (Lightning workers only)" if k == "lightning" else f"Nemotron 3 {k.title()}"
+            )
+            nums["planners_arvo"][k] = {
+                "label": name,
+                "verified": sum(r["verdict"] == "verified" for r in recs),
+                "strict": sum(strict(r) for r in recs),
+                "cases": d["cases"],
+                "usd_per_verified": v["usd_per_verified"],
+            }
+            p = nums["planners_arvo"][k]
             out.append(
-                f"| {k} | {round(10 * v['verified_rate_mean'])}/{d['cases']} | "
+                f"| {name} | {p['verified']}/{d['cases']} | {p['strict']}/{d['cases']} | "
                 f"${v['usd_per_verified']} | {v['p50_latency_s']} s |"
             )
         out.append(
@@ -214,6 +318,8 @@ def main() -> int:
             f"- Nebius Sandboxes: {units:.2f} units, not billed during the beta.",
         ]
     OUT.write_text("\n".join(out) + "\n", encoding="utf-8", newline="\n")
+    SITE.parent.mkdir(parents=True, exist_ok=True)
+    SITE.write_text(json.dumps(nums, indent=1) + "\n", encoding="utf-8", newline="\n")
     print(OUT.read_text(encoding="utf-8"))
     return 0
 

@@ -1,0 +1,1251 @@
+{
+ "_doc": "Hand adjudication of every distinct verified ARVO diff (D-0069). class: equivalent | different_but_correct | defensive | wrong. Correct = equivalent or different_but_correct. ultra_class is Nemotron 3 Ultra's advisory class; reviewed = agree | override. Every non-equivalent row and every equivalent row was read against the developer's fix; 'agree' rows keep Ultra's reason.",
+ "rows": [
+  {
+   "case": "417323384",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix includes the developer's root-cause fix by adding the explicit null-termination s->data[length] = 0 at jv.c:1109 in jvp_string_empty_new, and additionally changes jvp_string_alloc at jv.c:1051 to allocate size+2 bytes instead of size+1, giving every string an extra byte of padding that satisfies the AddressSanitizer's 2-byte validation read. This overallocation does not alter logical string semantics (length, capacity, or content) and is a maintainer-acceptable trade-off for robustness.",
+   "change": "-  jvp_string* s = jv_mem_alloc(sizeof(jvp_string) + size + 1);\n+  jvp_string* s = jv_mem_alloc(sizeof(jvp_string) + size + 2);\n+  s->data[length] = 0;"
+  },
+  {
+   "case": "417323384",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both patches add the line `s->data[length] = 0;` in `jvp_string_empty_new` (jv.c:1110) after `memset(s->data, 0, length);` to ensure null-termination even when length is zero, directly fixing the root cause of the missing null terminator for zero-capacity strings.",
+   "change": "+  s->data[length] = 0;"
+  },
+  {
+   "case": "417323384",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix addresses the root cause (missing null terminator for empty strings) by explicitly writing `s->data[0] = 0` in `jvp_string_empty_new` (jv.c:1079), which is the semantically correct position for a logical-length-0 string, whereas the developer's fix writes at `s->data[length]` (capacity). The candidate also changes `jvp_string_alloc` (jv.c:1047) to allocate 2 bytes instead of 1 for zero-capacity strings, which hardens against the sanitizer's 2-byte validation read but does not alter valid-input behavior. Both changes are localized to string creation and a maintainer would accept the slightly larger empty-string buffers.",
+   "change": "-  jvp_string* s = jv_mem_alloc(sizeof(jvp_string) + size + 1);\n+  jvp_string* s = jv_mem_alloc(sizeof(jvp_string) + (size > 0 ? size : 1) + 1);\n+  s->data[0] = 0;"
+  },
+  {
+   "case": "417323384",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H4",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "defensive",
+   "class": "defensive",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix in jv_aux.c:115 adds a guard `&& jv_string_length_bytes(jv_copy(k)) > 0` to avoid calling jv_string_fmt with empty strings, which prevents the crash at jv.c:1453 in that specific code path. However, it does not address the root cause identified in jv.c:1098 where jvp_string_empty_new fails to null-terminate zero-capacity strings. The developer's fix at jv.c:1098 correctly ensures null-termination at string creation time, while the candidate merely avoids one consumer of the defective strings.",
+   "change": "-    if (jv_get_kind(k) == JV_KIND_STRING && jv_string_length_bytes(jv_copy(k)) < 30) {\n+    if (jv_get_kind(k) == JV_KIND_STRING && jv_string_length_bytes(jv_copy(k)) < 30 && jv_string_length_bytes(jv_copy(k)) > 0) {"
+  },
+  {
+   "case": "417323384",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H1",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix adds a null terminator at the capacity boundary in jvp_string_alloc (jv.c:1037) for all string allocations, while the developer's fix adds it only in jvp_string_empty_new (jv.c:1079). Both ensure that zero-capacity strings have data[0]=0, preventing the AddressSanitizer's 2-byte validation read from overflowing. The candidate fix also null-terminates at capacity for all strings, which is harmless and a maintainer would accept. Thus, it fixes the root cause (missing null termination) in a different but correct way.",
+   "change": "+  s->data[size] = 0;"
+  },
+  {
+   "case": "417323384",
+   "members": [
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix adds `s->data[0] = 0;` in jvp_string_empty_new (jv.c:1105 in the candidate patch) while the developer's fix adds `s->data[length] = 0;`. Since the logical length of an empty string is always 0, the candidate correctly null-terminates at the logical start for all capacities, whereas the developer's fix uses the capacity parameter. Both prevent the heap-buffer-overflow by ensuring data[0] is initialized when capacity is 0, but the candidate's approach is more logically correct for non-zero capacities and fixes the root cause in a different but acceptable way.",
+   "change": "+  s->data[0] = 0;"
+  },
+  {
+   "case": "417323384",
+   "members": [
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H4",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Accepted: calloc zero-fills every string allocation (data[0] = 0 for empty strings) but bypasses jv_mem_alloc's out-of-memory handling. Ultra: The developer's fix (jv.c:1100) explicitly null-terminates the buffer in jvp_string_empty_new by adding s->data[length] = 0. The candidate fix (jv.c:1050) instead changes jvp_string_alloc to use calloc, zero-initializing the entire allocation including the data buffer for all strings. Both address the root cause (uninitialized data[0] for zero-capacity strings) but via different mechanisms; the candidate's approach is broader and maintainers would accept the zero-initialization semantics on valid inputs.",
+   "change": "-  jvp_string* s = jv_mem_alloc(sizeof(jvp_string) + size + 1);\n+  jvp_string* s = (jvp_string*)calloc(1, sizeof(jvp_string) + size + 1);"
+  },
+  {
+   "case": "42482401",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix sets rr_name = NULL after ares_free(rr_name) at the end of the non-SOA record path (ares_parse_soa_reply.c:~180), so the next loop iteration starts with a NULL pointer. If ares__expand_name_for_response then fails, the error handler calls ares_free(NULL) safely, preventing the double-free. This fixes the root cause (dangling pointer carried to the next iteration) using the standard free-then-NULL pattern, whereas the developer's fix initializes rr_name = NULL at the start of each iteration (ares_parse_soa_reply.c:68). Both are semantically correct; the candidate fix is a different but valid approach.",
+   "change": "-    \n+\n-    \n+    rr_name = NULL;\n+"
+  },
+  {
+   "case": "42482401",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H1",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The developer's fix initializes rr_name to NULL at the start of each loop iteration (ares_parse_soa_reply.c:61) before calling ares__expand_name_for_response, ensuring the output pointer is NULL on entry. The candidate fix sets rr_name to NULL after ares_free(rr_name) at the end of each iteration (ares_parse_soa_reply.c:147), which also makes rr_name NULL at the start of the next iteration. Both prevent the double-free when ares__expand_name_for_response fails on a subsequent iteration, but the developer's fix additionally protects the first iteration where rr_name would otherwise be uninitialized. The candidate fix correctly addresses the reported root cause for iterations 2..n using a different placement of the NULL assignment.",
+   "change": "+    rr_name = NULL;"
+  },
+  {
+   "case": "42482401",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix modifies ares_expand_name.c to set the output pointer *s to NULL on its two error returns (lines 55 and 61 in the diff). This ensures that when ares__expand_name_for_response (which likely calls ares_expand_name) fails, the caller's rr_name becomes NULL, making the subsequent ares_free(rr_name) in the error handler safe. This addresses the planner's root cause that ares_expand_name does not modify its output pointer on failure, but does so in a different function than the developer's fix (which sets rr_name = NULL in the caller). The change does not alter behavior on valid inputs and appears to cover all error paths shown in the provided snippet.",
+   "change": "-  if (nlen.sig < 0)\n+  if (nlen.sig < 0) {\n+    *s = NULL;\n+  }\n-  if (!*s)\n+  if (!*s) {\n+    *s = NULL;\n+  }"
+  },
+  {
+   "case": "42482401",
+   "members": [
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both fixes address the same root cause: the dangling `rr_name` pointer after `ares_free(rr_name)` at the end of a loop iteration, which causes a double-free when the next iteration's `ares__expand_name_for_response()` fails and the error handler at ares_parse_soa_reply.c:91 calls `ares_free(rr_name)` again. The developer's fix (lines 58-62) sets `rr_name = NULL` at the start of each iteration before the expand call. The candidate fix (lines 134-148) sets `rr_name = NULL` immediately after `ares_free(rr_name)` at the end of each iteration. Both ensure `rr_name` is NULL when the error handler runs after a failed expansion, differing only in syntactic placement of the NULL assignment within the loop.",
+   "change": "-    ares_free(rr_name);\n-    \n+     ares_free(rr_name);\n+     rr_name = NULL;"
+  },
+  {
+   "case": "42482401",
+   "members": [
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The developer's fix initializes rr_name = NULL at the start of each loop iteration (ares_parse_soa_reply.c:71) before the call that can fail without modifying the output pointer, ensuring the error path never sees a dangling pointer. The candidate fix instead adds rr_name = NULL after every ares_free(rr_name) call across all error paths and the loop's successful exit (e.g., lines 76, 86, 96, 106, 116, 126, 134), which also eliminates the double-free by nulling the pointer after each free. Both address the root cause (dangling pointer on failure) but use different strategies: initialize-before-use vs. null-after-free.",
+   "change": "-     {\n+    {\n+      rr_name = NULL;\n-     }\n+    }\n+      rr_name = NULL;\n-      {\n-        ares_free(rr_name);\n-        status = ARES_EBADRESP;\n-        goto failed_stat;\n-      }\n+    {\n+      ares_free(rr_name);\n+      rr_name = NULL;\n+      status = ARES_EBADRESP;\n+      goto failed_stat;\n+    }\n-        {\n-          ares_free(rr_name);\n-          status = ARES_ENOMEM;\n-          goto failed_stat;\n-        }\n+      {\n+        ares_free(rr_name);\n+        rr_name = NULL;\n+        status = ARES_ENOMEM;\n+        goto failed_stat;\n+      }\n+        rr_name = NULL;\n+        rr_name = NULL;\n+        rr_name = NULL;\n+      rr_name = NULL;\n+    rr_name = NULL;"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix replaces the unsafe strcmp with a bounded memcmp and a size check (e->size >= 9) at exif-mnote-data-apple.c:235, correctly identifying the 9-byte 'Apple iOS' tag even when the buffer lacks a null terminator. The developer's fix requires e->size >= 10, which would reject a valid 9-byte tag. Both prevent the heap overflow, but the candidate's condition matches the actual tag length and is behavior a maintainer would accept.",
+   "change": "-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 9 && memcmp((const char *) e->data, \"Apple iOS\", 9) == 0) {"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "defensive",
+   "class": "different_but_correct",
+   "reviewed": "override",
+   "reason": "Override (Ultra: defensive). The fix is in the identify function the developer changed (exif-mnote-data-apple.c:235): size >= 10 and data[9] == 0 before strcmp makes the comparison in-bounds; same result as the developer's on Apple notes, which are NUL-terminated at byte 9.",
+   "change": "-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 10 && ((const char *)e->data)[9] == '\\0' &&\n+        !strcmp((const char *)e->data, \"Apple iOS\")) {"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both fixes address the root cause—calling strcmp on a possibly non-null-terminated buffer—by adding a size guard and using a bounded comparison. The developer's fix (exif-mnote-data-apple.c:235-238) checks e->size >= 10 then uses memcmp for 9 bytes, accepting any 10th byte. The candidate fix (exif-mnote-data-apple.c:235-238) checks e->size >= 10 then uses strncmp for 10 bytes, which requires a null terminator at offset 9, matching the original strcmp semantics more closely. This is a semantically distinct but correct alternative a maintainer would accept.",
+   "change": "-    int variant;\n-\n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    int variant = 0;\n+\n+    if (e->size >= 10 && strncmp((const char *) e->data, \"Apple iOS\", 10) == 0) {\n-    } else {\n-        variant = 0;"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "wrong",
+   "class": "different_but_correct",
+   "reviewed": "override",
+   "reason": "Override (Ultra: wrong). strcmp against the literal \"Apple iOS\" stops at its NUL, i.e. after at most 10 bytes of e->data, so `e->size >= 10` makes it in-bounds (exif-mnote-data-apple.c:235). It requires byte 9 to be NUL where the developer's memcmp of 9 bytes does not; Apple maker notes carry \"Apple iOS\u0000\", so valid inputs behave the same.",
+   "change": "-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 10 && !strcmp((const char *) e->data, \"Apple iOS\")) {"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "defensive",
+   "class": "defensive",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix adds an early return in interpret_maker_note (exif-data.c:778) when e->size < 10, which prevents the Apple identify function from being called with insufficient data but does not fix the root cause (the unsafe strcmp in exif-mnote-data-apple.c:235). This guard is placed at the consumer and also applies the same length check to all MakerNote types, potentially skipping valid shorter MakerNotes from other manufacturers.",
+   "change": "-\t\n+\n+\t/* Validate MakerNote entry data length to prevent out-of-bounds read\n+\t * in identify functions that assume null-terminated strings. */\n+\tif (e->size < 10)\n+\t\treturn;\n+"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_lightning_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix at exif-mnote-data-apple.c:235 replaces the unsafe strcmp with a bounded strncmp and a size check (e->size >= 9), whereas the developer's fix uses memcmp with a stricter size check (e->size < 10). Both prevent the heap-buffer-overflow, but the candidate accepts a 9-byte 'Apple iOS' buffer without a trailing null, which the developer's fix rejects. Since the root cause states the buffer may be shorter than 10 bytes and not null-terminated, this behavioral difference on valid inputs is acceptable and likely intended.",
+   "change": "-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 9 && !strncmp((const char *) e->data, \"Apple iOS\", 9)) {"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "lb_arvo_lightning_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix replaces the unsafe strcmp with a length-checked memcmp, but uses a size threshold of 9 bytes (exif-mnote-data-apple.c:235) instead of the developer's 10 bytes. This accepts a 9-byte \"Apple iOS\" buffer without a trailing NUL, which the planner notes is a valid input that the original code would overrun. Both fixes address the root cause, but the candidate's behaviour on this valid input is likely acceptable to a maintainer.",
+   "change": "-    int variant;\n-\n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    int variant = 0;\n+\n+    if (e->size >= 9 && memcmp(e->data, \"Apple iOS\", 9) == 0) {\n-    } else {\n-        variant = 0;"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "lb_arvo_lightning_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix at exif-mnote-data-apple.c:235 uses strncmp with a length of 10 (including the null terminator) and a size check, which correctly matches only null-terminated \"Apple iOS\" strings. The developer's fix at exif-mnote-data-apple.c:235 uses memcmp with length 9, which also matches non-null-terminated strings like \"Apple iOSX\". The candidate fix preserves the original strcmp semantics (exact string match) while avoiding the buffer overflow, a behavior a maintainer would accept.",
+   "change": "-    int variant;\n-\n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    int variant = 0;\n+\n+    if (e->size >= 10 && !strncmp((const char *) e->data, \"Apple iOS\", 10)) {\n-    } else {\n-        variant = 0;"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "lb_arvo_lightning_r1",
+     "hypothesis_id": "H4",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "wrong",
+   "class": "wrong",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra. `e->size >= 9 && !strcmp(...)`: a 9-byte entry equal to \"Apple iOS\" without a NUL makes strcmp read data[9], one byte past the allocation (exif-mnote-data-apple.c:235). The residual over-read is not on any input the gate tried.",
+   "change": "-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->data && e->size >= 9 && !strcmp((const char *) e->data, \"Apple iOS\")) {"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "lb_arvo_super_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_super_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "defensive",
+   "class": "different_but_correct",
+   "reviewed": "override",
+   "reason": "Override (Ultra: defensive). memcmp of sizeof(\"Apple iOS\") = 10 bytes after size >= 10, in the developer's function: bounded and in-bounds; it additionally requires the NUL at byte 9, which real Apple notes have.",
+   "change": "-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= sizeof(\"Apple iOS\") && memcmp(e->data, \"Apple iOS\", sizeof(\"Apple iOS\")) == 0) {"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "lb_arvo_super_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "wrong",
+   "class": "wrong",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix at exif-mnote-data-apple.c:227 uses memcmp with length 8 instead of 9, so it matches only \"Apple iO\" rather than the full \"Apple iOS\" string. This changes behavior on valid inputs by accepting any 9-byte buffer starting with \"Apple iO\" (e.g., \"Apple iOX\") as a positive identification, whereas the developer's fix correctly compares all 9 bytes of \"Apple iOS\" after ensuring the buffer is large enough (exif-mnote-data-apple.c:222-224).",
+   "change": "-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 9 && memcmp(e->data, \"Apple iOS\", 8) == 0) {"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "lb_arvo_super_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both fixes replace the unsafe strcmp with a size check (developer: e->size < strlen(\"Apple iOS\")+1 at exif-mnote-data-apple.c:235; candidate: e->size >= 10 at exif-mnote-data-apple.c:235) followed by a bounded memcmp of 9 bytes (developer: strlen(\"Apple iOS\") at line 237; candidate: hardcoded 9 at line 235). The logic is identical; only the developer uses strlen for maintainability.",
+   "change": "-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 10 && memcmp(e->data, \"Apple iOS\", 9) == 0) {"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both fixes address the root cause by checking e->size before reading and using memcmp instead of strcmp. However, the developer's fix (exif-mnote-data-apple.c:235-240) only compares 9 bytes and requires size >= 10, accepting \"Apple iOSX\" as a match, while the candidate fix (exif-mnote-data-apple.c:235-241) additionally verifies the 10th byte is a null terminator, preserving the exact original strcmp semantics for valid null-terminated strings. A maintainer would accept either as a safe fix, but they differ on edge-case behavior.",
+   "change": "-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 10 && !memcmp(e->data, \"Apple iOS\", 9) && ((const unsigned char *)e->data)[9] == 0) {"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "defensive",
+   "class": "different_but_correct",
+   "reviewed": "override",
+   "reason": "Override (Ultra: defensive). size >= 10 plus a memchr for a NUL inside e->size before strcmp, in the developer's function: strcmp then cannot leave the buffer. Same result on valid Apple notes.",
+   "change": "-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 10 && (const char *)memchr(e->data, '\\0', e->size) != NULL &&\n+        !strcmp((const char *) e->data, \"Apple iOS\")) {"
+  },
+  {
+   "case": "42500216",
+   "members": [
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "defensive",
+   "class": "defensive",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix adds a null-termination check in interpret_maker_note (exif-data.c:782-788) that returns early if the maker note data lacks a null terminator, preventing the call to exif_mnote_data_apple_identify. This guards the symptom (strcmp overflow) at the consumer rather than fixing the root cause in the identify function itself, as the developer did by using memcmp with a size check (exif-mnote-data-apple.c:235-240). This may also reject valid non-null-terminated maker notes, changing behavior.",
+   "change": "-\t\n+\n+\t/*\n+\t * Verify that the maker note data is null-terminated within its allocated\n+\t * size to prevent heap-buffer-overflow in identify functions that call strcmp.\n+\t */\n+\tif (e->size > 0 && e->data && memchr(e->data, '\\0', e->size) == NULL) {\n+\t\texif_log (data->priv->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+\t\t\t  \"ExifData\", \"MakerNote data not null-terminated\");\n+\t\treturn;\n+\t}\n+"
+  },
+  {
+   "case": "42500232",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix corrects the same incorrect sanity check as the developer's fix (exif-mnote-data-apple.c:83) but additionally adds per-iteration bounds checks for both the entry header (line with ofs+12) and the variable-sized data payload (line with dofs+dsize), which the planner identified as missing. On valid inputs both behave identically; on crafted inputs the candidate fix aborts the entire load rather than partially processing entries, a stricter but acceptable behavior.",
+   "change": "-    if (!d || !buf || (buf_size < 6 + 16)) {\n+    if (!d || !buf || (buf_size < d->offset + 6 + 16)) {\n+\n+    if (ofs + 13 >= buf_size) {\n+        exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+                 \"ExifMnoteDataApple\", \"Short MakerNote\");\n+        return;\n+    }\n-    /* Sanity check the offset */\n-    if (buf_size < 6 + 16 + tcount * 6 + 4) {\n+    /* Sanity check the offset and minimum space for entry headers */\n+    if (buf_size < d->offset + 6 + 16 + tcount * 12 + 4) {\n+        /* Bounds check for entry header */\n+        if (ofs + 12 > buf_size) {\n+            exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+                     \"ExifMnoteDataApple\", \"Short MakerNote entry\");\n+            exif_mnote_data_apple_free(md);\n+            return;\n+        }\n+\n+            /* Bounds check for data payload */\n+            if (dofs + dsize > buf_size) {\n+                exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+                         \"ExifMnoteDataApple\", \"Short MakerNote data\");\n+                exif_mnote_data_apple_free(md);\n+                return;\n+            }"
+  },
+  {
+   "case": "42500232",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix corrects the root-cause sanity check at line 83 (now line 78) to use the proper formula `buf_size < d->offset + 26 + tcount * 12`, which accounts for d->offset and the true 12-byte per-entry header size. This matches the developer's corrected formula (since 6+16+4=26) and prevents the heap-buffer-overflow by ensuring the buffer is large enough for all tag headers before the loop runs. However, the candidate omits the developer's additional per-iteration bounds check (ofs+12 > buf_size) and the memset initialization; these are defensive layers, not required for correctness on valid inputs, so the candidate is a correct but different fix.",
+   "change": "-    /* Sanity check the offset */\n-    if (buf_size < 6 + 16 + tcount * 6 + 4) {\n+    /* Sanity check the offset and per-entry size */\n+    if (buf_size < d->offset + 26 + tcount * 12) {"
+  },
+  {
+   "case": "42500232",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "different_but_correct",
+   "reviewed": "override",
+   "reason": "Override (Ultra: equivalent). Same corrected sanity check as the developer (exif-mnote-data-apple.c:83), but on a short entry it frees all entries and returns where the developer breaks and keeps the entries already loaded: corrupt notes lose more data.",
+   "change": "-    if (buf_size < 6 + 16 + tcount * 6 + 4) {\n+    if (buf_size < d->offset + 6 + 16 + tcount * 12 + 4) {\n+        if (ofs + 12 > buf_size) {\n+            exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+                     \"ExifMnoteDataApple\", \"Buffer overflow\");\n+            exif_mnote_data_apple_free(md);\n+            return;\n+        }"
+  },
+  {
+   "case": "42507297",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "RH1",
+     "worker_index": 0,
+     "round": 2
+    }
+   ],
+   "ultra_class": "defensive",
+   "class": "defensive",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix adds a bounds check in md_is_link_reference (md4c.c:2230) to clamp label_size to the remaining input buffer, which prevents the overflow but does not address the developer's fix of changing OPENERS_CHAIN_FIRST (md4c.c:165) and mark chain handling in md_rollback/md_resolve_links. This is a defensive guard at the consumer rather than fixing the root cause in the mark chain logic.",
+   "change": "+    /* Clamp label_size to the input buffer size to prevent heap-buffer-overflow. */\n+    SZ max_label = ctx->size - beg;\n+    if (label_size > max_label)\n+        label_size = max_label;\n+"
+  },
+  {
+   "case": "42507851",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Accepted with a caveat: a VLA `char tmp[str_len+1]` sized by the token length; a very long numeric token could exhaust the stack (README limitations). Ultra: Both fixes address the root cause by creating a null-terminated copy of the token substring before calling strtol/atof, preventing the heap-buffer-overflow READ. The developer's fix (jplist.c:428-435) uses a fixed 48-byte buffer with truncation and adjusts endp back to original coordinates. The candidate fix (jplist.c:428-431) uses a VLA of exact token length (tmp[str_len+1]), works entirely in the copy's coordinate system (using tmp+str_len for bounds checks at lines 433, 435, 440), and reports errors relative to tmp. The candidate approach is cleaner, handles arbitrarily long tokens without arbitrary limits, and avoids pointer arithmetic errors. Both produce identical behavior on valid inputs.",
+   "change": "+        char tmp[str_len+1];\n+        memcpy(tmp, str_val, str_len);\n+        tmp[str_len] = '\\0';\n-        long long intpart = strtol(str_val, &endp, 10);\n-        if (endp >= str_end) {\n+        long long intpart = strtol(tmp, &endp, 10);\n+        if (endp >= tmp + str_len) {\n-        } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n+        } else if (*endp == '.' && endp+1 < tmp + str_len && isdigit(*(endp+1))) {\n-            while (isdigit(*fendp) && fendp < str_end) fendp++;\n-            if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n-                double dval = atof(str_val);\n+            while (isdigit(*fendp) && fendp < tmp + str_len) fendp++;\n+            if ((fendp > endp+1 && fendp >= tmp + str_len) || (fendp+2 < tmp + str_len && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n+                double dval = atof(tmp);\n-                PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing floating point value\\n\", __func__, (int)(fendp - js));\n+                PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing floating point value\\n\", __func__, (int)(fendp - tmp));\n-            PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing numerical value\\n\", __func__, (int)(endp - js));\n+            PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing numerical value\\n\", __func__, (int)(endp - tmp));"
+  },
+  {
+   "case": "42507851",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H4",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Accepted with a caveat: VLA sized by the token length, as H3·w2. Ultra: The candidate fix creates a null-terminated stack copy of the token (jplist.c:432-434) to prevent the heap-buffer-overflow, addressing the root cause differently than the developer's fixed-size buffer. It correctly parses valid numeric inputs without truncation, but fails to adjust the end pointer for error reporting (jplist.c:444,449), resulting in incorrect offsets for invalid inputs. A maintainer would accept the parsing behavior on valid inputs, though the error reporting bug would need a follow-up fix.",
+   "change": "+        /* Create a null-terminated copy to avoid heap-buffer-overflow in strtol. */\n+        char tmp[str_len+1];\n+        memcpy(tmp, str_val, str_len);\n+        tmp[str_len] = '\\0';\n-        long long intpart = strtol(str_val, &endp, 10);\n-        if (endp >= str_end) {\n+        long long intpart = strtol(tmp, &endp, 10);\n+        if (endp >= tmp + str_len) {\n-        } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n+        } else if (*endp == '.' && endp+1 < tmp + str_len && isdigit(*(endp+1))) {\n-            while (isdigit(*fendp) && fendp < str_end) fendp++;\n-            if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n-                double dval = atof(str_val);\n+            while (isdigit(*fendp) && fendp < tmp + str_len) fendp++;\n+            if ((fendp > endp+1 && fendp >= tmp + str_len) || (fendp+2 < tmp + str_len && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n+                double dval = atof(tmp);"
+  },
+  {
+   "case": "42507851",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "RH1",
+     "worker_index": 0,
+     "round": 2
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix replaces the developer's fixed 48-byte stack buffer with a heap-allocated copy via strndup (jplist.c:~441), eliminating the arbitrary truncation limit and correctly handling arbitrarily long numeric tokens on valid inputs. Both fixes address the root cause by providing a null-terminated buffer to strtol. However, the candidate's error-reporting paths incorrectly compute offsets using pointers into token_copy against the original js buffer (e.g., jplist.c:~458, ~462), a bug confined to invalid-input diagnostics that does not affect valid-input parsing semantics.",
+   "change": "+        char* token_copy = strndup(str_val, str_len);\n+        if (!token_copy) {\n+            PLIST_JSON_ERR(\"%s: Out of memory\\n\", __func__);\n+            (*index)++;\n+            return NULL;\n+        }\n-        long long intpart = strtol(str_val, &endp, 10);\n-        if (endp >= str_end) {\n+        long long intpart = strtol(token_copy, &endp, 10);\n+        if (endp >= token_copy + str_len) {\n-        } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n+        } else if (*endp == '.' && endp + 1 < token_copy + str_len && isdigit(*(endp + 1))) {\n-            char* fendp = endp+1;\n-            while (isdigit(*fendp) && fendp < str_end) fendp++;\n-            if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n-                double dval = atof(str_val);\n+            char* fendp = endp + 1;\n+            while (isdigit(*fendp) && fendp < token_copy + str_len) fendp++;\n+            if ((fendp > endp + 1 && fendp >= token_copy + str_len) || (fendp + 2 < token_copy + str_len && (*fendp == 'e' || *fendp == 'E') && (*(fendp + 1) == '+' || *(fendp + 1) == '-') && isdigit(*(fendp + 2)))) {\n+                double dval = atof(token_copy);\n+        free(token_copy);"
+  },
+  {
+   "case": "42507851",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "RH3",
+     "worker_index": 2,
+     "round": 2
+    }
+   ],
+   "ultra_class": "wrong",
+   "class": "wrong",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix copies the token into a stack buffer for strtol but then calls atof(str_val) on the original non‑null‑terminated heap buffer (jplist.c:460), so the heap‑buffer‑overflow READ remains for floating‑point values. It also computes error offsets using pointers into the stack buffer (fendp, endp) subtracted from js (jplist.c:459, 462), producing meaningless offsets. Additionally, it truncates tokens longer than 63 characters without adjusting endp back to the original string, causing incorrect integer/float classification.",
+   "change": "+        /* Use a stack buffer to avoid heap-buffer-overflow from strtol reading past token boundaries */\n+        char num_buf[64];\n+        size_t copy_len = str_len < sizeof(num_buf) - 1 ? str_len : sizeof(num_buf) - 1;\n+        strncpy(num_buf, str_val, copy_len);\n+        num_buf[copy_len] = '\\0';\n-        long long intpart = strtol(str_val, &endp, 10);\n-        if (endp >= str_end) {\n+        long long intpart = strtol(num_buf, &endp, 10);\n+        if (endp >= num_buf + copy_len) {\n-        } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n+        } else if (*endp == '.' && endp + 1 < num_buf + copy_len && isdigit(*(endp + 1))) {\n-            char* fendp = endp+1;\n-            while (isdigit(*fendp) && fendp < str_end) fendp++;\n-            if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n+            char* fendp = endp + 1;\n+            while (isdigit(*fendp) && fendp < num_buf + copy_len) fendp++;\n+            if ((fendp > endp + 1 && fendp >= num_buf + copy_len) || (fendp + 2 < num_buf + copy_len && (*fendp == 'e' || *fendp == 'E') && (*(fendp + 1) == '+' || *(fendp + 1) == '-') && isdigit(*(fendp + 2)))) {"
+  },
+  {
+   "case": "42508524",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both patches apply the identical change to the floating-point detection condition at jplist.c:470 (the line shown in the diff hunk). They both replace the unsafe `endp < str_end` with `endp+1 < str_end` for the exponent character check and `endp+1 < str_end` with `endp+2 < str_end` for the negative-exponent digit check, eliminating the out-of-bounds reads. No other differences exist between the two diffs.",
+   "change": "-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2)))))) {"
+  },
+  {
+   "case": "42508524",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H4",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both patches modify the same condition at jplist.c:470 to fix the heap buffer overflow by reordering bounds checks: they require `endp+1 < str_end` before reading `*(endp+1)` and `endp+2 < str_end` before reading `*(endp+2)` for negative exponents. The candidate adds an explicit `endp+1 < str_end` check inside the negative exponent branch, but this is redundant because the outer condition already guarantees it. The semantic behavior is identical.",
+   "change": "-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((endp+1 < str_end && *(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2)))))) {"
+  },
+  {
+   "case": "42508524",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix includes the identical root-cause fix as the developer at jplist.c:470 (correcting the exponent detection bounds checks from `endp < str_end` to `endp+1 < str_end` and `endp+2 < str_end` for the negative exponent case). Additionally, it fixes a second bounds-check-order bug in the fractional-part parsing loop at jplist.c:485 by changing `while (isdigit(*fendp) && fendp < str_end)` to `while (fendp < str_end && isdigit(*fendp))`, preventing a potential read past `str_end`. Both changes are correct and a maintainer would accept the more comprehensive fix.",
+   "change": "-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2)))))) {\n-                    while (isdigit(*fendp) && fendp < str_end) {\n+                    while (fendp < str_end && isdigit(*fendp)) {"
+  },
+  {
+   "case": "42508524",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H4",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "wrong",
+   "class": "wrong",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix at jplist.c:470 changes the first bound check from `endp < str_end` to `endp+1 < str_end` but incorrectly keeps `endp+1 < str_end` for the negative exponent case where `*(endp+2)` is accessed. The developer's fix correctly uses `endp+2 < str_end` there. The candidate still permits a one-byte overread when a token ends with \"e-\" or \"E-\".",
+   "change": "-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {"
+  },
+  {
+   "case": "42510992",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix replaces all CHECKOVERFLOW macro calls in exif_mnote_data_fuji_load (exif-mnote-data-fuji.c lines 150, 158, 172, 185) with explicit subtraction-based bounds checks (e.g., `buf_size - n->offset < 6+8+4`), which directly prevents integer overflow when validating offset+size. The developer's fix only adds parentheses to the macro definition, which does not address the overflow in the offset computation (e.g., `dataofs = exif_get_long(...) + 6 + n->offset`). Both approaches preserve correct behavior on valid inputs.",
+   "change": "-\tif (CHECKOVERFLOW(n->offset, buf_size, 6+8+4)) {\n+\tif (n->offset >= buf_size || buf_size - n->offset < 6+8+4) {\n-\tif (CHECKOVERFLOW(datao, buf_size, 2)) {\n+\tif (datao >= buf_size || buf_size - datao < 2) {\n-\t\tif (CHECKOVERFLOW(o, buf_size, 12)) {\n+\t\tif (o >= buf_size || buf_size - o < 12) {\n-\t\t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n+\t\t\t\t\t  \"ExifMnoteDataFuji\", \"Short MakerNote\");\n-\t\t\tif (CHECKOVERFLOW(dataofs, buf_size, s)) {\n+\t\t\tif (dataofs >= buf_size || buf_size - dataofs < s) {\n-\t\t\t\t\t\t  \"ExifMnoteDataFuji\", \"Tag data past end of \"\n-\t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);\n+\t\t\t\t\t\t\t  \"ExifMnoteDataFuji\", \"Tag data past end of \"\n+\t\t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);"
+  },
+  {
+   "case": "42510992",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The developer's fix only adds parentheses to the CHECKOVERFLOW macro definition (exif-mnote-data-fuji.c:14), whereas the candidate fix replaces all four macro invocations in exif_mnote_data_fuji_load with explicit inline bounds checks (lines 148, 153, 162, 176). Both patches address the same root cause—preventing integer overflow in offset+size calculations—but the candidate achieves it by eliminating the macro entirely, which is a different but equally correct approach that a maintainer would likely accept as clearer and less error-prone.",
+   "change": "-\tif (CHECKOVERFLOW(n->offset, buf_size, 6+8+4)) {\n+\tif (buf_size < 6+8+4 || n->offset > buf_size - (6+8+4)) {\n-\tif (CHECKOVERFLOW(datao, buf_size, 2)) {\n+\tif (buf_size < 2 || datao > buf_size - 2) {\n-\t\tif (CHECKOVERFLOW(o, buf_size, 12)) {\n+\t\tif (buf_size < 12 || o > buf_size - 12) {\n-\t\t\tif (CHECKOVERFLOW(dataofs, buf_size, s)) {\n+\t\t\tif (s > buf_size || dataofs > buf_size - s) {\n-\t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);\n+\t\t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);"
+  },
+  {
+   "case": "42510992",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix replaces all four CHECKOVERFLOW macro calls in exif_mnote_data_fuji_load (exif-mnote-data-fuji.c:152, 160, 172, 191) with explicit bounds checks (e.g., buf_size < 18 || n->offset > buf_size - 18). These checks are logically equivalent to the macro's intent but avoid the macro entirely, fixing the root cause in a different way. The developer's fix only adds parentheses to the macro definition. Both prevent the overflow, and the candidate's inline checks are acceptable for valid inputs.",
+   "change": "-\tif (CHECKOVERFLOW(n->offset, buf_size, 6+8+4)) {\n+\tif (buf_size < 6+8+4 || n->offset > buf_size - (6+8+4)) {\n-\tif (CHECKOVERFLOW(datao, buf_size, 2)) {\n+\tif (buf_size < 2 || datao > buf_size - 2) {\n-\t\tif (CHECKOVERFLOW(o, buf_size, 12)) {\n+\t\tif (buf_size < 12 || o > buf_size - 12) {\n-\t\t\tif (CHECKOVERFLOW(dataofs, buf_size, s)) {\n+\t\t\tif (s > buf_size || dataofs > buf_size - s) {"
+  },
+  {
+   "case": "42510992",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix replaces all four CHECKOVERFLOW macro calls in exif_mnote_data_fuji_load (exif-mnote-data-fuji.c:149, :155, :168, :195) with explicit bounds checks using the safe pattern `buf_size < required_size || offset > buf_size - required_size`, which prevents integer overflow by checking buffer size before subtraction. The developer's fix only adds parentheses to the macro definition (exif-mnote-data-fuji.c:27), which does not address the overflow issue. The candidate's approach fixes the root cause differently but preserves valid-input behavior.",
+   "change": "-\tif (CHECKOVERFLOW(n->offset, buf_size, 6+8+4)) {\n+\tif (buf_size < (size_t)(6+8+4) || n->offset > buf_size - (size_t)(6+8+4)) {\n-\tif (CHECKOVERFLOW(datao, buf_size, 2)) {\n+\tif (buf_size < (size_t)2 || datao > buf_size - (size_t)2) {\n-\t\tif (CHECKOVERFLOW(o, buf_size, 12)) {\n-\t\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+\tif (buf_size < (size_t)12 || o > buf_size - (size_t)12) {\n+\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n-\t\t\tbreak;\n-\t\t}\n+\t\tbreak;\n+\t}\n-\t\t\tif (CHECKOVERFLOW(dataofs, buf_size, s)) {\n-\t\t\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n-\t\t\t\t\t\t  \"ExifMnoteDataFuji\", \"Tag data past end of \"\n-\t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);\n-\t\t\t\tcontinue;\n-\t\t\t}\n+\tif (buf_size < (size_t)s || dataofs > buf_size - (size_t)s) {\n+\t\t\texif_log (en->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+\t\t\t\t\t\t\t  \"ExifMnoteDataFuji\", \"Tag data past end of \"\n+\t\t\t\t\t\t  \"buffer (%u >= %u)\", (unsigned)(dataofs + s), buf_size);\n+\t\t\tcontinue;\n+\t}"
+  },
+  {
+   "case": "42512369",
+   "members": [
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "wrong",
+   "class": "wrong",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix at ucl_parser.c:1178-1184 replaces the DL_FOREACH loop that searches all objects in the parser stack (for duplicate keys across inheritance scopes) with a single search of only the top container (parser->stack->obj->value.ov). This changes valid-input behavior by ignoring duplicates in parent scopes, breaking the intended override/inheritance logic evidenced by the UCL_OBJECT_INHERITED handling at ucl_parser.c:1210. The developer's fix at ucl_parser.c:1178-1184 instead adds a cur->type == UCL_OBJECT guard to the existing loop, preserving the correct semantics while avoiding the buffer overflow on non-object stack elements.",
+   "change": "-\tDL_FOREACH (parser->stack->obj, cur) {\n-\t\ttobj = __DECONST (ucl_object_t *, ucl_hash_search_obj (cur->value.ov, nobj));\n-\n-\t\tif (tobj != NULL) {\n-\t\t\tbreak;\n-\t\t}\n-\t}\n+\ttobj = __DECONST (ucl_object_t *, ucl_hash_search_obj (container, nobj));"
+  },
+  {
+   "case": "42520377",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H1",
+     "worker_index": 1,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H1",
+     "worker_index": 2,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_super_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_super_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 2,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 1,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both patches remove the identical line `zip_source_free(src_window);` at zip_open.c:931 (in the original source) that prematurely freed the window source while the CRC layered source still held a reference to it. This elimination of the early free is the exact root-cause fix for the use-after-free at zip_source_open.c:39.",
+   "change": "-        zip_source_free(src_window);"
+  },
+  {
+   "case": "42520955",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both patches fix the root cause in config__add_listener by updating config->default_listener after the realloc at line 149 (developer) / line 152 (candidate). The developer's fix (conf.c:123-130) searches the old array for the index, while the candidate fix (conf.c:125-129) computes the offset via pointer arithmetic; both correctly restore the pointer to the same logical listener in the new array.",
+   "change": "+\tstruct mosquitto__listener *old_listeners = config->listeners;\n+\t}\n+\tif(config->default_listener && config->default_listener >= old_listeners && config->default_listener < old_listeners + (config->listener_count - 1)){\n+\t\tptrdiff_t offset = config->default_listener - old_listeners;\n+\t\tconfig->default_listener = &config->listeners[offset];"
+  },
+  {
+   "case": "42520955",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "wrong",
+   "class": "wrong",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix in config__add_listener (conf.c lines 138-141) incorrectly updates config->default_listener to point to the newly added listener whenever a default listener already exists. This changes which listener is the default, whereas the root cause requires preserving the existing default listener's index across reallocation. The developer's fix correctly saves and restores the index (conf.c lines 120-136).",
+   "change": "+\tif(config->default_listener){\n+\t\tconfig->default_listener = &config->listeners[config->listener_count - 1];\n+\t}"
+  },
+  {
+   "case": "42520955",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "wrong",
+   "class": "wrong",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix at conf.c:136-138 updates config->default_listener to point to the newly added listener (the last element) after reallocation, but the default listener should remain the same listener as before. The developer's fix at conf.c:122-131 correctly preserves the default listener by tracking its index before realloc and restoring it afterward. The candidate fix changes which listener is the default, altering behavior on valid inputs.",
+   "change": "+\t}\n+\tif(config->default_listener){\n+\t\tconfig->default_listener = &config->listeners[config->listener_count-1];"
+  },
+  {
+   "case": "42521026",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both fixes address the same root cause: the original bounds check `i == len-codelen+1` only caught the exact boundary case. The developer's fix changes it to `i >= len-codelen+1` (line 65), while the candidate uses `i + codelen > len` (line 65). These conditions are mathematically equivalent (i >= len-codelen+1 ⟺ i+codelen > len), both correctly rejecting any input where insufficient bytes remain for the full multi-byte sequence.",
+   "change": "-\t\tif(i == len-codelen+1){\n+\t\tif(i + codelen > len){"
+  },
+  {
+   "case": "42521026",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both patches replace the exact-equality bounds check at utf8_mosq.c:65 with a greater-than-or-equal condition (developer: `i >= len-codelen+1`; candidate: `i + codelen - 1 >= len`), which are mathematically identical and fix the same root cause of insufficient bounds checking before the inner loop increments `i` past `len-1`.",
+   "change": "-\t\tif(i == len-codelen+1){\n+\t\tif(i + codelen - 1 >= len){"
+  },
+  {
+   "case": "42521026",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H4",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Equivalent bounds check (`i + codelen > len`), but the patch also reformats the whole function and deletes comments. Ultra: Both fixes correct the root cause by changing the bounds check from an exact equality to an inclusive condition that catches all cases where insufficient bytes remain for a multi-byte sequence. The developer's fix uses `i >= len-codelen+1` (utf8_mosq.c:65), while the candidate uses the mathematically equivalent `i + codelen > len` (candidate utf8_mosq.c:65). The candidate also restructures the outer loop from `for` to `while` with manual `i++` (candidate utf8_mosq.c:48,92), but this preserves identical iteration semantics. Both directly fix the insufficient bounds check that allowed the overflow.",
+   "change": "-\tint i;\n+\tint i = 0;\n-\tfor(i=0; i<len; i++){\n-\t\tif(ustr[i] == 0){\n+\twhile (i < len) {\n+\t\tif (ustr[i] == 0) {\n-\t\t}else if(ustr[i] <= 0x7f){\n+\t\t} else if (ustr[i] <= 0x7f) {\n-\t\t}else if((ustr[i] & 0xE0) == 0xC0){\n+\t\t} else if ((ustr[i] & 0xE0) == 0xC0) {\n-\t\t\tif(ustr[i] == 0xC0 || ustr[i] == 0xC1){\n-\t\t\t\t/* Invalid bytes */\n+\t\t\tif (ustr[i] == 0xC0 || ustr[i] == 0xC1) {\n-\t\t}else if((ustr[i] & 0xF0) == 0xE0){\n+\t\t} else if ((ustr[i] & 0xF0) == 0xE0) {\n-\t\t}else if((ustr[i] & 0xF8) == 0xF0){\n+\t\t} else if ((ustr[i] & 0xF8) == 0xF0) {\n-\t\t\tif(ustr[i] > 0xF4){\n-\t\t\t\t/* Invalid, this would produce values > 0x10FFFF. */\n+\t\t\tif (ustr[i] > 0xF4) {\n-\t\t}else{\n+\t\t} else {\n-\t\t/* Reconstruct full code point */\n-\t\tif(i == len-codelen+1){\n-\t\t\t/* Not enough data */\n+\t\t/* Check that we have enough bytes for this code sequence */\n+\t\tif (i + codelen > len) {\n-\t\tfor(j=0; j<codelen-1; j++){\n-\t\t\tif((ustr[++i] & 0xC0) != 0x80){\n+\n+\t\t/* Reconstruct full code point */\n+\t\tfor (j = 0; j < codelen - 1; j++) {\n+\t\t\tif ((ustr[++i] & 0xC0) != 0x80) {\n-\t\t\tcodepoint = (codepoint<<6) | (ustr[i] & 0x3F);\n+\t\t\tcodepoint = (codepoint << 6) | (ustr[i] & 0x3F);\n-\t\tif(codepoint >= 0xD800 && codepoint <= 0xDFFF){\n+\t\tif (codepoint >= 0xD800 && codepoint <= 0xDFFF) {\n-\t\t/* Checking codelen == 2 isn't necessary here, because it is already\n-\t\t * covered above in the C0 and C1 checks.\n-\t\t * if(codelen == 2 && codepoint < 0x0080){\n-\t\t *\t return MOSQ_ERR_MALFORMED_UTF8;\n-\t\t * }else\n-\t\t*/\n-\t\tif(codelen == 3 && codepoint < 0x0800){\n+\t\tif (codelen == 3 && codepoint < 0x0800) {\n-\t\t}else if(codelen == 4 && (codepoint < 0x10000 || codepoint > 0x10FFFF)){\n+\t\t} else if (codelen == 4 && (codepoint < 0x10000 || codepoint > 0x10FFFF)) {\n-\t\tif(codepoint >= 0xFDD0 && codepoint <= 0xFDEF){\n+\t\tif (codepoint >= 0xFDD0 && codepoint <= 0xFDEF) {\n-\t\tif((codepoint & 0xFFFF) == 0xFFFE || (codepoint & 0xFFFF) == 0xFFFF){\n+\t\tif ((codepoint & 0xFFFF) == 0xFFFE || (codepoint & 0xFFFF) == 0xFFFF) {\n-\t\tif(codepoint <= 0x001F || (codepoint >= 0x007F && codepoint <= 0x009F)){\n+\t\tif (codepoint <= 0x001F || (codepoint >= 0x007F && codepoint <= 0x009F)) {\n+\n+\t\t/* Advance i to the byte after the multi-byte sequence. */\n+\t\ti++;\n+"
+  },
+  {
+   "case": "42521092",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 1,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix updates cur_listener->ws_origins to the reallocated array before conf__parse_string and removes the error-path free, exactly matching the developer's root-cause fix at conf.c:2414-2430 (websockets_origin parsing). Both patches prevent the dangling pointer that config__cleanup would later free.",
+   "change": "+\t\t\t\t\tcur_listener->ws_origins = ws_origins;\n-\t\t\t\t\t\tmosquitto__FREE(ws_origins);\n-\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n-\t\t\t\t\t}\n-\t\t\t\t\tcur_listener->ws_origins = ws_origins;\n+\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n+\t\t\t\t\t}"
+  },
+  {
+   "case": "42522195",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "defensive",
+   "class": "defensive",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix adds a null-termination guard at config__read_file (conf.c:2473-2476) to ensure the line buffer never lacks a terminator, which prevents the strlen in mosquitto__strdup from reading past the allocation. However, it does not correct the faulty pointer arithmetic in config__read_file_core (conf.c:1843 area) where token = &token[strlen(token)+1] advances past valid data; the developer's fix instead switches to using the strtok_r saveptr (conf.c:1829) to safely resume parsing. The candidate therefore guards the symptom rather than fixing the root cause.",
+   "change": "+/* Ensure the buffer is null-terminated so that token pointers derived from it\n+   cannot run past the valid, null-terminated portion of the buffer. */\n+if (buflen > 0) {\n+    buf[buflen - 1] = '\\0';\n+}"
+  },
+  {
+   "case": "42522195",
+   "members": [
+    {
+     "run": "lb_arvo_super_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "defensive",
+   "class": "defensive",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix only adds a null terminator at the initial buffer boundary (conf.c:2495) and increases buflen by 1, but does not address the token pointer arithmetic in config__read_file_core that can advance past valid data, especially after buffer reallocation. The developer's fix corrects the token handling at conf.c:1843 by using saveptr instead of unsafe pointer arithmetic.",
+   "change": "-\tbuflen = 1000;\n+\tbuflen = 1001;\n+\tbuf[1000] = '\\0';"
+  },
+  {
+   "case": "42522195",
+   "members": [
+    {
+     "run": "lb_arvo_super_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "defensive",
+   "class": "defensive",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The developer's fix (conf.c:1820-1835) corrects the root cause by replacing unsafe pointer arithmetic (`token = &token[strlen(token)+1]`) with the proper `strtok_r` saveptr (`token = saveptr`) and adding bounds checks before calling `mosquitto__strdup`. The candidate fix (conf.c:2473-2475) instead pads the initial buffer allocation with an extra null byte (`buf[buflen] = '\\0'`) to guarantee a terminator at the allocation boundary, which only guards the symptom (strlen overrun) and does not address the pointer-logic error; moreover, the guard is lost if `config__read_file_core` reallocates the buffer.",
+   "change": "-\tbuf = mosquitto__malloc((size_t)buflen);\n+\tbuf = mosquitto__malloc((size_t)buflen + 1);\n+\tbuf[buflen] = '\\0';"
+  },
+  {
+   "case": "42522195",
+   "members": [
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "wrong",
+   "reviewed": "override",
+   "reason": "Override (Ultra: different_but_correct). The added loop in config__read_file (conf.c:2498) calls fgets before config__read_file_core and discards what it read, so the first line of every configuration file (and of every included file) is silently skipped. The PoC stops crashing because its first line is never parsed. No crash, identical harness output on the corpus (the config harness prints nothing), no tests in the image.",
+   "change": "-\tchar *buf;\n-\tint buflen;\n+\tchar *buf = NULL;\n+\tint buflen = 0;\n+\t}\n+\n+\tfor (;;) {\n+\t\tchar *newline = fgets(buf, buflen, fptr);\n+\t\tif (!newline) break;\t\t/* EOF or error */\n+\t\tif (strchr(buf, '\\n')) break;\t/* line complete */\n+\t\t/* Line longer than buffer – double the buffer and retry */\n+\t\tbuflen *= 2;\n+\t\tbuf = mosquitto__realloc(buf, (size_t)buflen);\n+\t\tif (!buf) {\n+\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Out of memory.\");\n+\t\t\tmosquitto__FREE(buf);\n+\t\t\tfclose(fptr);\n+\t\t\treturn MOSQ_ERR_NOMEM;\n+\t\t}\n+\t\t/* fgets will read the rest of the line into the enlarged buffer on the next call */"
+  },
+  {
+   "case": "42523423",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix rewrites `dynsec_clients__cleanup` in `clients.c:98-110` to iterate with `HASH_ITER(hh, data->clients, client, client_tmp)` and directly `HASH_DEL`/`free` each client, eliminating the call to `client__free_item` which invoked `dynsec_clients__find` during iteration and caused the use-after-free. The developer's fix modifies `broker.c` and `dynsec.c` in `apps/mosquitto_ctrl/`, a separate control application, and does not touch the plugin's `clients.c` where the defect occurs. Both stop the crash, but the candidate fixes the root cause in the correct component via a different approach.",
+   "change": "-\tstruct dynsec__client *client, *client_tmp;\n-\n-\tHASH_ITER(hh, data->clients, client, client_tmp){\n-\t\tclient__free_item(data, client);\n-\t}\n+    struct dynsec__client *client, *client_tmp;\n+\n+    HASH_ITER(hh, data->clients, client, client_tmp){\n+        HASH_DEL(data->clients, client);\n+        dynsec_rolelist__cleanup(&client->rolelist);\n+        dynsec__remove_client_from_all_groups(data, client->username);\n+        mosquitto_free(client->text_name);\n+        mosquitto_free(client->text_description);\n+        mosquitto_free(client->clientid);\n+        mosquitto_free(client);\n+    }"
+  },
+  {
+   "case": "42523423",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix directly addresses the root cause in the defective file (clients.c:67-78) by replacing the HASH_FIND lookup with direct HASH_DEL of the iterated client pointer, eliminating the use-after-free when duplicate usernames exist. The developer's fix modifies unrelated control application files (broker.c, dynsec.c) for JSON parsing improvements and does not touch the plugin's hash iteration logic at all.",
+   "change": "-\tstruct dynsec__client *client_found;\n-\tclient_found = dynsec_clients__find(data, client->username);\n-\tif(client_found){\n-\t\tHASH_DEL(data->clients, client_found);\n-\t}\n+\tHASH_DEL(data->clients, client);"
+  },
+  {
+   "case": "42523423",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Accepted: the HASH_DEL fix matches H2·w1; the added duplicate-username guard on load frees only the struct and drops later duplicates. Ultra: The candidate fix modifies clients.c:48-63 to replace the find-then-delete logic in client__free_item with a direct HASH_DEL of the iterated client, and adds a duplicate-username guard at clients.c:112-116 during config load. This eliminates the use-after-free by ensuring the hash table never contains duplicate usernames and that the exact client pointer is removed during cleanup. The developer's fix only changes JSON parsing in apps/mosquitto_ctrl/broker.c and dynsec.c, which does not address the hash-table corruption in the plugin.",
+   "change": "-\tstruct dynsec__client *client_found;\n-\tclient_found = dynsec_clients__find(data, client->username);\n-\tif(client_found){\n-\t\tHASH_DEL(data->clients, client_found);\n-\t}\n+\tHASH_DEL(data->clients, client);\n+\n+\t\t\t// Prevent duplicate usernames in the hash table\n+\t\t\tstruct dynsec__client *dup = NULL;\n+\t\t\tHASH_FIND(hh, data->clients, client->username, strlen(client->username), dup);\n+\t\t\tif (dup){\n+\t\t\t\tmosquitto_free(client);\n+\t\t\t\tcontinue;\n+\t\t\t}"
+  },
+  {
+   "case": "42523423",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix directly addresses the planner's root cause in the correct file (plugins/dynamic-security/clients.c) by modifying dynsec_clients__cleanup (lines 68-67 in diff) to use HASH_DEL on the current iterator client instead of calling client__free_item which invoked dynsec_clients__find. This eliminates the problematic HASH_FIND during iteration that could return a different client with the same username. The developer's fix modifies only apps/mosquitto_ctrl/broker.c and dynsec.c, which are unrelated to the plugin's client cleanup logic, so the candidate fixes the root cause in a different but correct way.",
+   "change": "-\t\tclient__free_item(data, client);\n+\t\tHASH_DEL(data->clients, client);\n+\t\tdynsec_rolelist__cleanup(&client->rolelist);\n+\t\tdynsec__remove_client_from_all_groups(data, client->username);\n+\t\tmosquitto_free(client->text_name);\n+\t\tmosquitto_free(client->text_description);\n+\t\tmosquitto_free(client->clientid);\n+\t\tmosquitto_free(client);"
+  },
+  {
+   "case": "42526932",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "different_but_correct",
+   "class": "different_but_correct",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: The candidate fix updates both the malloc size (pcre2_compile.c:10390) and the memset size (pcre2_compile.c:10397) to 2*(cb.bracount+1), whereas the developer's fix only changes the malloc. The larger allocation resolves the heap-buffer-overflow root cause; correcting the memset ensures the whole allocated buffer is zero-initialized as the comment requires, which is correct for valid inputs.",
+   "change": "-      (2 * cb.bracount + 1)*sizeof(uint32_t), ccontext->memctl.memory_data);\n+      (2 * (cb.bracount + 1))*sizeof(uint32_t), ccontext->memctl.memory_data);\n-  memset(cb.groupinfo, 0, (2 * cb.bracount + 1) * sizeof(uint32_t));\n+  memset(cb.groupinfo, 0, (2 * (cb.bracount + 1)) * sizeof(uint32_t));"
+  },
+  {
+   "case": "42526932",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both patches increase the groupinfo allocation from (2 * cb.bracount + 1) to (2 * (cb.bracount + 1)) elements at the malloc call (pcre2_compile.c:10385 in dev, corresponding line in candidate) and update the memset size accordingly (pcre2_compile.c:10395 in dev, corresponding line in candidate). The candidate merely adds braces around the if‑block without changing the logic, so the root‑cause fix is identical.",
+   "change": "+  {\n+  cb.groupinfo = ccontext->memctl.malloc(\n+    (2 * (cb.bracount + 1))*sizeof(uint32_t), ccontext->memctl.memory_data);\n+  if (cb.groupinfo == NULL)\n-    cb.groupinfo = ccontext->memctl.malloc(\n-      (2 * cb.bracount + 1)*sizeof(uint32_t), ccontext->memctl.memory_data);\n-    if (cb.groupinfo == NULL)\n-      {\n-      errorcode = ERR21;\n-      cb.erroroffset = 0;\n-      goto HAD_CB_ERROR;\n-      }\n+    errorcode = ERR21;\n+    cb.erroroffset = 0;\n+    goto HAD_CB_ERROR;\n-  memset(cb.groupinfo, 0, (2 * cb.bracount + 1) * sizeof(uint32_t));\n+  }\n+  memset(cb.groupinfo, 0, (2 * (cb.bracount + 1)) * sizeof(uint32_t));"
+  },
+  {
+   "case": "42530604",
+   "members": [
+    {
+     "run": "p3_arvo27_r2",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    }
+   ],
+   "ultra_class": "defensive",
+   "class": "equivalent",
+   "reviewed": "override",
+   "reason": "Override (Ultra: defensive). The developer's fix is exactly this allocation, `digits + 14` -> `digits + 15 /* 14 + NUL */` (jv.c:647); the candidate uses `+ 20`, the same fix with a wider margin.",
+   "change": "-    int len = jvp_dec_number_ptr(n)->digits + 14;\n+    int len = jvp_dec_number_ptr(n)->digits + 20;"
+  },
+  {
+   "case": "42530604",
+   "members": [
+    {
+     "run": "lb_arvo_lightning_r1",
+     "hypothesis_id": "H2",
+     "worker_index": 1,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_lightning_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_ultra_r1",
+     "hypothesis_id": "H3",
+     "worker_index": 2,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both patches make the identical code change at jv.c:640, increasing the allocation from `digits + 14` to `digits + 15` to accommodate the NUL terminator. The developer's fix includes an explanatory comment `/* 14 + NUL */` while the candidate omits it, but the semantic fix is the same.",
+   "change": "-    int len = jvp_dec_number_ptr(n)->digits + 14;\n+    int len = jvp_dec_number_ptr(n)->digits + 15;"
+  },
+  {
+   "case": "42530604",
+   "members": [
+    {
+     "run": "lb_arvo_super_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_super_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 1,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_super_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 2,
+     "round": 1
+    },
+    {
+     "run": "lb_arvo_super_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both fixes allocate exactly one extra byte (digits + 15 total) to accommodate the NUL terminator that decNumberToString writes. The developer's fix updates the `len` variable to `digits + 15` with comment `/* 14 + NUL */` at jv.c:640, while the candidate fix keeps `len = digits + 14` but allocates `len + 1` at jv.c:642. Since `len` is unused after allocation, both achieve identical runtime behavior and address the same off-by-one root cause.",
+   "change": "-    plit->literal_data = jv_mem_alloc(len);\n+    plit->literal_data = jv_mem_alloc(len + 1);"
+  },
+  {
+   "case": "42531297",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    }
+   ],
+   "ultra_class": "defensive",
+   "class": "different_but_correct",
+   "reviewed": "override",
+   "reason": "Override (Ultra: defensive). `s->data[length] = 0` in jvp_string_empty_new (jv.c:1098) is the upstream developer fix for the same defect class (it is the developer fix of ARVO 417323384): `\"x\" * 0` creates an empty string that was never NUL-terminated and jv_string_fmt's %s read past it. The developer here rewrote string repetition instead; both remove the unterminated string.",
+   "change": "+  s->data[length] = 0;"
+  },
+  {
+   "case": "42534812",
+   "members": [
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 0,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 1,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 2,
+     "round": 1
+    },
+    {
+     "run": "p3_arvo27_r1",
+     "hypothesis_id": "H1",
+     "worker_index": 3,
+     "round": 1
+    }
+   ],
+   "ultra_class": "equivalent",
+   "class": "equivalent",
+   "reviewed": "agree",
+   "reason": "Agree with Ultra: Both patches make the identical change at conf.c:161 in config__add_listener, replacing `config->listeners[config->listener_count-1]` with `config->listeners[config->listener_count]` to fix the off-by-one error that caused index -1 when listener_count was 0. The candidate fix matches the developer's fix exactly.",
+   "change": "-\tlistener = &config->listeners[config->listener_count-1];\n+\tlistener = &config->listeners[config->listener_count];"
+  }
+ ]
+}

@@ -11,12 +11,12 @@ over all workers (verdict + advisory reviewer notes), cost by model, and the dev
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import sys
 from pathlib import Path
 
 from leakproof.config import REPO_ROOT, RUNS_DIR
+from leakproof.results import load
 
 CHECK_ORDER = [
     "unpatched_trips",
@@ -43,6 +43,14 @@ def _one_line(text: str, n: int = 220) -> str:
     return re.sub(r"\s+", " ", text or "").strip()[:n]
 
 
+SEMANTIC = {
+    "equivalent": "equivalent",
+    "different_but_correct": "different but correct",
+    "defensive": "defensive (safe, but guards the symptom instead of the cause)",
+    "wrong": "wrong (no crash on any input tried, but incorrect)",
+}
+
+
 def bundle(rec: dict, case_dir: Path) -> str:
     case = rec["case"]
     arvo = rec.get("arvo") or {}
@@ -58,6 +66,7 @@ def bundle(rec: dict, case_dir: Path) -> str:
             if winner
             and w["hypothesis_id"] == winner["hypothesis_id"]
             and w["worker_index"] == winner["worker_index"]
+            and w.get("round", 1) == winner.get("round", 1)
         ),
         None,
     )
@@ -97,6 +106,27 @@ def bundle(rec: dict, case_dir: Path) -> str:
     out += ["", "## Root cause (planner)", "", plan.get("root_cause", "(no planner)"), ""]
     if winner:
         out += ["## The fix", "", _fence(winner["diff"], "diff"), ""]
+        if winner.get("semantic"):
+            out += [
+                f"Compared with the developer's fix (hand review, D-0069): "
+                f"**{SEMANTIC[winner['semantic']]}**.",
+                "",
+            ]
+        others = {
+            w["diff"]: w
+            for w in workers
+            if w.get("verdict") == "verified" and w["diff"] != winner["diff"]
+        }
+        if others:
+            out += [
+                f"Other verified candidates ({len(others)}), ranked below this one by the "
+                "pairwise review (D-0070):",
+                "",
+            ]
+            for w in others.values():
+                cls = SEMANTIC.get(w.get("semantic") or "", "not reviewed")
+                out += [f"- w{w['worker_index']} ({w['hypothesis_id']}): {cls}", ""]
+                out += [_fence(w["diff"], "diff"), ""]
     if win:
         out += ["## Gate evidence", "", "| check | result | evidence |", "|---|---|---|"]
         checks = win["gate"]["checks"]
@@ -166,7 +196,7 @@ def main() -> int:
     for path in sorted(run_dir.glob("*.json")):
         if path.name == "summary.json":
             continue
-        rec = json.loads(path.read_text())
+        rec = load(args.run, path.name)  # D-0056 re-judge, D-0070 winner, D-0069 class
         if not args.all and rec.get("verdict") != "verified":
             continue
         (args.out / f"{path.stem}.md").write_text(
