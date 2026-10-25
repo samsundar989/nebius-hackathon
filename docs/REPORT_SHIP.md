@@ -262,3 +262,15 @@ Funnel labels in plain words; FEEDBACK: the re-judge lesson (cross-cutting secti
 
 ### Model spend
 $0.70 (open bugs) since review #6.
+
+## Day 5 (cont.) · Sun 2026-10-25, 10:25–11:40 CDT — review #7
+
+Strategist notes 2026-10-25 10:25 CDT (review #7): acknowledged; orders 1–5 done; 6 (Pages fallback) is due Mon 12:00 if Render is still not applied.
+
+1. **Video v2** (`video/leakproof_draft.mp4`, 2:49, 1920×1080): terminal scenes at 28 px with ≤ 22 lines and the result line boxed; one dashboard card per scene, zoomed to fill the frame, slow pans; title and end cards (end card numbers read from `site/data`); 40 px captions. Two recording bugs found by pulling frames and fixed: device-scale-factor recording landed in a quarter of the frame, and static stretches recorded too few frames (clips now padded to their exact length). NOTE 0016 updated.
+2. **toybox #572 package** (`cases/open_bugs/landley_toybox/572/SUBMISSION.md`): the one-liner and H2·w1 both pass the gate and all 13 of toybox's `patch` tests (D-0077); format-patch with Samuel as author; disclosure states the one-liner came from review. QUESTION 0017 updated.
+3. **Devpost assets** (`docs/devpost/`): thumbnail, 5 gallery images at 3:2 2×, architecture PNG; `docs/DEVPOST.md` gained "Try it out" and the open-bugs funnel.
+4. **README** "In 60 seconds" box.
+5. **Open bugs round 2**: 16 more issues → 3 reproduce at HEAD → 2 verified → 0 ready as written (cNBT defensive with a new NULL dereference on the out-of-memory path; jsmn needs one more guard). Both rounds: 30 → 7 → 5 → 1. $0.22 (total open-bugs spend $0.92).
+
+Model spend for review #7: $0.22.
