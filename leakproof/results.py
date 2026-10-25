@@ -3,6 +3,7 @@
 Overlays on the raw records in runs/<run>/<case>.json, each documented in DECISIONS:
   D-0056  re-judged verdicts (a libFuzzer slow-unit artifact is not a crash)
   D-0073  mosquitto re-gated with its CUnit suite
+  D-0075  libexif and libplist re-gated with make check
   D-0070  re-selected winners among several verified candidates (runs/winners.json),
           plus `ambiguous` from the cross-candidate differential
   D-0069  the hand semantic class of every verified diff (cases/arvo/semantic_adjudication.json)
@@ -22,7 +23,11 @@ from leakproof.semantic import CORRECT, change
 
 # Re-judges applied in order: (output dir under runs/, decision). Each holds
 # <case>/<run>/gate.json for the runs it re-gated.
-REJUDGES = (("p3_rejudge_d0056", "D-0056"), ("p3_rejudge_d0073", "D-0073"))
+REJUDGES = (
+    ("p3_rejudge_d0056", "D-0056"),
+    ("p3_rejudge_d0073", "D-0073"),
+    ("p3_rejudge_d0075", "D-0075"),
+)
 ADJUDICATION = REPO_ROOT / "cases" / "arvo" / "semantic_adjudication.json"
 
 
@@ -97,7 +102,7 @@ def load(run: str, case_file: str) -> dict[str, Any]:
     sel = _winners().get(run, {}).get(rec["case"])
     if sel and rec.get("winner"):
         w = _find(rec["workers"], sel["new"])
-        if w is not None:
+        if w is not None and w.get("verdict") == "verified":  # a re-judge can reject it
             rec["winner_d0039"] = rec["winner"]
             rec["winner"] = {**sel["new"], "diff": w["diff"]}
             rec["selection"] = sel.get("log", [])
