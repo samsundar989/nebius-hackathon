@@ -35,7 +35,7 @@ def _fix(args: argparse.Namespace) -> int:
     )
     client = LLMClient(ledger=CostLedger(budget=args.budget), run_id=f"{run_id}:project")
     rec = fix_case(
-        f"project:{config}",
+        f"project:{config}" + (f"#poc={Path(args.poc).resolve()}" if args.poc else ""),
         run_dir,
         client,
         runner,
@@ -212,6 +212,7 @@ def main(argv: list[str] | None = None) -> int:
     fx.add_argument("--config", default="leakproof.toml")
     fx.add_argument("--runner", default="docker", choices=["docker", "sandboxes"])
     fx.add_argument("--planner", default="ultra", choices=["ultra", "super", "none"])
+    fx.add_argument("--poc", help="crash input to fix (overrides `poc` in the config)")
     fx.add_argument("--workers", type=int, default=4)
     fx.add_argument(
         "--select", default="ultra", choices=["ultra", "none"], help="rank several verified fixes"

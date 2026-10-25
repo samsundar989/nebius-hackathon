@@ -1,0 +1,83 @@
+# Template: copy to .github/workflows/leakproof-fix.yml in a C/C++ project that has a
+# leakproof.toml (see examples/csvsplit/). When the fuzzing workflow fails and uploads its crash
+# inputs as an artifact, this runs `leakproof fix` on the first one and uploads the evidence
+# bundle. It never pushes code: a verified diff is attached for a human to review.
+#
+# Needs one repository secret, NEBIUS_API_KEY (Nebius Token Factory), and NEBIUS_PROJECT_ID as a
+# repository variable. Each run is capped by LEAKPROOF_BUDGET_USD (model spend, USD).
+name: leakproof-fix
+
+on:
+  workflow_run:
+    workflows: ["fuzz"]          # the name of your fuzzing workflow
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Run id of a failed fuzz workflow (its artifact holds the crash inputs)"
+        required: true
+
+permissions:
+  contents: read
+  actions: read                  # to download the fuzz run's artifact
+
+jobs:
+  fix:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NEBIUS_API_KEY: ${{ secrets.NEBIUS_API_KEY }}
+      NEBIUS_PROJECT_ID: ${{ vars.NEBIUS_PROJECT_ID }}
+      LEAKPROOF_BUDGET_USD: "0.50"
+      LEAKPROOF_RUNS: ${{ github.workspace }}/leakproof-runs
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: samsundar989/nebius-hackathon
+          path: .leakproof
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Download the crash inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: crashes                  # the artifact your fuzz workflow uploads
+          path: crashes
+          run-id: ${{ github.event.workflow_run.id || inputs.run_id }}
+          github-token: ${{ github.token }}
+
+      - name: leakproof fix
+        id: fix
+        run: |
+          set -euo pipefail
+          poc=$(find crashes -type f | sort | head -1)
+          echo "fixing $poc"
+          set +e
+          uv run --project .leakproof leakproof fix --config leakproof.toml --poc "$poc" --run-id ci
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Evidence bundle
+        if: always()
+        run: |
+          uv run --project .leakproof python .leakproof/scripts/render_bundle.py ci --all --out bundle
+          cat bundle/*.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: leakproof-evidence
+          path: |
+            bundle/
+            leakproof-runs/ci/
+
+      - name: Verdict
+        if: always()
+        run: |
+          if [ "${{ steps.fix.outputs.exit }}" = "0" ]; then
+            echo "::notice::Leakproof verified a fix: see the leakproof-evidence artifact."
+          else
+            echo "::warning::No verified fix (the bundle says why). Nothing was changed."
+          fi
