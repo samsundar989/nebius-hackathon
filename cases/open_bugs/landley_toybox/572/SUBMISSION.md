@@ -51,8 +51,8 @@ Fixes #572.
 
 ## AI-assistance disclosure (put it in the PR or e-mail text)
 
-> This fix was found and verified with Leakproof, an AI repair agent that only reports patches its
-> sanitizer and test gate confirms. I reviewed the change and ran toybox's patch tests myself.
+> This fix was developed with Leakproof, an AI repair agent: its sanitizer-verified patch was reduced
+> to this one line during an AI-assisted review. I reviewed the change and ran toybox's patch tests myself.
 
 The repository states no AI-contribution policy. Check the project's README for how it prefers to
 receive patches, and keep the description short and in your own words.
