@@ -217,8 +217,11 @@ def _init(args: argparse.Namespace) -> int:
         issue, usd = init.from_issue(client, Path(args.issue_text).read_text(encoding="utf-8"))
         print(f"issue read by Nemotron Nano (${usd:.4f}): {json.dumps(issue)[:300]}")
     src = os.path.relpath(repo.resolve(), out.resolve().parent).replace(os.sep, "/")
+    poc_dir = os.path.relpath(out.resolve().parent, repo.resolve()).replace(os.sep, "/")
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(init.draft(repo, issue, src=src), encoding="utf-8", newline="\n")
+    out.write_text(
+        init.draft(repo, issue, src=src, poc_dir=poc_dir), encoding="utf-8", newline="\n"
+    )
     poc = init.write_poc(out.parent, issue) if issue else None
     print(f"wrote {out}" + (f" and {poc}" if poc else ""))
     print(out.read_text(encoding="utf-8"))

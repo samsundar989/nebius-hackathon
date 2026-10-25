@@ -41,7 +41,9 @@ def draft(root: Path) -> None:
         for old in out.glob("poc*"):
             old.unlink()
         src = os.path.relpath(repo, out).replace(os.sep, "/")
-        text = init.draft(repo, issue, name=case, src=src)
+        text = init.draft(
+            repo, issue, name=case, src=src, poc_dir=os.path.relpath(out, repo).replace(os.sep, "/")
+        )
         (out / "leakproof.toml").write_text(text, encoding="utf-8", newline="\n")
         init.write_poc(out, issue)
         print(f"== {case}\n{text}")
@@ -74,7 +76,7 @@ def check(root: Path) -> None:
             pc.prepare(runner)
             row["outcome"] = "builds and reproduces"
             row["finding"] = pc.finding
-        except RuntimeError as e:
+        except Exception as e:  # noqa: BLE001 - one bad draft must not stop the others
             msg = str(e)
             row["outcome"] = (
                 "build failed"

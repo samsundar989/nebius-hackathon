@@ -188,9 +188,17 @@ def reproduce_cmd(issue: dict[str, Any]) -> str | None:
 
 
 def draft(
-    repo: Path, issue: dict[str, Any] | None = None, name: str | None = None, src: str = "."
+    repo: Path,
+    issue: dict[str, Any] | None = None,
+    name: str | None = None,
+    src: str = ".",
+    poc_dir: str = ".",
 ) -> str:
-    """The leakproof.toml text. Unknowns are left as commented TODO lines."""
+    """The leakproof.toml text. Unknowns are left as commented TODO lines.
+
+    `src` is the repo relative to the config file; `poc_dir` is where the input file is written,
+    relative to the repo (the config's `poc` is resolved against `src`).
+    """
     d = detect(repo)
     lines = [
         f"# Drafted by `leakproof init` ({d['system']}); check it with `leakproof fix`.",
@@ -203,7 +211,8 @@ def draft(
     if rep:
         lines.append(f"reproduce = '''{rep}'''")
         if issue and poc_bytes(issue) is not None:
-            lines.append(f'poc = "poc{issue.get("input_ext") or ".bin"}"')
+            poc = f"poc{issue.get('input_ext') or '.bin'}"
+            lines.append(f'poc = "{poc if poc_dir == "." else f"{poc_dir}/{poc}"}"')
         elif "/tmp/poc" in rep:
             lines.append('# TODO poc = "..."  # the issue attaches or links its input: add it')
         prog = issue["program"].strip().removeprefix("./") if issue else ""
