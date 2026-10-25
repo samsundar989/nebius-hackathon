@@ -33,6 +33,7 @@ from leakproof import gate_cli as gc
 from leakproof import gate_fuzz as gf
 
 MAX_INPUTS = 8
+PROMPT_VERSION = 2  # part of the answer cache key: a new prompt asks the models again
 MAX_INPUT_BYTES = 1 << 16
 CONTEXT = 40  # unpatched lines shown around each hunk
 
@@ -68,11 +69,15 @@ the patch does not cover (other call paths, other lengths, empty input, input th
 an escape or a token, very large counts, allocation failure paths), and valid inputs whose \
 output the patch changes.
 
-Each input is the whole content of the input the reproducer reads (the same role as the PoC). \
-Give at most 8 inputs, each different. Use encoding "text" for printable input (it is used \
-byte for byte; write a real newline as a newline) and "hex" for binary input (two hex digits per \
-byte, no separators). Keep each input under 4 KB unless size matters. For each, say what you \
-expect and why in one sentence. Answer with the JSON object only."""
+Each input is the WHOLE content the reproducer reads, exactly like the PoC: a complete file (or \
+argument, or stdin) with the same framing, headers and syntax. Build every input by editing the \
+PoC, changing only the part the patch handles; a fragment such as a bare string or a single \
+field is useless, because the program never reaches the patched code with it. Give at most 8 \
+inputs, each different. Use encoding "hex" (two hex digits per byte, no separators) whenever an \
+input contains a backslash, a quote, a newline or any control or non-ASCII byte; use "text" \
+only for plain printable ASCII without those characters. Keep each input under 4 KB unless size \
+matters. For each, say what you expect and why in one sentence. \
+Answer with the JSON object only."""
 
 
 def _hunk_context(original: str, patched: str, path: str) -> str:
@@ -96,13 +101,11 @@ def _hunk_context(original: str, patched: str, path: str) -> str:
 
 
 def _show(data: bytes) -> str:
-    try:
-        text = data.decode("utf-8")
-        if all(c.isprintable() or c in "\n\t\r" for c in text):
-            return f"text ({len(data)} bytes):\n{text[:3000]}"
-    except UnicodeDecodeError:
-        pass
-    return f"hex ({len(data)} bytes):\n{data[:1500].hex()}"
+    """The PoC as hex and as an escaped string, so no newline or backslash is ambiguous."""
+    return (
+        f"{len(data)} bytes\nhex: {data[:1500].hex()}\n"
+        f"escaped (Python bytes literal): {data[:1500]!r}"
+    )
 
 
 def prompt(
