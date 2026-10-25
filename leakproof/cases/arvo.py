@@ -87,6 +87,9 @@ TESTS: dict[str, str | None] = {
     # so it needs the sanitizer and coverage flags at link time; -k runs every suite (D-0073).
     "mosquitto": "ASAN_OPTIONS=detect_leaks=0 make -k -C test/unit test "
     "LDFLAGS='-fsanitize=address -fsanitize=fuzzer-no-link --coverage'",
+    # Both run offline in their ARVO images (automake `make check`; runs/arvo_inspect, D-0075).
+    "libexif": "ASAN_OPTIONS=detect_leaks=0 make -k check",
+    "libplist": "ASAN_OPTIONS=detect_leaks=0 make -k check",
 }
 # Test-suite dependencies missing from the ARVO image: installed once while preparing the
 # baseline, the only step with the network on (gate runs stay offline). Gate side, D-0073.
