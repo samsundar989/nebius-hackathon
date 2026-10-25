@@ -54,6 +54,8 @@ Measured 2026-10-14 with `scripts/smoke_tf.py` (raw output in `runs/smoke_tf_*.j
   - Zero-to-hello-world (REST, after access): ~40 min including reading the SDK source for request shapes; first sandbox run 0.8 s.
   - Build again?: yes for anything that runs untrusted builds offline and needs cheap branching from a checkpoint — the checkpoint-per-run model is exactly the "baseline → N candidate branches → gate" shape. Not yet for ARVO-era images until the importer handles those layers.
 
+- **Update 2026-10-25: a contract test that passed on 2026-10-24 now fails.** `tests/test_runner_contract.py::test_files_env_cwd[contree]`: files uploaded with a relative path (`rel.txt`, `sub/host.txt`, resolved against `cwd=/work/case`) are no longer readable there, while the absolute one (`/etc/abs.txt`) still is; the run itself succeeds. Not yet diagnosed whether the API changed or our backend relied on undocumented behaviour; the gate uploads to absolute paths (`/tmp/lp/...`), so verdicts are unaffected. Reproduced twice.
+
 ## Token Factory Batch API
 - Tried on 2026-10-14 for cheap bulk triage; `POST /v1/batches` returned `HTTP 403: {'detail': 'Creating new batch job is temporarily unavailable'}` after the file upload succeeded (details under Token Factory). We did not retry it later: synchronous calls with 600 RPM were fast and cheap enough (a 27-case ARVO run cost about $1). Would use again for offline evaluation if it is enabled and documented.
 
