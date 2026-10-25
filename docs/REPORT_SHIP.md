@@ -246,3 +246,19 @@ Strategist notes 2026-10-25 01:20 CDT (review #5): acknowledged; orders 1, 2, 3,
 
 ### Model spend
 $0 since review #5 (all Docker work through workerq, jobs 3820–3828).
+
+## Day 5 (cont.) · Sun 2026-10-25, 07:15–09:40 CDT — review #6
+
+Strategist notes 2026-10-25 07:15 CDT (review #6): acknowledged; orders 1, 2 and 3 done; 4 (Pages fallback) is due Mon 12:00 if Render is still not applied; 5 waits for ANSWER 0015.
+
+### 1 — real open bugs (D-0076, QUESTION 0017)
+14 open GitHub issues with ASan reports triaged → 10 configured → 6 reproduce at upstream HEAD → 4 without an open fix PR → 3 verified (berry #544 format, toybox #571, #572) → **1 ready to propose** after Ultra's and my review (toybox #572, H2·w1; the patch applies cleanly to HEAD). Spend $0.70 of the $2.50 cap. On these projects the gate had only the reproducer (no tests wired, no harness), and 6 of 7 distinct verified diffs are wrong or defensive on review; for #572 the pairwise selection picked a wrong candidate over the correct one. Nothing posted upstream.
+
+### 2 — video draft
+`video/leakproof_draft.mp4`: 2:55, silent, captions burned in; Playwright recordings of the dashboard and of terminal replays rebuilt from recorded runs, assembled with the ffmpeg bundled in imageio-ffmpeg (both installed into `.venv-win` only). Shot list and captions in `video/`. NOTE 0016 updated.
+
+### 3 — polish
+Funnel labels in plain words; FEEDBACK: the re-judge lesson (cross-cutting section).
+
+### Model spend
+$0.70 (open bugs) since review #6.
