@@ -5,7 +5,7 @@
 **Start here, in order:** `docs/research/HACKATHON_RESEARCH_BRIEF_2026-10-13.md` → `docs/research/IDEA_A_REFINED_2026-10-14.md` → the current kickoff prompt in `docs/kickoff/` (highest-numbered experiment). The kickoff prompt scopes the work; do not exceed it.
 
 ## Non-negotiables
-1. **Clean room.** Nothing from Samuel's employer: no code, configs, prompts, scripts, or layouts. Public knowledge only.
+1. **Clean room.** Public knowledge and our own code only.
 2. **No secrets in the repo or in logs.** Keys live in `.env` (gitignored). `.env.example` lists names only. Never echo a key. A pre-commit/CI check must fail on leaked tokens.
 3. **Every model call is metered.** Append to `runs/cost_ledger.jsonl`; respect `LEAKPROOF_BUDGET_USD` (hard stop). Token Factory has no spend cap (402 when empty).
 4. **Spend caps per experiment** are in the kickoff prompt. Any single action > $2 → ask first in `docs/HUMAN.md`.
