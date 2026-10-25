@@ -34,13 +34,27 @@ def progress(frac: float) -> None:
             Path(path).write_text(f"{frac:.3f}")
 
 
-def rejudge_case(case_id: str, runs: list[str], out: Path, runner: LocalDockerRunner) -> dict:
+def rejudge_case(
+    case_id: str, runs: list[str], out: Path, runner: LocalDockerRunner, developer: bool = False
+) -> dict:
     rec: dict = {"case": case_id, "runs": {}}
     case = load_case(case_id)
     t0 = time.monotonic()
+    ref = None
     try:
         baseline = case.prepare(runner)
         rec["prepare_s"] = round(time.monotonic() - t0, 1)
+        if developer:
+            # The same reference the ARVO runs were gated with (D-0052): refuzz attribution
+            # does not blame a candidate for a crash the developer's fix also has.
+            from leakproof.calibrate import build_reference, dev_fix_candidate
+
+            dev, meta = dev_fix_candidate(case, runner, baseline)
+            if dev is not None:
+                ref, err = build_reference(case, runner, baseline, dev["files"])
+                rec["reference"] = ref.ref if ref else f"build failed: {err[-300:]}"
+            else:
+                rec["reference"] = f"none: {meta.get('error')}"
         rec["finding_location"] = case.finding.get("location")
         for run in runs:
             src = RUNS_DIR / run / case_id
@@ -60,6 +74,7 @@ def rejudge_case(case_id: str, runs: list[str], out: Path, runner: LocalDockerRu
                 case.finding or payload.get("finding", {}),
                 payload["candidates"],
                 case_dir,
+                reference=ref.ref if ref else None,
             )
             olds = {(r["hypothesis_id"], r["worker_index"]): r for r in old.get("results", [])}
             rows = []
@@ -86,6 +101,8 @@ def rejudge_case(case_id: str, runs: list[str], out: Path, runner: LocalDockerRu
     except Exception as exc:  # noqa: BLE001 - record and continue with the next case
         rec["error"] = f"{type(exc).__name__}: {exc}"[:2000]
     finally:
+        if ref is not None:
+            runner.remove_image(ref)
         if hasattr(case, "cleanup"):
             case.cleanup(runner)
     rec["elapsed_s"] = round(time.monotonic() - t0, 1)
@@ -97,6 +114,12 @@ def main() -> int:
     ap.add_argument("--cases", required=True, help="comma-separated case ids")
     ap.add_argument("--runs", required=True, help="comma-separated source run dirs under runs/")
     ap.add_argument("--out", required=True)
+    ap.add_argument(
+        "--reference",
+        choices=["none", "developer"],
+        default="none",
+        help="developer: gate with the developer's fix as refuzz reference, like the ARVO runs",
+    )
     args = ap.parse_args()
     out = RUNS_DIR / args.out
     out.mkdir(parents=True, exist_ok=True)
@@ -105,7 +128,7 @@ def main() -> int:
     runs = [r for r in args.runs.split(",") if r]
     recs = []
     for i, cid in enumerate(cases):
-        recs.append(rejudge_case(cid, runs, out, runner))
+        recs.append(rejudge_case(cid, runs, out, runner, args.reference == "developer"))
         (out / "summary.json").write_text(json.dumps({"cases": recs}, indent=1))
         progress((i + 1) / len(cases))
     for rec in recs:
