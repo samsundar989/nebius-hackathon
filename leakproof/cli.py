@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -202,6 +203,28 @@ def _batch(args: argparse.Namespace) -> int:
     return 0
 
 
+def _init(args: argparse.Namespace) -> int:
+    from leakproof import init
+
+    repo = Path(args.repo_dir)
+    out = Path(args.out) if args.out else repo / "leakproof.toml"
+    if out.exists() and not args.force:
+        print(f"{out} exists; pass --force to overwrite", file=sys.stderr)
+        return 2
+    issue = None
+    if args.issue_text:
+        client = LLMClient(ledger=CostLedger(budget=args.budget), run_id="init")
+        issue, usd = init.from_issue(client, Path(args.issue_text).read_text(encoding="utf-8"))
+        print(f"issue read by Nemotron Nano (${usd:.4f}): {json.dumps(issue)[:300]}")
+    src = os.path.relpath(repo.resolve(), out.resolve().parent).replace(os.sep, "/")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(init.draft(repo, issue, src=src), encoding="utf-8", newline="\n")
+    poc = init.write_poc(out.parent, issue) if issue else None
+    print(f"wrote {out}" + (f" and {poc}" if poc else ""))
+    print(out.read_text(encoding="utf-8"))
+    return 0
+
+
 def _winner_files(rec: dict) -> dict[str, str]:
     w = rec["winner"]
     for worker in rec.get("workers", []):
@@ -240,7 +263,15 @@ def main(argv: list[str] | None = None) -> int:
     bt.add_argument("--select", default="ultra", choices=["ultra", "none"])
     bt.add_argument("--budget", type=float, default=0.5, help="USD cap per cluster")
     bt.add_argument("--run-id")
+    it = sub.add_parser("init", help="draft a leakproof.toml for a C/C++ repository")
+    it.add_argument("repo_dir")
+    it.add_argument("--issue-text", help="the bug report's text: reproducer and inline input")
+    it.add_argument("--out", help="where to write (default: <repo-dir>/leakproof.toml)")
+    it.add_argument("--force", action="store_true")
+    it.add_argument("--budget", type=float, default=0.05, help="USD cap for the issue read")
     args = ap.parse_args(argv)
+    if args.cmd == "init":
+        return _init(args)
     return _batch(args) if args.cmd == "batch" else _fix(args)
 
 
