@@ -158,9 +158,14 @@ def attack_case(
                         g["data"] = bytes.fromhex(g["data"])
                     usd = got["usd"]
                 else:
-                    got_inputs, usd = adv.attack(
-                        client, VARIANTS[model][0], text, VARIANTS[model][1]
-                    )
+                    try:
+                        got_inputs, usd = adv.attack(
+                            client, VARIANTS[model][0], text, VARIANTS[model][1]
+                        )
+                    except Exception as exc:  # noqa: BLE001 - e.g. no JSON: no inputs, not cached
+                        print("model error", model, str(exc)[:200], flush=True)
+                        row["models"][model] = {"usd": 0.0, "n_inputs": 0, "error": str(exc)[:300]}
+                        continue
                     got = {"inputs": got_inputs, "usd": usd}
                     cache.write_text(
                         json.dumps(
@@ -291,7 +296,7 @@ def main() -> int:
                     "error": f"{type(exc).__name__}: {exc}"[:1500],
                 }
             )
-            print("error", case, exc, flush=True)
+            print("error", getattr(case, "id", case), str(exc)[:300], flush=True)
         (out / "summary.json").write_text(json.dumps(summary, indent=1))
     (out / "summary.json").write_text(json.dumps(summary, indent=1))
     usd = sum(m.get("usd", 0) for s in summary for m in s.get("models", {}).values())
