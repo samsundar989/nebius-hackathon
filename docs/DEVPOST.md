@@ -12,6 +12,10 @@ Numbers come from `docs/NUMBERS.md`; re-check them on Wed Oct 29 before the fina
 
 ---
 
+## Who it's for
+
+Maintainers and security teams with a backlog of OSS-Fuzz or sanitizer reports in C and C++, and CUDA teams whose kernels compute-sanitizer flags. They want patches they can review quickly, with the evidence attached.
+
 ## Inspiration
 
 Fuzzers find memory bugs faster than maintainers can fix them, and LLMs now write patches for them. The catch: most "fixes" just make the crash go away. They clamp a bound, skip a code path or allocate one more byte, and a repair loop that stops at "the sanitizer is quiet" reports them as wins. Published work finds that checking only the original crash input inflates repair agents' solve rates by about 1.8× (PatchBench). We wanted an agent whose "fixed" you can believe, and whose "not fixed" tells you why.
@@ -65,7 +69,7 @@ Honest numbers: raw versus verified versus correct, side by side, regenerated fr
 
 ## What's next
 
-Run the project test suites the OSS-Fuzz images lack (with their dependencies installed while preparing the baseline). Run the GitHub Action on a real repository. Move ARVO to Sandboxes once its image importer handles symlinked layers.
+More real tests in the gate. jq, mosquitto (about 210 CUnit tests, after installing CUnit while preparing the baseline), libexif and libplist now run their own suites; the other projects' suites need dependencies their OSS-Fuzz images lack. Show reviewers where the evidence is thin: a verified fix whose project has no tests and whose fuzz harness prints nothing to compare is labelled "verified, needs human review". Run the GitHub Action on a real repository. Move ARVO to Sandboxes once its image importer handles symlinked layers.
 
 ## Built with
 

@@ -17,6 +17,14 @@ Numbers are from `docs/NUMBERS.md` and the dashboard (both generated from the sa
 Accuracy notes for the narration (do not drop when shortening):
 - The jq refusal is P3 run 1, case 42530604 (worker H2·w1); the verified one-line fix (`digits + 20`) is from run 2.
 - Say "on Nebius Sandboxes" only about the gate in general: the Juliet runs used Sandboxes; ARVO images do not import there yet, so ARVO ran on local Docker (README).
-- The planner comparison is one repeat on 10 cases (2/4/7 verified; verified and correct 2/2/5).
+- The planner comparison is one repeat on 10 cases (2/4/7 verified; verified and correct 2/3/5, from `site/data/numbers.json`).
+
+B-roll to capture (dashboard served locally or on Render, 1440×900):
+1. The first screen: five headline numbers, the jq refusal card, the planner card.
+2. A gate matrix: mosquitto 42520955's case page, with "Other verified candidates (2): both wrong" open and the evidence badge visible.
+3. The calibration counts table (24 of 27 developer fixes accepted).
+4. The planner card close up (2 → 4 → 7 of 10).
+5. `docs/architecture.svg`.
+6. The terminal at the end of `leakproof batch` ("1/1 clusters verified for every member input").
 
 Recording notes: run `scripts/demo_run.sh` once beforehand so images are pulled; keep the terminal at 110 columns; the dashboard is the Render static site (or `site/` served locally: `cd site && python -m http.server 8765`). Do not show `.env` or the Render environment page.
