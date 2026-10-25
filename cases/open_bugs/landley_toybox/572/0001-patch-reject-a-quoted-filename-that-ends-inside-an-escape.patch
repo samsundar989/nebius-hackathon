@@ -1,0 +1,31 @@
+From ee9ab83faf66a00f19668bd977399b1944dcd3dc Mon Sep 17 00:00:00 2001
+From: samsundar989 <40044199+samsundar989@users.noreply.github.com>
+Date: Sun, 25 Oct 2026 10:40:33 -0500
+Subject: [PATCH] patch: reject a quoted filename that ends inside an escape
+
+unquote_file() checks s[1] at the top of its loop, but an escape sequence can
+consume the last character and leave s on the terminator. The next iteration
+then reads past the end of the string and keeps writing past the buffer
+(heap-buffer-overflow, toys/posix/patch.c:287). Stop at the terminator too.
+
+Fixes #572.
+---
+ toys/posix/patch.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/toys/posix/patch.c b/toys/posix/patch.c
+index b66d590..4e32587 100644
+--- a/toys/posix/patch.c
++++ b/toys/posix/patch.c
+@@ -281,7 +281,7 @@ static char *unquote_file(char *filename)
+ 
+   // quoted and escaped filenames are larger than the original
+   for (t = newfile = xmalloc(strlen(s) + 1); *s != '"'; s++) {
+-    if (!s[1]) error_exit("bad %s", filename);
++    if (!*s || !s[1]) error_exit("bad %s", filename);
+ 
+     // don't accept escape sequences unless the filename is quoted
+     if (*s != '\\') *t++ = *s;
+-- 
+2.50.1.windows.1
+

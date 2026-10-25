@@ -117,3 +117,5 @@ After your answer I set `site/config.json` to the service URL, push, and test fr
 - **Project AI policy:** none stated in the repository. toybox is maintained by one person by mailing list and GitHub; if you submit, say plainly that the fix was found with an AI tool and reviewed by you.
 
 Options: (a) you submit it (or the one-line version) under your name with that disclosure; (b) leave it — the result stays in the README either way. I will not post, comment, fork or open a PR.
+
+**Update 2026-10-25 (review #7):** the one-line version is now packaged and tested: `cases/open_bugs/landley_toybox/572/SUBMISSION.md` (format-patch file with your git identity as author, commit message, and a two-sentence AI-assistance disclosure). Gate run with no model calls (`runs/open_bugs_572_manual/gate.json`): the one-liner and H2·w1 both clear the reproducer, both are proven compiled into the binary, and both pass all 13 of toybox's own `patch` tests (13/13 on the unpatched build too, with an ASan-only test build; with UBSan, 12 tests fail at HEAD from an unrelated report in `lib/xwrap.c:428`). Recommendation: send the one-liner. Still your decision; I post nothing.
