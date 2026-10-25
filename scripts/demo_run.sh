@@ -7,7 +7,9 @@ cd "$(dirname "$0")/.."
 pause() { printf '\n\033[2m-- %s (Enter) --\033[0m\n' "$1"; read -r _; }
 
 pause "1. the bug: csvsplit under AddressSanitizer"
-docker run --rm -v "$PWD/examples/csvsplit:/src/csvsplit:ro" -w /tmp leakproof/cpp-sanitizers:e0 \
+# Git Bash would rewrite /tmp and /src into Windows paths; WSL ignores both settings.
+HERE=$(pwd -W 2>/dev/null || pwd)
+MSYS_NO_PATHCONV=1 docker run --rm -v "$HERE/examples/csvsplit:/src/csvsplit:ro" -w /tmp leakproof/cpp-sanitizers:e0 \
   bash -c 'cp -r /src/csvsplit /tmp/c && cd /tmp/c && make -s all CC=clang \
     CFLAGS="-fsanitize=address,undefined -g -O0" >/dev/null && ./csvsplit_fuzz poc.csv 2>&1 | head -12' || true
 
