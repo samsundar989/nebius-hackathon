@@ -274,3 +274,20 @@ Strategist notes 2026-10-25 10:25 CDT (review #7): acknowledged; orders 1–5 do
 5. **Open bugs round 2**: 16 more issues → 3 reproduce at HEAD → 2 verified → 0 ready as written (cNBT defensive with a new NULL dereference on the out-of-memory path; jsmn needs one more guard). Both rounds: 30 → 7 → 5 → 1. $0.22 (total open-bugs spend $0.92).
 
 Model spend for review #7: $0.22.
+
+## Day 5 (cont.) · Sun 2026-10-25, 13:30–14:30 CDT — review #8
+
+Strategist notes 2026-10-25 13:30 CDT (review #8): acknowledged; orders 1, 2, 3 and 5 done; 4 (`leakproof init`) next; 6 (Pages fallback) due Mon 12:00 if Render is still not applied.
+
+1. **Harness-less gate (D-0078)**: generated inputs from the PoC (amplified, 8 truncations, 200 seeded mutations) through the project's own reproducer, patched and unpatched; same-bug / new-crash / pre-existing crash rule; behaviour rule on clean inputs. Re-gate of every verified open-bugs diff ($0): toybox #571's wrong fix is now rejected (`refuzz_same_bug`, 7 of 169 inputs); both correct #572 fixes still verified; four other review findings still missed (table in `cases/open_bugs/REVIEW.md`, README gate section, NUMBERS). Allocation-failure check (advisory): on cNBT #28 it reached only 4 allocations — inconclusive. The "20 Juliet cases" acceptance check does not apply (Juliet programs take no input); D-0078 says so.
+2. **Video v3** (2:36): caption band, top-anchored terminal, fix split into plan → verdict and the highlighted diff, calibration summary card, cards at 70–85 % of frame height, 104 px end-card numbers. A blank calibration scene (Playwright records nothing for a static page) was found by pulling frames; card scenes are now screenshots. NOTE 0016: ready for narration.
+3. **Devpost gallery**: cards fill the 3:2 canvas (matrix transposed); image 5 is now jq 42531297 (1 verified, 2 refused by re-fuzz); new image 6 (review finding → caught by); arrowhead fixed (an unfilled dashed path rendered as a black triangle); first screen at a narrower viewport without the "not deployed" note.
+5. **Before going public** — `git grep` for the email and personal paths:
+   - email in `572/0001-…patch` and `572/SUBMISSION.md` → replaced with `<your git identity>`; the real copy is the gitignored `0001-patch.private.patch`; QUESTION 0017 updated.
+   - `C:\Users\<user>` in `scripts/lp_job.ps1` and `scripts/service_smoke.ps1` → `%USERPROFILE%`- and `$PSScriptRoot`-relative paths.
+   - left as is: `CLAUDE.md` (environment line), `docs/DECISIONS.md` D-0006 (append-only), `docs/HUMAN.md` (a Docker disk path in an old note). `samsundar989` also appears as the GitHub repo owner in README, the GitHub Action example and the video end card: the public repo URL.
+   - git history: every commit's author email is the Gmail address, and one earlier version of the patch file has it; not rewritten (QUESTION 0012).
+   - Also found: the Sandboxes contract test for relative-path uploads fails today (FEEDBACK); the gate uploads to absolute paths, so verdicts are unaffected.
+
+Model spend for review #8 so far: $0.
+
