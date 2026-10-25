@@ -89,4 +89,4 @@ gate does not judge; struct2json's demo exits 2 without a LeakSanitizer report i
 
 ## Both rounds
 
-30 issues triaged → 9 reproduce at HEAD without an open fix PR, of which 7 were attempted → 5 verified → 1 ready to propose (toybox #572, QUESTION 0017). Model spend $0.92 ($0.70 + $0.22).
+30 issues triaged → 7 reproduce at HEAD without an open fix PR, all attempted → 5 verified → 1 ready to propose (toybox #572, QUESTION 0017). Model spend $0.92 ($0.70 + $0.22).
