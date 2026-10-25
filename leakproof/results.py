@@ -2,6 +2,7 @@
 
 Overlays on the raw records in runs/<run>/<case>.json, each documented in DECISIONS:
   D-0056  re-judged verdicts (a libFuzzer slow-unit artifact is not a crash)
+  D-0073  mosquitto re-gated with its CUnit suite
   D-0070  re-selected winners among several verified candidates (runs/winners.json),
           plus `ambiguous` from the cross-candidate differential
   D-0069  the hand semantic class of every verified diff (cases/arvo/semantic_adjudication.json)
@@ -18,7 +19,9 @@ from leakproof.config import REPO_ROOT, RUNS_DIR
 from leakproof.fix import rank
 from leakproof.semantic import CORRECT, change
 
-REJUDGED = {"p3_arvo27_r1": "p3_rejudge_d0056"}
+# Re-judges applied in order: (output dir under runs/, decision). Each holds
+# <case>/<run>/gate.json for the runs it re-gated.
+REJUDGES = (("p3_rejudge_d0056", "D-0056"), ("p3_rejudge_d0073", "D-0073"))
 ADJUDICATION = REPO_ROOT / "cases" / "arvo" / "semantic_adjudication.json"
 
 
@@ -55,19 +58,23 @@ def _find(workers: list[dict], who: dict) -> dict | None:
 
 def load(run: str, case_file: str) -> dict[str, Any]:
     rec = json.loads((RUNS_DIR / run / case_file).read_text())
-    rejudge = RUNS_DIR / REJUDGED.get(run, "-") / rec["case"] / run / "gate.json"
-    if rejudge.exists():
+    for out_dir, decision in REJUDGES:
+        rejudge = RUNS_DIR / out_dir / rec["case"] / run / "gate.json"
+        if not rejudge.exists():
+            continue
         gate = json.loads(rejudge.read_text())
         new = {(g["hypothesis_id"], g["worker_index"]): g for g in gate["results"]}
         for w in rec.get("workers", []):
             g = new.get((w["hypothesis_id"], w["worker_index"]))
             if g is not None and w.get("round", 1) == 1:
-                w["verdict_as_run"], w["verdict"], w["gate"] = w["verdict"], g["verdict"], g
+                w.setdefault("verdict_as_run", w["verdict"])
+                w["verdict"], w["gate"] = g["verdict"], g
         best = min(
             rec["workers"], key=lambda w: (rank(w["verdict"]), len(w.get("diff") or "x" * 10**6))
         )
-        rec["verdict_as_run"], rec["verdict"] = rec["verdict"], best["verdict"]
-        rec["rejudged"] = "D-0056"
+        rec.setdefault("verdict_as_run", rec["verdict"])
+        rec["verdict"] = best["verdict"]
+        rec.setdefault("rejudged", []).append(decision)
         if best["verdict"] == "verified":
             rec["winner"] = {k: best.get(k, 1) for k in ("hypothesis_id", "worker_index", "round")}
             rec["winner"]["diff"] = best["diff"]
