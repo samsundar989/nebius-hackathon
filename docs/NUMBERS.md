@@ -73,11 +73,25 @@ One repeat on 10 cases: read the gap between no planner and Ultra, not small dif
 - A hypothesis names a file the developer changed: 22/24.
 - The root cause names a function the developer changed: 14/22 (lower bound: hunk headers name the function enclosing each change's first line).
 
+## Open bugs without a fuzz harness: re-gate with generated inputs (D-0078)
+
+| case | generated inputs (crash unpatched) | candidate | verdict |
+|---|---|---|---|
+| berry_544_format | 204 (36) | H1w0 | verified |
+| berry_544_format | 204 (36) | H3w2 | verified |
+| berry_544_format | 204 (36) | H4w3 | verified |
+| jsmn_249 | 219 (54) | H2w3 | verified |
+| toybox_571 | 169 (52) | H2w1 | rejected:refuzz_same_bug |
+| toybox_572 | 183 (12) | M1 | verified |
+| toybox_572 | 183 (12) | H2w1 | verified |
+| toybox_572 | 183 (12) | H3w2 | verified |
+| toybox_572 | 183 (12) | H1w0 | verified |
+
 ## CUDA on a Kaggle T4 (compute-sanitizer)
 
 - 3/3 cases verified (oob_global: global-out-of-bounds, leak_cudamalloc: leak, race_shared: race); 2 candidate(s) silenced the sanitizer but printed the wrong checksum.
 
 ## Spend
 
-- Every model call in the project, failed runs included: **$9.3700** (Nebius billing agreed within $0.01 on 2026-10-24).
+- Every model call in the project, failed runs included: **$10.2928** (Nebius billing agreed within $0.01 on 2026-10-24).
 - Nebius Sandboxes: 9.42 units, not billed during the beta.

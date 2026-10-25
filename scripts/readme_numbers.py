@@ -7,6 +7,7 @@ scripts/readme_numbers.py        -> docs/NUMBERS.md (re-run whenever a run chang
 from __future__ import annotations
 
 import json
+import re
 import sys
 from collections import Counter
 
@@ -345,6 +346,23 @@ def main() -> int:
             f"{d['function_match']}/{d['function_cases']} (lower bound: hunk headers name the "
             "function enclosing each change's first line).",
         ]
+    regate = sorted((RUNS_DIR / "open_bugs_regate").glob("*/gate.json"))
+    if regate:
+        out += [
+            "",
+            "## Open bugs without a fuzz harness: re-gate with generated inputs (D-0078)",
+            "",
+            "| case | generated inputs (crash unpatched) | candidate | verdict |",
+            "|---|---|---|---|",
+        ]
+        for p in regate:
+            g = json.loads(p.read_text())
+            m = re.search(
+                r"(\d+) inputs generated from the PoC \((\d+) crash", g["unpatched"]["detail"]
+            )
+            gen = f"{m[1]} ({m[2]})" if m else "?"
+            for r in g["results"]:
+                out.append(f"| {p.parent.name} | {gen} | {r['hypothesis_id']} | {r['verdict']} |")
     cu = RUNS_DIR / "p5_cuda" / "verdicts.json"
     if cu.exists():
         d = json.loads(cu.read_text())

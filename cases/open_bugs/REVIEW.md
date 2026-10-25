@@ -90,3 +90,23 @@ gate does not judge; struct2json's demo exits 2 without a LeakSanitizer report i
 ## Both rounds
 
 30 issues triaged → 7 reproduce at HEAD without an open fix PR, all attempted → 5 verified → 1 ready to propose (toybox #572, QUESTION 0017). Model spend $0.92 ($0.70 + $0.22).
+
+## Review finding → caught by which check (D-0078 re-gate)
+
+Every distinct verified open-bugs diff re-gated with the harness-less checks: inputs generated
+from the PoC (the PoC, an amplified copy, 8 truncations, 200 seeded mutations), run through the
+reproducer with the patched and the unpatched build (`runs/open_bugs_regate/`, job 3850, $0).
+
+| case | candidate | human review said | re-gate verdict | caught by |
+|---|---|---|---|---|
+| toybox #571 | H2w1 | wrong: the overflow recurs on other `-l` strings | rejected:refuzz_same_bug (target crash on 7 of 169 generated inputs) | **generated inputs** |
+| toybox #572 | M1 (one line) | correct | verified | — (no false reject) |
+| toybox #572 | H2w1 | correct | verified | — (no false reject) |
+| toybox #572 | H3w2, H1w0 | wrong: depends on the byte after the terminator | verified | **still missed**: no generated input put a non-quote byte there |
+| berry #544 | H1w0, H3w2, H4w3 | defensive; the UB stays | verified | **still missed**: the UB does not crash under ASan |
+| jsmn #249 | H2w3 | needs a one-line guard for a residual edge | verified | **still missed**: the edge needs a token count no mutation reached |
+| cNBT #28 | H1w0, H1w1 | defensive; the OOM path still dereferences NULL | verified (fuzz-harness path, unchanged) | **inconclusive**: the allocation-failure check (advisory) reached only 4 allocations, none on that path |
+
+One of five wrong-or-incomplete findings is now caught by a machine check; the other four still need
+the human review, which is why "verified" on open bugs is reported as "verified, needs human
+review" and only toybox #572 is ready to propose.

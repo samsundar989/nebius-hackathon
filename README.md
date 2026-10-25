@@ -76,6 +76,8 @@ A candidate is **verified** only if every check passes:
 | amplified re-fuzz | enlarged copies of the PoC (every digit/letter run ×2/×8/×64, the whole input, the last element) and 90 s of libFuzzer find a crash the developer's fix does not have |
 | safe-fix | the corpus under LeakSanitizer shows a leak, use-after-free or double free the reference does not |
 
+**Projects without a fuzz harness** (most open-source C, and every open bug we tried): the gate generates inputs from the PoC — an amplified copy, 8 truncations and 200 seeded mutations — and runs the project's own reproduce command on each, patched and unpatched. The target crash on any of them rejects the patch (`rejected:refuzz_same_bug`); a new crash, or a changed exit status or output on an input that ran clean unpatched, fails the re-fuzz or behaviour check. On the open bugs this caught one of five wrong-or-incomplete fixes a human review had found (toybox #571) and rejected none of the correct ones ([REVIEW](cases/open_bugs/REVIEW.md#review-finding--caught-by-which-check-d-0078-re-gate)).
+
 **How a gate lies — bugs we found in our own gate and fixed** (each in [docs/DECISIONS.md](docs/DECISIONS.md)):
 - *The patch was never compiled.* Copied-in sources had older timestamps than the objects, so `make` skipped them; the gate "verified" the unpatched binary. Now the harness hash must change.
 - *The fuzzer never ran.* ARVO hard-codes AFL/honggfuzz engines; our libFuzzer flags were silently ignored and re-fuzzing "passed" with zero executions. Now every build uses libFuzzer and a run with no executions is inconclusive.
