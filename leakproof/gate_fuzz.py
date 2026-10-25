@@ -34,7 +34,12 @@ AMP_MAX_BYTES = 1 << 20
 AMP_MAX_RUNS = 4  # digit/alpha runs amplified per input, longest first
 SAFE_FIX_KINDS = {"leak", "use-after-free", "double-free", "invalid-free"}
 LP = "/tmp/lp"
-SIG = r"grep -m1 -oE '(ERROR|WARNING): ([A-Za-z]+Sanitizer|libFuzzer): [A-Za-z-]+'"
+# UBSan (D-0079) reports as `file:line:col: runtime error: <kind>`; builds that enable it halt on
+# the first report (UBSAN_OPTIONS=halt_on_error=1), so it is a crash like any other.
+SIG = (
+    r"grep -m1 -oE '(ERROR|WARNING): ([A-Za-z]+Sanitizer|libFuzzer): [A-Za-z-]+"
+    r"|runtime error: [A-Za-z -]+'"
+)
 
 
 def report_cmd(path: str) -> str:
