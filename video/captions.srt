@@ -1,5 +1,5 @@
 1
-00:00:00,300 --> 00:00:14,700
+00:00:03,300 --> 00:00:14,700
 jq: the model's patch passed jq's own tests, and the original crash input no longer crashes.
 
 2
@@ -7,29 +7,33 @@ jq: the model's patch passed jq's own tests, and the original crash input no lon
 Leakproof doubled one number in that input: the patched jq overflows. Refused.
 
 3
-00:00:30,300 --> 00:00:44,700
+00:00:30,300 --> 00:00:41,700
 A bug to fix live: a CSV splitter writes one byte past a buffer.
 
 4
-00:00:45,300 --> 00:01:19,700
-Nemotron 3 Ultra plans; four Nemotron 3.5 Lightning workers patch; the gate verifies (network off).
+00:00:42,300 --> 00:01:13,700
+Nemotron 3 Ultra plans; four Nemotron 3.5 Lightning workers patch; the gate verifies with the network off.
 
 5
-00:01:20,300 --> 00:01:49,700
-27 real OSS-Fuzz bugs: crash gone in 18, verified 15, correct 14. The gate accepts 24 of 27 developer fixes.
+00:01:14,300 --> 00:01:29,700
+27 real OSS-Fuzz bugs: crash gone in 18, verified 15, correct 14.
 
 6
-00:01:50,300 --> 00:02:04,700
-Same Lightning workers, 10 real bugs: no planner 2, Super 4, Ultra 7 verified.
+00:01:30,300 --> 00:01:41,700
+The gate accepts 24 of 27 of the developers' own fixes.
 
 7
-00:02:05,300 --> 00:02:19,700
-Batch mode: 10 crash reports, 1 root cause, fixed once, every report re-checked.
+00:01:42,300 --> 00:01:56,700
+Same Lightning workers, 10 real bugs: no planner 2, Super 4, Ultra 7 verified.
 
 8
-00:02:20,300 --> 00:02:34,700
-On the GPU: two patches silenced compute-sanitizer and printed the wrong answer. Rejected.
+00:01:57,300 --> 00:02:09,699
+Batch mode: 10 crash reports, 1 root cause, fixed once, every report re-checked.
 
 9
-00:02:35,300 --> 00:02:54,700
+00:02:10,300 --> 00:02:23,700
+On the GPU: two patches silenced compute-sanitizer and printed the wrong answer. Rejected.
+
+10
+00:02:24,300 --> 00:02:43,700
 Where it falls short: two mosquitto fixes passed every check yet were wrong. We report verified and correct.

@@ -36,3 +36,8 @@ def test_newly_failing_or_missing_test_fails() -> None:
     missing = {k: v for k, v in base.items() if k != "Persist read/Empty file"}
     c = compare_tests(base, missing)
     assert c.status == "fail" and "did not run (1)" in c.detail
+
+
+def test_test_names_with_spaces_stay_distinct() -> None:
+    r = parse_results("PASS: patch create file\nFAIL: patch dry run doesn't create file\n")
+    assert r == {"patch create file": True, "patch dry run doesn't create file": False}

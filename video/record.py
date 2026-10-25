@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Silent video draft for Samuel to narrate over (review #6 order 2).
+"""Silent video draft for Samuel to narrate over (review #6 order 2, v2 per review #7).
 
-video/record.py  -> video/clips/<scene>.webm (Playwright screen recordings, 1440x900),
-                    video/captions.srt, video/leakproof_draft.mp4 (concatenated, captions burned in)
+video/record.py  -> video/clips/<scene>.webm (Playwright, 1920x1080), video/captions.srt,
+                    video/leakproof_draft.mp4 (concatenated, captions burned in)
 
-Scenes follow docs/VIDEO_SCRIPT.md v2: terminal replays of recorded runs (video/transcripts/,
-built by video/build_transcripts.py) and the dashboard (site/, served locally). Needs Playwright
-with Chromium and imageio-ffmpeg in the Windows venv; no model calls, no Docker.
+Readable at 1080p and on a phone: terminal scenes use a 28 px font with at most 22 lines; each
+dashboard scene isolates one card, zooms it (CSS zoom) to fill the frame and pans slowly when it
+is taller than the frame. Scenes follow docs/VIDEO_SCRIPT.md v2; terminal
+scenes replay recorded runs (video/transcripts/, from video/build_transcripts.py). Needs
+Playwright with Chromium and imageio-ffmpeg in the Windows venv; no model calls, no Docker.
 """
 
 from __future__ import annotations
@@ -25,56 +27,110 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parent.parent
 VIDEO = ROOT / "video"
 CLIPS = VIDEO / "clips"
-W, H = 1440, 900
+W, H = 1920, 1080
 
-# (scene, seconds, caption) in script order; captions condense the narration of VIDEO_SCRIPT v2.
+# (scene, kind, target, seconds, caption) in script order. kind: card | term | dash.
 SCENES = [
+    ("00_title", "card", "title", 3, ""),
     (
         "01_jq_bundle",
-        15,
+        "term",
+        "01_jq_bundle",
+        12,
         "jq: the model's patch passed jq's own tests, and the original crash input no longer crashes.",
     ),
     (
         "02_refusal_card",
+        "dash",
+        "#refusal",
         15,
         "Leakproof doubled one number in that input: the patched jq overflows. Refused.",
     ),
-    ("03_crash", 15, "A bug to fix live: a CSV splitter writes one byte past a buffer."),
+    (
+        "03_crash",
+        "term",
+        "03_crash",
+        12,
+        "A bug to fix live: a CSV splitter writes one byte past a buffer.",
+    ),
     (
         "04_fix",
-        35,
-        "Nemotron 3 Ultra plans; four Nemotron 3.5 Lightning workers patch; the gate verifies (network off).",
+        "term",
+        "04_fix",
+        32,
+        "Nemotron 3 Ultra plans; four Nemotron 3.5 Lightning workers patch; the gate verifies with the network off.",
     ),
     (
         "05_funnel",
-        30,
-        "27 real OSS-Fuzz bugs: crash gone in 18, verified 15, correct 14. The gate accepts 24 of 27 developer fixes.",
+        "dash",
+        "funnel",
+        16,
+        "27 real OSS-Fuzz bugs: crash gone in 18, verified 15, correct 14.",
     ),
     (
-        "06_planner",
+        "06_calibration",
+        "dash",
+        "#calibration",
+        12,
+        "The gate accepts 24 of 27 of the developers' own fixes.",
+    ),
+    (
+        "07_planner",
+        "dash",
+        "#planner",
         15,
         "Same Lightning workers, 10 real bugs: no planner 2, Super 4, Ultra 7 verified.",
     ),
     (
+        "08_batch",
+        "term",
         "07_batch",
-        15,
+        13,
         "Batch mode: 10 crash reports, 1 root cause, fixed once, every report re-checked.",
     ),
     (
-        "08_cuda",
-        15,
+        "09_cuda",
+        "dash",
+        "#cuda",
+        14,
         "On the GPU: two patches silenced compute-sanitizer and printed the wrong answer. Rejected.",
     ),
     (
-        "09_mosquitto",
+        "10_mosquitto",
+        "dash",
+        "mosquitto",
         20,
         "Where it falls short: two mosquitto fixes passed every check yet were wrong. We report verified and correct.",
     ),
+    ("11_end", "card", "end", 5, ""),
 ]
+
+# Isolate one element, zoom it to fill the frame, then pan linearly if it is taller than the frame.
+ISOLATE = """([sel, seconds]) => {
+  const el = document.querySelector(sel).cloneNode(true);
+  el.querySelectorAll('details').forEach(d => d.open = true);
+  if (el.matches('details')) el.open = true;
+  const stage = document.createElement('div');
+  stage.style.cssText = 'width:880px;margin:0 auto;padding:16px 0 40px';
+  stage.appendChild(el);
+  document.body.replaceChildren(stage);
+  const fit = Math.min(innerWidth * 0.95 / 880, innerHeight * 0.92 / stage.offsetHeight);
+  stage.style.zoom = Math.max(fit, innerWidth * 0.95 / 880 * 0.999);
+  const extra = document.documentElement.scrollHeight - innerHeight;
+  if (extra > 0) {
+    const start = performance.now() + 2500, span = (seconds - 4.5) * 1000;
+    const step = (t) => {
+      const k = Math.min(Math.max((t - start) / span, 0), 1);
+      window.scrollTo(0, extra * k);
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+}"""
 
 
 def serve() -> tuple[http.server.ThreadingHTTPServer, int]:
-    # One server over the repo: /site/ for the dashboard, /video/ for the terminal page.
+    # One server over the repo: /site/ for the dashboard, /video/ for terminal and cards.
     handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(ROOT))
     handler.log_message = lambda *a, **k: None  # type: ignore[method-assign]
     srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
@@ -82,49 +138,30 @@ def serve() -> tuple[http.server.ThreadingHTTPServer, int]:
     return srv, srv.server_address[1]
 
 
-def smooth_scroll(page, selector: str, seconds: float) -> None:  # noqa: ANN001
-    page.evaluate(
-        "s => document.querySelector(s).scrollIntoView({behavior: 'smooth', block: 'start'})",
-        selector,
-    )
-    page.wait_for_timeout(int(seconds * 1000))
-
-
-def play(page, base: str, scene: str, seconds: int) -> None:  # noqa: ANN001
-    ms = seconds * 1000
-    if scene in ("01_jq_bundle", "03_crash", "04_fix", "07_batch"):
-        page.goto(f"{base}/video/terminal.html?t={scene}")
-        page.wait_for_timeout(ms)
-        return
-    page.goto(f"{base}/site/index.html")
-    page.wait_for_selector("#headline .stat")
-    page.wait_for_timeout(800)
-    if scene == "02_refusal_card":
-        smooth_scroll(page, "#refusal", 1.5)
-        page.wait_for_timeout(ms - 2300)
-    elif scene == "05_funnel":
-        page.wait_for_timeout(9000)
-        smooth_scroll(page, "#funnel", 9)
-        smooth_scroll(page, "#calibration", 10.5)
-    elif scene == "06_planner":
-        smooth_scroll(page, "#planner", 1.5)
-        page.wait_for_timeout(ms - 2300)
-    elif scene == "08_cuda":
-        smooth_scroll(page, "#cuda", 1.5)
-        page.wait_for_timeout(ms - 2300)
-    elif scene == "09_mosquitto":
-        page.evaluate(
-            "[...document.querySelectorAll('#cases button')].find(b => b.textContent.includes('42520955')).click()"
-        )
-        page.wait_for_timeout(600)
-        smooth_scroll(page, "#case", 1.5)
-        page.wait_for_timeout(4000)
-        page.evaluate("document.querySelector('#case details').open = true")
-        page.wait_for_timeout(800)
-        page.evaluate(
-            "document.querySelector('#case details').scrollIntoView({behavior: 'smooth'})"
-        )
-        page.wait_for_timeout(ms - 7700)
+def play(page, base: str, kind: str, target: str, seconds: int) -> None:  # noqa: ANN001
+    if kind == "card":
+        page.goto(f"{base}/video/card.html?type={target}")
+    elif kind == "term":
+        page.goto(f"{base}/video/terminal.html?t={target}")
+    else:
+        page.goto(f"{base}/site/index.html")
+        page.wait_for_selector("#headline .stat")
+        page.wait_for_selector("#cases button")
+        sel = target
+        if target == "funnel":
+            sel = "#funnel"
+            page.evaluate("document.querySelector('#funnel').closest('.panel').id = 'funnel-panel'")
+            sel = "#funnel-panel"
+        elif target == "mosquitto":
+            page.evaluate(
+                "[...document.querySelectorAll('#cases button')]"
+                ".find(b => b.textContent.includes('42520955')).click()"
+            )
+            page.wait_for_selector("#case details")
+            sel = "#case details"
+        page.wait_for_timeout(300)
+        page.evaluate(ISOLATE, [sel, seconds])
+    page.wait_for_timeout(seconds * 1000)
 
 
 def stamp(t: float) -> str:
@@ -137,14 +174,16 @@ def main() -> int:
     base = f"http://127.0.0.1:{port}"
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        for scene, seconds, _ in SCENES:
+        for scene, kind, target, seconds, _ in SCENES:
+            # Full-HD viewport for every scene; dashboard cards are enlarged by CSS zoom (ISOLATE),
+            # which renders text at full resolution.
             ctx = browser.new_context(
                 viewport={"width": W, "height": H},
                 record_video_dir=str(CLIPS / "tmp"),
                 record_video_size={"width": W, "height": H},
             )
             page = ctx.new_page()
-            play(page, base, scene, seconds)
+            play(page, base, kind, target, seconds)
             video = page.video
             ctx.close()
             shutil.move(video.path(), CLIPS / f"{scene}.webm")
@@ -153,26 +192,33 @@ def main() -> int:
     srv.shutdown()
     shutil.rmtree(CLIPS / "tmp", ignore_errors=True)
 
-    # Captions: one cue per scene, timed by the scene lengths.
     t, cues = 0.0, []
-    for i, (_, seconds, caption) in enumerate(SCENES, 1):
-        cues.append(f"{i}\n{stamp(t + 0.3)} --> {stamp(t + seconds - 0.3)}\n{caption}\n")
+    for _, _, _, seconds, caption in SCENES:
+        if caption:
+            cues.append(
+                f"{len(cues) + 1}\n{stamp(t + 0.3)} --> {stamp(t + seconds - 0.3)}\n{caption}\n"
+            )
         t += seconds
     (VIDEO / "captions.srt").write_text("\n".join(cues), encoding="utf-8", newline="\n")
 
-    # Each clip trimmed to its scene length (recordings start with a short blank page), then
-    # concatenated; captions are drawn per scene with drawtext so no libass is needed.
+    # Each clip: skip the blank first frames, cut to length, draw its caption (drawtext, so no
+    # libass is needed); then concatenate.
     ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
     parts = []
-    for scene, seconds, caption in SCENES:
+    for scene, kind, _, seconds, caption in SCENES:
         out = CLIPS / f"{scene}.mp4"
-        text = (
-            caption.replace("\\", "\\\\").replace(":", "\\:").replace("'", "’").replace(",", "\\,")
-        )
-        draw = (
-            f"drawtext=text='{text}':fontfile='C\\:/Windows/Fonts/segoeui.ttf':fontsize=30:"
-            "fontcolor=white:box=1:boxcolor=black@0.65:boxborderw=14:x=(w-text_w)/2:y=h-90"
-        )
+        # Playwright records only when the page repaints, so a static stretch has few frames:
+        # pad to the full scene length by repeating the last frame. Card scenes are static from
+        # their first paint, so nothing is skipped at their start.
+        skip = "0" if kind == "card" else "0.8"
+        vf = f"tpad=stop_mode=clone:stop_duration={seconds},fps=30,scale=1920:1080"
+        if caption:
+            text = caption.replace("\\", "\\\\").replace(":", "\\:").replace("'", "’")
+            text = text.replace(",", "\\,")
+            vf += (
+                f",drawtext=text='{text}':fontfile='C\\:/Windows/Fonts/segoeui.ttf':fontsize=40:"
+                "fontcolor=white:box=1:boxcolor=black@0.72:boxborderw=18:x=(w-text_w)/2:y=h-110"
+            )
         subprocess.run(
             [
                 ffmpeg,
@@ -180,15 +226,19 @@ def main() -> int:
                 "-loglevel",
                 "error",
                 "-ss",
-                "0.6",
+                skip,
                 "-i",
                 str(CLIPS / f"{scene}.webm"),
                 "-t",
                 str(seconds),
                 "-vf",
-                f"fps=30,{draw}",
+                vf,
                 "-c:v",
                 "libx264",
+                "-preset",
+                "medium",
+                "-crf",
+                "20",
                 "-pix_fmt",
                 "yuv420p",
                 "-an",

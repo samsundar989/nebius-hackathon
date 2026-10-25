@@ -10,6 +10,12 @@ Numbers come from `docs/NUMBERS.md`; re-check them on Wed Oct 29 before the fina
 
 **Links:** repository [GitHub URL] · live dashboard [Render static site URL] · video [YouTube URL]
 
+## Try it out
+
+- Repository: [GitHub URL] — `uv run leakproof fix --config examples/csvsplit/leakproof.toml` (Docker and a Nebius Token Factory key; about one cent per fix).
+- Dashboard: [dashboard URL] — every run, every gate check, the calibration and the planner comparison.
+- Video: [YouTube URL] — 2:49.
+
 ---
 
 ## Who it's for
@@ -41,6 +47,7 @@ It works on your own project through a short `leakproof.toml` (`leakproof fix`),
 - **The planner matters on real code:** same Lightning workers, 10 cases. No planner: 2 verified; Super: 4; Ultra: 7. Ultra was also cheaper per verified fix, because failed attempts cost money too.
 - **Juliet CWE-401 (synthetic):** 94/100, every reproducible case, at $0.011 per fix.
 - **CUDA (compute-sanitizer on a T4):** 3/3 verified. Two candidate patches silenced the sanitizer but printed the wrong answer; the gate rejected them.
+- **Bugs that are still open upstream:** 14 open GitHub issues with sanitizer reports → 6 still reproduce at upstream HEAD → 4 without a fix PR → 3 verified by the gate → 1 ready to propose after review (toybox #572; a human decides whether to send it, nothing was posted). Without tests or a fuzz harness the gate checks only the reproducer, and 6 of the 7 distinct verified diffs were wrong or defensive on review.
 
 ## How we built it
 
@@ -82,9 +89,12 @@ nvidia-nemotron, nemotron-3-ultra, nemotron-3.5-lightning, nemotron-3-super, neb
 - **Nemotron:** Ultra is a strong planner and a useful first-pass reviewer (we overrode 8 of its 67 judgments). Lightning is a fast, cheap patch worker when its thinking budget is bounded.
 - **compute-sanitizer:** exact reports, but the exit code is 0 on errors unless `--error-exitcode` is set, and it cannot attach under WSL2 yet prints a clean-looking report.
 
-## Gallery images (to capture)
+## Gallery images (rendered by `docs/devpost/render_assets.py`, 3:2 at 2×)
 
-1. Dashboard first screen (headline numbers, jq refusal card, planner card).
-2. A case page with the gate matrix (mosquitto 42520955, with "other verified candidates" open).
-3. `docs/architecture.svg`.
-4. Terminal: `leakproof batch` → "1 cluster, all 6 members clean".
+- Thumbnail: `docs/devpost/thumbnail.png` ("15/27 real bugs verified · 14 correct").
+1. `docs/devpost/1_first_screen.png` — the dashboard's first screen.
+2. `docs/devpost/2_jq_refusal.png` — what a refusal looks like (jq).
+3. `docs/devpost/3_funnel.png` — from "the crash went away" to "verified and correct".
+4. `docs/devpost/4_planner.png` — which model does what: 2 → 4 → 7 of 10.
+5. `docs/devpost/5_gate_matrix.png` — every check, every candidate (mosquitto 42520955: all three candidates verified, two of them wrong — the case for the semantic review).
+- Architecture: `docs/devpost/architecture.png`.

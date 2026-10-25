@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Leakproof card</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0f1115; color: #e8eaed; font-family: system-ui, "Segoe UI", sans-serif; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; text-align: center; }
+  h1 { font-size: 112px; margin: 0 0 18px; letter-spacing: -0.02em; }
+  .tag { font-size: 52px; color: #6fd39e; margin: 0 0 44px; }
+  .sub { font-size: 34px; color: #a0a7b3; }
+  .nums { display: grid; grid-template-columns: repeat(4, 360px); gap: 22px; margin: 40px auto 46px; }
+  .nums div { background: #191c21; border: 1px solid #2b3038; border-radius: 16px; padding: 26px 18px; }
+  .nums b { display: block; font-size: 64px; color: #6fd39e; }
+  .nums span { font-size: 24px; color: #a0a7b3; }
+  .links { font: 32px/1.6 ui-monospace, Consolas, monospace; color: #7ea2ff; }
+</style>
+</head>
+<body>
+<div id="card"></div>
+<script>
+// ?type=title | ?type=end ; the end card reads the headline numbers from site/data/numbers.json.
+(async () => {
+  const type = new URLSearchParams(location.search).get("type");
+  const card = document.getElementById("card");
+  if (type === "title") {
+    card.innerHTML = `<h1>Leakproof</h1><p class="tag">Verified fixes, or nothing.</p>
+      <p class="sub">Nemotron on Nebius Token Factory · gate on Nebius Sandboxes</p>`;
+    return;
+  }
+  const n = await fetch("../site/data/numbers.json").then((r) => r.json());
+  const cal = await fetch("../site/data/calibration.json").then((r) => r.json());
+  const r1 = n.arvo.p3_arvo27_r1, p = n.planners_arvo, a = cal.adjudicated;
+  card.innerHTML = `<h1 style="font-size:84px">Leakproof</h1>
+    <div class="nums">
+      <div><b>${r1.verified}/${r1.cases}</b><span>real OSS-Fuzz bugs verified</span></div>
+      <div><b>${r1.strict}/${r1.cases}</b><span>verified and correct</span></div>
+      <div><b>${a.classes.accepted}/${a.judged}</b><span>developers' fixes the gate accepts</span></div>
+      <div><b>${p.lightning.verified} → ${p.ultra.verified}</b><span>of 10 with Ultra's plan</span></div>
+    </div>
+    <div class="links">github.com/samsundar989/nebius-hackathon<br>dashboard: (link when deployed)</div>`;
+})();
+</script>
+</body>
+</html>

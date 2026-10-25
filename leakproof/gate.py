@@ -219,7 +219,8 @@ def behavior_check(cwe: str, before: str, after: str) -> Check:
 
 # One line per test result: automake (`PASS: tests/x`) and CUnit (`Test: name ...passed`).
 TEST_LINES = "'^(PASS|FAIL|XFAIL|XPASS|ERROR): |^Suite: |Test: .*[.]{3}(passed|FAILED)'"
-_AUTOMAKE = re.compile(r"^(PASS|FAIL|XFAIL|XPASS|ERROR): (\S+)")
+# The whole rest of the line names the test: automake prints a path, toybox a sentence.
+_AUTOMAKE = re.compile(r"^(PASS|FAIL|XFAIL|XPASS|ERROR): (.+?)\s*$")
 _CUNIT_SUITE = re.compile(r"^Suite: (.+)")
 _CUNIT_TEST = re.compile(r"Test: (.+?) \.\.\.(passed|FAILED)")
 

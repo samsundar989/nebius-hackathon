@@ -4,49 +4,61 @@
 <meta charset="utf-8">
 <title>Leakproof terminal replay</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #0f1115; }
+  html, body { margin: 0; height: 100%; background: #0f1115; overflow: hidden; }
   body { display: flex; align-items: center; justify-content: center; }
-  .win { width: 1320px; height: 800px; background: #16191f; border-radius: 10px; box-shadow: 0 10px 40px #0008; overflow: hidden; display: flex; flex-direction: column; }
-  .bar { height: 34px; background: #23262e; display: flex; align-items: center; gap: 8px; padding: 0 14px; }
-  .bar i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-  .bar span { color: #8b93a1; font: 13px system-ui, sans-serif; margin-left: 10px; }
-  pre { flex: 1; margin: 0; padding: 18px 22px; color: #d7dae0; font: 17px/1.5 ui-monospace, Consolas, monospace; white-space: pre-wrap; overflow: hidden; }
-  .cmd { color: #7ee787; } .note { color: #8b93a1; } .err { color: #ff7b72; } .ok { color: #7ee787; font-weight: 600; }
+  .win { width: 1840px; height: 960px; background: #16191f; border-radius: 14px; box-shadow: 0 10px 40px #0008; overflow: hidden; display: flex; flex-direction: column; }
+  .bar { height: 46px; flex: none; background: #23262e; display: flex; align-items: center; gap: 10px; padding: 0 18px; }
+  .bar i { width: 15px; height: 15px; border-radius: 50%; display: inline-block; }
+  .bar span { color: #8b93a1; font: 20px system-ui, sans-serif; margin-left: 12px; }
+  pre { flex: 1; margin: 0; padding: 22px 30px; color: #d7dae0; font: 28px/1.45 ui-monospace, Consolas, monospace; white-space: pre; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+  .l { display: block; overflow: hidden; text-overflow: ellipsis; }
+  .cmd { color: #7ee787; } .note { color: #8b93a1; } .err { color: #ff7b72; } .ok { color: #7ee787; font-weight: 700; }
   .add { color: #7ee787; } .del { color: #ff7b72; }
+  .key { outline: 3px solid #f2cc60; outline-offset: 2px; border-radius: 4px; background: #f2cc6018; }
 </style>
 </head>
 <body>
 <div class="win"><div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span id="title">leakproof</span></div><pre id="out"></pre></div>
 <script>
-// Replays a recorded transcript: ?t=<name> loads transcripts/<name>.txt and types it out.
+// Replays a recorded transcript: ?t=<name> loads transcripts/<name>.txt and types it out. The
+// last 22 lines stay visible (it scrolls like a terminal); long lines are cut, not wrapped; the
+// line that carries the result gets a box.
+const MAX_LINES = 22;
+const MAX_COLS = 108;
 const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
-function style(line) {
-  const l = esc(line);
-  if (line.startsWith("$ ")) return `<span class="cmd">${l}</span>`;
-  if (line.startsWith("# ")) return `<span class="note">${l}</span>`;
-  if (/ERROR|rejected|Not fixed/.test(line)) return `<span class="err">${l}</span>`;
-  if (/^VERIFIED|verified, all members clean|clusters verified/.test(line)) return `<span class="ok">${l}</span>`;
-  if (line.startsWith("+") && !line.startsWith("+++")) return `<span class="add">${l}</span>`;
-  if (line.startsWith("-") && !line.startsWith("---")) return `<span class="del">${l}</span>`;
-  return l;
+const KEY = /^(verdict:|VERIFIED|Not fixed|==ERROR|\d+\/\d+ clusters verified)/;
+function cls(line) {
+  if (line.startsWith("$ ")) return "cmd";
+  if (line.startsWith("# ")) return "note";
+  if (/^(VERIFIED|verdict: verified)|clusters verified/.test(line)) return "ok";
+  if (/ERROR|rejected|Not fixed/.test(line)) return "err";
+  if (line.startsWith("+") && !line.startsWith("+++")) return "add";
+  if (line.startsWith("-") && !line.startsWith("---")) return "del";
+  return "";
+}
+function add(out, line) {
+  const span = document.createElement("span");
+  const cut = line.length > MAX_COLS ? line.slice(0, MAX_COLS - 1) + "…" : line;
+  span.className = `l ${cls(line)} ${KEY.test(line) ? "key" : ""}`;
+  span.innerHTML = esc(cut) || " ";
+  out.appendChild(span);
+  while (out.children.length > MAX_LINES) out.removeChild(out.firstChild);
+  return span;
 }
 (async () => {
   const name = new URLSearchParams(location.search).get("t");
-  document.getElementById("title").textContent = `leakproof — ${name}`;
+  document.getElementById("title").textContent = `leakproof — ${name.replace(/^\d+_/, "")}`;
   const text = await fetch(`transcripts/${name}.txt`).then((r) => r.text());
   const out = document.getElementById("out");
-  const lines = text.replace(/\n$/, "").split("\n");
-  for (const line of lines) {
+  for (const line of text.replace(/\n$/, "").split("\n")) {
     if (line.startsWith("$ ")) {
-      const span = document.createElement("span");
-      span.className = "cmd";
-      out.appendChild(span);
-      for (const ch of line) { span.textContent += ch; await new Promise((r) => setTimeout(r, 28)); }
-      out.appendChild(document.createTextNode("\n"));
-      await new Promise((r) => setTimeout(r, 600));
+      const span = add(out, "");
+      span.className = "l cmd";
+      for (const ch of line.slice(0, MAX_COLS)) { span.textContent += ch; await new Promise((r) => setTimeout(r, 30)); }
+      await new Promise((r) => setTimeout(r, 700));
     } else {
-      out.insertAdjacentHTML("beforeend", style(line) + "\n");
-      await new Promise((r) => setTimeout(r, 140));
+      add(out, line);
+      await new Promise((r) => setTimeout(r, 170));
     }
   }
   document.body.dataset.done = "1";

@@ -1,0 +1,13 @@
+diff --git a/toys/posix/patch.c b/toys/posix/patch.c
+index b66d590..4e32587 100644
+--- a/toys/posix/patch.c
++++ b/toys/posix/patch.c
+@@ -281,7 +281,7 @@ static char *unquote_file(char *filename)
+ 
+   // quoted and escaped filenames are larger than the original
+   for (t = newfile = xmalloc(strlen(s) + 1); *s != '"'; s++) {
+-    if (!s[1]) error_exit("bad %s", filename);
++    if (!*s || !s[1]) error_exit("bad %s", filename);
+ 
+     // don't accept escape sequences unless the filename is quoted
+     if (*s != '\\') *t++ = *s;

@@ -8,4 +8,9 @@ build = '''chmod +x scripts/*.sh scripts/*/*.sh 2>/dev/null; make defconfig > /d
 # the sanitizer report, so a crash still fails the check.
 reproduce = '''./generated/unstripped/toybox patch < /tmp/poc || true'''
 poc = "../572/poc.patch"
+# toybox's own tests for this command (tests/patch.test), offline; VERBOSE=all runs every test
+# instead of stopping at the first failure (one already fails at HEAD under UBSan, lib/xwrap.c:428).
+test = '''VERBOSE=all bash scripts/test.sh patch'''
+# Hashed by the gate to prove each candidate was compiled into the binary under test.
+artifact = "generated/unstripped/toybox"
 editable = ["toys/*/*.c", "lib/*.c", "lib/*.h"]

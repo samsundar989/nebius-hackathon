@@ -106,6 +106,8 @@ After your answer I set `site/config.json` to the service URL, push, and test fr
 
 **Update 2026-10-25 (video draft, strategist review #6 order 2):** `video/leakproof_draft.mp4` (local file, not committed; rebuild with `.venv-win/Scripts/python.exe video/record.py`) is a 2:55 silent cut in script order at 1440×900, with captions burned in and also in `video/captions.srt`. `video/shotlist.md` lists the 9 scenes, their sources and what to say. The terminal scenes are replays of recorded runs (labelled as such on screen); the dashboard scenes are recorded from `site/`. You only need to record your voice over it, or upload it with the captions if short on time.
 
+**Update 2026-10-25 (video v2, strategist review #7):** rebuilt to be readable at 1080p and on a phone: 1920×1080, terminal text at 28 px with the result line boxed, each dashboard scene shows one card filling the frame, a 3 s title card and a 5 s end card with the four headline numbers; 2:49 in total. `video/shotlist.md` has the new scene times.
+
 ## QUESTION 0017 — One fix for a still-open upstream bug is ready for your review (your decision; nothing has been posted)
 2026-10-25, per strategist review #6 order 1. Leakproof ran on 14 open, public GitHub issues with sanitizer reports (`cases/open_bugs/TRIAGE.md`): 6 still reproduce at upstream HEAD, 4 have no open fix PR, 3 were verified by the gate, and after Ultra's review and mine **one** is ready to propose (`cases/open_bugs/REVIEW.md`; model spend $0.70).
 
