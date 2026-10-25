@@ -123,6 +123,8 @@ uv run leakproof batch --config examples/csvsplit/leakproof.toml --findings exam
 
 `batch` is triage at scale: it reproduces every crash input on one build, groups them by signature (defect kind + top in-project frames), fixes one per group, and re-runs every member's input against the winning patch. On the demo: 10 inputs → 6 crashes → 1 group → fixed once, all 6 clean ($0.009).
 
+In CI: [examples/github-action](examples/github-action/) is a workflow template that runs `leakproof fix` on the crash input of a failed fuzzing run and uploads the evidence bundle. It never pushes code. It has not run on GitHub yet (we have no demo repository with the secret).
+
 ## Setup
 
 Python 3.12 and [uv](https://docs.astral.sh/uv/); Docker for the ARVO and bring-your-own runners. Copy `.env.example` to `.env` and fill in `NEBIUS_API_KEY`, `NEBIUS_PROJECT_ID`, `LEAKPROOF_BUDGET_USD`. Then `uv sync` and `uv run pytest -q -m "not network and not docker and not contree"`.
