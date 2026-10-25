@@ -82,7 +82,11 @@ def detect(repo: Path) -> dict[str, Any]:
     CMakeLists.txt sits next to it), CMake.
     """
     has = lambda name: (repo / name).exists()  # noqa: E731
-    prep = "find . -name '*.sh' -exec chmod +x {} + ; "  # exec bits get lost on some checkouts
+    # Exec bits get lost on some checkouts: every file that starts with a shebang gets one back.
+    prep = (
+        "find . -type f -not -path './.git/*' -size -1M "
+        "-exec awk 'FNR==1 {if (/^#!/) print FILENAME; nextfile}' {} + | xargs -r chmod +x ; "
+    )
     if has("meson.build"):
         tests = "test(" in (repo / "meson.build").read_text(errors="replace")
         return {
@@ -111,9 +115,12 @@ def detect(repo: Path) -> dict[str, Any]:
             )
             if test is None and has("scripts/test.sh"):
                 test = "bash scripts/test.sh"
+            # A Makefile that assigns CFLAGS drops the environment's: then the flags ride in $CC.
+            text = (repo / name).read_text(encoding="utf-8", errors="replace")
+            cc = f" {CC}" if re.search(r"^\s*CFLAGS\s*:?=", text, re.M) else ""
             return {
                 "system": "make",
-                "build": prep + config + f"make -j4 {CC}",
+                "build": prep + config + f"make -j4{cc}",
                 "test": test,
             }
     if has("CMakeLists.txt"):
@@ -208,6 +215,12 @@ def draft(
     ]
     lines.append(f"build = '''{d['build']}'''" if d["build"] else "# TODO build = '''...'''")
     rep = reproduce_cmd(issue) if issue else None
+    if rep and issue and d["system"] in ("cmake", "meson"):
+        # These build out of tree: a bare program name the reporter ran lives in build/.
+        prog = issue["program"].strip().removeprefix("./")
+        if "/" not in prog:
+            issue = {**issue, "program": f"build/{prog}"}
+            rep = reproduce_cmd(issue)
     if rep:
         lines.append(f"reproduce = '''{rep}'''")
         if issue and poc_bytes(issue) is not None:
