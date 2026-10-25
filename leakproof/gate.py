@@ -738,6 +738,7 @@ def run_gate(
             "amplified_variants": [n for n, _ in getattr(gate, "amp", [])],
             "poc_bytes": len(poc := getattr(gate, "poc", b"")),
             "poc_b64": gf.b64(poc) if len(poc) <= 4096 else None,
+            **gf.output_stats(getattr(gate, "base_diff", {})),
         },
         "tests_baseline": tb.to_dict() if (tb := getattr(gate, "tests_baseline", None)) else None,
         "results": results,

@@ -246,6 +246,17 @@ class Row:
     sig: str
 
 
+EMPTY_STDOUT = "d41d8cd98f00"  # md5 of empty output, cut to the 12 characters rows keep
+
+
+def output_stats(rows: dict[str, Row]) -> dict[str, int]:
+    """What the differential can observe: inputs that ran clean, and how many distinct non-empty
+    stdouts they produced. A harness that prints nothing gives it nothing to compare (D-0074)."""
+    clean = [r for r in rows.values() if not r.sig and r.rc == "0"]
+    outs = {r.out for r in clean if r.out != EMPTY_STDOUT}
+    return {"clean_inputs": len(clean), "stdout_distinct": len(outs)}
+
+
 def parse_rows(text: str) -> dict[str, Row]:
     rows = {}
     for line in text.splitlines():
