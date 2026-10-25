@@ -132,14 +132,20 @@ def decode(item: dict[str, Any]) -> bytes | None:
     return data.encode("utf-8", "surrogateescape")[:MAX_INPUT_BYTES]
 
 
-def attack(client: Any, model: str, text: str) -> tuple[list[dict[str, Any]], float]:
-    """[{name, data, expect, reason}] from one model call, plus its cost."""
+def attack(
+    client: Any, model: str, text: str, thinking: bool = False
+) -> tuple[list[dict[str, Any]], float]:
+    """[{name, data, expect, reason}] from one model call, plus its cost.
+
+    Thinking is off by default: with it on, Super spent a 12k-token budget reasoning and
+    returned nothing, and Ultra's reasoning would cost ~$0.06 a call."""
     value, res = client.structured(
         model,
         [{"role": "system", "content": SYSTEM}, {"role": "user", "content": text}],
         SCHEMA,
         purpose="adversary",
-        max_completion_tokens=12000,
+        thinking=thinking,
+        max_completion_tokens=32000 if thinking else 6000,
     )
     out = []
     for i, item in enumerate(value.get("inputs", [])[:MAX_INPUTS]):

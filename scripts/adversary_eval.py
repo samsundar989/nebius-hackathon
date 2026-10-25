@@ -29,6 +29,8 @@ from leakproof.llm import CostLedger, LLMClient
 from leakproof.results import records, strict
 from leakproof.runner import LocalDockerRunner
 
+# variant -> (model, thinking). super_think runs on the open-bugs set only (cost).
+VARIANTS = {"super": ("super", False), "ultra": ("ultra", False), "super_think": ("super", True)}
 MODELS = ("super", "ultra")
 BUDGET = 1.50
 
@@ -116,7 +118,13 @@ def run_inputs(runner, case, image, inputs, files=None):  # noqa: ANN001, ANN201
 
 
 def attack_case(
-    runner, client, case, out: Path, cands: list[tuple[str, dict[str, str], str]], ref_files=None
+    runner,
+    client,
+    case,
+    out: Path,
+    cands: list[tuple[str, dict[str, str], str]],
+    ref_files=None,
+    models: tuple[str, ...] = MODELS,
 ) -> list[dict[str, Any]]:  # noqa: ANN001
     t0 = time.monotonic()
     baseline = case.prepare(runner)
@@ -142,7 +150,7 @@ def attack_case(
             text = adv.prompt(report, how(case), poc, originals, files, diff)
             row: dict[str, Any] = {"case": case.id, "candidate": cid, "models": {}}
             inputs = []
-            for model in MODELS:
+            for model in models:
                 cache = out / f"{case.id.split(':')[-1].split('/')[-1]}__{cid}__{model}.inputs.json"
                 if cache.exists():
                     got = json.loads(cache.read_text())
@@ -150,7 +158,9 @@ def attack_case(
                         g["data"] = bytes.fromhex(g["data"])
                     usd = got["usd"]
                 else:
-                    got_inputs, usd = adv.attack(client, model, text)
+                    got_inputs, usd = adv.attack(
+                        client, VARIANTS[model][0], text, VARIANTS[model][1]
+                    )
                     got = {"inputs": got_inputs, "usd": usd}
                     cache.write_text(
                         json.dumps(
@@ -162,7 +172,7 @@ def attack_case(
                         )
                     )
                 for i in got["inputs"]:
-                    inputs.append(i | {"name": f"{model[0]}_{i['name']}", "model": model})
+                    inputs.append(i | {"name": f"{model}_{i['name']}", "model": model})
                 row["models"][model] = {"usd": usd, "n_inputs": len(got["inputs"])}
             if not inputs:
                 row["error"] = "no inputs"
@@ -176,7 +186,7 @@ def attack_case(
                 results.append(row)
                 continue
             refr = run_inputs(runner, case, ref, inputs) if ref else None
-            for model in MODELS:
+            for model in models:
                 keep = {i["name"] for i in inputs if i["model"] == model}
 
                 def sub(r: gc.Run | None, keep=keep) -> gc.Run | None:  # noqa: ANN001
@@ -198,7 +208,7 @@ def attack_case(
             print(
                 case.id,
                 cid,
-                {m: row["models"][m].get("verdict") for m in MODELS},
+                {m: row["models"][m].get("verdict") for m in models},
                 flush=True,
             )
             results.append(row)
@@ -247,7 +257,9 @@ def main() -> int:
     for case, cands, mode in jobs:
         try:
             if mode is None:
-                summary += attack_case(runner, client, case, out, cands)
+                summary += attack_case(
+                    runner, client, case, out, cands, models=(*MODELS, "super_think")
+                )
                 continue
             c = load_case(case)
             # The developer's fix comes from the upstream commit (preparation step, network on).
