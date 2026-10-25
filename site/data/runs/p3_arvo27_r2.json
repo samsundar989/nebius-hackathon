@@ -1549,7 +1549,7 @@
    "winner": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,7 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2)))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n@@ -478,7 +478,7 @@\n                     int is_neg = (str_val[0] == '-');\n                     double frac = 0;\n                     double p = 0.1;\n-                    while (isdigit(*fendp) && fendp < str_end) {\n+                    while (fendp < str_end && isdigit(*fendp)) {\n                         frac = frac + (*fendp - '0') * p;\n                         p *= 0.1;\n                         fendp++;\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": "different_but_correct",
-   "ambiguous": false,
+   "ambiguous": true,
    "rejudged": null,
    "workers": [
     {

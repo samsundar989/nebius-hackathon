@@ -23,6 +23,8 @@ Every distinct verified diff in the ARVO runs (p3_arvo27_r1, p3_arvo27_r2, lb_ar
 
 - **Gate precision: 52/67 (77.6%)** of verified diffs are correct (equivalent 16, different but correct 36); defensive 7 (safe, guards the symptom); **wrong 8** (no crash on any input the gate tried, but a residual over-read or changed behaviour).
 
+- Cross-candidate differential (D-0070): 13 cases with several distinct verified diffs; in 11 every candidate behaves identically on corpus, PoC, amplified variants and 30 s of fuzz finds per candidate, wrong ones included (the harnesses print too little to separate them). 2 split (42500232, 42508524); in 2 of them the unpatched program **and the developer's fix** crash on the separating inputs: some candidates also fixed a second, pre-existing bug, and the pairwise review chose one of those.
+
 ## Gate calibration: the developers' own fixes through the same gate
 
 - Adjudicated: **24/27 accepted**, 1 true reject (the developer fix leaks), 2 false rejects (7.4%).

@@ -195,6 +195,26 @@ def main() -> int:
             f"guards the symptom); **wrong {cls.get('wrong', 0)}** (no crash on any input the gate "
             "tried, but a residual over-read or changed behaviour).",
         ]
+    cross = sorted((RUNS_DIR / "cross_diff").glob("*.json"))
+    if cross:
+        cds = [json.loads(p.read_text()) for p in cross]
+        split = [d for d in cds if d.get("verdict") == "ambiguous"]
+        older = [
+            d["case"]
+            for d in split
+            if d.get("probe") and all(v["developer_fix"] != "clean" for v in d["probe"].values())
+        ]
+        nums["cross_diff"] = {"cases": len(cds), "split": len(split), "older_bug": len(older)}
+        out += [
+            "",
+            f"- Cross-candidate differential (D-0070): {len(cds)} cases with several distinct "
+            f"verified diffs; in {len(cds) - len(split)} every candidate behaves identically on "
+            "corpus, PoC, amplified variants and 30 s of fuzz finds per candidate, wrong ones "
+            f"included (the harnesses print too little to separate them). {len(split)} split "
+            f"({', '.join(d['case'] for d in split)}); in {len(older)} of them the unpatched "
+            "program **and the developer's fix** crash on the separating inputs: some candidates "
+            "also fixed a second, pre-existing bug, and the pairwise review chose one of those.",
+        ]
     cal = RUNS_DIR / "p1_calibration_v3" / "summary.json"
     if cal.exists():
         c = json.loads(cal.read_text())

@@ -3,7 +3,7 @@
   "p3_arvo27_r1": {
    "strict": 14,
    "strict_d0039": 13,
-   "ambiguous": 0,
+   "ambiguous": 1,
    "verified_ids": [
     "417323384",
     "42482401",
@@ -62,7 +62,7 @@
   "p3_arvo27_r2": {
    "strict": 8,
    "strict_d0039": 7,
-   "ambiguous": 0,
+   "ambiguous": 1,
    "verified_ids": [
     "417323384",
     "42482401",
@@ -130,6 +130,11 @@
    "defensive": 7,
    "wrong": 8
   }
+ },
+ "cross_diff": {
+  "cases": 13,
+  "split": 2,
+  "older_bug": 2
  },
  "planners_arvo": {
   "lightning": {
