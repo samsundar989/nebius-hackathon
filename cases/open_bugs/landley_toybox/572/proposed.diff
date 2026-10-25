@@ -1,0 +1,37 @@
+--- a/toys/posix/patch.c
++++ b/toys/posix/patch.c
+@@ -279,8 +279,32 @@
+   // Return copy of file that wasn't quoted
+   if (*s++ != '"' || !*s) return xstrdup(filename);
+ 
+-  // quoted and escaped filenames are larger than the original
+-  for (t = newfile = xmalloc(strlen(s) + 1); *s != '"'; s++) {
++  // Pre-scan to find closing quote and compute needed size
++  char *tmp = s;
++  size_t need = 0;
++  for (;;) {
++    if (*tmp == '"')
++      break;
++    if (*tmp == '\\') {
++      tmp++;
++      if (*tmp >= '0' && *tmp < '8') {
++        while (*tmp >= '0' && *tmp < '8')
++          tmp++;
++      } else {
++        if (*tmp)
++          tmp++;
++      }
++    } else {
++      tmp++;
++    }
++    need++;
++    if (!*tmp) {
++      error_exit("bad %s", filename);
++    }
++  }
++
++  // allocate exactly need+1 bytes (for terminator)
++  for (t = newfile = xmalloc(need + 1); *s != '"'; s++) {
+     if (!s[1]) error_exit("bad %s", filename);
+ 
+     // don't accept escape sequences unless the filename is quoted
