@@ -4,7 +4,7 @@
 video/record.py  -> video/clips/<scene>.webm (Playwright, 1920x1080), video/captions.srt,
                     video/leakproof_draft.mp4 (concatenated, captions burned in)
 
-Readable at 1080p and on a phone: terminal scenes use a 28 px font with at most 22 lines; each
+Readable at 1080p and on a phone: terminal scenes use a 28 px font with at most 19 lines above a 150 px caption band; each
 dashboard scene isolates one card, zooms it (CSS zoom) to fill the frame and pans slowly when it
 is taller than the frame. Scenes follow docs/VIDEO_SCRIPT.md v2; terminal
 scenes replay recorded runs (video/transcripts/, from video/build_transcripts.py). Needs
@@ -35,7 +35,7 @@ SCENES = [
     (
         "01_jq_bundle",
         "term",
-        "01_jq_bundle",
+        "01_jq_bundle&d=700",
         12,
         "jq: the model's patch passed jq's own tests, and the original crash input no longer crashes.",
     ),
@@ -49,43 +49,50 @@ SCENES = [
     (
         "03_crash",
         "term",
-        "03_crash",
-        12,
+        "03_crash&d=900",
+        10,
         "A bug to fix live: a CSV splitter writes one byte past a buffer.",
     ),
     (
         "04_fix",
         "term",
-        "04_fix",
-        32,
+        "04_fix&d=800",
+        16,
         "Nemotron 3 Ultra plans; four Nemotron 3.5 Lightning workers patch; the gate verifies with the network off.",
+    ),
+    (
+        "05_fix_diff",
+        "term",
+        "05_fix_diff&d=700",
+        11,
+        "The verified fix: one byte more for the terminator.",
     ),
     (
         "05_funnel",
         "dash",
         "funnel",
-        16,
+        14,
         "27 real OSS-Fuzz bugs: crash gone in 18, verified 15, correct 14.",
     ),
     (
         "06_calibration",
-        "dash",
-        "#calibration",
-        12,
+        "card",
+        "calibration",
+        10,
         "The gate accepts 24 of 27 of the developers' own fixes.",
     ),
     (
         "07_planner",
         "dash",
         "#planner",
-        15,
+        14,
         "Same Lightning workers, 10 real bugs: no planner 2, Super 4, Ultra 7 verified.",
     ),
     (
         "08_batch",
         "term",
-        "07_batch",
-        13,
+        "07_batch&d=1000",
+        11,
         "Batch mode: 10 crash reports, 1 root cause, fixed once, every report re-checked.",
     ),
     (
@@ -102,20 +109,26 @@ SCENES = [
         20,
         "Where it falls short: two mosquitto fixes passed every check yet were wrong. We report verified and correct.",
     ),
-    ("11_end", "card", "end", 5, ""),
+    ("11_end", "card", "end", 6, ""),
 ]
 
-# Isolate one element, zoom it to fill the frame, then pan linearly if it is taller than the frame.
-ISOLATE = """([sel, seconds]) => {
+# Stage width per dashboard card: narrower stages zoom further, so short cards fill the frame.
+STAGE = {"#refusal": 820, "funnel": 600, "#planner": 660, "#cuda": 560, "mosquitto": 880}
+
+# Isolate one element at a stage width, zoom it to fill the frame above the 150 px caption band,
+# and pan linearly only when it is far taller than the frame (zooming it to fit would be too small).
+ISOLATE = """([sel, seconds, width]) => {
   const el = document.querySelector(sel).cloneNode(true);
   el.querySelectorAll('details').forEach(d => d.open = true);
   if (el.matches('details')) el.open = true;
   const stage = document.createElement('div');
-  stage.style.cssText = 'width:880px;margin:0 auto;padding:16px 0 40px';
+  stage.style.cssText = `width:${width}px;margin:0 auto;padding:12px 0`;
   stage.appendChild(el);
   document.body.replaceChildren(stage);
-  const fit = Math.min(innerWidth * 0.95 / 880, innerHeight * 0.92 / stage.offsetHeight);
-  stage.style.zoom = Math.max(fit, innerWidth * 0.95 / 880 * 0.999);
+  const byW = innerWidth * 0.95 / width, byH = (innerHeight - 170) / stage.offsetHeight;
+  const pan = byH < byW * 0.6;
+  stage.style.zoom = pan ? byW : Math.min(byW, byH);
+  if (pan) stage.style.paddingBottom = `${170 / byW}px`;
   const extra = document.documentElement.scrollHeight - innerHeight;
   if (extra > 0) {
     const start = performance.now() + 2500, span = (seconds - 4.5) * 1000;
@@ -140,7 +153,11 @@ def serve() -> tuple[http.server.ThreadingHTTPServer, int]:
 
 def play(page, base: str, kind: str, target: str, seconds: int) -> None:  # noqa: ANN001
     if kind == "card":
+        # A static page gives Playwright no repaint to record, so a card is a screenshot (below).
         page.goto(f"{base}/video/card.html?type={target}")
+        page.wait_for_timeout(1500)
+        page.screenshot(path=str(CLIPS / f"{target}.png"))
+        return
     elif kind == "term":
         page.goto(f"{base}/video/terminal.html?t={target}")
     else:
@@ -160,7 +177,7 @@ def play(page, base: str, kind: str, target: str, seconds: int) -> None:  # noqa
             page.wait_for_selector("#case details")
             sel = "#case details"
         page.wait_for_timeout(300)
-        page.evaluate(ISOLATE, [sel, seconds])
+        page.evaluate(ISOLATE, [sel, seconds, STAGE[target]])
     page.wait_for_timeout(seconds * 1000)
 
 
@@ -205,12 +222,16 @@ def main() -> int:
     # libass is needed); then concatenate.
     ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
     parts = []
-    for scene, kind, _, seconds, caption in SCENES:
+    for scene, kind, target, seconds, caption in SCENES:
         out = CLIPS / f"{scene}.mp4"
         # Playwright records only when the page repaints, so a static stretch has few frames:
-        # pad to the full scene length by repeating the last frame. Card scenes are static from
-        # their first paint, so nothing is skipped at their start.
-        skip = "0" if kind == "card" else "0.8"
+        # pad to the full scene length by repeating the last frame. Card scenes loop their
+        # screenshot.
+        src = (
+            ["-loop", "1", "-i", str(CLIPS / f"{target}.png")]
+            if kind == "card"
+            else ["-ss", "0.8", "-i", str(CLIPS / f"{scene}.webm")]
+        )
         vf = f"tpad=stop_mode=clone:stop_duration={seconds},fps=30,scale=1920:1080"
         if caption:
             text = caption.replace("\\", "\\\\").replace(":", "\\:").replace("'", "’")
@@ -225,10 +246,7 @@ def main() -> int:
                 "-y",
                 "-loglevel",
                 "error",
-                "-ss",
-                skip,
-                "-i",
-                str(CLIPS / f"{scene}.webm"),
+                *src,
                 "-t",
                 str(seconds),
                 "-vf",

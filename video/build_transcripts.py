@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import sys
+import textwrap
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -47,12 +48,18 @@ def crash() -> str:
     )
 
 
-def fix() -> str:
+def fix() -> tuple[str, str]:
+    """Two scenes: the plan, workers and verdict together; then the winning diff."""
     rec = json.loads((RUNS_DIR / "demo_fix" / "project_csvsplit.json").read_text())
+    plan = textwrap.wrap(rec["plan"]["root_cause"], 100)
+    if len(plan) > 3:
+        plan = plan[:3]
+        plan[2] = plan[2][:97] + "..."
     lines = [
         "# replay of a recorded run: runs/demo_fix (2026-10-24)",
         "$ uv run leakproof fix --config examples/csvsplit/leakproof.toml",
-        f"plan (Nemotron 3 Ultra): {rec['plan']['root_cause'][:180]}",
+        "plan (Nemotron 3 Ultra):",
+        *(f"  {ln}" for ln in plan),
         f"{rec['n_workers']} workers (Nemotron 3.5 Lightning) -> gate (own process, network off)",
         "",
         f"verdict: {rec['verdict']}   ${rec['usd']:.4f}   {rec['elapsed_s']} s",
@@ -62,9 +69,17 @@ def fix() -> str:
     win = next(w for w in rec["workers"] if w["diff"] == rec["winner"]["diff"])
     corpus = (rec.get("gate") or {}).get("corpus") or {}
     ev = strength(win["gate"]["checks"], corpus if "stdout_distinct" in corpus else None)
-    lines += ["", f"{ev['label'].upper()}: {explain(ev)}", "", "winning diff:"]
-    lines += rec["winner"]["diff"].rstrip().splitlines()
-    return "\n".join(lines)
+    lines += ["", f"{ev['label'].upper()}: {explain(ev)}"]
+    diff = [
+        "# replay of a recorded run: runs/demo_fix (2026-10-24)",
+        "winning diff (src/csvsplit.c):",
+        *(
+            ln
+            for ln in rec["winner"]["diff"].rstrip().splitlines()
+            if not ln.startswith(("---", "+++"))
+        ),
+    ]
+    return "\n".join(lines), "\n".join(diff)
 
 
 def batch() -> str:
@@ -104,7 +119,8 @@ def main() -> int:
     for name, text in (
         ("01_jq_bundle", jq()),
         ("03_crash", crash()),
-        ("04_fix", fix()),
+        ("04_fix", fix()[0]),
+        ("05_fix_diff", fix()[1]),
         ("07_batch", batch()),
     ):
         (OUT / f"{name}.txt").write_text(text + "\n", encoding="utf-8", newline="\n")

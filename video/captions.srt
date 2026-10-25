@@ -7,33 +7,37 @@ jq: the model's patch passed jq's own tests, and the original crash input no lon
 Leakproof doubled one number in that input: the patched jq overflows. Refused.
 
 3
-00:00:30,300 --> 00:00:41,700
+00:00:30,300 --> 00:00:39,700
 A bug to fix live: a CSV splitter writes one byte past a buffer.
 
 4
-00:00:42,300 --> 00:01:13,700
+00:00:40,300 --> 00:00:55,700
 Nemotron 3 Ultra plans; four Nemotron 3.5 Lightning workers patch; the gate verifies with the network off.
 
 5
-00:01:14,300 --> 00:01:29,700
-27 real OSS-Fuzz bugs: crash gone in 18, verified 15, correct 14.
+00:00:56,300 --> 00:01:06,700
+The verified fix: one byte more for the terminator.
 
 6
-00:01:30,300 --> 00:01:41,700
-The gate accepts 24 of 27 of the developers' own fixes.
+00:01:07,300 --> 00:01:20,700
+27 real OSS-Fuzz bugs: crash gone in 18, verified 15, correct 14.
 
 7
-00:01:42,300 --> 00:01:56,700
-Same Lightning workers, 10 real bugs: no planner 2, Super 4, Ultra 7 verified.
+00:01:21,300 --> 00:01:30,700
+The gate accepts 24 of 27 of the developers' own fixes.
 
 8
-00:01:57,300 --> 00:02:09,699
-Batch mode: 10 crash reports, 1 root cause, fixed once, every report re-checked.
+00:01:31,300 --> 00:01:44,700
+Same Lightning workers, 10 real bugs: no planner 2, Super 4, Ultra 7 verified.
 
 9
-00:02:10,300 --> 00:02:23,700
-On the GPU: two patches silenced compute-sanitizer and printed the wrong answer. Rejected.
+00:01:45,300 --> 00:01:55,700
+Batch mode: 10 crash reports, 1 root cause, fixed once, every report re-checked.
 
 10
-00:02:24,300 --> 00:02:43,700
+00:01:56,300 --> 00:02:09,699
+On the GPU: two patches silenced compute-sanitizer and printed the wrong answer. Rejected.
+
+11
+00:02:10,300 --> 00:02:29,700
 Where it falls short: two mosquitto fixes passed every check yet were wrong. We report verified and correct.

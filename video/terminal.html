@@ -5,15 +5,16 @@
 <title>Leakproof terminal replay</title>
 <style>
   html, body { margin: 0; height: 100%; background: #0f1115; overflow: hidden; }
-  body { display: flex; align-items: center; justify-content: center; }
-  .win { width: 1840px; height: 960px; background: #16191f; border-radius: 14px; box-shadow: 0 10px 40px #0008; overflow: hidden; display: flex; flex-direction: column; }
+  /* The bottom 150 px of the 1080 px frame belong to the caption band: the window ends above it. */
+  body { display: flex; align-items: flex-start; justify-content: center; padding-top: 26px; box-sizing: border-box; }
+  .win { width: 1840px; height: 880px; background: #16191f; border-radius: 14px; box-shadow: 0 10px 40px #0008; overflow: hidden; display: flex; flex-direction: column; }
   .bar { height: 46px; flex: none; background: #23262e; display: flex; align-items: center; gap: 10px; padding: 0 18px; }
   .bar i { width: 15px; height: 15px; border-radius: 50%; display: inline-block; }
   .bar span { color: #8b93a1; font: 20px system-ui, sans-serif; margin-left: 12px; }
-  pre { flex: 1; margin: 0; padding: 22px 30px; color: #d7dae0; font: 28px/1.45 ui-monospace, Consolas, monospace; white-space: pre; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+  pre { flex: 1; margin: 0; padding: 22px 30px; color: #d7dae0; font: 28px/1.45 ui-monospace, Consolas, monospace; white-space: pre; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; }
   .l { display: block; overflow: hidden; text-overflow: ellipsis; }
   .cmd { color: #7ee787; } .note { color: #8b93a1; } .err { color: #ff7b72; } .ok { color: #7ee787; font-weight: 700; }
-  .add { color: #7ee787; } .del { color: #ff7b72; }
+  .add { color: #7ee787; background: #7ee78722; } .del { color: #ff7b72; background: #ff7b7222; }
   .key { outline: 3px solid #f2cc60; outline-offset: 2px; border-radius: 4px; background: #f2cc6018; }
 </style>
 </head>
@@ -21,9 +22,9 @@
 <div class="win"><div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span id="title">leakproof</span></div><pre id="out"></pre></div>
 <script>
 // Replays a recorded transcript: ?t=<name> loads transcripts/<name>.txt and types it out. The
-// last 22 lines stay visible (it scrolls like a terminal); long lines are cut, not wrapped; the
+// last 19 lines stay visible (it scrolls like a terminal); long lines are cut, not wrapped; the
 // line that carries the result gets a box.
-const MAX_LINES = 22;
+const MAX_LINES = 19;  // what fits above the caption band at 28 px
 const MAX_COLS = 108;
 const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 const KEY = /^(verdict:|VERIFIED|Not fixed|==ERROR|\d+\/\d+ clusters verified)/;
@@ -46,7 +47,9 @@ function add(out, line) {
   return span;
 }
 (async () => {
-  const name = new URLSearchParams(location.search).get("t");
+  const params = new URLSearchParams(location.search);
+  const name = params.get("t");
+  const pace = Number(params.get("d") || 170);  // ms per output line: paced so the scene never sits still long
   document.getElementById("title").textContent = `leakproof — ${name.replace(/^\d+_/, "")}`;
   const text = await fetch(`transcripts/${name}.txt`).then((r) => r.text());
   const out = document.getElementById("out");
@@ -58,7 +61,7 @@ function add(out, line) {
       await new Promise((r) => setTimeout(r, 700));
     } else {
       add(out, line);
-      await new Promise((r) => setTimeout(r, 170));
+      await new Promise((r) => setTimeout(r, pace));
     }
   }
   document.body.dataset.done = "1";

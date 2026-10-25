@@ -1,0 +1,11 @@
+# replay of a recorded run: runs/demo_fix (2026-10-24)
+winning diff (src/csvsplit.c):
+@@ -19,7 +19,7 @@
+  * quote, `n` counts every byte up to and including the closing quote. */
+ static char *copy_quoted(const char *raw, size_t n) {
+     size_t inner = n >= 2 ? n - 2 : 0;
+-    char *field = malloc(inner); /* room for the content */
++    char *field = malloc(inner + 1); /* room for the content */
+     size_t out = 0;
+     if (field == NULL) {
+         return NULL;

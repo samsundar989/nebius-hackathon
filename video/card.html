@@ -9,11 +9,20 @@
   h1 { font-size: 112px; margin: 0 0 18px; letter-spacing: -0.02em; }
   .tag { font-size: 52px; color: #6fd39e; margin: 0 0 44px; }
   .sub { font-size: 34px; color: #a0a7b3; }
-  .nums { display: grid; grid-template-columns: repeat(4, 360px); gap: 22px; margin: 40px auto 46px; }
-  .nums div { background: #191c21; border: 1px solid #2b3038; border-radius: 16px; padding: 26px 18px; }
-  .nums b { display: block; font-size: 64px; color: #6fd39e; }
-  .nums span { font-size: 24px; color: #a0a7b3; }
-  .links { font: 32px/1.6 ui-monospace, Consolas, monospace; color: #7ea2ff; }
+  /* The bottom 150 px are the caption band; cards sit above it. */
+  body { box-sizing: border-box; padding-bottom: 150px; }
+  .nums { display: grid; grid-template-columns: repeat(2, 760px); gap: 26px; margin: 30px auto 40px; }
+  .nums div { background: #191c21; border: 1px solid #2b3038; border-radius: 16px; padding: 22px 18px; }
+  .nums b { display: block; font-size: 104px; line-height: 1.1; color: #6fd39e; }
+  .nums span { font-size: 34px; color: #c3c8d1; }
+  .links { font: 34px/1.5 ui-monospace, Consolas, monospace; color: #7ea2ff; }
+  .cal { width: 1600px; text-align: left; }
+  .cal h2 { font-size: 56px; margin: 0 0 8px; }
+  .cal .big { font-size: 150px; font-weight: 700; color: #6fd39e; line-height: 1; margin: 10px 0 6px; }
+  .cal .lbl { font-size: 40px; color: #c3c8d1; margin: 0 0 40px; }
+  .cal ul { list-style: none; padding: 0; margin: 0; font-size: 36px; line-height: 1.45; }
+  .cal li { margin: 0 0 18px; }
+  .cal li b { color: #f2cc60; }
 </style>
 </head>
 <body>
@@ -31,6 +40,19 @@
   const n = await fetch("../site/data/numbers.json").then((r) => r.json());
   const cal = await fetch("../site/data/calibration.json").then((r) => r.json());
   const r1 = n.arvo.p3_arvo27_r1, p = n.planners_arvo, a = cal.adjudicated;
+  if (type === "calibration") {
+    // A summary, not the per-case table: what the gate does with the developers' own fixes.
+    const cls = a.classes, rej = a.judged - cls.accepted;
+    card.innerHTML = `<div class="cal"><h2>Calibration: the developers' own fixes, same gate</h2>
+      <p class="big">${cls.accepted}/${a.judged}</p>
+      <p class="lbl">accepted; ${rej} rejected:</p>
+      <ul>
+        <li><b>${cls.true_reject} correct reject</b> — mosquitto: the developer's fix leaks memory on 21 inputs</li>
+        <li><b>${cls.false_reject} false rejects</b>, known gate limits:
+          libzip (a leak the old bug used to hide) · quickjs (a crash the old bug used to hide)</li>
+      </ul></div>`;
+    return;
+  }
   card.innerHTML = `<h1 style="font-size:84px">Leakproof</h1>
     <div class="nums">
       <div><b>${r1.verified}/${r1.cases}</b><span>real OSS-Fuzz bugs verified</span></div>
