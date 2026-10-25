@@ -1,4 +1,5 @@
 {
+ "suite": "juliet",
  "cases": 20,
  "subset": "cases\\juliet\\selection_leaderboard20.json",
  "configs": {

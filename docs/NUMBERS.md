@@ -33,6 +33,16 @@ r1 as run counted 14 verified; jq 42531297 was rejected on a libFuzzer slow-unit
 | ultra | 3 | 95% (95–95%) | $0.0142 | 73.7 s |
 | super | 3 | 93% (90–95%) | $0.008 | 74.5 s |
 
+## Planner leaderboard on real code (10 calibrated ARVO cases, round 1 only, 1 repeat; workers 4 × Lightning)
+
+| planner | verified | $ / verified fix | p50 latency |
+|---|---|---|---|
+| lightning | 2/10 | $0.112 | 234.3 s |
+| ultra | 7/10 | $0.0589 | 299.0 s |
+| super | 4/10 | $0.0466 | 250.6 s |
+
+One repeat on 10 cases: read the gap between no planner and Ultra, not small differences. The same 10 cases had 4 verified in P3 r1 (Ultra, before the D-0058/62/65 edit fixes).
+
 ## Ultra's root cause vs the developer's fix (ARVO r1, a proxy)
 
 - A hypothesis names a file the developer changed: 22/24.
@@ -44,5 +54,5 @@ r1 as run counted 14 verified; jq 42531297 was rejected on a libFuzzer slow-unit
 
 ## Spend
 
-- Every model call in the project, failed runs included: **$7.5082** (Nebius billing agreed within $0.01 on 2026-10-24).
+- Every model call in the project, failed runs included: **$7.9953** (Nebius billing agreed within $0.01 on 2026-10-24).
 - Nebius Sandboxes: 9.42 units, not billed during the beta.

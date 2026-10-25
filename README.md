@@ -69,7 +69,7 @@ The gate was calibrated on the developers' own fixes after each change; the numb
 | Nemotron 3.5 Lightning | the four parallel workers that write edits; advisory reviewer notes |
 | Nemotron 3 Super | alternative planner (leaderboard) |
 
-On the synthetic Juliet subset the planner barely matters (Lightning-only 93%, Ultra 95%, Super 93% verified; Lightning-only is the cheapest per fix); the comparison on real ARVO code is in NUMBERS.md. The advisory reviewer flags verified and rejected candidates at about the same rate, so it is shown as notes and never counted as evidence.
+On the synthetic Juliet subset the planner barely matters (Lightning-only 93%, Ultra 95%, Super 93% verified). **On real code it does:** on 10 calibrated ARVO cases, workers without a plan verified 2, with Super 4, with Ultra 7 — and Ultra was cheaper per verified fix than no planner ($0.059 vs $0.112), because failed attempts cost money too (one repeat; see NUMBERS.md). The advisory reviewer flags verified and rejected candidates at about the same rate, so it is shown as notes and never counted as evidence.
 
 ## How we use Nebius
 

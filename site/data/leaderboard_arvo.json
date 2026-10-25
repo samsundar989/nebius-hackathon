@@ -1,0 +1,61 @@
+{
+ "suite": "arvo",
+ "cases": 10,
+ "subset": "cases\\arvo\\selection_leaderboard10.json",
+ "configs": {
+  "lightning": {
+   "repeats": 1,
+   "verified_rate_mean": 0.2,
+   "verified_rate_min": 0.2,
+   "verified_rate_max": 0.2,
+   "usd_per_verified": 0.112,
+   "p50_latency_s": 234.3,
+   "runs": [
+    {
+     "run": "lb_arvo_lightning_r1",
+     "verified": 2,
+     "rate": 0.2,
+     "usd": 0.224,
+     "p50_s": 234.26,
+     "raw": 3
+    }
+   ]
+  },
+  "ultra": {
+   "repeats": 1,
+   "verified_rate_mean": 0.7,
+   "verified_rate_min": 0.7,
+   "verified_rate_max": 0.7,
+   "usd_per_verified": 0.0589,
+   "p50_latency_s": 299.0,
+   "runs": [
+    {
+     "run": "lb_arvo_ultra_r1",
+     "verified": 7,
+     "rate": 0.7,
+     "usd": 0.4121,
+     "p50_s": 299.01,
+     "raw": 7
+    }
+   ]
+  },
+  "super": {
+   "repeats": 1,
+   "verified_rate_mean": 0.4,
+   "verified_rate_min": 0.4,
+   "verified_rate_max": 0.4,
+   "usd_per_verified": 0.0466,
+   "p50_latency_s": 250.6,
+   "runs": [
+    {
+     "run": "lb_arvo_super_r1",
+     "verified": 4,
+     "rate": 0.4,
+     "usd": 0.1864,
+     "p50_s": 250.57,
+     "raw": 4
+    }
+   ]
+  }
+ }
+}

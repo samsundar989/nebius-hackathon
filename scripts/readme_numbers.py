@@ -147,6 +147,27 @@ def main() -> int:
                 f"({100 * v['verified_rate_min']:.0f}–{100 * v['verified_rate_max']:.0f}%) | "
                 f"${v['usd_per_verified']} | {v['p50_latency_s']} s |"
             )
+    lba = RUNS_DIR / "leaderboard_arvo.json"
+    if lba.exists():
+        d = json.loads(lba.read_text())
+        out += [
+            "",
+            f"## Planner leaderboard on real code ({d['cases']} calibrated ARVO cases, round 1 only, "
+            "1 repeat; workers 4 × Lightning)",
+            "",
+            "| planner | verified | $ / verified fix | p50 latency |",
+            "|---|---|---|---|",
+        ]
+        for k, v in d["configs"].items():
+            out.append(
+                f"| {k} | {round(10 * v['verified_rate_mean'])}/{d['cases']} | "
+                f"${v['usd_per_verified']} | {v['p50_latency_s']} s |"
+            )
+        out.append(
+            "\nOne repeat on 10 cases: read the gap between no planner and Ultra, not small "
+            "differences. The same 10 cases had 4 verified in P3 r1 (Ultra, before the D-0058/62/65 "
+            "edit fixes)."
+        )
     rc = RUNS_DIR / "root_cause_accuracy_p3_arvo27_r1.json"
     if rc.exists():
         d = json.loads(rc.read_text())
