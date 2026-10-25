@@ -7,4 +7,5 @@ build = '''chmod +x tools/coc/coc && make CC=clang CFLAGS="$CFLAGS -std=c99" LFL
 reproduce = '''./berry /tmp/poc'''
 test = '''ASAN_OPTIONS=detect_leaks=0 ./berry testall.be'''
 poc = "../544_format/poc.be"
+artifact = "berry"
 editable = ["src/*.c", "src/*.h"]

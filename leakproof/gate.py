@@ -29,6 +29,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from leakproof import gate_cli as gc
 from leakproof import gate_fuzz as gf
 from leakproof.cases.arvo import ArvoCase
 from leakproof.cases.juliet import JulietCase
@@ -185,6 +186,8 @@ def decide(checks: dict[str, Check]) -> str:
         return f"inconclusive:{patched.detail if patched else 'not_run'}"
     if patched.status == "fail":
         return "rejected:" + patched.detail.split(":", 1)[0]
+    if st("refuzz") == "fail" and checks["refuzz"].detail.startswith("same bug"):
+        return "rejected:refuzz_same_bug"
     for name, reason in (
         ("refuzz", "refuzz_new_crash"),
         ("differential", "differential"),
@@ -376,6 +379,9 @@ class ArvoGate:
         self.base_leak: dict[str, gf.Row] = {}
         self.amp: list[tuple[str, bytes]] = []
         self.ref_leak: dict[str, gf.Row] | None = None
+        # No harness but a PoC input (bring-your-own projects): generated inputs (D-0078).
+        self.cli_inputs: list[tuple[str, bytes]] = []
+        self.cli_base: gc.Run | None = None
 
     def unpatched(self) -> Check:
         tests = self.case.tests_cmd
@@ -411,12 +417,35 @@ class ArvoGate:
         if p is None or p.kind != want:
             return Check("fail", f"unpatched run: {p.kind if p else 'no report'} (expected {want})")
         if self.harness is None:
-            return Check("pass", f"{p.kind} at {p.location}; no fuzz harness configured")
+            note = self._cli_baseline()
+            return Check("pass", f"{p.kind} at {p.location}; {note}")
         self._baseline_corpus()
         return Check(
             "pass",
             f"{p.kind} at {p.location}; corpus {len(self.base_diff)} inputs "
             f"({self.corpus_source}); {len(self.amp)} amplified PoC variants",
+        )
+
+    def _cli_baseline(self) -> str:
+        """Checks 5-7 without a harness: generate inputs from /tmp/poc, run them unpatched."""
+        if not isinstance(self.case, ProjectCase) or not self.case.cfg.get("poc"):
+            return "no fuzz harness and no PoC input file: checks 5-7 skipped"
+        poc = self.runner.read(self.baseline, "/tmp/poc")
+        self.cli_inputs = gc.generate(poc)
+        res = self.runner.run(
+            self.baseline,
+            gc.script([n for n, _ in self.cli_inputs], self.case.reproduce_cmd),
+            files=gc.files(self.cli_inputs, self.case.reproduce_cmd),
+            env=self.case.build_env | (getattr(self.case, "reproduce_env", None) or {}),
+            cwd=self.case.workdir,
+            timeout_s=3600,
+            network=False,
+        )
+        self.cli_base = gc.Run.parse(split(res.stdout))
+        crashing = sum(1 for r in self.cli_base.rows.values() if r.sig)
+        return (
+            f"no fuzz harness: {len(self.cli_inputs)} inputs generated from the PoC "
+            f"({crashing} crash unpatched)"
         )
 
     def _baseline_corpus(self) -> None:
@@ -591,6 +620,13 @@ class ArvoGate:
             script.append(
                 "if [ $(cat /tmp/rc_run 2>/dev/null) = 0 ]; then\n" + self._fuzz_script() + "\nfi"
             )
+        elif self.cli_inputs:
+            # The reproducer may exit non-zero on a rejected input; the build is the gate here.
+            script.append(
+                "if [ $(cat /tmp/rc_build) = 0 ]; then\n"
+                + gc.script([n for n, _ in self.cli_inputs], self.case.reproduce_cmd)
+                + "\nfi"
+            )
         for name in (
             "rc_build",
             "rc_run",
@@ -606,7 +642,9 @@ class ArvoGate:
         res = self.runner.run(
             self.baseline,
             "\n".join(script),
-            files={k: v.encode() for k, v in cand["files"].items()} | self._fuzz_files(),
+            files={k: v.encode() for k, v in cand["files"].items()}
+            | (self._fuzz_files() if self.harness is not None else {})
+            | (gc.files(self.cli_inputs, self.case.reproduce_cmd) if self.cli_inputs else {}),
             env=self.case.build_env | (getattr(self.case, "reproduce_env", None) or {}),
             cwd=self.case.workdir,
             timeout_s=3600,
@@ -656,9 +694,22 @@ class ArvoGate:
             )
         if checks["patched"].status == "pass" and self.harness is not None:
             cand["_artifacts"] = self._judge_fuzz(sec, cand, checks)
+        elif self.harness is None and self.cli_base is not None:
+            if checks["patched"].status == "pass":
+                target = (
+                    gf._norm(self.case.finding.get("kind", "")),
+                    gf.finding_site(self.case.finding),
+                )
+                refuzz, diff = gc.judge(self.cli_base, gc.Run.parse(sec), target)
+                checks["refuzz"] = Check(*refuzz)
+                checks["differential"] = Check(*diff)
+                checks["safe_fix"] = Check(
+                    "pass" if refuzz[0] == "pass" else "skipped",
+                    "LeakSanitizer was on for every generated input (leaks judged by refuzz)",
+                )
         elif self.harness is None:
             for name in ("differential", "refuzz", "safe_fix"):
-                checks[name] = Check("skipped", "no fuzz harness configured for this project")
+                checks[name] = Check("skipped", "no fuzz harness and no PoC input file")
         return report
 
 

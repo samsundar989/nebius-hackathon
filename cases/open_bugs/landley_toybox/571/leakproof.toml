@@ -6,5 +6,8 @@ src = "../src"
 build = '''chmod +x scripts/*.sh scripts/*/*.sh 2>/dev/null; make defconfig > /dev/null && make -j4 toybox'''
 # `|| true`: a fixed getopt may reject the option with exit 1; the gate judges the sanitizer
 # report, so a crash still fails the check.
-reproduce = '''./generated/unstripped/toybox getopt '-l\,,' || true'''
+# The argument lives in poc.arg so the gate can generate variants of it (D-0078).
+reproduce = '''./generated/unstripped/toybox getopt "$(cat /tmp/poc)" || true'''
+poc = "../571/poc.arg"
+artifact = "generated/unstripped/toybox"
 editable = ["toys/*/*.c", "lib/*.c", "lib/*.h"]

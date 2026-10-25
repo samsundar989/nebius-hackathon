@@ -7,4 +7,5 @@ build = '''clang $CFLAGS -Isrc -o jsondump src/example/jsondump.c'''
 reproduce = '''./jsondump < /tmp/poc > /dev/null'''
 test = '''make -C src test'''
 poc = "poc.json"
+artifact = "jsondump"
 editable = ["src/jsmn.h", "src/example/*.c"]
