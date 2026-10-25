@@ -38,3 +38,26 @@ def test_decode() -> None:
     assert adv.decode(hexed) == b"ABBB\n"
     assert adv.decode({"encoding": "hex", "prefix": "zz"}) is None
     assert adv.decode({"encoding": "text", "prefix": "a", "repeat": "", "count": 0}) == b"a"
+
+
+def test_same_function_other_line_is_pre_existing() -> None:
+    sig = "ERROR:_AddressSanitizer:_heap-buffer-overflow"
+    base = _run({"a": ("1", "x", sig)}, {"a": REP})  # unpatched crashes at a.c:3
+    pat = _run({"a": ("1", "x", sig)}, {"a": REP})
+    assert adv.judge(base, pat, None, TARGET, "/src/p/a.c:3:1")[0] == "adversary_same_bug"
+    verdict, _, rows = adv.judge(base, pat, None, TARGET, "/src/p/a.c:9")
+    assert verdict == "pass" and rows[0]["outcome"].startswith("pre-existing")
+
+
+def test_leak_after_unpatched_crash_is_not_attributed() -> None:
+    leak = (
+        "==1==ERROR: LeakSanitizer: detected memory leaks\n\n"
+        "Direct leak of 4 byte(s) in 1 object(s) allocated from:\n"
+        "    #0 0x1 in malloc /src/llvm-project/compiler-rt/lib/asan/asan_malloc_linux.cpp:145:3\n"
+        "    #1 0x2 in g /src/p/b.c:2:1\n"
+    )
+    base = _run({"a": ("1", "x", "ERROR:_AddressSanitizer:_SEGV")}, {"a": NEW})
+    pat = _run({"a": ("1", "x", "ERROR:_LeakSanitizer:_detected")}, {"a": leak})
+    assert adv.judge(base, pat, None, TARGET)[0] == "pass"
+    clean = _run({"a": ("0", "x", "")})
+    assert adv.judge(clean, pat, None, TARGET)[0] == "adversary_new_crash"

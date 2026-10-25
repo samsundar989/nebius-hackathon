@@ -31,6 +31,7 @@ from typing import Any
 
 from leakproof import gate_cli as gc
 from leakproof import gate_fuzz as gf
+from leakproof.findings import parse_report, primary
 
 MAX_INPUTS = 8
 PROMPT_VERSION = 3  # part of the answer cache key: a new prompt asks the models again
@@ -176,13 +177,29 @@ def attack(
     return out, res.usd
 
 
+def _loc(run: gc.Run, name: str) -> str:
+    """file:line of the input's sanitizer report ('' when clean or unparsable)."""
+    f = primary(parse_report(run.reports.get(name, "")))
+    return ":".join((f.location or "").split(":")[:2]) if f else ""
+
+
 def judge(
-    base: gc.Run, patched: gc.Run, ref: gc.Run | None, target: tuple[str, str]
+    base: gc.Run,
+    patched: gc.Run,
+    ref: gc.Run | None,
+    target: tuple[str, str],
+    target_loc: str = "",
 ) -> tuple[str, str, list[dict[str, Any]]]:
     """(verdict, detail, per-input rows). verdict: pass | adversary_same_bug |
-    adversary_new_crash | behaviour_change | inconclusive."""
+    adversary_new_crash | behaviour_change | inconclusive.
+
+    Same bug needs the unpatched build to crash on that input at the target's own line
+    (`target_loc`): a crash elsewhere in the same function is a different, pre-existing bug.
+    A leak counts only on an input the unpatched build runs cleanly, since a crash ends the run
+    before LeakSanitizer reports (the D-0047 safe-fix rule)."""
     if not base.rows or not patched.rows:
         return "inconclusive", "no rows from the unpatched or the patched run", []
+    target_loc = ":".join(target_loc.split(":")[:2])
     rows, same, new, changed = [], [], [], []
     for name, b in base.rows.items():
         p = patched.rows.get(name)
@@ -190,17 +207,26 @@ def judge(
         pk, bk = patched.key(name), base.key(name)
         rk = ref.key(name) if ref else None
         row = {"input": name, "unpatched": b.sig or f"exit {b.rc}", "patched": None}
+        if bk is not None:
+            row["unpatched_at"] = _loc(base, name)
         if p is None:
             row["patched"] = "no result"
         elif pk is not None:
             row["patched"] = f"{pk[0]} at {pk[1] or '?'}"
-            if pk == tuple(target) and rk != pk:
-                # The unpatched build crashing the same way is expected; only a reference
-                # (developer's fix) with the same crash makes it pre-existing.
+            if pk in (bk, rk) and pk != tuple(target):
+                row["outcome"] = "pre-existing"
+            elif pk == tuple(target) and rk == pk:
+                row["outcome"] = "pre-existing (the developer's fix has it too)"
+            elif pk == tuple(target) and target_loc and row.get("unpatched_at") != target_loc:
+                row["outcome"] = (
+                    f"pre-existing (unpatched crashes at {row.get('unpatched_at') or 'nothing'}, "
+                    f"not the target line {target_loc})"
+                )
+            elif pk == tuple(target):
                 row["outcome"] = "same bug"
                 same.append(name)
-            elif pk in (bk, rk):
-                row["outcome"] = "pre-existing"
+            elif pk[0] == "leak" and (bk is not None or b.rc == "124"):
+                row["outcome"] = "not attributed (the unpatched build crashed first: leaks unseen)"
             else:
                 row["outcome"] = "new crash"
                 new.append(name)

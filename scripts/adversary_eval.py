@@ -207,7 +207,9 @@ def attack_case(
                         {k: v for k, v in r.reports.items() if k in keep},
                     )
 
-                verdict, detail, rows = adv.judge(sub(base), sub(pat), sub(refr), target)
+                verdict, detail, rows = adv.judge(
+                    sub(base), sub(pat), sub(refr), target, case.finding.get("location") or ""
+                )
                 reasons = {i["name"]: (i["expect"], i["reason"]) for i in inputs}
                 for r in rows:
                     r["expect"], r["reason"] = reasons.get(r["input"], ("", ""))
