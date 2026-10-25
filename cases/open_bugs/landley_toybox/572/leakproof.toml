@@ -1,0 +1,9 @@
+# landley/toybox issue #572: heap-buffer-overflow in patch (KLEE-found). Upstream source in ../src
+# (shallow clone shared by the three toybox cases, not committed; see ../notes.md).
+[project]
+name = "toybox_572"
+src = "../src"
+build = '''chmod +x scripts/*.sh scripts/*/*.sh 2>/dev/null; make defconfig > /dev/null && make -j4 toybox'''
+reproduce = '''./generated/unstripped/toybox patch < /tmp/poc'''
+poc = "../572/poc.patch"
+editable = ["toys/*/*.c", "lib/*.c", "lib/*.h"]

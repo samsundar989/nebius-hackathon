@@ -1,0 +1,7 @@
+# replay of a recorded run: runs/demo_fix (2026-10-24)
+$ ./csvsplit_fuzz poc.csv
+==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000052 at pc 0x5a39d217f6c3 bp 0x7ffd19a3d3d0 sp 0x7ffd19a3d3c8
+WRITE of size 1 at 0x502000000052 thread T0
+    #0 0x5a39d217f6c2 in copy_quoted /src/csvsplit/src/csvsplit.c:33:16
+    #1 0x5a39d217eaf3 in csv_split /src/csvsplit/src/csvsplit.c:54:21
+    #2 0x5a39d217e47f in LLVMFuzzerTestOneInput /src/csvsplit/fuzz/csvsplit_fuzz.c:8:13

@@ -1,0 +1,10 @@
+# nanosvg issue #295: 1-byte heap over-read in nsvg__parseNameValue via a <style> class body with
+# no trailing ';'. Upstream source in ./src (shallow clone, not committed; see notes.md).
+[project]
+name = "nanosvg_295"
+src = "."
+build = '''clang $CFLAGS -fsanitize=fuzzer -Isrc/src -o fuzz_nanosvg fuzz_nanosvg.c -lm'''
+reproduce = "./fuzz_nanosvg /tmp/poc"
+harness = "fuzz_nanosvg"
+poc = "poc.svg"
+editable = ["src/src/nanosvg.h"]

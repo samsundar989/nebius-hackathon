@@ -1,0 +1,25 @@
+# replay of a recorded run: runs/demo_fix (2026-10-24)
+$ uv run leakproof fix --config examples/csvsplit/leakproof.toml
+plan (Nemotron 3 Ultra): In copy_quoted(), malloc(inner) allocates exactly the number of content bytes but the function writes 'out' content bytes plus a null terminator at field[out], requiring inner+1 by
+4 workers (Nemotron 3.5 Lightning) -> gate (own process, network off)
+
+verdict: verified   $0.0062   209.76 s
+  H1 w0: no_candidate:apply_failed
+  H1 w1: verified
+  H1 w2: verified
+  H1 w3: verified
+
+VERIFIED: evidence medium: project tests ran; harness output not measured
+
+winning diff:
+--- a/src/csvsplit/src/csvsplit.c
++++ b/src/csvsplit/src/csvsplit.c
+@@ -19,7 +19,7 @@
+  * quote, `n` counts every byte up to and including the closing quote. */
+ static char *copy_quoted(const char *raw, size_t n) {
+     size_t inner = n >= 2 ? n - 2 : 0;
+-    char *field = malloc(inner); /* room for the content */
++    char *field = malloc(inner + 1); /* room for the content */
+     size_t out = 0;
+     if (field == NULL) {
+         return NULL;

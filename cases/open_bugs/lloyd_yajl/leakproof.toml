@@ -1,0 +1,13 @@
+# yajl issue #260: heap-buffer-overflow (read) in hexToDigit after a high surrogate followed by a
+# truncated escape. Upstream source in ./src (shallow clone, not committed; see notes.md).
+# The build mirrors CMake's header layout (inc/yajl/*) without CMake; the tests are yajl's own
+# parsing suite (test/parsing/run_tests.sh, gold files).
+[project]
+name = "yajl_260"
+src = "."
+build = '''mkdir -p inc/yajl && cp src/src/api/yajl_common.h src/src/api/yajl_gen.h src/src/api/yajl_parse.h src/src/api/yajl_tree.h inc/yajl/ && sed -e 's/[$]{YAJL_MAJOR}/2/' -e 's/[$]{YAJL_MINOR}/1/' -e 's/[$]{YAJL_MICRO}/1/' src/src/api/yajl_version.h.cmake > inc/yajl/yajl_version.h && clang $CFLAGS -fsanitize=fuzzer -Iinc -o fuzz_yajl fuzz_yajl.c src/src/*.c && clang $CFLAGS $LDFLAGS -Iinc -o yajl_test src/test/parsing/yajl_test.c src/src/*.c'''
+reproduce = "./fuzz_yajl /tmp/poc"
+test = '''cd src/test/parsing && ASAN_OPTIONS=detect_leaks=0 sh run_tests.sh /src/yajl_260/yajl_test'''
+harness = "fuzz_yajl"
+poc = "poc.json"
+editable = ["src/src/*.c", "src/src/*.h"]

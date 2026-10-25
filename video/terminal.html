@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Leakproof terminal replay</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0f1115; }
+  body { display: flex; align-items: center; justify-content: center; }
+  .win { width: 1320px; height: 800px; background: #16191f; border-radius: 10px; box-shadow: 0 10px 40px #0008; overflow: hidden; display: flex; flex-direction: column; }
+  .bar { height: 34px; background: #23262e; display: flex; align-items: center; gap: 8px; padding: 0 14px; }
+  .bar i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .bar span { color: #8b93a1; font: 13px system-ui, sans-serif; margin-left: 10px; }
+  pre { flex: 1; margin: 0; padding: 18px 22px; color: #d7dae0; font: 17px/1.5 ui-monospace, Consolas, monospace; white-space: pre-wrap; overflow: hidden; }
+  .cmd { color: #7ee787; } .note { color: #8b93a1; } .err { color: #ff7b72; } .ok { color: #7ee787; font-weight: 600; }
+  .add { color: #7ee787; } .del { color: #ff7b72; }
+</style>
+</head>
+<body>
+<div class="win"><div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span id="title">leakproof</span></div><pre id="out"></pre></div>
+<script>
+// Replays a recorded transcript: ?t=<name> loads transcripts/<name>.txt and types it out.
+const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+function style(line) {
+  const l = esc(line);
+  if (line.startsWith("$ ")) return `<span class="cmd">${l}</span>`;
+  if (line.startsWith("# ")) return `<span class="note">${l}</span>`;
+  if (/ERROR|rejected|Not fixed/.test(line)) return `<span class="err">${l}</span>`;
+  if (/^VERIFIED|verified, all members clean|clusters verified/.test(line)) return `<span class="ok">${l}</span>`;
+  if (line.startsWith("+") && !line.startsWith("+++")) return `<span class="add">${l}</span>`;
+  if (line.startsWith("-") && !line.startsWith("---")) return `<span class="del">${l}</span>`;
+  return l;
+}
+(async () => {
+  const name = new URLSearchParams(location.search).get("t");
+  document.getElementById("title").textContent = `leakproof — ${name}`;
+  const text = await fetch(`transcripts/${name}.txt`).then((r) => r.text());
+  const out = document.getElementById("out");
+  const lines = text.replace(/\n$/, "").split("\n");
+  for (const line of lines) {
+    if (line.startsWith("$ ")) {
+      const span = document.createElement("span");
+      span.className = "cmd";
+      out.appendChild(span);
+      for (const ch of line) { span.textContent += ch; await new Promise((r) => setTimeout(r, 28)); }
+      out.appendChild(document.createTextNode("\n"));
+      await new Promise((r) => setTimeout(r, 600));
+    } else {
+      out.insertAdjacentHTML("beforeend", style(line) + "\n");
+      await new Promise((r) => setTimeout(r, 140));
+    }
+  }
+  document.body.dataset.done = "1";
+})();
+</script>
+</body>
+</html>

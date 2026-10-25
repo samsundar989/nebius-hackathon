@@ -51,3 +51,10 @@ docs/kickoff/
 docs/bundles/*
 !docs/bundles/42520955.md
 !docs/bundles/42530604.md
+
+# Open-bug cases: upstream clones stay local (cases/open_bugs/<id>/src).
+cases/open_bugs/*/src/
+
+# Video draft: rendered clips and the assembled draft stay local (video/record.py rebuilds them).
+video/clips/
+video/*.mp4

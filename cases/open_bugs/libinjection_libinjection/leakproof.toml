@@ -1,0 +1,10 @@
+# libinjection issue #90: out-of-bounds read in htmlencode_startswith on input ending in an
+# incomplete HTML entity. Upstream source in ./src (shallow clone, not committed; see notes.md).
+[project]
+name = "libinjection_90"
+src = "."
+build = '''clang $CFLAGS -fsanitize=fuzzer -Isrc/src -o fuzz_libinjection fuzz_libinjection.c src/src/libinjection_xss.c src/src/libinjection_html5.c src/src/libinjection_sqli.c'''
+reproduce = "./fuzz_libinjection /tmp/poc"
+harness = "fuzz_libinjection"
+poc = "poc.bin"
+editable = ["src/src/libinjection_*.c", "src/src/libinjection_*.h"]

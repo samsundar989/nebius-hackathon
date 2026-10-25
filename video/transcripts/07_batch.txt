@@ -1,0 +1,6 @@
+# replay of a recorded run: runs/demo_batch (2026-10-24)
+$ uv run leakproof batch --config examples/csvsplit/leakproof.toml --findings examples/csvsplit/findings
+10 inputs -> 1 cluster(s); 4 do not crash
+  cluster 1 (6 inputs, heap-buffer-overflow / copy_quoted csvsplit.c / csv_split csvsplit.c): verified, all members clean: True
+
+1/1 clusters verified for every member input; $0.0137; 236.7 s

@@ -1,0 +1,8 @@
+# landley/toybox issue #571: heap-buffer-overflow in getopt (KLEE-found). Upstream source in ../src
+# (shallow clone shared by the three toybox cases, not committed; see ../notes.md).
+[project]
+name = "toybox_571"
+src = "../src"
+build = '''chmod +x scripts/*.sh scripts/*/*.sh 2>/dev/null; make defconfig > /dev/null && make -j4 toybox'''
+reproduce = '''./generated/unstripped/toybox getopt '-l\,,''''
+editable = ["toys/*/*.c", "lib/*.c", "lib/*.h"]

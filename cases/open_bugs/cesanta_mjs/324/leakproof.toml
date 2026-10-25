@@ -1,0 +1,13 @@
+# cesanta/mjs issue #324: heap-buffer-overflow (read) in skip_spaces_and_comments on an input
+# ending in whitespace. Upstream source in ../src (shallow clone, not committed; see notes.md).
+[project]
+name = "mjs_324"
+src = ".."
+build = '''clang $CFLAGS -fno-sanitize=pointer-overflow -fsanitize=fuzzer -Isrc -o fuzz_mjs fuzz_mjs.c src/mjs.c -lm'''
+reproduce = "./fuzz_mjs /tmp/poc"
+harness = "fuzz_mjs"
+poc = "324/poc.js"
+# -fno-sanitize=pointer-overflow: mjs trips UBSan in gc_mark_mbuf_pt (NULL buffer + 0, mjs.c:10791)
+# on every script, before any reported bug is reached; recorded in ../../TRIAGE.md.
+# The amalgamated mjs.c is what builds; an upstream PR would carry the same change to src/mjs_tok.c.
+editable = ["src/mjs.c"]

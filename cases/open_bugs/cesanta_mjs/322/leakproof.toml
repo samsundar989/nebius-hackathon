@@ -1,0 +1,13 @@
+# cesanta/mjs issue #322: heap-use-after-free in mjs_next() when an array is spliced during
+# for...in iteration. Upstream source in ../src (shallow clone, not committed; see notes.md).
+[project]
+name = "mjs_322"
+src = ".."
+build = '''clang $CFLAGS -fno-sanitize=pointer-overflow -fsanitize=fuzzer -Isrc -o fuzz_mjs fuzz_mjs.c src/mjs.c -lm'''
+reproduce = "./fuzz_mjs /tmp/poc"
+harness = "fuzz_mjs"
+poc = "322/poc.js"
+# -fno-sanitize=pointer-overflow: mjs trips UBSan in gc_mark_mbuf_pt (NULL buffer + 0, mjs.c:10791)
+# on every script, before any reported bug is reached; recorded in ../../TRIAGE.md.
+# The amalgamated mjs.c is what builds; an upstream PR would carry the same change to src/*.c.
+editable = ["src/mjs.c"]

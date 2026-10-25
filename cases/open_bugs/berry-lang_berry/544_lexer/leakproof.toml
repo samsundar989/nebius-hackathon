@@ -1,0 +1,9 @@
+# berry-lang/berry issue #544 (lexer path): read past the end-of-input sentinel when an
+# unterminated string ends with a backslash. Upstream source in ../src (not committed).
+[project]
+name = "berry_544_lexer"
+src = "../src"
+build = '''chmod +x tools/coc/coc && make CC=clang CFLAGS="$CFLAGS -std=c99" LFLAGS="$LDFLAGS" LIBS="-lm -ldl" -j4'''
+reproduce = '''./berry -e 'var s = "abc\''''
+test = '''ASAN_OPTIONS=detect_leaks=0 ./berry testall.be'''
+editable = ["src/*.c", "src/*.h"]
