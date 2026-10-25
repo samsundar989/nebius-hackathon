@@ -176,3 +176,29 @@ Bring-your-own adapter + `leakproof fix --config` + `examples/csvsplit` (D-0055;
 
 ### CI
 Red on d55c8da/afaff4c (a smoke-set test assumed only 60 Juliet case files; fixed in 5427caf); the Actions page has been unreachable from the browser since, so later runs are unconfirmed; the full suite (262 tests) passes locally on every commit.
+
+## Day 4 (evening) · Sat 2026-10-24 — B4 (P3 r2), C, D, E, README/video drafts
+
+Strategist notes 2026-10-24 15:50 CDT: still the newest entry; acting on B4 (r2 paused at the $1.95 cap, QUESTION 0015), C (done), D (done except Render apply = QUESTION 0011), E (done), Monday items started early (README draft, §7 rewording, video script).
+
+### P3 r2 (edit fallbacks + one repair round; `runs/p3_arvo27_r2`) — 18/27 cases run before the cap
+Same 18 cases: r1 8 verified → **r2 9** (7 in round 1 + 2 recovered by the repair round: md4c 42507297, libplist 42507851). Gained md4c 42507297, libzip 42520377, jq 42530604; lost mosquitto 42522195 and jq 42531297 — run-to-run variance in both directions. Workers without an applicable edit: 30/80 (r1 40/108): the fallbacks alone did not move the rate; two worker-side fixes followed (D-0062 brace balance, D-0065 diff-shaped replies), effective after r2. The other 9 cases await ANSWER 0015.
+
+### C — evidence quality
+- Juliet leaderboard (20 cases × 3 repeats): Lightning-only 93%, Ultra 95%, Super 93%; $/verified $0.0042 / $0.0142 / $0.0080. ARVO leaderboard (10 cases, round 1 only) running: Lightning-only **2/10** verified.
+- Ultra root cause vs developer fix (proxy): file 22/24, function 14/22.
+- Audit flag: does not separate verified from rejected (ARVO 83% vs 79%) → "advisory reviewer notes" (D-0060).
+
+### D — product surface
+- CUDA on a Kaggle T4: **3/3 verified**; 2 candidates `silenced_only` (clamp, over-allocate) caught by the checksum (D-0063).
+- Bundles for every case (refused ones lead with the reason); dashboard CUDA panel; demo service live path sandboxed (`nobody`, clean env), live smoke 3/3 verified, key isolation verified (D-0061, D-0067) → QUESTION 0011.
+
+### E — triage at scale
+`leakproof batch`: csvsplit 10 inputs → 6 crash → 1 cluster → fixed once, all 6 members clean, $0.0094 (D-0064, D-0066). `leakproof fix` on csvsplit: verified, $0.0100.
+
+### Numbers that changed
+- Juliet leaderboard and ARVO r2 (partial) are new; P3 r1 stays 15/27; calibration stays 24/27.
+- Model spend total: see `docs/NUMBERS.md` (generated); sandbox units separate.
+
+### CI
+Not verifiable from here since the Actions page went 404 in the browser; 266 tests pass locally on every push.
