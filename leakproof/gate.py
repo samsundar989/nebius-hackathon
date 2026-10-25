@@ -217,6 +217,43 @@ def behavior_check(cwe: str, before: str, after: str) -> Check:
     )
 
 
+# One line per test result: automake (`PASS: tests/x`) and CUnit (`Test: name ...passed`).
+TEST_LINES = "'^(PASS|FAIL|XFAIL|XPASS|ERROR): |^Suite: |Test: .*[.]{3}(passed|FAILED)'"
+_AUTOMAKE = re.compile(r"^(PASS|FAIL|XFAIL|XPASS|ERROR): (\S+)")
+_CUNIT_SUITE = re.compile(r"^Suite: (.+)")
+_CUNIT_TEST = re.compile(r"Test: (.+?) \.\.\.(passed|FAILED)")
+
+
+def test_results(text: str) -> dict[str, bool]:
+    """{test name: passed} from a suite's output (automake or CUnit)."""
+    out: dict[str, bool] = {}
+    suite = ""
+    for line in text.splitlines():
+        if m := _AUTOMAKE.match(line):
+            out[m.group(2)] = m.group(1) in ("PASS", "XFAIL")
+        elif m := _CUNIT_SUITE.match(line.strip()):
+            suite = m.group(1).strip()
+        elif m := _CUNIT_TEST.search(line):
+            out[f"{suite}/{m.group(1)}"] = m.group(2) == "passed"
+    return out
+
+
+def compare_tests(base: dict[str, bool], patched: dict[str, bool]) -> Check:
+    """A suite that fails on the baseline: every test that passes there must still pass."""
+    broken = sorted(n for n, ok in base.items() if ok and not patched.get(n, False))
+    already = sum(not ok for ok in base.values())
+    note = f"{sum(base.values())} tests pass on the baseline ({already} already failing there)"
+    if broken:
+        missing = sum(n not in patched for n in broken)
+        return Check(
+            "fail",
+            f"{len(broken)} test(s) that pass on the baseline fail now"
+            + (f" or did not run ({missing})" if missing else "")
+            + f": {', '.join(broken[:5])}; {note}",
+        )
+    return Check("pass", f"all {note} still pass")
+
+
 def split(stdout: str) -> dict[str, str]:
     # The separator carries its own leading newline (printf '\n@@LPGATE@@ name\n'), so a file
     # without a trailing newline cannot swallow the next marker; contents stay byte-exact.
@@ -323,6 +360,7 @@ class ArvoGate:
         # reference when attributing a refuzz crash. Never shown to workers.
         self.reference = reference
         self.tests_baseline: Check | None = None
+        self.tests_baseline_results: dict[str, bool] = {}
         # Suite hooks (ArvoCase, ProjectCase): harness for checks 5-7 (None = skip them),
         # artifact whose hash proves the patch was compiled, reproduce and build commands.
         self.harness = case.harness_path
@@ -341,16 +379,20 @@ class ArvoGate:
     def unpatched(self) -> Check:
         tests = self.case.tests_cmd
         if tests:
-            # A suite that already fails on the unpatched build cannot judge a patch.
+            # A suite that already fails on the unpatched build judges a patch per test: the
+            # tests that pass on the baseline must still pass (D-0073).
             t = self.runner.run(
                 self.baseline,
-                f"( {tests} ) > /tmp/t.log 2>&1; rc=$?; tail -40 /tmp/t.log; exit $rc",
+                f"( {tests} ) > /tmp/t.log 2>&1; rc=$?; grep -E {TEST_LINES} /tmp/t.log; "
+                f"printf '\n{MARK} tail\n'; tail -40 /tmp/t.log; exit $rc",
                 env=self.case.build_env,
                 cwd=self.case.workdir,
                 timeout_s=3600,
                 network=False,
             )
-            self.tests_baseline = Check("pass" if t.exit_code == 0 else "fail", t.stdout[-600:])
+            head, _, tail = t.stdout.partition(f"\n{MARK} tail\n")
+            self.tests_baseline = Check("pass" if t.exit_code == 0 else "fail", tail[-600:])
+            self.tests_baseline_results = test_results(head)
         hash_cmd = f"md5sum {self.artifact} > /tmp/hash; " if self.artifact else ": > /tmp/hash; "
         res = self.runner.run(
             self.baseline,
@@ -541,7 +583,7 @@ class ArvoGate:
         if tests:
             script.append(
                 f"if [ $(cat /tmp/rc_run 2>/dev/null) = 0 ]; then ( {tests} ) > /tmp/tests.log 2>&1; "
-                "echo $? > /tmp/rc_tests; fi"
+                f"echo $? > /tmp/rc_tests; grep -E {TEST_LINES} /tmp/tests.log > /tmp/tests.res; fi"
             )
         # Checks 5-7 only judge a patch that already survives its own PoC.
         if self.harness is not None:
@@ -554,6 +596,7 @@ class ArvoGate:
             "err_run",
             "out_run",
             "rc_tests",
+            "tests.res",
             "tests.log",
             "compile.log",
             "hash",
@@ -600,7 +643,11 @@ class ArvoGate:
         if tests is None:
             checks["tests"] = Check("skipped", "no runnable project test suite in the image")
         elif self.tests_baseline is not None and self.tests_baseline.status != "pass":
-            checks["tests"] = Check("skipped", "suite fails on the unpatched baseline too")
+            base = self.tests_baseline_results
+            if not any(base.values()):
+                checks["tests"] = Check("skipped", "suite fails on the unpatched baseline too")
+            elif checks["patched"].status == "pass":
+                checks["tests"] = compare_tests(base, test_results(sec.get("tests.res", "")))
         elif checks["patched"].status == "pass":
             rc_t = sec.get("rc_tests", "").strip()
             checks["tests"] = Check(

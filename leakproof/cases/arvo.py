@@ -83,8 +83,15 @@ TESTS: dict[str, str | None] = {
     # 7 of jq's 8 suites; tests/shtest already fails on the unpatched -O0 image (runs/arvo_inspect).
     "jq": 'ASAN_OPTIONS=detect_leaks=0 make check-TESTS TESTS="tests/utf8test tests/base64test '
     'tests/optionaltest tests/onigtest tests/manonigtest tests/mantest tests/jqtest"',
-    # test/unit needs CUnit, which the image lacks (and the gate runs offline).
-    "mosquitto": None,
+    # test/unit (CUnit, installed by TEST_DEPS) links against the sanitizer-built library objects,
+    # so it needs the sanitizer and coverage flags at link time; -k runs every suite (D-0073).
+    "mosquitto": "ASAN_OPTIONS=detect_leaks=0 make -k -C test/unit test "
+    "LDFLAGS='-fsanitize=address -fsanitize=fuzzer-no-link --coverage'",
+}
+# Test-suite dependencies missing from the ARVO image: installed once while preparing the
+# baseline, the only step with the network on (gate runs stay offline). Gate side, D-0073.
+TEST_DEPS: dict[str, str] = {
+    "mosquitto": "apt-get update -qq && apt-get install -y -qq libcunit1-dev",
 }
 
 
@@ -102,6 +109,7 @@ class ArvoCase:
     finding: dict[str, Any] = field(default_factory=dict)
     prep: dict[str, Any] = field(default_factory=dict)
     _baseline: ImageRef | None = None
+    _deps: ImageRef | None = None
     _sources: dict[str, str] = field(default_factory=dict)
 
     @classmethod
@@ -182,6 +190,18 @@ class ArvoCase:
             raise RuntimeError(
                 f"{self.id}: shipped harness did not trip (exit {shipped.exit_code})"
             )
+        if self.project in TEST_DEPS:
+            deps = runner.run(
+                ref,
+                TEST_DEPS[self.project],
+                cwd=self.workdir,
+                timeout_s=900,
+                network=True,
+                save=True,
+            )
+            self.prep["test_deps_exit"] = deps.exit_code
+            if deps.exit_code == 0 and deps.image is not None:
+                self._deps = ref = deps.image
         rebuilt = runner.run(
             ref,
             MKDIR_SHIM
@@ -209,10 +229,10 @@ class ArvoCase:
         return rebuilt.image
 
     def cleanup(self, runner: Runner) -> None:
-        for ref in (self._baseline, ImageRef("docker", self.image)):
+        for ref in (self._baseline, self._deps, ImageRef("docker", self.image)):
             if ref is not None and hasattr(runner, "remove_image"):
                 runner.remove_image(ref)
-        self._baseline = None
+        self._baseline = self._deps = None
 
     # ---------------------------------------------------------------- worker-visible view
     def _editable(self, path: str | None) -> bool:
