@@ -110,7 +110,7 @@ details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
 
   <section>
     <h2>Runs</h2>
-    <div class="scroll panel"><table id="runs"><thead><tr><th>run</th><th>cases</th><th>crash gone</th><th>gate checks 1–4</th><th>verified</th><th>$ / verified</th><th>gate</th></tr></thead><tbody></tbody></table></div>
+    <div class="scroll panel"><table id="runs"><thead><tr><th>run</th><th>cases</th><th>crash gone</th><th>builds, crash gone, tests, in scope</th><th>verified</th><th>$ / verified</th><th>gate</th></tr></thead><tbody></tbody></table></div>
   </section>
 
   <section>
@@ -279,7 +279,7 @@ async function showRun(run, btn) {
       <p>Verified and correct: ${order.map((k) => `${esc(num.planners_arvo[k].label)} ${num.planners_arvo[k].strict}`).join(" · ")}. With Ultra's plan each verified fix also cost less (${money(num.planners_arvo.ultra && num.planners_arvo.ultra.usd_per_verified)} vs ${money(num.planners_arvo.lightning && num.planners_arvo.lightning.usd_per_verified)} without a planner): failed attempts cost money too. One repeat.</p>`;
   }
   if (arvo) {
-    const bars = [["Crash gone (what most agents report)", arvo.raw, ""], ["Gate checks 1–4 (v0)", arvo.v0, ""], ["Verified by gate v1", arvo.verified, "v1"]];
+    const bars = [["Crash gone (what most agents report)", arvo.raw, ""], ["Builds, crash gone, tests pass, edits in scope", arvo.v0, ""], ["Verified: also survives corpus, re-fuzz and leak checks", arvo.verified, "v1"]];
     if (r1) bars.push(["Verified and correct (hand review)", r1.strict, "v1"]);
     $("#funnel").innerHTML = bars.map(([l, n, cls]) => `<div class="bar"><div class="lab">${esc(l)}</div><div class="track"><div class="fill ${cls}" style="width:${(100 * n) / Math.max(arvo.cases, 1)}%"></div></div><div class="num">${n}/${arvo.cases}</div></div>`).join("");
   }
