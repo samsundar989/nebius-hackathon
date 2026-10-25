@@ -289,8 +289,6 @@ Strategist notes 2026-10-25 13:30 CDT (review #8): acknowledged; orders 1–5 do
    - git history: every commit's author email is the Gmail address, and one earlier version of the patch file has it; not rewritten (QUESTION 0012).
    - Also found: the Sandboxes contract test for relative-path uploads fails today (FEEDBACK); the gate uploads to absolute paths, so verdicts are unaffected.
 
-Model spend for review #8 so far: $0.
-
 4. **`leakproof init`** (`leakproof/init.py`, `scripts/init_eval.py`, 6 unit tests): drafts a `leakproof.toml` from a repo (build system, sanitizer flags, tests, editable globs) and an issue's text (Nano: command and inline input). On the 10 hand-configured open-bugs projects: **6 of 10 drafts build unchanged; 0 of 10 build and reproduce unchanged** (`cases/open_bugs/INIT_EVAL.md`, job 3856). Three rounds; two found deterministic bugs that were fixed (exec bits, `$CC` flags, `build/` binaries). The reproducer is what a person still writes: 6 of 10 issues use a program the project does not build. README "Use it on your own project" says so. Nano $0.005.
 
 Model spend for review #8: $0.01 (Nemotron Nano, `init`).
