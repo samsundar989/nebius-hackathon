@@ -43,6 +43,7 @@ def _fix(args: argparse.Namespace) -> int:
         planner_model=None if args.planner == "none" else args.planner,
         n_workers=args.workers,
         select_model=None if args.select == "none" else args.select,
+        repair_rounds=args.repair_rounds,
     )
     workers = rec.get("workers", [])
     print(f"\nverdict: {rec['verdict']}   ${rec.get('usd', 0):.4f}   {rec.get('elapsed_s')} s")
@@ -221,6 +222,9 @@ def main(argv: list[str] | None = None) -> int:
     fx.add_argument("--runner", default="docker", choices=["docker", "sandboxes"])
     fx.add_argument("--planner", default="ultra", choices=["ultra", "super", "none"])
     fx.add_argument("--poc", help="crash input to fix (overrides `poc` in the config)")
+    fx.add_argument(
+        "--repair-rounds", type=int, default=0, help="1: one repair round when nothing verifies"
+    )
     fx.add_argument("--workers", type=int, default=4)
     fx.add_argument(
         "--select", default="ultra", choices=["ultra", "none"], help="rank several verified fixes"

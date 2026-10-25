@@ -63,7 +63,13 @@ def reproduce(cases: Path) -> int:
     return 0
 
 
-def fix(cases: Path, budget: float, only: set[str] | None) -> int:
+def fix(
+    cases: Path,
+    budget: float,
+    only: set[str] | None,
+    repair_rounds: int = 0,
+    run_id: str = "open_bugs_fix",
+) -> int:
     rows = json.loads((OUT / "reproduce.json").read_text())
     for row in rows:
         if not row.get("reproduces") or (only and row["case"] not in only):
@@ -76,9 +82,11 @@ def fix(cases: Path, budget: float, only: set[str] | None) -> int:
             "--config",
             str(cases / row["config"]),
             "--run-id",
-            "open_bugs_fix",
+            run_id,
             "--budget",
             str(budget),
+            "--repair-rounds",
+            str(repair_rounds),
         ]
         print("$", " ".join(cmd[2:]), flush=True)
         subprocess.run(cmd, check=False)
@@ -91,11 +99,14 @@ def main() -> int:
     ap.add_argument("--budget", type=float, default=0.3, help="USD cap per case (fix)")
     ap.add_argument("--cases-dir", type=Path, default=CASES)
     ap.add_argument("--only", help="comma-separated case names (fix)")
+    ap.add_argument("--repair-rounds", type=int, default=0)
+    ap.add_argument("--run-id", default="open_bugs_fix")
     args = ap.parse_args()
     cases = args.cases_dir.resolve()
     if args.step == "reproduce":
         return reproduce(cases)
-    return fix(cases, args.budget, set(args.only.split(",")) if args.only else None)
+    only = set(args.only.split(",")) if args.only else None
+    return fix(cases, args.budget, only, args.repair_rounds, args.run_id)
 
 
 if __name__ == "__main__":
