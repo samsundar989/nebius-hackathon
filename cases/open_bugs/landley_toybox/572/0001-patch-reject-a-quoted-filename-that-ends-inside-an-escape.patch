@@ -1,5 +1,5 @@
 From ee9ab83faf66a00f19668bd977399b1944dcd3dc Mon Sep 17 00:00:00 2001
-From: samsundar989 <40044199+samsundar989@users.noreply.github.com>
+From: <your git identity>
 Date: Sun, 25 Oct 2026 10:40:33 -0500
 Subject: [PATCH] patch: reject a quoted filename that ends inside an escape
 

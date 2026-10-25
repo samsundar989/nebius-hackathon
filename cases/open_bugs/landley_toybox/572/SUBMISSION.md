@@ -6,7 +6,7 @@ Issue: https://github.com/landley/toybox/issues/572 — heap-buffer-overflow in 
 ## The patch
 
 `0001-patch-reject-a-quoted-filename-that-ends-inside-an-escape.patch` (this directory),
-`git format-patch` form, author set to your git identity (`samsundar989 <40044199+samsundar989@users.noreply.github.com>`;
+`git format-patch` form, author set to your git identity (the committed copy says `<your git identity>`; a local, gitignored `0001-patch.private.patch` carries yours;
 change it with `git am` and `git commit --amend --reset-author` if you use another). It is the
 one-line fix:
 

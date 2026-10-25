@@ -58,3 +58,6 @@ cases/open_bugs/*/src/
 # Video draft: rendered clips and the assembled draft stay local (video/record.py rebuilds them).
 video/clips/
 video/*.mp4
+
+# local copies with real identities (review #8 order 5)
+*.private.*

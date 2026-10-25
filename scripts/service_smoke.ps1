@@ -10,7 +10,7 @@ if ($LASTEXITCODE -ne 0) { Write-Output "BUILD FAILED"; exit 1 }
 docker rm -f $name 2>$null | Out-Null
 $runArgs = @("run", "-d", "--name", $name, "-p", "18080:10000", "-e", "PORT=10000")
 if ($Live) {
-    $envFile = "C:\Users\<user>\Documents\nebius-hackathon\.env"
+    $envFile = Join-Path $PSScriptRoot "..\.env"
     $runArgs += @("--env-file", $envFile, "-e", "DEMO_ENABLED=true", "-e", "LEAKPROOF_BUDGET_USD=0.10")
 } else {
     $runArgs += @("-e", "DEMO_ENABLED=false")

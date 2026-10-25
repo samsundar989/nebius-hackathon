@@ -4,8 +4,10 @@
 # Usage: powershell -NoProfile -ExecutionPolicy Bypass -File scripts\lp_job.ps1 scripts\fix_batch.py --cases ...
 $ErrorActionPreference = "Continue"
 $env:UV_PROJECT_ENVIRONMENT = ".venv-win"
-if (-not $env:LEAKPROOF_DOTENV) { $env:LEAKPROOF_DOTENV = "C:\Users\<user>\Documents\nebius-hackathon\.env" }
-if (-not $env:LEAKPROOF_RUNS) { $env:LEAKPROOF_RUNS = "C:\Users\<user>\Documents\nebius-hackathon\runs" }
+# LEAKPROOF_HOME is the live checkout (default: Documents\nebius-hackathon under the user profile).
+if (-not $env:LEAKPROOF_HOME) { $env:LEAKPROOF_HOME = Join-Path $env:USERPROFILE "Documents\nebius-hackathon" }
+if (-not $env:LEAKPROOF_DOTENV) { $env:LEAKPROOF_DOTENV = Join-Path $env:LEAKPROOF_HOME ".env" }
+if (-not $env:LEAKPROOF_RUNS) { $env:LEAKPROOF_RUNS = Join-Path $env:LEAKPROOF_HOME "runs" }
 $env:PYTHONUNBUFFERED = "1"
 & powershell -NoProfile -ExecutionPolicy Bypass -File "$PSScriptRoot\with_docker.ps1" uv run --quiet python @args
 exit $LASTEXITCODE
