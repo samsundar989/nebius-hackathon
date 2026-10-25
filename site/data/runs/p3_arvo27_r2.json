@@ -42,6 +42,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -52,6 +53,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/h3/src/h3lib/lib/polyfill.c\n+++ b/src/h3/src/h3lib/lib/polyfill.c\n@@ -695,26 +695,27 @@\n  */\n H3Error H3_EXPORT(polygonToCellsExperimental)(const GeoPolygon *polygon,\n                                               int res, uint32_t flags,\n+                                              int64_t maxCells,\n                                               H3Index *out) {\n #ifdef H3_POLYGON_TO_CELLS_ASSERT\n     // TODO: This is incompatible with testH3Memory, since it will make more\n     // allocations. This is just for debugging that the algorithm is not\n     // exceeding its buffer size.\n-    int64_t maxSize;\n-    H3Error sizeError = H3_EXPORT(maxPolygonToCellsSizeExperimental)(\n-        polygon, res, flags, &maxSize);\n-    if (sizeError) {\n-        return sizeError;\n+    if (NEVER(maxCells < 0)) {\n+        return E_INVALID_ARGUMENT;\n     }\n #endif\n \n     IterCellsPolygon iter = iterInitPolygon(polygon, res, flags);\n     int64_t i = 0;\n     for (; iter.cell; iterStepPolygon(&iter)) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n-        if (NEVER(i >= maxSize)) {\n+        if (i >= maxCells) {\n             iterDestroyPolygon(&iter);\n             return E_FAILED;\n+        }\n+#ifdef H3_POLYGON_TO_CELLS_ASSERT\n+        if (NEVER(i >= maxCells)) {\n+            /* bounds check active in debug */\n         }\n #endif\n         out[i++] = iter.cell;\n"
     },
     {
@@ -61,6 +63,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -70,6 +73,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/h3/src/h3lib/lib/polyfill.c\n+++ b/src/h3/src/h3lib/lib/polyfill.c\n@@ -695,28 +695,14 @@\n  */\n H3Error H3_EXPORT(polygonToCellsExperimental)(const GeoPolygon *polygon,\n                                               int res, uint32_t flags,\n-                                              H3Index *out) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n-    // TODO: This is incompatible with testH3Memory, since it will make more\n-    // allocations. This is just for debugging that the algorithm is not\n-    // exceeding its buffer size.\n-    int64_t maxSize;\n-    H3Error sizeError = H3_EXPORT(maxPolygonToCellsSizeExperimental)(\n-        polygon, res, flags, &maxSize);\n-    if (sizeError) {\n-        return sizeError;\n-    }\n-#endif\n-\n+                                              H3Index *out, int64_t capacity) {\n     IterCellsPolygon iter = iterInitPolygon(polygon, res, flags);\n     int64_t i = 0;\n     for (; iter.cell; iterStepPolygon(&iter)) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n-        if (NEVER(i >= maxSize)) {\n+        if (i >= capacity) {\n             iterDestroyPolygon(&iter);\n             return E_FAILED;\n         }\n-#endif\n         out[i++] = iter.cell;\n     }\n     return iter.error;\n"
     },
     {
@@ -79,6 +83,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/h3/src/h3lib/lib/polyfill.c\n+++ b/src/h3/src/h3lib/lib/polyfill.c\n@@ -695,6 +695,7 @@\n  */\n H3Error H3_EXPORT(polygonToCellsExperimental)(const GeoPolygon *polygon,\n                                               int res, uint32_t flags,\n+                                              int64_t maxCells,\n                                               H3Index *out) {\n #ifdef H3_POLYGON_TO_CELLS_ASSERT\n     // TODO: This is incompatible with testH3Memory, since it will make more\n@@ -717,6 +718,10 @@\n             return E_FAILED;\n         }\n #endif\n+        if (i >= maxCells) {\n+            iterDestroyPolygon(&iter);\n+            return E_FAILED;\n+        }\n         out[i++] = iter.cell;\n     }\n     return iter.error;\n"
     },
     {
@@ -88,6 +93,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -126,6 +132,7 @@
       "error_handling"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/h3/src/h3lib/lib/polyfill.c\n+++ b/src/h3/src/h3lib/lib/polyfill.c\n@@ -696,27 +696,20 @@\n H3Error H3_EXPORT(polygonToCellsExperimental)(const GeoPolygon *polygon,\n                                               int res, uint32_t flags,\n                                               H3Index *out) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n-    // TODO: This is incompatible with testH3Memory, since it will make more\n-    // allocations. This is just for debugging that the algorithm is not\n-    // exceeding its buffer size.\n     int64_t maxSize;\n     H3Error sizeError = H3_EXPORT(maxPolygonToCellsSizeExperimental)(\n         polygon, res, flags, &maxSize);\n     if (sizeError) {\n         return sizeError;\n     }\n-#endif\n \n     IterCellsPolygon iter = iterInitPolygon(polygon, res, flags);\n     int64_t i = 0;\n     for (; iter.cell; iterStepPolygon(&iter)) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n         if (NEVER(i >= maxSize)) {\n             iterDestroyPolygon(&iter);\n             return E_FAILED;\n         }\n-#endif\n         out[i++] = iter.cell;\n     }\n     return iter.error;\n"
     },
     {
@@ -135,6 +142,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/h3/src/h3lib/lib/polyfill.c\n+++ b/src/h3/src/h3lib/lib/polyfill.c\n@@ -696,12 +696,30 @@\n H3Error H3_EXPORT(polygonToCellsExperimental)(const GeoPolygon *polygon,\n                                               int res, uint32_t flags,\n                                               H3Index *out) {\n+    int64_t maxSize;\n+    H3_EXPORT(maxPolygonToCellsSizeExperimental)(\n+        polygon, res, flags, &maxSize);\n+    if (sizeError) {\n+        return sizeError;\n+    }\n+\n+    IterCellsPolygon iter = iterInitPolygon(polygon, res, flags);\n+    int64_t i = 0;\n+    for (; iter.cell; iterStepPolygon(&iter)) {\n+        if (NEVER(i >= maxSize)) {\n+            iterDestroyPolygon(&iter);\n+            return E_FAILED;\n+        }\n+        out[i++] = iter.cell;\n+    }\n+    return iter.error;\n+=======\n #ifdef H3_POLYGON_TO_CELLS_ASSERT\n     // TODO: This is incompatible with testH3Memory, since it will make more\n     // allocations. This is just for debugging that the algorithm is not\n     // exceeding its buffer size.\n     int64_t maxSize;\n-    H3Error sizeError = H3_EXPORT(maxPolygonToCellsSizeExperimental)(\n+    H3_EXPORT(maxPolygonToCellsSizeExperimental)(\n         polygon, res, flags, &maxSize);\n     if (sizeError) {\n         return sizeError;\n@@ -720,7 +738,7 @@\n         out[i++] = iter.cell;\n     }\n     return iter.error;\n-}\n+=======\n \n static int MAX_SIZE_CELL_THRESHOLD = 10;\n \n"
     },
     {
@@ -173,6 +181,7 @@
       "scope"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/h3/src/h3lib/lib/polyfill.c\n+++ b/src/h3/src/h3lib/lib/polyfill.c\n@@ -696,30 +696,26 @@\n H3Error H3_EXPORT(polygonToCellsExperimental)(const GeoPolygon *polygon,\n                                               int res, uint32_t flags,\n                                               H3Index *out) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n-    // TODO: This is incompatible with testH3Memory, since it will make more\n-    // allocations. This is just for debugging that the algorithm is not\n-    // exceeding its buffer size.\n-    int64_t maxSize;\n-    H3Error sizeError = H3_EXPORT(maxPolygonToCellsSizeExperimental)(\n-        polygon, res, flags, &maxSize);\n-    if (sizeError) {\n-        return sizeError;\n-    }\n-#endif\n-\n-    IterCellsPolygon iter = iterInitPolygon(polygon, res, flags);\n-    int64_t i = 0;\n-    for (; iter.cell; iterStepPolygon(&iter)) {\n-#ifdef H3_POLYGON_TO_CELLS_ASSERT\n-        if (NEVER(i >= maxSize)) {\n-            iterDestroyPolygon(&iter);\n-            return E_FAILED;\n-        }\n-#endif\n-        out[i++] = iter.cell;\n-    }\n-    return iter.error;\n+// TODO: This is incompatible with testH3Memory, since it will make more\n+// allocations. This is just for debugging that the algorithm is not\n+// exceeding its buffer size.\n+int64_t maxSize;\n+H3Error sizeError = H3_EXPORT(maxPolygonToCellsSizeExperimental)(\n+    polygon, res, flags, &maxSize);\n+if (sizeError) {\n+    return sizeError;\n+}\n+\n+IterCellsPolygon iter = iterInitPolygon(polygon, res, flags);\n+int64_t i = 0;\n+for (; iter.cell; iterStepPolygon(&iter)) {\n+    if (NEVER(i >= maxSize)) {\n+        iterDestroyPolygon(&iter);\n+        return E_FAILED;\n+    }\n+    out[i++] = iter.cell;\n+}\n+return iter.error;\n }\n \n static int MAX_SIZE_CELL_THRESHOLD = 10;\n"
     }
    ],
@@ -202,6 +211,15 @@
    "winner": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1064,6 +1064,7 @@\n   jvp_string* s = jv_mem_alloc(sizeof(jvp_string) + size + 1);\n   s->refcnt.count = 1;\n   s->alloc_length = size;\n+  s->data[size] = 0;\n   return s;\n }\n \n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": "different_but_correct",
+   "winner_evidence": {
+    "level": "medium",
+    "label": "verified",
+    "tests": true,
+    "output_varies": null,
+    "stdout_distinct": null,
+    "refuzz_runs": 97577,
+    "safe_fix": "pass"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -251,6 +269,15 @@
       "new_memory_risk"
      ],
      "semantic": "different_but_correct",
+     "evidence": {
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 97577,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1064,6 +1064,7 @@\n   jvp_string* s = jv_mem_alloc(sizeof(jvp_string) + size + 1);\n   s->refcnt.count = 1;\n   s->alloc_length = size;\n+  s->data[size] = 0;\n   return s;\n }\n \n"
     },
     {
@@ -284,6 +311,7 @@
       "new_memory_risk"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/jq/src/jv_aux.c\n+++ b/src/jq/src/jv_aux.c\n@@ -140,9 +140,15 @@\n      * user.  The length 30 is arbitrary.\n      */\n     if (jv_get_kind(k) == JV_KIND_STRING && jv_string_length_bytes(jv_copy(k)) < 30) {\n-      v = jv_invalid_with_msg(jv_string_fmt(\"Cannot index %s with string \\\"%s\\\"\",\n-                                            jv_kind_name(jv_get_kind(t)),\n-                                            jv_string_value(k)));\n+      jv msg = jv_string(\"Cannot index \");\n+      msg = jv_string_append_buf(msg, jv_kind_name(jv_get_kind(t)),\n+                                 strlen(jv_kind_name(jv_get_kind(t))));\n+      msg = jv_string_append_buf(msg, \" with string \\\"\", 14);\n+      size_t klen = jv_string_length_bytes(k);\n+      const char* kv = jv_string_value(k);\n+      msg = jv_string_append_buf(msg, kv, klen);\n+      msg = jv_string_append_buf(msg, \"\\\"\", 1);\n+      v = jv_invalid_with_msg(msg);\n     } else {\n       v = jv_invalid_with_msg(jv_string_fmt(\"Cannot index %s with %s\",\n                                             jv_kind_name(jv_get_kind(t)),\n"
     },
     {
@@ -332,6 +360,15 @@
       "new_memory_risk"
      ],
      "semantic": "different_but_correct",
+     "evidence": {
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 97577,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1064,6 +1064,7 @@\n   jvp_string* s = jv_mem_alloc(sizeof(jvp_string) + size + 1);\n   s->refcnt.count = 1;\n   s->alloc_length = size;\n+  s->data[size] = 0;\n   return s;\n }\n \n"
     },
     {
@@ -341,6 +378,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
@@ -370,6 +408,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -380,6 +419,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -389,6 +429,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -398,6 +439,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -407,6 +449,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -416,6 +459,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -450,6 +494,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/quickjs/quickjs.c\n+++ b/src/quickjs/quickjs.c\n@@ -5833,7 +5833,7 @@\n     case JS_TAG_FUNCTION_BYTECODE:\n         {\n             JSGCObjectHeader *p = JS_VALUE_GET_PTR(v);\n-            if (rt->gc_phase != JS_GC_PHASE_REMOVE_CYCLES) {\n+            if (rt->gc_phase != JS_GC_PHASE_REMOVE_CYCLES && p->mark == 0) {\n                 list_del(&p->link);\n                 list_add(&p->link, &rt->gc_zero_ref_count_list);\n                 p->mark = 1; /* indicate that the object is about to be freed */\n"
     },
     {
@@ -490,6 +535,7 @@
       "error_handling"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/quickjs/list.h\n+++ b/src/quickjs/list.h\n@@ -71,6 +71,11 @@\n     struct list_head *prev, *next;\n     prev = el->prev;\n     next = el->next;\n+    // Validate list integrity before unlinking to prevent use-after-free on corrupted lists\n+    if (prev->next != el || next->prev != el) {\n+        // Integrity violation detected; abort to prevent undefined behavior\n+        __builtin_unreachable();\n+    }\n     prev->next = next;\n     next->prev = prev;\n     el->prev = NULL; /* fail safe */\n"
     },
     {
@@ -499,6 +545,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
@@ -528,6 +575,15 @@
    "winner": "--- a/src/c-ares/ares_parse_soa_reply.c\n+++ b/src/c-ares/ares_parse_soa_reply.c\n@@ -162,6 +162,7 @@\n     aptr += rr_len;\n     \n     ares_free(rr_name);\n+    rr_name = NULL;\n     \n     if (aptr > abuf + alen)\n       goto failed_stat;\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": "different_but_correct",
+   "winner_evidence": {
+    "level": "weak",
+    "label": "verified, needs human review",
+    "tests": false,
+    "output_varies": null,
+    "stdout_distinct": null,
+    "refuzz_runs": 8095,
+    "safe_fix": "pass"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -577,6 +633,15 @@
       "root_cause"
      ],
      "semantic": "different_but_correct",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 8095,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/c-ares/ares_parse_soa_reply.c\n+++ b/src/c-ares/ares_parse_soa_reply.c\n@@ -162,6 +162,7 @@\n     aptr += rr_len;\n     \n     ares_free(rr_name);\n+    rr_name = NULL;\n     \n     if (aptr > abuf + alen)\n       goto failed_stat;\n"
     },
     {
@@ -626,6 +691,15 @@
       "error_handling"
      ],
      "semantic": "different_but_correct",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 8095,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/c-ares/ares_parse_soa_reply.c\n+++ b/src/c-ares/ares_parse_soa_reply.c\n@@ -85,6 +85,7 @@\n   /* examine all the records, break and return if found soa */\n   for (i = 0; i < ancount; i++)\n   {\n+    rr_name = NULL;\n     status = ares__expand_name_for_response (aptr, abuf, alen, &rr_name, &len);\n     if (status != ARES_SUCCESS)\n      {\n"
     },
     {
@@ -674,6 +748,15 @@
       "error_handling"
      ],
      "semantic": "different_but_correct",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 5786,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/c-ares/ares_expand_name.c\n+++ b/src/c-ares/ares_expand_name.c\n@@ -74,12 +74,16 @@\n   } nlen;\n \n   nlen.sig = name_length(encoded, abuf, alen);\n-  if (nlen.sig < 0)\n+  if (nlen.sig < 0) {\n+    *s = NULL;\n     return ARES_EBADNAME;\n+  }\n \n   *s = ares_malloc(nlen.uns + 1);\n-  if (!*s)\n+  if (!*s) {\n+    *s = NULL;\n     return ARES_ENOMEM;\n+  }\n   q = *s;\n \n   if (nlen.uns == 0) {\n"
     },
     {
@@ -722,6 +805,15 @@
       "root_cause"
      ],
      "semantic": "different_but_correct",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 8095,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/c-ares/ares_parse_soa_reply.c\n+++ b/src/c-ares/ares_parse_soa_reply.c\n@@ -162,6 +162,7 @@\n     aptr += rr_len;\n     \n     ares_free(rr_name);\n+    rr_name = NULL;\n     \n     if (aptr > abuf + alen)\n       goto failed_stat;\n"
     }
    ],
@@ -751,6 +843,15 @@
    "winner": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -232,7 +232,7 @@\n exif_mnote_data_apple_identify(const ExifData *ed, const ExifEntry *e) {\n     int variant;\n \n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 9 && !strncmp((const char *) e->data, \"Apple iOS\", 9)) {\n         variant = 1;\n     } else {\n         variant = 0;\n",
    "winner_id": "H3\u00b7w2",
    "winner_semantic": "different_but_correct",
+   "winner_evidence": {
+    "level": "weak",
+    "label": "verified, needs human review",
+    "tests": false,
+    "output_varies": null,
+    "stdout_distinct": null,
+    "refuzz_runs": 1120049,
+    "safe_fix": "pass"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -800,6 +901,15 @@
       "root_cause"
      ],
      "semantic": "different_but_correct",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 778729,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -232,7 +232,7 @@\n exif_mnote_data_apple_identify(const ExifData *ed, const ExifEntry *e) {\n     int variant;\n \n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 10 && !strcmp((const char *) e->data, \"Apple iOS\")) {\n         variant = 1;\n     } else {\n         variant = 0;\n"
     },
     {
@@ -850,6 +960,15 @@
       "behavior_change"
      ],
      "semantic": "defensive",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 981876,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/libexif/libexif/exif-data.c\n+++ b/src/libexif/libexif/exif-data.c\n@@ -795,7 +795,12 @@\n \tExifEntry* e = exif_data_get_entry (data, EXIF_TAG_MAKER_NOTE);\n \tif (!e)\n \t\treturn;\n-\t\n+\n+\t/* Validate MakerNote entry data length to prevent out-of-bounds read\n+\t * in identify functions that assume null-terminated strings. */\n+\tif (e->size < 10)\n+\t\treturn;\n+\n \tif ((mnoteid = exif_mnote_data_olympus_identify (data, e)) != 0) {\n \t\texif_log (data->priv->log, EXIF_LOG_CODE_DEBUG,\n \t\t\t\"ExifData\", \"Olympus MakerNote variant type %d\", mnoteid);\n"
     },
     {
@@ -896,6 +1015,15 @@
      },
      "audit": [],
      "semantic": "different_but_correct",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 1120049,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -232,7 +232,7 @@\n exif_mnote_data_apple_identify(const ExifData *ed, const ExifEntry *e) {\n     int variant;\n \n-    if (!strcmp((const char *) e->data, \"Apple iOS\")) {\n+    if (e->size >= 9 && !strncmp((const char *) e->data, \"Apple iOS\", 9)) {\n         variant = 1;\n     } else {\n         variant = 0;\n"
     },
     {
@@ -905,6 +1033,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libexif/libexif/exif-data.c\n+++ b/src/libexif/libexif/exif-data.c\n@@ -788,53 +788,27 @@\n  * \\param[in] d pointer to raw EXIF data\n  * \\param[in] ds length of data at d\n  */\n-static void\n-interpret_maker_note(ExifData *data, const unsigned char *d, unsigned int ds)\n-{\n-\tint mnoteid;\n-\tExifEntry* e = exif_data_get_entry (data, EXIF_TAG_MAKER_NOTE);\n-\tif (!e)\n-\t\treturn;\n-\t\n-\tif ((mnoteid = exif_mnote_data_olympus_identify (data, e)) != 0) {\n-\t\texif_log (data->priv->log, EXIF_LOG_CODE_DEBUG,\n-\t\t\t\"ExifData\", \"Olympus MakerNote variant type %d\", mnoteid);\n-\t\tdata->priv->md = exif_mnote_data_olympus_new (data->priv->mem);\n-\n-\t} else if ((mnoteid = exif_mnote_data_canon_identify (data, e)) != 0) {\n-\t\texif_log (data->priv->log, EXIF_LOG_CODE_DEBUG,\n-\t\t\t\"ExifData\", \"Canon MakerNote variant type %d\", mnoteid);\n-\t\tdata->priv->md = exif_mnote_data_canon_new (data->priv->mem, data->priv->options);\n-\n-\t} else if ((mnoteid = exif_mnote_data_fuji_identify (data, e)) != 0) {\n-\t\texif_log (data->priv->log, EXIF_LOG_CODE_DEBUG,\n-\t\t\t\"ExifData\", \"Fuji MakerNote variant type %d\", mnoteid);\n-\t\tdata->priv->md = exif_mnote_data_fuji_new (data->priv->mem);\n-\n-\t/* NOTE: Must do Pentax detection last because some of the\n-\t * heuristics are pretty general. */\n-\t} else if ((mnoteid = exif_mnote_data_pentax_identify (data, e)) != 0) {\n-\t\texif_log (data->priv->log, EXIF_LOG_CODE_DEBUG,\n-\t\t\t\"ExifData\", \"Pentax MakerNote variant type %d\", mnoteid);\n-\t\tdata->priv->md = exif_mnote_data_pentax_new (data->priv->mem);\n-\t} else if ((mnoteid = exif_mnote_data_apple_identify (data, e)) != 0) {\n-\t\texif_log (data->priv->log, EXIF_LOG_CODE_DEBUG,\n-\t\t\t\"ExifData\", \"Apple MakerNote variant type %d\", mnoteid);\n-\t\tdata->priv->md = exif_mnote_data_apple_new (data->priv->mem);\n-\t}\n-\n-\t/* \n-\t * If we are able to interpret the maker note, do so.\n-\t */\n-\tif (data->priv->md) {\n-\t\texif_mnote_data_log (data->priv->md, data->priv->log);\n-\t\texif_mnote_data_set_byte_order (data->priv->md,\n-\t\t\t\t\t\tdata->priv->order);\n-\t\texif_mnote_data_set_offset (data->priv->md,\n-\t\t\t\t\t    data->priv->offset_mnote);\n-\t\texif_mnote_data_load (data->priv->md, d, ds);\n-\t}\n-}\n+ 791| static void\n+ 792| interpret_maker_note(ExifData *data, const unsigned char *d, unsigned int ds)\n+ 793| {\n+ 794| \tint mnoteid;\n+ 795| \tExifEntry* e = exif_data_get_entry (data, EXIF_TAG_MAKER_NOTE);\n+ 796| \tif (!e)\n+ 797| \t\treturn;\n++\n++\t\t/*\n++\t\t * Ensure MakerNote entry data is null-terminated to prevent\n++\t\t * heap-buffer-overflow in strcmp calls within identify functions.\n++\t\t */\n++\t\tif (e->data && e->size > 0) {\n++\t\t\tunsigned char *tmp = (unsigned char *)realloc(e->data, e->size + 1);\n++\t\t\tif (tmp) {\n++\t\t\t\ttmp[e->size] = '\\0';\n++\t\t\t\te->data = tmp;\n++\t\t\t}\n++\t\t}\n++\n+ 798| \tif ((mnoteid = exif_mnote_data_olympus_identify (data, e)) != 0) {\n \n #define LOG_TOO_SMALL \\\n exif_log (data->priv->log, EXIF_LOG_CODE_CORRUPT_DATA, \"ExifData\", \\\n"
     }
    ],
@@ -934,6 +1063,15 @@
    "winner": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -85,7 +85,7 @@\n     tcount = (unsigned int) exif_get_short(buf + ofs + 14, d->order);\n \n     /* Sanity check the offset */\n-    if (buf_size < 6 + 16 + tcount * 6 + 4) {\n+    if (buf_size < d->offset + 6 + 16 + tcount * 12 + 4) {\n         exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n                  \"ExifMnoteDataApple\", \"Short MakerNote\");\n         /*printf(\"%s(%d)\\n\", __FUNCTION__, __LINE__);*/\n@@ -107,6 +107,12 @@\n     }\n \n     for (i = 0; i < tcount; i++) {\n+        if (ofs + 12 > buf_size) {\n+            exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+                     \"ExifMnoteDataApple\", \"Buffer overflow\");\n+            exif_mnote_data_apple_free(md);\n+            return;\n+        }\n         d->entries[i].tag = exif_get_short(buf + ofs, d->order);\n         d->entries[i].format = exif_get_short(buf + ofs + 2, d->order);\n         d->entries[i].components = exif_get_long(buf + ofs + 4, d->order);\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": "different_but_correct",
+   "winner_evidence": {
+    "level": "weak",
+    "label": "verified, needs human review",
+    "tests": false,
+    "output_varies": null,
+    "stdout_distinct": null,
+    "refuzz_runs": 213,
+    "safe_fix": "pass"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -944,6 +1082,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -992,6 +1131,15 @@
       "scope"
      ],
      "semantic": "different_but_correct",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 213,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/libexif/libexif/apple/exif-mnote-data-apple.c\n+++ b/src/libexif/libexif/apple/exif-mnote-data-apple.c\n@@ -85,7 +85,7 @@\n     tcount = (unsigned int) exif_get_short(buf + ofs + 14, d->order);\n \n     /* Sanity check the offset */\n-    if (buf_size < 6 + 16 + tcount * 6 + 4) {\n+    if (buf_size < d->offset + 6 + 16 + tcount * 12 + 4) {\n         exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n                  \"ExifMnoteDataApple\", \"Short MakerNote\");\n         /*printf(\"%s(%d)\\n\", __FUNCTION__, __LINE__);*/\n@@ -107,6 +107,12 @@\n     }\n \n     for (i = 0; i < tcount; i++) {\n+        if (ofs + 12 > buf_size) {\n+            exif_log(md->log, EXIF_LOG_CODE_CORRUPT_DATA,\n+                     \"ExifMnoteDataApple\", \"Buffer overflow\");\n+            exif_mnote_data_apple_free(md);\n+            return;\n+        }\n         d->entries[i].tag = exif_get_short(buf + ofs, d->order);\n         d->entries[i].format = exif_get_short(buf + ofs + 2, d->order);\n         d->entries[i].components = exif_get_long(buf + ofs + 4, d->order);\n"
     },
     {
@@ -1001,6 +1149,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -1010,6 +1159,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
@@ -1039,6 +1189,15 @@
    "winner": "--- a/src/md4c/src/md4c.c\n+++ b/src/md4c/src/md4c.c\n@@ -2257,6 +2257,11 @@\n         label_size = end - beg;\n     }\n \n+    /* Clamp label_size to the input buffer size to prevent heap-buffer-overflow. */\n+    SZ max_label = ctx->size - beg;\n+    if (label_size > max_label)\n+        label_size = max_label;\n+\n     def = md_lookup_ref_def(ctx, label, label_size);\n     if(def != NULL) {\n         attr->dest_beg = def->dest_beg;\n",
    "winner_id": "RH1\u00b7w0",
    "winner_semantic": "defensive",
+   "winner_evidence": {
+    "level": "weak",
+    "label": "verified, needs human review",
+    "tests": false,
+    "output_varies": null,
+    "stdout_distinct": null,
+    "refuzz_runs": 6409,
+    "safe_fix": "pass"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -1076,6 +1235,7 @@
       "root_cause"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/md4c/src/md4c.c\n+++ b/src/md4c/src/md4c.c\n@@ -814,6 +814,11 @@\n     static unsigned\n     md_decode_utf8__(const CHAR* str, SZ str_size, SZ* p_size)\n     {\n+        if (str_size == 0) {\n+            if (p_size != NULL)\n+                *p_size = 0;\n+            return 0;\n+        }\n         if(!IS_UTF8_LEAD1(str[0])) {\n             if(IS_UTF8_LEAD2(str[0])) {\n                 if(1 < str_size && IS_UTF8_TAIL(str[1])) {\n"
     },
     {
@@ -1110,6 +1270,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/md4c/src/md4c.c\n+++ b/src/md4c/src/md4c.c\n@@ -883,6 +883,11 @@\n     static inline unsigned\n     md_decode_unicode(const CHAR* str, OFF off, SZ str_size, SZ* p_char_size)\n     {\n+        if (off >= str_size) {\n+            if (p_char_size != NULL)\n+                *p_char_size = 0;\n+            return 0;\n+        }\n         return md_decode_utf8__(str+off, str_size-off, p_char_size);\n     }\n #else\n"
     },
     {
@@ -1144,6 +1305,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/md4c/src/md4c.c\n+++ b/src/md4c/src/md4c.c\n@@ -1559,6 +1559,11 @@\n     while(off < size) {\n         SZ char_size;\n \n+        if (off >= size) {\n+            /* Label has been fully consumed */\n+            break;\n+        }\n+\n         codepoint = md_decode_unicode(label, off, size, &char_size);\n         is_whitespace = ISUNICODEWHITESPACE_(codepoint) || ISNEWLINE_(label[off]);\n \n"
     },
     {
@@ -1153,6 +1315,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -1199,6 +1362,15 @@
      },
      "audit": [],
      "semantic": "defensive",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 6409,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/md4c/src/md4c.c\n+++ b/src/md4c/src/md4c.c\n@@ -2257,6 +2257,11 @@\n         label_size = end - beg;\n     }\n \n+    /* Clamp label_size to the input buffer size to prevent heap-buffer-overflow. */\n+    SZ max_label = ctx->size - beg;\n+    if (label_size > max_label)\n+        label_size = max_label;\n+\n     def = md_lookup_ref_def(ctx, label, label_size);\n     if(def != NULL) {\n         attr->dest_beg = def->dest_beg;\n"
     },
     {
@@ -1208,6 +1380,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -1244,6 +1417,7 @@
       "root_cause"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/md4c/src/md4c.c\n+++ b/src/md4c/src/md4c.c\n@@ -814,6 +814,7 @@\n     static unsigned\n     md_decode_utf8__(const CHAR* str, SZ str_size, SZ* p_size)\n     {\n+        if(str_size == 0) return 0;\n         if(!IS_UTF8_LEAD1(str[0])) {\n             if(IS_UTF8_LEAD2(str[0])) {\n                 if(1 < str_size && IS_UTF8_TAIL(str[1])) {\n"
     },
     {
@@ -1281,6 +1455,7 @@
       "behavior_change"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/md4c/src/md4c.c\n+++ b/src/md4c/src/md4c.c\n@@ -2245,6 +2245,11 @@\n     beg += (CH(beg) == _T('!') ? 2 : 1);\n     end--;\n \n+    if (beg > ctx->size) beg = ctx->size;\n+    if (end > ctx->size) end = ctx->size;\n+\n+    /* Find lines corresponding to the beg and end positions. */\n+\n     /* Find lines corresponding to the beg and end positions. */\n     beg_line = md_lookup_line(beg, lines, n_lines);\n     is_multiline = (end > beg_line->end);\n"
     }
    ],
@@ -1310,6 +1485,15 @@
    "winner": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -437,17 +437,23 @@\n         data->type = PLIST_NULL;\n         val = plist_new_node(data);\n     } else if (str_val[0] == '-' || isdigit(str_val[0])) {\n+        char* token_copy = strndup(str_val, str_len);\n+        if (!token_copy) {\n+            PLIST_JSON_ERR(\"%s: Out of memory\\n\", __func__);\n+            (*index)++;\n+            return NULL;\n+        }\n         char* endp = NULL;\n-        long long intpart = strtol(str_val, &endp, 10);\n-        if (endp >= str_end) {\n+        long long intpart = strtol(token_copy, &endp, 10);\n+        if (endp >= token_copy + str_len) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n+        } else if (*endp == '.' && endp + 1 < token_copy + str_len && isdigit(*(endp + 1))) {\n             /* float */\n-            char* fendp = endp+1;\n-            while (isdigit(*fendp) && fendp < str_end) fendp++;\n-            if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n-                double dval = atof(str_val);\n+            char* fendp = endp + 1;\n+            while (isdigit(*fendp) && fendp < token_copy + str_len) fendp++;\n+            if ((fendp > endp + 1 && fendp >= token_copy + str_len) || (fendp + 2 < token_copy + str_len && (*fendp == 'e' || *fendp == 'E') && (*(fendp + 1) == '+' || *(fendp + 1) == '-') && isdigit(*(fendp + 2)))) {\n+                double dval = atof(token_copy);\n                 val = plist_new_real(dval);\n             } else {\n                 PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing floating point value\\n\", __func__, (int)(fendp - js));\n@@ -455,6 +461,7 @@\n         } else {\n             PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing numerical value\\n\", __func__, (int)(endp - js));\n         }\n+        free(token_copy);\n     } else {\n         PLIST_JSON_ERR(\"%s: invalid primitive value '%.*s' encountered\\n\", __func__, (int)str_len, str_val);\n     }\n",
    "winner_id": "RH1\u00b7w0",
    "winner_semantic": "different_but_correct",
+   "winner_evidence": {
+    "level": "weak",
+    "label": "verified, needs human review",
+    "tests": false,
+    "output_varies": null,
+    "stdout_distinct": null,
+    "refuzz_runs": 4585,
+    "safe_fix": "pass"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -1320,6 +1504,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -1329,6 +1514,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -1338,6 +1524,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -1347,6 +1534,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -438,22 +438,95 @@\n         val = plist_new_node(data);\n     } else if (str_val[0] == '-' || isdigit(str_val[0])) {\n         char* endp = NULL;\n-        long long intpart = strtol(str_val, &endp, 10);\n-        if (endp >= str_end) {\n-            /* integer */\n-            val = plist_new_uint((uint64_t)intpart);\n-        } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n-            /* float */\n-            char* fendp = endp+1;\n-            while (isdigit(*fendp) && fendp < str_end) fendp++;\n-            if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n-                double dval = atof(str_val);\n-                val = plist_new_real(dval);\n+        long long intpart = 0;\n+        int sign = 1;\n+        size_t pos = 0;\n+        if (str_val[0] == '-') {\n+            sign = -1;\n+            pos = 1;\n+        }\n+        for (; pos < str_len; pos++) {\n+            unsigned char c = (unsigned char)str_val[pos];\n+            if (c == '.') {\n+                if (has_dot) break;\n+                has_dot = 1;\n+                if (pos + 1 >= str_len) break;\n+                pos++;\n+                if (!isdigit((unsigned char)str_val[pos])) break;\n+                double frac = 0;\n+                double mult = 0.1;\n+                size_t frac_start = pos;\n+                while (pos < str_len && isdigit((unsigned char)str_val[pos])) {\n+                    frac = frac * 10 + (str_val[pos] - '0');\n+                    mult *= 0.1;\n+                    pos++;\n+                }\n+                if (pos == frac_start) break;\n+                intpart = (long long)(sign * (intpart + frac * mult * 10));\n+                has_dot = 1;\n+                if (pos < str_len && (str_val[pos] == 'e' || str_val[pos] == 'E')) {\n+                    pos++;\n+                    if (pos < str_len && (str_val[pos] == '+' || str_val[pos] == '-')) pos++;\n+                    while (pos < str_len && isdigit((unsigned char)str_val[pos])) pos++;\n+                }\n+                break;\n+            } else if (c == 'e' || c == 'E') {\n+                if (has_e) break;\n+                has_e = 1;\n+                pos++;\n+                if (pos < str_len && (str_val[pos] == '+' || str_val[pos] == '-')) pos++;\n+                while (pos < str_len && isdigit((unsigned char)str_val[pos])) pos++;\n+                break;\n+            } else if (!isdigit(c)) {\n+                break;\n+            }\n+        }\n+        if (has_dot || has_e) {\n+            double dval = 0;\n+            pos = (str_val[0] == '-') ? 1 : 0;\n+            long long intpart_i = 0;\n+            for (; pos < str_len; pos++) {\n+                unsigned char c = (unsigned char)str_val[pos];\n+                if (c == '.') {\n+                    pos++;\n+                    double frac = 0;\n+                    double mult = 0.1;\n+                    while (pos < str_len && isdigit((unsigned char)str_val[pos])) {\n+                        frac = frac * 10 + (str_val[pos] - '0');\n+                        mult *= 0.1;\n+                        pos++;\n+                    }\n+                    dval = (double)intpart_i + frac;\n+                    if (pos < str_len && (str_val[pos] == 'e' || str_val[pos] == 'E')) {\n+                        pos++;\n+                        int exp = 0;\n+                        if (pos < str_len && (str_val[pos] == '+' || str_val[pos] == '-')) {\n+                            pos++;\n+                        }\n+                        while (pos < str_len && isdigit((unsigned char)str_val[pos])) {\n+                            exp = exp * 10 + (str_val[pos] - '0');\n+                            pos++;\n+                        }\n+                        while (exp-- > 0) dval *= 10;\n+                    }\n+                    if (str_val[0] == '-') dval = -dval;\n+                    val = plist_new_real(dval);\n+                    break;\n+                }\n+                if (!isdigit(c)) break;\n+                intpart_i = intpart_i * 10 + (c - '0');\n+            }\n+            if (!has_dot) dval = (double)intpart_i;\n+            if (str_val[0] == '-') dval = -dval;\n+            val = plist_new_real(dval);\n+        } else {\n+            intpart = sign * intpart_i;\n+            if (endp) *endp = (char *)(str_val + pos);\n+            if (endp >= str_end) {\n+                val = plist_new_uint((uint64_t)intpart);\n             } else {\n-                PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing floating point value\\n\", __func__, (int)(fendp - js));\n-            }\n-        } else {\n-            PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing numerical value\\n\", __func__, (int)(endp - js));\n+                PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing numerical value\\n\", __func__, (int)(endp - js));\n+            }\n         }\n     } else {\n         PLIST_JSON_ERR(\"%s: invalid primitive value '%.*s' encountered\\n\", __func__, (int)str_len, str_val);\n"
     },
     {
@@ -1398,6 +1586,15 @@
       "error_handling"
      ],
      "semantic": "different_but_correct",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 4585,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -437,17 +437,23 @@\n         data->type = PLIST_NULL;\n         val = plist_new_node(data);\n     } else if (str_val[0] == '-' || isdigit(str_val[0])) {\n+        char* token_copy = strndup(str_val, str_len);\n+        if (!token_copy) {\n+            PLIST_JSON_ERR(\"%s: Out of memory\\n\", __func__);\n+            (*index)++;\n+            return NULL;\n+        }\n         char* endp = NULL;\n-        long long intpart = strtol(str_val, &endp, 10);\n-        if (endp >= str_end) {\n+        long long intpart = strtol(token_copy, &endp, 10);\n+        if (endp >= token_copy + str_len) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n+        } else if (*endp == '.' && endp + 1 < token_copy + str_len && isdigit(*(endp + 1))) {\n             /* float */\n-            char* fendp = endp+1;\n-            while (isdigit(*fendp) && fendp < str_end) fendp++;\n-            if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n-                double dval = atof(str_val);\n+            char* fendp = endp + 1;\n+            while (isdigit(*fendp) && fendp < token_copy + str_len) fendp++;\n+            if ((fendp > endp + 1 && fendp >= token_copy + str_len) || (fendp + 2 < token_copy + str_len && (*fendp == 'e' || *fendp == 'E') && (*(fendp + 1) == '+' || *(fendp + 1) == '-') && isdigit(*(fendp + 2)))) {\n+                double dval = atof(token_copy);\n                 val = plist_new_real(dval);\n             } else {\n                 PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing floating point value\\n\", __func__, (int)(fendp - js));\n@@ -455,6 +461,7 @@\n         } else {\n             PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing numerical value\\n\", __func__, (int)(endp - js));\n         }\n+        free(token_copy);\n     } else {\n         PLIST_JSON_ERR(\"%s: invalid primitive value '%.*s' encountered\\n\", __func__, (int)str_len, str_val);\n     }\n"
     },
     {
@@ -1434,6 +1631,7 @@
       "root_cause"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -436,25 +436,25 @@\n         plist_data_t data = plist_new_plist_data();\n         data->type = PLIST_NULL;\n         val = plist_new_node(data);\n-    } else if (str_val[0] == '-' || isdigit(str_val[0])) {\n-        char* endp = NULL;\n-        long long intpart = strtol(str_val, &endp, 10);\n-        if (endp >= str_end) {\n-            /* integer */\n-            val = plist_new_uint((uint64_t)intpart);\n-        } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n-            /* float */\n-            char* fendp = endp+1;\n-            while (isdigit(*fendp) && fendp < str_end) fendp++;\n-            if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n-                double dval = atof(str_val);\n-                val = plist_new_real(dval);\n+        } else if (str_val[0] == '-' || isdigit(str_val[0])) {\n+            char* endp = NULL;\n+            long long intpart = strtol(str_val, &endp, 10);\n+            if (endp >= str_end) {\n+                /* integer */\n+                val = plist_new_uint((uint64_t)intpart);\n+            } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n+                /* float */\n+                char* fendp = endp+1;\n+                while (isdigit(*fendp) && fendp < str_end) fendp++;\n+                if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n+                    double dval = atof(str_val);\n+                    val = plist_new_real(dval);\n+                } else {\n+                    PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing floating point value\\n\", __func__, (int)(fendp - js));\n+                }\n             } else {\n-                PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing floating point value\\n\", __func__, (int)(fendp - js));\n-            }\n-        } else {\n-            PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing numerical value\\n\", __func__, (int)(endp - js));\n-        }\n+                PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing numerical value\\n\", __func__, (int)(endp - js));\n+            }\n     } else {\n         PLIST_JSON_ERR(\"%s: invalid primitive value '%.*s' encountered\\n\", __func__, (int)str_len, str_val);\n     }\n"
     },
     {
@@ -1482,6 +1680,15 @@
       "root_cause"
      ],
      "semantic": "wrong",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 1968,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -437,16 +437,21 @@\n         data->type = PLIST_NULL;\n         val = plist_new_node(data);\n     } else if (str_val[0] == '-' || isdigit(str_val[0])) {\n+        /* Use a stack buffer to avoid heap-buffer-overflow from strtol reading past token boundaries */\n+        char num_buf[64];\n+        size_t copy_len = str_len < sizeof(num_buf) - 1 ? str_len : sizeof(num_buf) - 1;\n+        strncpy(num_buf, str_val, copy_len);\n+        num_buf[copy_len] = '\\0';\n         char* endp = NULL;\n-        long long intpart = strtol(str_val, &endp, 10);\n-        if (endp >= str_end) {\n+        long long intpart = strtol(num_buf, &endp, 10);\n+        if (endp >= num_buf + copy_len) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if (*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) {\n+        } else if (*endp == '.' && endp + 1 < num_buf + copy_len && isdigit(*(endp + 1))) {\n             /* float */\n-            char* fendp = endp+1;\n-            while (isdigit(*fendp) && fendp < str_end) fendp++;\n-            if ((fendp > endp+1 && fendp >= str_end) || (fendp+2 < str_end && (*fendp == 'e' || *fendp == 'E') && (*(fendp+1) == '+' || *(fendp+1) == '-') && isdigit(*(fendp+2)))) {\n+            char* fendp = endp + 1;\n+            while (isdigit(*fendp) && fendp < num_buf + copy_len) fendp++;\n+            if ((fendp > endp + 1 && fendp >= num_buf + copy_len) || (fendp + 2 < num_buf + copy_len && (*fendp == 'e' || *fendp == 'E') && (*(fendp + 1) == '+' || *(fendp + 1) == '-') && isdigit(*(fendp + 2)))) {\n                 double dval = atof(str_val);\n                 val = plist_new_real(dval);\n             } else {\n"
     },
     {
@@ -1520,6 +1727,7 @@
       "behavior_change"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -438,7 +438,11 @@\n         val = plist_new_node(data);\n     } else if (str_val[0] == '-' || isdigit(str_val[0])) {\n         char* endp = NULL;\n+        // Temporarily null-terminate at str_end so strtol does not read past the token bounds.\n+        char saved = * (char *)str_end;\n+        * (char *)str_end = '\\0';\n         long long intpart = strtol(str_val, &endp, 10);\n+        * (char *)str_end = saved;\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n"
     }
    ],
@@ -1549,6 +1757,15 @@
    "winner": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,7 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2)))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n@@ -478,7 +478,7 @@\n                     int is_neg = (str_val[0] == '-');\n                     double frac = 0;\n                     double p = 0.1;\n-                    while (isdigit(*fendp) && fendp < str_end) {\n+                    while (fendp < str_end && isdigit(*fendp)) {\n                         frac = frac + (*fendp - '0') * p;\n                         p *= 0.1;\n                         fendp++;\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": "different_but_correct",
+   "winner_evidence": {
+    "level": "weak",
+    "label": "verified, needs human review",
+    "tests": false,
+    "output_varies": null,
+    "stdout_distinct": null,
+    "refuzz_runs": 20237,
+    "safe_fix": "pass"
+   },
    "ambiguous": true,
    "rejudged": null,
    "workers": [
@@ -1598,6 +1815,15 @@
       "root_cause"
      ],
      "semantic": "equivalent",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 21657,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,7 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2)))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n"
     },
     {
@@ -1646,6 +1872,15 @@
       "behavior_change"
      ],
      "semantic": "different_but_correct",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 20237,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,7 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+2 < str_end && isdigit(*(endp+2)))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n@@ -478,7 +478,7 @@\n                     int is_neg = (str_val[0] == '-');\n                     double frac = 0;\n                     double p = 0.1;\n-                    while (isdigit(*fendp) && fendp < str_end) {\n+                    while (fendp < str_end && isdigit(*fendp)) {\n                         frac = frac + (*fendp - '0') * p;\n                         p *= 0.1;\n                         fendp++;\n"
     },
     {
@@ -1655,6 +1890,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,6 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n@@ -507,6 +506,15 @@\n                     val = plist_new_real(dval);\n                 }\n             }\n+        } else {\n+            PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing numerical value\\n\", __func__, (int)(endp - js));\n+        }\n+    } else {\n+        PLIST_JSON_ERR(\"%s: invalid primitive value '%.*s' encountered\\n\", __func__, (int)str_len, str_val);\n+    }\n+    (*index)++;\n+    return val;\n+}\n         } else {\n             PLIST_JSON_ERR(\"%s: invalid character at offset %d when parsing numerical value\\n\", __func__, (int)(endp - js));\n         }\n"
     },
     {
@@ -1701,6 +1937,15 @@
      },
      "audit": [],
      "semantic": "wrong",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 27552,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/libplist/src/jplist.c\n+++ b/src/libplist/src/jplist.c\n@@ -467,7 +467,7 @@\n         if (endp >= str_end) {\n             /* integer */\n             val = plist_new_uint((uint64_t)intpart);\n-        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n+        } else if ((*endp == '.' && endp+1 < str_end && isdigit(*(endp+1))) || ((*endp == 'e' || *endp == 'E') && endp+1 < str_end && (isdigit(*(endp+1)) || ((*(endp+1) == '-') && endp+1 < str_end && isdigit(*(endp+2)))))) {\n             /* floating point */\n             double dval = (double)intpart;\n             char* fendp = endp;\n"
     }
    ],
@@ -1730,6 +1975,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -1784,6 +2030,7 @@
       "scope"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libplist/src/plist.c\n+++ b/src/libplist/src/plist.c\n@@ -327,6 +327,25 @@\n \n static int plist_free_node(node_t* node)\n {\n+    if (node == NULL) {\n+        return 0;\n+    }\n+\n+    // idempotency check \u2013 prevent use-after-free on double-free\n+    static uintptr_t freed_node_table[64] = {0};\n+    unsigned int idx = (unsigned int)((uintptr_t)node % 64);\n+    unsigned int attempts = 0;\n+    while (freed_node_table[idx] != 0 && freed_node_table[idx] != (uintptr_t)node) {\n+        idx = (idx + 1) % 64;\n+        attempts++;\n+        if (attempts > 64) break;\n+    }\n+    if (freed_node_table[idx] == (uintptr_t)node) {\n+        return 0; // already freed, skip\n+    }\n+    // mark as freed\n+    freed_node_table[idx] = (uintptr_t)node;\n+\n     plist_data_t data = NULL;\n     int node_index = node_detach(node->parent, node);\n     data = plist_get_data(node);\n"
     },
     {
@@ -1822,6 +2069,7 @@
       "behavior_change"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libplist/src/plist.c\n+++ b/src/libplist/src/plist.c\n@@ -327,6 +327,10 @@\n \n static int plist_free_node(node_t* node)\n {\n+    if (node->data == NULL) {\n+        return node_detach(node->parent, node);\n+    }\n+\n     plist_data_t data = NULL;\n     int node_index = node_detach(node->parent, node);\n     data = plist_get_data(node);\n"
     },
     {
@@ -1858,6 +2106,7 @@
       "error_handling"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libplist/src/plist.c\n+++ b/src/libplist/src/plist.c\n@@ -327,11 +327,12 @@\n \n static int plist_free_node(node_t* node)\n {\n-    plist_data_t data = NULL;\n+    if (node == NULL) return 0;\n+    if (node->data == NULL) return 0;\n+    plist_data_t data = node->data;\n+    node->data = NULL;\n     int node_index = node_detach(node->parent, node);\n-    data = plist_get_data(node);\n     plist_free_data(data);\n-    node->data = NULL;\n \n     node_t *ch;\n     for (ch = node_first_child(node); ch; ) {\n"
     },
     {
@@ -1909,6 +2158,7 @@
       "scope"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libplist/src/plist.c\n+++ b/src/libplist/src/plist.c\n@@ -325,8 +325,20 @@\n     }\n }\n \n+static void *freed_ptrs[256];\n+static int freed_count = 0;\n+\n static int plist_free_node(node_t* node)\n {\n+    if (freed_count > 0) {\n+        int i;\n+        for (i = 0; i < freed_count; i++) {\n+            if (freed_ptrs[i] == (void *)node) {\n+                return 0;\n+            }\n+        }\n+    }\n+\n     plist_data_t data = NULL;\n     int node_index = node_detach(node->parent, node);\n     data = plist_get_data(node);\n@@ -341,6 +353,10 @@\n     }\n \n     node_destroy(node);\n+\n+    if (freed_count < 256) {\n+        freed_ptrs[freed_count++] = (void *)node;\n+    }\n \n     return node_index;\n }\n"
     },
     {
@@ -1918,6 +2168,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -1927,6 +2178,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libplist/src/plist.c\n+++ b/src/libplist/src/plist.c\n@@ -327,23 +327,37 @@\n \n static int plist_free_node(node_t* node)\n {\n-    plist_data_t data = NULL;\n-    int node_index = node_detach(node->parent, node);\n-    data = plist_get_data(node);\n-    plist_free_data(data);\n-    node->data = NULL;\n-\n-    node_t *ch;\n-    for (ch = node_first_child(node); ch; ) {\n-        node_t *next = node_next_sibling(ch);\n-        plist_free_node(ch);\n-        ch = next;\n-    }\n-\n-    node_destroy(node);\n-\n-    return node_index;\n-}\n++    static ptrarray_t visited = {0};\n++    \n++    if (visited.capacity == 0) {\n++        visited = ptr_array_new(16);\n++    }\n++    \n++    // Avoid use-after-free: skip nodes already freed (cycles/shared subtrees)\n++    node_t **found = ptr_array_find(&visited, node);\n++    if (found != NULL) {\n++        return 0;\n++    }\n++    \n++    ptr_array_add(&visited, node);\n++\n+     plist_data_t data = NULL;\n+     int node_index = node_detach(node->parent, node);\n+     data = plist_get_data(node);\n+     plist_free_data(data);\n+     node->data = NULL;\n+\n+     node_t *ch;\n+     for (ch = node_first_child(node); ch; ) {\n+         node_t *next = node_next_sibling(ch);\n+         plist_free_node(ch);\n+         ch = next;\n+     }\n+\n+     node_destroy(node);\n+\n+     return node_index;\n+ }\n \n PLIST_API plist_t plist_new_dict(void)\n {\n"
     },
     {
@@ -1936,6 +2188,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libplist/src/plist.c\n+++ b/src/libplist/src/plist.c\n@@ -327,6 +327,20 @@\n \n static int plist_free_node(node_t* node)\n {\n+    static ptrarray_t *visited = NULL;\n+\n+    if (visited == NULL) {\n+        visited = ptr_array_new(0);\n+    }\n+\n+    for (size_t i = 0; i < visited->len; i++) {\n+        if (visited->items[i] == node) {\n+            return 0;\n+        }\n+    }\n+\n+    ptr_array_add(visited, node);\n+\n     plist_data_t data = NULL;\n     int node_index = node_detach(node->parent, node);\n     data = plist_get_data(node);\n"
     },
     {
@@ -1945,6 +2198,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libplist/src/plist.c\n+++ b/src/libplist/src/plist.c\n@@ -327,6 +327,18 @@\n \n static int plist_free_node(node_t* node)\n {\n+    static ptrarray_t *visited = NULL;\n+\n+    if (!visited) {\n+        visited = ptr_array_new(0);\n+    }\n+\n+    if (ptr_array_contains(visited, node)) {\n+        return 0;\n+    }\n+\n+    ptr_array_add(visited, node);\n+\n     plist_data_t data = NULL;\n     int node_index = node_detach(node->parent, node);\n     data = plist_get_data(node);\n"
     }
    ],
@@ -1974,6 +2228,15 @@
    "winner": "--- a/src/libzip/lib/zip_open.c\n+++ b/src/libzip/lib/zip_open.c\n@@ -928,7 +928,6 @@\n             zip_source_free(src_window);\n             return;\n         }\n-        zip_source_free(src_window);\n         if (zip_source_open(src_crc) != 0) {\n             zip_source_free(src_crc);\n             return;\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": "equivalent",
+   "winner_evidence": {
+    "level": "weak",
+    "label": "verified, needs human review",
+    "tests": false,
+    "output_varies": null,
+    "stdout_distinct": null,
+    "refuzz_runs": 471521,
+    "safe_fix": "pass"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -2023,6 +2286,15 @@
       "root_cause"
      ],
      "semantic": "equivalent",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 471521,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/libzip/lib/zip_open.c\n+++ b/src/libzip/lib/zip_open.c\n@@ -928,7 +928,6 @@\n             zip_source_free(src_window);\n             return;\n         }\n-        zip_source_free(src_window);\n         if (zip_source_open(src_crc) != 0) {\n             zip_source_free(src_crc);\n             return;\n"
     },
     {
@@ -2071,6 +2343,15 @@
       "root_cause"
      ],
      "semantic": "equivalent",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 471521,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/libzip/lib/zip_open.c\n+++ b/src/libzip/lib/zip_open.c\n@@ -928,7 +928,6 @@\n             zip_source_free(src_window);\n             return;\n         }\n-        zip_source_free(src_window);\n         if (zip_source_open(src_crc) != 0) {\n             zip_source_free(src_crc);\n             return;\n"
     },
     {
@@ -2119,6 +2400,15 @@
       "root_cause"
      ],
      "semantic": "equivalent",
+     "evidence": {
+      "level": "weak",
+      "label": "verified, needs human review",
+      "tests": false,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 471521,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/libzip/lib/zip_open.c\n+++ b/src/libzip/lib/zip_open.c\n@@ -928,7 +928,6 @@\n             zip_source_free(src_window);\n             return;\n         }\n-        zip_source_free(src_window);\n         if (zip_source_open(src_crc) != 0) {\n             zip_source_free(src_crc);\n             return;\n"
     },
     {
@@ -2128,6 +2418,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libzip/lib/zip_open.c\n+++ b/src/libzip/lib/zip_open.c\n@@ -928,7 +928,7 @@\n             zip_source_free(src_window);\n             return;\n         }\n-        zip_source_free(src_window);\n+-        zip_source_free(src_window);\n         if (zip_source_open(src_crc) != 0) {\n             zip_source_free(src_crc);\n             return;\n"
     }
    ],
@@ -2157,6 +2448,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -2196,6 +2488,7 @@
       "error_handling"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -2498,7 +2498,9 @@\n \t}\n \n \trc = config__read_file_core(config, reload, cr, level, lineno, fptr, &buf, &buflen);\n-\tmosquitto__FREE(buf);\n+\tif (rc != MOSQ_ERR_SUCCESS) {\n+\t\tmosquitto__FREE(buf);\n+\t}\n \tfclose(fptr);\n \n \treturn rc;\n"
     },
     {
@@ -2234,6 +2527,7 @@
       "error_handling"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -2498,7 +2498,9 @@\n \t}\n \n \trc = config__read_file_core(config, reload, cr, level, lineno, fptr, &buf, &buflen);\n-\tmosquitto__FREE(buf);\n+\tif (rc != MOSQ_ERR_SUCCESS) {\n+\t\tmosquitto__FREE(buf);\n+\t}\n \tfclose(fptr);\n \n \treturn rc;\n"
     },
     {
@@ -2272,6 +2566,7 @@
       "error_handling"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -2498,7 +2498,9 @@\n \t}\n \n \trc = config__read_file_core(config, reload, cr, level, lineno, fptr, &buf, &buflen);\n-\tmosquitto__FREE(buf);\n+\tif (rc != MOSQ_ERR_SUCCESS) {\n+\t\tmosquitto__FREE(buf);\n+\t}\n \tfclose(fptr);\n \n \treturn rc;\n"
     },
     {
@@ -2310,6 +2605,7 @@
       "error_handling"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -2498,7 +2498,9 @@\n \t}\n \n \trc = config__read_file_core(config, reload, cr, level, lineno, fptr, &buf, &buflen);\n-\tmosquitto__FREE(buf);\n+\tif (rc != MOSQ_ERR_SUCCESS) {\n+\t\tmosquitto__FREE(buf);\n+\t}\n \tfclose(fptr);\n \n \treturn rc;\n"
     },
     {
@@ -2319,6 +2615,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -2328,6 +2625,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -2337,6 +2635,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -2346,6 +2645,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
@@ -2375,6 +2675,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -2385,6 +2686,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -1834,10 +1834,13 @@\n \t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Duplicate \\\"log_dest file\\\" value.\");\n \t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n \t\t\t\t\t\t}\n-\t\t\t\t\t\t/* Get remaining string. */\n-\t\t\t\t\t\ttoken = &token[strlen(token)+1];\n-\t\t\t\t\t\twhile(token[0] == ' ' || token[0] == '\\t'){\n-\t\t\t\t\t\t\ttoken++;\n+\t\t\t\t\t\tif ((char *)token < buf || (char *)token >= buf + buflen) {\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: log_dest file value out of bounds.\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n+\t\t\t\t\t\t}\n+\t\t\t\t\t\tif (memchr(token, '\\0', (size_t)(buf + buflen - (char *)token)) == NULL) {\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: log_dest file value not null-terminated.\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n \t\t\t\t\t\t}\n \t\t\t\t\t\tif(token[0]){\n \t\t\t\t\t\t\tconfig->log_file = mosquitto__strdup(token);\n"
     },
     {
@@ -2394,6 +2696,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/mosquitto/lib/memory_mosq.c\n+++ b/src/mosquitto/lib/memory_mosq.c\n@@ -144,12 +144,18 @@\n char *mosquitto__strdup(const char *s)\n {\n \tchar *str;\n+\tsize_t slen;\n #ifdef REAL_WITH_MEMORY_TRACKING\n \tif(mem_limit && memcount + strlen(s) > mem_limit){\n \t\treturn NULL;\n \t}\n #endif\n-\tstr = strdup(s);\n+\tslen = strlen(s);\n+\tstr = malloc(slen + 1);\n+\tif(!str){\n+\t\treturn NULL;\n+\t}\n+\tmemcpy(str, s, slen + 1);\n \n #ifdef REAL_WITH_MEMORY_TRACKING\n \tif(str){\n@@ -162,3 +168,39 @@\n \n \treturn str;\n }\n+=== end /src/mosquitto/lib/memory_mosq.c ===\n+\n+=== /src/mosquitto/src/conf.c ===\n+@@ replace /src/mosquitto/src/conf.c lines 1837-1843 @@\n+\t\t\t\t\t\t/* Get remaining string. */\n+\t\t\t\t\t\ttoken = &token[strlen(token)+1];\n+\t\t\t\t\t\twhile(token[0] == ' ' || token[0] == '\\t'){\n+\t\t\t\t\t\t\ttoken++;\n+\t\t\t\t\t\t}\n+\t\t\t\t\t\tif(token[0]){\n+\t\t\t\t\t\t\tconfig->log_file = mosquitto__strdup(token);\n+\t\t\t\t\t\t\tif(!config->log_file){\n+\t\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Out of memory.\");\n+\t\t\t\t\t\t\t\treturn MOSQ_ERR_NOMEM;\n+\t\t\t\t\t\t\t}\n+\t\t\t\t\t\t}else{\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Empty \\\"log_dest file\\\" value in configuration.\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n+\t\t\t\t\t\t}\n+---\n+\t\t\t\t\t\t/* Get remaining string. */\n+\t\t\t\t\t\ttoken = &token[strlen(token)+1];\n+\t\t\t\t\t\twhile(token[0] == ' ' || token[0] == '\\t'){\n+\t\t\t\t\t\t\ttoken++;\n+\t\t\t\t\t\t}\n+\t\t\t\t\t\tif(token[0]){\n+\t\t\t\t\t\t\tconfig->log_file = mosquitto__strdup(token);\n+\t\t\t\t\t\t\tif(!config->log_file){\n+\t\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Out of memory.\");\n+\t\t\t\t\t\t\t\treturn MOSQ_ERR_NOMEM;\n+\t\t\t\t\t\t\t}\n+\t\t\t\t\t\t}else{\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Empty \\\"log_dest file\\\" value in configuration.\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n+\t\t\t\t\t\t}\n+---\n"
     },
     {
@@ -2403,6 +2706,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -1836,8 +1836,16 @@\n \t\t\t\t\t\t}\n \t\t\t\t\t\t/* Get remaining string. */\n \t\t\t\t\t\ttoken = &token[strlen(token)+1];\n+\t\t\t\t\t\tif ((char *)token >= buf + buflen) {\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Unexpected end of configuration file.\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n+\t\t\t\t\t\t}\n \t\t\t\t\t\twhile(token[0] == ' ' || token[0] == '\\t'){\n \t\t\t\t\t\t\ttoken++;\n+\t\t\t\t\t\t}\n+\t\t\t\t\t\tif ((char *)token >= buf + buflen) {\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Unexpected end of configuration file.\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n \t\t\t\t\t\t}\n \t\t\t\t\t\tif(token[0]){\n \t\t\t\t\t\t\tconfig->log_file = mosquitto__strdup(token);\n"
     },
     {
@@ -2412,6 +2716,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -2496,6 +2496,28 @@\n \t\tfclose(fptr);\n \t\treturn MOSQ_ERR_NOMEM;\n \t}\n+\tmemset(buf, 0, (size_t)buflen);\n+@@ replace /src/mosquitto/src/conf.c lines 1831-1841 @@\n+\t\t\t\t}else if(!strcmp(token, \"file\")){\n+\t\t\t\t\t\tcr->log_dest |= MQTT3_LOG_FILE;\n+\t\t\t\t\t\tif(config->log_fptr || config->log_file){\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Duplicate \\\"log_dest file\\\" value.\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n+\t\t\t\t\t\t}\n+\t\t\t\t\t\t/* Get remaining string. */\n+\t\t\t\t\t\ttoken = &token[strlen(token)+1];\n+\t\t\t\t\t\twhile(token[0] == ' ' || token[0] == '\\t'){\n+\t\t\t\t\t\t\ttoken++;\n+\t\t\t\t\t\t}\n+\t\t\t\t\t\tif (token >= buf + buflen) {\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Invalid 'log_dest file' value.\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n+\t\t\t\t\t\t}\n+\t\t\t\t\t\tif(token[0]){\n+\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Out of memory.\");\n+\t\tfclose(fptr);\n+\t\treturn MOSQ_ERR_NOMEM;\n+\t}\n \n \trc = config__read_file_core(config, reload, cr, level, lineno, fptr, &buf, &buflen);\n \tmosquitto__FREE(buf);\n"
     },
     {
@@ -2450,6 +2755,7 @@
       "scope"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -1835,9 +1835,17 @@\n \t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n \t\t\t\t\t\t}\n \t\t\t\t\t\t/* Get remaining string. */\n+\t\t\t\t\t\tif (token - *buf + strlen(token) + 1 > *buflen) {\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: \\\"log_dest file\\\" value exceeds buffer size.\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n+\t\t\t\t\t\t}\n \t\t\t\t\t\ttoken = &token[strlen(token)+1];\n \t\t\t\t\t\twhile(token[0] == ' ' || token[0] == '\\t'){\n \t\t\t\t\t\t\ttoken++;\n+\t\t\t\t\t\t}\n+\t\t\t\t\t\tif (token >= *buf + *buflen) {\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: \\\"log_dest file\\\" value exceeds buffer size.\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n \t\t\t\t\t\t}\n \t\t\t\t\t\tif(token[0]){\n \t\t\t\t\t\t\tconfig->log_file = mosquitto__strdup(token);\n"
     },
     {
@@ -2459,6 +2765,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -501,9 +501,28 @@\n \tprintf(\"      debugging with e.g. wireshark. Do not use on a production\\n\");\n \tprintf(\"      server.\\n\");\n \tprintf(\"\\nSee https://mosquitto.org/ for more information.\\n\\n\");\n-}\n-\n-int config__parse_args(struct mosquitto__config *config, int argc, char *argv[])\n+ static inline int safe_advance_token(const char **token, const char *buf, int buflen)\n+ {\n+     const char *p = *token;\n+     /* Verify current token is within the buffer */\n+     if (p < buf || p >= buf + buflen) return -1;\n+     /* Advance past the token and the separating null byte */\n+     p += strlen(p) + 1;\n+     /* Verify we are still inside the buffer */\n+     if (p < buf || p >= buf + buflen) return -1;\n+     /* Skip any whitespace characters */\n+     while (p < buf + buflen && (*p == ' ' || *p == '\\t')) {\n+         p++;\n+     }\n+     /* If we reached or passed the end of the buffer, treat as empty */\n+     if (p >= buf + buflen) return -1;\n+     *token = p;\n+     return 0;\n+ }\n+ \n+ 504| }\n+ 505| \n+ 506| int config__parse_args(struct mosquitto__config *config, int argc, char *argv[])\n {\n \tint i;\n \tint port_tmp;\n@@ -1835,9 +1854,9 @@\n \t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n \t\t\t\t\t\t}\n \t\t\t\t\t\t/* Get remaining string. */\n-\t\t\t\t\t\ttoken = &token[strlen(token)+1];\n-\t\t\t\t\t\twhile(token[0] == ' ' || token[0] == '\\t'){\n-\t\t\t\t\t\t\ttoken++;\n+\t\t\t\t\t\tif(safe_advance_token(&token, buf, buflen) != 0){\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Invalid \\\"log_dest file\\\" value.\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n \t\t\t\t\t\t}\n \t\t\t\t\t\tif(token[0]){\n \t\t\t\t\t\t\tconfig->log_file = mosquitto__strdup(token);\n"
     },
     {
@@ -2498,6 +2805,7 @@
       "scope"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -1836,16 +1836,21 @@\n \t\t\t\t\t\t}\n \t\t\t\t\t\t/* Get remaining string. */\n \t\t\t\t\t\ttoken = &token[strlen(token)+1];\n-\t\t\t\t\t\twhile(token[0] == ' ' || token[0] == '\\t'){\n+\t\t\t\t\t\tif (token < *buf || (size_t)(token - *buf) >= (size_t)*buflen) {\n+\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: log_dest file value out of configuration buffer bounds.\");\n+\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n+\t\t\t\t\t\t}\n+\t\t\t\t\t\twhile (token[0] == ' ' || token[0] == '\\t') {\n+\t\t\t\t\t\t\tif (token >= *buf + *buflen) break;\n \t\t\t\t\t\t\ttoken++;\n \t\t\t\t\t\t}\n-\t\t\t\t\t\tif(token[0]){\n+\t\t\t\t\t\tif (token[0]) {\n \t\t\t\t\t\t\tconfig->log_file = mosquitto__strdup(token);\n-\t\t\t\t\t\t\tif(!config->log_file){\n+\t\t\t\t\t\t\tif (!config->log_file) {\n \t\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Out of memory.\");\n \t\t\t\t\t\t\t\treturn MOSQ_ERR_NOMEM;\n \t\t\t\t\t\t\t}\n-\t\t\t\t\t\t}else{\n+\t\t\t\t\t\t} else {\n \t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Empty \\\"log_dest file\\\" value in configuration.\");\n \t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n \t\t\t\t\t\t}\n"
     },
     {
@@ -2538,6 +2846,7 @@
       "scope"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/mosquitto/lib/memory_mosq.c\n+++ b/src/mosquitto/lib/memory_mosq.c\n@@ -162,3 +162,15 @@\n \n \treturn str;\n }\n+\n+char *mosquitto__strndup(const char *s, size_t maxlen)\n+{\n+\tsize_t i;\n+\tfor (i = 0; i < maxlen && s[i] != '\\0'; i++) {}\n+\tchar *str = mosquitto__malloc(i + 1);\n+\tif (str) {\n+\t\tmemcpy(str, s, i);\n+\t\tstr[i] = '\\0';\n+\t}\n+\treturn str;\n+}\n--- a/src/mosquitto/src/conf.c\n+++ b/src/mosquitto/src/conf.c\n@@ -1840,7 +1840,12 @@\n \t\t\t\t\t\t\ttoken++;\n \t\t\t\t\t\t}\n \t\t\t\t\t\tif(token[0]){\n-\t\t\t\t\t\t\tconfig->log_file = mosquitto__strdup(token);\n+\t\t\t\t\t\t\tsize_t safe_len = (size_t)(*buflen) - (token - *buf);\n+\t\t\t\t\t\t\tif (safe_len == 0) {\n+\t\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Empty \\\"log_dest file\\\" value in configuration.\");\n+\t\t\t\t\t\t\t\treturn MOSQ_ERR_INVAL;\n+\t\t\t\t\t\t\t}\n+\t\t\t\t\t\t\tconfig->log_file = mosquitto__strndup(token, safe_len);\n \t\t\t\t\t\t\tif(!config->log_file){\n \t\t\t\t\t\t\t\tlog__printf(NULL, MOSQ_LOG_ERR, \"Error: Out of memory.\");\n \t\t\t\t\t\t\t\treturn MOSQ_ERR_NOMEM;\n"
     }
    ],
@@ -2567,6 +2876,15 @@
    "winner": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -644,7 +644,7 @@\n   }\n \n   if (plit->literal_data == NULL) {\n-    int len = jvp_dec_number_ptr(n)->digits + 14;\n+    int len = jvp_dec_number_ptr(n)->digits + 20;\n     plit->literal_data = jv_mem_alloc(len);\n \n     // Preserve the actual precision as we have parsed it\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": "equivalent",
+   "winner_evidence": {
+    "level": "medium",
+    "label": "verified",
+    "tests": true,
+    "output_varies": null,
+    "stdout_distinct": null,
+    "refuzz_runs": 2449232,
+    "safe_fix": "pass"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -2577,6 +2895,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -2625,6 +2944,15 @@
       "root_cause"
      ],
      "semantic": "equivalent",
+     "evidence": {
+      "level": "medium",
+      "label": "verified",
+      "tests": true,
+      "output_varies": null,
+      "stdout_distinct": null,
+      "refuzz_runs": 2449232,
+      "safe_fix": "pass"
+     },
      "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -644,7 +644,7 @@\n   }\n \n   if (plit->literal_data == NULL) {\n-    int len = jvp_dec_number_ptr(n)->digits + 14;\n+    int len = jvp_dec_number_ptr(n)->digits + 20;\n     plit->literal_data = jv_mem_alloc(len);\n \n     // Preserve the actual precision as we have parsed it\n"
     },
     {
@@ -2634,6 +2962,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -2652,6 +2981,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/jq/src/decNumber/decNumber.c\n+++ b/src/jq/src/decNumber/decNumber.c\n@@ -1,8143 +1,8143 @@\n-/* ------------------------------------------------------------------ */\r\n-/* Decimal Number arithmetic module                                   */\r\n-/* ------------------------------------------------------------------ */\r\n-/* Copyright (c) IBM Corporation, 2000, 2009.  All rights reserved.   */\r\n-/*                                                                    */\r\n-/* This software is made available under the terms of the             */\r\n-/* ICU License -- ICU 1.8.1 and later.                                */\r\n-/*                                                                    */\r\n-/* The description and User's Guide (\"The decNumber C Library\") for   */\r\n-/* this software is called decNumber.pdf.  This document is           */\r\n-/* available, together with arithmetic and format specifications,     */\r\n-/* testcases, and Web links, on the General Decimal Arithmetic page.  */\r\n-/*                                                                    */\r\n-/* Please send comments, suggestions, and corrections to the author:  */\r\n-/*   mfc@uk.ibm.com                                                   */\r\n-/*   Mike Cowlishaw, IBM Fellow                                       */\r\n-/*   IBM UK, PO Box 31, Birmingham Road, Warwick CV34 5JL, UK         */\r\n-/* ------------------------------------------------------------------ */\r\n-/* This module comprises the routines for arbitrary-precision General */\r\n-/* Decimal Arithmetic as defined in the specification which may be    */\r\n-/* found on the General Decimal Arithmetic pages.  It implements both */\r\n-/* the full ('extended') arithmetic and the simpler ('subset')        */\r\n-/* arithmetic.                                                        */\r\n-/*                                                                    */\r\n-/* Usage notes:                                                       */\r\n-/*                                                                    */\r\n-/* 1. This code is ANSI C89 except:                                   */\r\n-/*                                                                    */\r\n-/*    a) C99 line comments (double forward slash) are used.  (Most C  */\r\n-/*       compilers accept these.  If yours does not, a simple script  */\r\n-/*       can be used to convert them to ANSI C comments.)             */\r\n-/*                                                                    */\r\n-/*    b) Types from C99 stdint.h are used.  If you do not have this   */\r\n-/*       header file, see the User's Guide section of the decNumber   */\r\n-/*       documentation; this lists the necessary definitions.         */\r\n-/*                                                                    */\r\n-/*    c) If DECDPUN>4 or DECUSE64=1, the C99 64-bit int64_t and       */\r\n-/*       uint64_t types may be used.  To avoid these, set DECUSE64=0  */\r\n-/*       and DECDPUN<=4 (see documentation).                          */\r\n-/*                                                                    */\r\n-/*    The code also conforms to C99 restrictions; in particular,      */\r\n-/*    strict aliasing rules are observed.                             */\r\n-/*                                                                    */\r\n-/* 2. The decNumber format which this library uses is optimized for   */\r\n-/*    efficient processing of relatively short numbers; in particular */\r\n-/*    it allows the use of fixed sized structures and minimizes copy  */\r\n-/*    and move operations.  It does, however, support arbitrary       */\r\n-/*    precision (up to 999,999,999 digits) and arbitrary exponent     */\r\n-/*    range (Emax in the range 0 through 999,999,999 and Emin in the  */\r\n-/*    range -999,999,999 through 0).  Mathematical functions (for     */\r\n-/*    example decNumberExp) as identified below are restricted more   */\r\n-/*    tightly: digits, emax, and -emin in the context must be <=      */\r\n-/*    DEC_MAX_MATH (999999), and their operand(s) must be within      */\r\n-/*    these bounds.                                                   */\r\n-/*                                                                    */\r\n-/* 3. Logical functions are further restricted; their operands must   */\r\n-/*    be finite, positive, have an exponent of zero, and all digits   */\r\n-/*    must be either 0 or 1.  The result will only contain digits     */\r\n-/*    which are 0 or 1 (and will have exponent=0 and a sign of 0).    */\r\n-/*                                                                    */\r\n-/* 4. Operands to operator functions are never modified unless they   */\r\n-/*    are also specified to be the result number (which is always     */\r\n-/*    permitted).  Other than that case, operands must not overlap.   */\r\n-/*                                                                    */\r\n-/* 5. Error handling: the type of the error is ORed into the status   */\r\n-/*    flags in the current context (decContext structure).  The       */\r\n-/*    SIGFPE signal is then raised if the corresponding trap-enabler  */\r\n-/*    flag in the decContext is set (is 1).                           */\r\n-/*                                                                    */\r\n-/*    It is the responsibility of the caller to clear the status      */\r\n-/*    flags as required.                                              */\r\n-/*                                                                    */\r\n-/*    The result of any routine which returns a number will always    */\r\n-/*    be a valid number (which may be a special value, such as an     */\r\n-/*    Infinity or NaN).                                               */\r\n-/*                                                                    */\r\n-/* 6. The decNumber format is not an exchangeable concrete            */\r\n-/*    representation as it comprises fields which may be machine-     */\r\n-/*    dependent (packed or unpacked, or special l"
     }
    ],
@@ -2681,6 +3011,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -2728,6 +3059,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1110,6 +1110,15 @@\n   return r;\n }\n \n+/* Copy up to bufsize-1 bytes from jv string k into buf, guaranteeing null termination. */\n+void jvp_string_copy_safe(jv k, char* buf, uint32_t bufsize) {\n+  uint32_t len = jv_string_length_bytes(jv_copy(k));\n+  if (len > bufsize - 1) len = bufsize - 1;\n+  const char* src = jv_string_value(k);\n+  memcpy(buf, src, len);\n+  buf[len] = '\\0';\n+}\n+\n \n static void jvp_string_free(jv js) {\n   jvp_string* s = jvp_string_ptr(js);\n--- a/src/jq/src/jv_aux.c\n+++ b/src/jq/src/jv_aux.c\n@@ -76,6 +76,8 @@\n   return jv_true();\n }\n \n+void jvp_string_copy_safe(jv k, char* buf, uint32_t bufsize);\n+\n jv jv_get(jv t, jv k) {\n   jv v;\n   if (jv_get_kind(t) == JV_KIND_OBJECT && jv_get_kind(k) == JV_KIND_STRING) {\n@@ -140,9 +142,11 @@\n      * user.  The length 30 is arbitrary.\n      */\n     if (jv_get_kind(k) == JV_KIND_STRING && jv_string_length_bytes(jv_copy(k)) < 30) {\n+      char safe[31];\n+      jvp_string_copy_safe(k, safe, sizeof(safe));\n       v = jv_invalid_with_msg(jv_string_fmt(\"Cannot index %s with string \\\"%s\\\"\",\n                                             jv_kind_name(jv_get_kind(t)),\n-                                            jv_string_value(k)));\n+                                            safe));\n     } else {\n       v = jv_invalid_with_msg(jv_string_fmt(\"Cannot index %s with %s\",\n                                             jv_kind_name(jv_get_kind(t)),\n"
     },
     {
@@ -2758,6 +3090,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/jq/src/jv_aux.c\n+++ b/src/jq/src/jv_aux.c\n@@ -140,7 +140,7 @@\n      * user.  The length 30 is arbitrary.\n      */\n     if (jv_get_kind(k) == JV_KIND_STRING && jv_string_length_bytes(jv_copy(k)) < 30) {\n-      v = jv_invalid_with_msg(jv_string_fmt(\"Cannot index %s with string \\\"%s\\\"\",\n+      v = jv_invalid_with_msg(jv_string_fmt(\"Cannot index %s with string \\\"%.30s\\\"\",\n                                             jv_kind_name(jv_get_kind(t)),\n                                             jv_string_value(k)));\n     } else {\n"
     },
     {
@@ -2767,6 +3100,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -2802,6 +3136,7 @@
       "error_handling"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1111,6 +1111,16 @@\n }\n \n \n+char* jvp_extract_string_nullterm(jv s, uint32_t* out_len) {\n+  const char* data = jv_string_value(s);\n+  uint32_t len = jv_string_length_bytes(s);\n+  char* buf = jv_mem_alloc(len + 1);\n+  memcpy(buf, data, len);\n+  buf[len] = '\\0';\n+  *out_len = len;\n+  return buf;\n+}\n+\n static void jvp_string_free(jv js) {\n   jvp_string* s = jvp_string_ptr(js);\n   if (jvp_refcnt_dec(&s->refcnt)) {\n--- a/src/jq/src/jv_aux.c\n+++ b/src/jq/src/jv_aux.c\n@@ -140,9 +140,12 @@\n      * user.  The length 30 is arbitrary.\n      */\n     if (jv_get_kind(k) == JV_KIND_STRING && jv_string_length_bytes(jv_copy(k)) < 30) {\n+      uint32_t slen;\n+      char* safe = jvp_extract_string_nullterm(k, &slen);\n       v = jv_invalid_with_msg(jv_string_fmt(\"Cannot index %s with string \\\"%s\\\"\",\n                                             jv_kind_name(jv_get_kind(t)),\n-                                            jv_string_value(k)));\n+                                            safe));\n+      jv_mem_free(safe);\n     } else {\n       v = jv_invalid_with_msg(jv_string_fmt(\"Cannot index %s with %s\",\n                                             jv_kind_name(jv_get_kind(t)),\n"
     },
     {
@@ -2853,6 +3188,7 @@
       "scope"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1106,6 +1106,7 @@\n   jvp_string* s = jvp_string_alloc(length);\n   s->length_hashed = 0;\n   memset(s->data, 0, length);\n+  s->data[length] = 0;\n   jv r = {JVP_FLAGS_STRING, 0, 0, 0, {&s->refcnt}};\n   return r;\n }\n"
     },
     {
@@ -2901,6 +3237,7 @@
       "behavior_change"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/jq/src/jv_aux.c\n+++ b/src/jq/src/jv_aux.c\n@@ -140,9 +140,9 @@\n      * user.  The length 30 is arbitrary.\n      */\n     if (jv_get_kind(k) == JV_KIND_STRING && jv_string_length_bytes(jv_copy(k)) < 30) {\n-      v = jv_invalid_with_msg(jv_string_fmt(\"Cannot index %s with string \\\"%s\\\"\",\n+      char k_buf[32]; size_t k_len = jv_string_length_bytes(jv_copy(k)); memcpy(k_buf, jv_string_value(k), k_len); k_buf[k_len] = '\\0'; v = jv_invalid_with_msg(jv_string_fmt(\"Cannot index %s with string \\\"%s\",\n                                             jv_kind_name(jv_get_kind(t)),\n-                                            jv_string_value(k)));\n+                                            k_buf));\n     } else {\n       v = jv_invalid_with_msg(jv_string_fmt(\"Cannot index %s with %s\",\n                                             jv_kind_name(jv_get_kind(t)),\n"
     },
     {
@@ -2952,6 +3289,7 @@
       "scope"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1106,6 +1106,7 @@\n   jvp_string* s = jvp_string_alloc(length);\n   s->length_hashed = 0;\n   memset(s->data, 0, length);\n+  s->data[length] = 0;\n   jv r = {JVP_FLAGS_STRING, 0, 0, 0, {&s->refcnt}};\n   return r;\n }\n"
     },
     {
@@ -3003,6 +3341,7 @@
       "scope"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/jq/src/jv.c\n+++ b/src/jq/src/jv.c\n@@ -1106,6 +1106,7 @@\n   jvp_string* s = jvp_string_alloc(length);\n   s->length_hashed = 0;\n   memset(s->data, 0, length);\n+  s->data[length] = 0;\n   jv r = {JVP_FLAGS_STRING, 0, 0, 0, {&s->refcnt}};\n   return r;\n }\n"
     }
    ],
@@ -3032,6 +3371,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -3063,6 +3403,7 @@
       "error_handling"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/miniz/build/amalgamation/miniz.c\n+++ b/src/miniz/build/amalgamation/miniz.c\n@@ -3806,6 +3806,9 @@\n \n         /* The end of central dir follows the central dir, unless the zip file has\n          * some trailing data (e.g. it is appended to an executable file). */\n+        if (eocd_ofs < cdir_ofs + cdir_size)\n+            return mz_zip_set_error(pZip, MZ_ZIP_INVALID_HEADER_OR_CORRUPTED);\n+\n         archive_ofs = eocd_ofs - (cdir_ofs + cdir_size);\n         if (pZip->m_pState->m_zip64)\n         {\n"
     },
     {
@@ -3072,6 +3413,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3081,6 +3423,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3110,6 +3453,7 @@
       "behavior_change"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/miniz/build/amalgamation/miniz.c\n+++ b/src/miniz/build/amalgamation/miniz.c\n@@ -3806,6 +3806,8 @@\n \n         /* The end of central dir follows the central dir, unless the zip file has\n          * some trailing data (e.g. it is appended to an executable file). */\n+        if (eocd_ofs < (cdir_ofs + cdir_size))\n+            return mz_zip_set_error(pZip, MZ_ZIP_INVALID_HEADER_OR_CORRUPTED);\n         archive_ofs = eocd_ofs - (cdir_ofs + cdir_size);\n         if (pZip->m_pState->m_zip64)\n         {\n"
     },
     {
@@ -3139,6 +3483,7 @@
       "behavior_change"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/miniz/build/amalgamation/miniz.c\n+++ b/src/miniz/build/amalgamation/miniz.c\n@@ -3881,8 +3881,7 @@\n                             buf = MZ_MALLOC(ext_data_size);\n                             if (buf == NULL)\n                                 return mz_zip_set_error(pZip, MZ_ZIP_ALLOC_FAILED);\n-\n-                            if (pZip->m_pRead(pZip->m_pIO_opaque, cdir_ofs + MZ_ZIP_CENTRAL_DIR_HEADER_SIZE + filename_size, buf, ext_data_size) != ext_data_size)\n+                            if (pZip->m_pRead(pZip->m_pIO_opaque, cdir_ofs + MZ_ZIP_ARRAY_ELEMENT(&pZip->m_pState->m_central_dir_offsets, mz_uint32, i) + MZ_ZIP_CENTRAL_DIR_HEADER_SIZE + filename_size, buf, ext_data_size) != ext_data_size)\n                             {\n                                 MZ_FREE(buf);\n                                 return mz_zip_set_error(pZip, MZ_ZIP_FILE_READ_FAILED);\n"
     },
     {
@@ -3165,6 +3510,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/miniz/build/amalgamation/miniz.c\n+++ b/src/miniz/build/amalgamation/miniz.c\n@@ -3881,13 +3881,21 @@\n                             buf = MZ_MALLOC(ext_data_size);\n                             if (buf == NULL)\n                                 return mz_zip_set_error(pZip, MZ_ZIP_ALLOC_FAILED);\n-\n-                            if (pZip->m_pRead(pZip->m_pIO_opaque, cdir_ofs + MZ_ZIP_CENTRAL_DIR_HEADER_SIZE + filename_size, buf, ext_data_size) != ext_data_size)\n+                        \n+                            mz_uint64 record_offset = MZ_ZIP_ARRAY_ELEMENT(&pZip->m_pState->m_central_dir_offsets, mz_uint32, i);\n+                            mz_uint64 read_offset = cdir_ofs + MZ_ZIP_CENTRAL_DIR_HEADER_SIZE + filename_size + record_offset;\n+                            if (read_offset + ext_data_size > pZip->m_archive_size)\n+                            {\n+                                MZ_FREE(buf);\n+                                return mz_zip_set_error(pZip, MZ_ZIP_INVALID_HEADER_OR_CORRUPTED);\n+                            }\n+                        \n+                            if (pZip->m_pRead(pZip->m_pIO_opaque, read_offset, buf, ext_data_size) != ext_data_size)\n                             {\n                                 MZ_FREE(buf);\n                                 return mz_zip_set_error(pZip, MZ_ZIP_FILE_READ_FAILED);\n                             }\n-\n+                        \n                             pExtra_data = (mz_uint8 *)buf;\n                         }\n                         else\n"
     },
     {
@@ -3194,6 +3540,7 @@
       "scope"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/miniz/build/amalgamation/miniz.c\n+++ b/src/miniz/build/amalgamation/miniz.c\n@@ -3882,7 +3882,7 @@\n                             if (buf == NULL)\n                                 return mz_zip_set_error(pZip, MZ_ZIP_ALLOC_FAILED);\n \n-                            if (pZip->m_pRead(pZip->m_pIO_opaque, cdir_ofs + MZ_ZIP_CENTRAL_DIR_HEADER_SIZE + filename_size, buf, ext_data_size) != ext_data_size)\n+                            if (pZip->m_pRead(pZip->m_pIO_opaque, cdir_ofs + MZ_ZIP_ARRAY_ELEMENT(&pZip->m_pState->m_central_dir_offsets, mz_uint32, i) + MZ_ZIP_CENTRAL_DIR_HEADER_SIZE + filename_size, buf, ext_data_size) != ext_data_size)\n                             {\n                                 MZ_FREE(buf);\n                                 return mz_zip_set_error(pZip, MZ_ZIP_FILE_READ_FAILED);\n"
     },
     {
@@ -3223,6 +3570,7 @@
       "behavior_change"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/miniz/build/amalgamation/miniz.c\n+++ b/src/miniz/build/amalgamation/miniz.c\n@@ -3881,13 +3881,13 @@\n                             buf = MZ_MALLOC(ext_data_size);\n                             if (buf == NULL)\n                                 return mz_zip_set_error(pZip, MZ_ZIP_ALLOC_FAILED);\n-\n-                            if (pZip->m_pRead(pZip->m_pIO_opaque, cdir_ofs + MZ_ZIP_CENTRAL_DIR_HEADER_SIZE + filename_size, buf, ext_data_size) != ext_data_size)\n+                        \n+                            if (pZip->m_pRead(pZip->m_pIO_opaque, cdir_ofs + MZ_ZIP_ARRAY_ELEMENT(&pZip->m_pState->m_central_dir_offsets, mz_uint32, i) + MZ_ZIP_CENTRAL_DIR_HEADER_SIZE + filename_size, buf, ext_data_size) != ext_data_size)\n                             {\n                                 MZ_FREE(buf);\n                                 return mz_zip_set_error(pZip, MZ_ZIP_FILE_READ_FAILED);\n                             }\n-\n+                        \n                             pExtra_data = (mz_uint8 *)buf;\n                         }\n                         else\n"
     }
    ],
@@ -3252,6 +3600,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -3302,6 +3651,7 @@
       "behavior_change"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libical/src/libical/icaltypes.c\n+++ b/src/libical/src/libical/icaltypes.c\n@@ -131,7 +131,7 @@\n \n     p2 = strchr(p1 + 1, ';');\n     if (p2 != 0 && *p2 != 0) {\n-        stat.debug = icalmemory_tmp_copy(p2 + 1);\n+        stat.debug = icalmemory_strdup(p2 + 1);\n     }\n \n     return stat;\n"
     },
     {
@@ -3311,6 +3661,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3361,6 +3712,7 @@
       "behavior_change"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libical/src/libical/icalmemory.c\n+++ b/src/libical/src/libical/icalmemory.c\n@@ -174,11 +174,6 @@\n     /* Wrap around the ring */\n     if (++(br->pos) == BUFFER_RING_SIZE) {\n         br->pos = 0;\n-    }\n-\n-    /* Free buffers as their slots are overwritten */\n-    if (br->ring[br->pos] != 0) {\n-        icalmemory_free_buffer(br->ring[br->pos]);\n     }\n \n     /* Assign the buffer to a slot */\n"
     },
     {
@@ -3410,6 +3762,7 @@
       "behavior_change"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libical/src/libical/icaltypes.c\n+++ b/src/libical/src/libical/icaltypes.c\n@@ -131,7 +131,7 @@\n \n     p2 = strchr(p1 + 1, ';');\n     if (p2 != 0 && *p2 != 0) {\n-        stat.debug = icalmemory_tmp_copy(p2 + 1);\n+        stat.debug = icalmemory_strdup(p2 + 1);\n     }\n \n     return stat;\n"
     },
     {
@@ -3419,6 +3772,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3428,6 +3782,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3437,6 +3792,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3446,6 +3802,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/libical/src/libical/icaltypes.c\n+++ b/src/libical/src/libical/icaltypes.c\n@@ -133,6 +133,73 @@\n     if (p2 != 0 && *p2 != 0) {\n         stat.debug = icalmemory_tmp_copy(p2 + 1);\n     }\n+=======\n+    if (p2 != 0 && *p2 != 0) {\n+        stat.debug = icalmemory_strdup(p2 + 1);\n+    }\n+>>>>>>> REPLACE\n+\n+/src/libical/src/libical/icalvalue.c\n+@@ replace /src/libical/src/libical/icalvalue.c lines 1220-1228 @@\n+    case ICAL_REQUESTSTATUS_VALUE:\n+        return icalreqstattype_as_string_r(value->data.v_requeststatus);\n+\n+    case ICAL_ACTION_VALUE:\n+=======\n+    case ICAL_REQUESTSTATUS_VALUE:\n+        if (value->data.v_requeststatus.debug != 0) {\n+            free(value->data.v_requeststatus.debug);\n+            value->data.v_requeststatus.debug = 0;\n+        }\n+        return icalreqstattype_as_string_r(value->data.v_requeststatus);\n+\n+    case ICAL_ACTION_VALUE:\n+=======\n+    case ICAL_REQUESTSTATUS_VALUE:\n+        if (value->data.v_requeststatus.debug != 0) {\n+            free(value->data.v_requeststatus.debug);\n+            value->data.v_requeststatus.debug = 0;\n+        }\n+        return icalreqstattype_as_string_r(value->data.v_requeststatus);\n+\n+    case ICAL_ACTION_VALUE:\n+=======\n+    case ICAL_REQUESTSTATUS_VALUE:\n+        if (value->data.v_requeststatus.debug != 0) {\n+            free(value->data.v_requeststatus.debug);\n+            value->data.v_requeststatus.debug = 0;\n+        }\n+        return icalreqstattype_as_string_r(value->data.v_requeststatus);\n+\n+    case ICAL_ACTION_VALUE:\n+=======\n+    case ICAL_REQUESTSTATUS_VALUE:\n+        if (value->data.v_requeststatus.debug != 0) {\n+            free(value->data.v_requeststatus.debug);\n+            value->data.v_requeststatus.debug = 0;\n+        }\n+        return icalreqstattype_as_string_r(value->data.v_requeststatus);\n+\n+    case ICAL_ACTION_VALUE:\n+=======\n+    case ICAL_REQUESTSTATUS_VALUE:\n+        if (value->data.v_requeststatus.debug != 0) {\n+            free(value->data.v_requeststatus.debug);\n+            value->data.v_requeststatus.debug = 0;\n+        }\n+        return icalreqstattype_as_string_r(value->data.v_requeststatus);\n+\n+    case ICAL_ACTION_VALUE:\n+        if (value->x_value != 0) {\n+            return icalmemory_strdup(value->x_value);\n+        }\n+\n+        return icalproperty_enum_to_string_r(value->data.v_enum);\n+\n+    case ICAL_CMD_VALUE:\n+    case ICAL_QUERYLEVEL_VALUE:\n+    case ICAL_CARLEVEL_VALUE:\n+    case ICAL_METHOD\n \n     return stat;\n }\n"
     }
    ],
@@ -3475,6 +3832,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -3485,6 +3843,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3494,6 +3853,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3503,6 +3863,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/pcre2/src/pcre2_auto_possess.c\n+++ b/src/pcre2/src/pcre2_auto_possess.c\n@@ -1116,6 +1116,53 @@\n \n     if (end != NULL && compare_opcodes(end, utf, cb, list, end, &rec_limit))\n       {\n+      switch(c)\n+        {\n+        case OP_STAR:\n+        *code += OP_POSSTAR - OP_STAR;\n+        break;\n+\n+        case OP_MINSTAR:\n+        *code += OP_POSSTAR - OP_MINSTAR;\n+        break;\n+\n+        case OP_PLUS:\n+        *code += OP_POSPLUS - OP_PLUS;\n+        break;\n+\n+        case OP_MINPLUS:\n+        *code += OP_POSPLUS - OP_MINPLUS;\n+        break;\n+\n+        case OP_QUERY:\n+        *code += OP_POSQUERY - OP_QUERY;\n+        break;\n+\n+        case OP_MINQUERY:\n+        *code += OP_POSQUERY - OP_MINQUERY;\n+        break;\n+\n+        case OP_UPTO:\n+        *code += OP_POSUPTO - OP_UPTO;\n+        break;\n+\n+        case OP_MINUPTO:\n+        *code += OP_POSUPTO - OP_MINUPTO;\n+        break;\n+        }\n+      }\n+    c = *code;\n+    }\n+    code[0] = (PCRE2_UCHAR)OP_TABLE_LENGTH;\n+    code[1] = 0;\n+@@ -1154 +1156,4 @@\n+   c = *code;\n+   }\n+-  else if (c == OP_CLASS || c == OP_NCLASS || c == OP_XCLASS)\n++  else if (c == OP_CLASS || c == OP_NCLASS || c == OP_XCLASS || c >= OP_TABLE_LENGTH)\n++    {\n++    if (c >= OP_TABLE_LENGTH) return 0;\n++    }\n       switch(c)\n         {\n         case OP_STAR:\n--- a/src/pcre2/src/pcre2_compile.c\n+++ b/src/pcre2/src/pcre2_compile.c\n@@ -9598,6 +9598,8 @@\n pptr = cb.parsed_pattern;\n code = (PCRE2_UCHAR *)codestart;\n *code = OP_BRA;\n+code[1] = (PCRE2_UCHAR)OP_TABLE_LENGTH;\n+code[2] = 0;\n regexrc = compile_regex(re->overall_options, &code, &pptr, &errorcode, 0,\n   &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL, &cb, NULL);\n if (regexrc < 0) re->flags |= PCRE2_MATCH_EMPTY;\n"
     },
     {
@@ -3512,6 +3873,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3521,6 +3883,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3558,6 +3921,7 @@
       "behavior_change"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/pcre2/src/pcre2_auto_possess.c\n+++ b/src/pcre2/src/pcre2_auto_possess.c\n@@ -384,6 +384,7 @@\n \n   case OP_CHAR:\n   case OP_NOT:\n+  if (code[0] == '\\0') return NULL;\n   GETCHARINCTEST(chr, code);\n   list[2] = chr;\n   list[3] = NOTACHAR;\n@@ -391,6 +392,7 @@\n \n   case OP_CHARI:\n   case OP_NOTI:\n+  if (code[0] == '\\0') return NULL;\n   list[0] = (c == OP_CHARI) ? OP_CHAR : OP_NOT;\n   GETCHARINCTEST(chr, code);\n   list[2] = chr;\n"
     },
     {
@@ -3596,6 +3960,7 @@
       "scope"
      ],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/src/pcre2/src/pcre2_compile.c\n+++ b/src/pcre2/src/pcre2_compile.c\n@@ -9702,8 +9702,26 @@\n \n if (errorcode == 0 && (re->overall_options & PCRE2_NO_AUTO_POSSESS) == 0)\n   {\n-  PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart;\n-  if (PRIV(auto_possessify)(temp, utf, &cb) != 0) errorcode = ERR80;\n+  /* Validate compiled pattern before auto-possessification to prevent\n+     heap-buffer-overflow when PCRE2_NO_UTF_CHECK produces malformed patterns\n+     with opcodes that read beyond the allocated buffer. */\n+  {\n+    PCRE2_UCHAR *check = (PCRE2_UCHAR *)codestart;\n+    PCRE2_UCHAR *end = check + length;\n+    int valid = 0;\n+    while (check < end)\n+      {\n+      PCRE2_UCHAR op = *check++;\n+      if (op == OP_END) { valid = 1; break; }\n+      /* Skip opcode arguments; most single-char opcodes use 2 bytes */\n+      if (op != OP_BRA) check += 2;\n+      }\n+    if (valid)\n+      {\n+      PCRE2_UCHAR *temp = (PCRE2_UCHAR *)codestart;\n+      if (PRIV(auto_possessify)(temp, utf, &cb) != 0) errorcode = ERR80;\n+      }\n+  }\n   }\n \n /* Failed to compile, or error while post-processing. */\n"
     },
     {
@@ -3605,6 +3970,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],

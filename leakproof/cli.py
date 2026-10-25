@@ -14,6 +14,7 @@ import time
 from pathlib import Path
 
 from leakproof.config import RUNS_DIR, load_dotenv
+from leakproof.evidence import explain, strength
 from leakproof.fix import case_slug, fix_case
 from leakproof.llm import CostLedger, LLMClient
 from leakproof.runner import LocalDockerRunner, get_runner
@@ -53,6 +54,13 @@ def _fix(args: argparse.Namespace) -> int:
             f"  {w['hypothesis_id']} w{w['worker_index']}: {w['verdict']:<36} reviewer notes: {flags}"
         )
     if rec.get("winner"):
+        win = next(
+            (w for w in workers if w["diff"] == rec["winner"]["diff"] and w.get("gate")), None
+        )
+        corpus = (rec.get("gate") or {}).get("corpus") or {}
+        if win is not None:
+            ev = strength(win["gate"]["checks"], corpus if "stdout_distinct" in corpus else None)
+            print(f"\n{ev['label'].upper()}: {explain(ev)}")
         print("\nwinning diff:\n" + rec["winner"]["diff"])
     print(f"\nrecord: {run_dir / (case_slug(rec['case']) + '.json')}")
     if args.json:

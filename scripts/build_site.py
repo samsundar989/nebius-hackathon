@@ -72,6 +72,7 @@ def case_view(rec: dict) -> dict:
                 },
                 "audit": (w.get("audit") or {}).get("flags", []),
                 "semantic": w.get("semantic"),
+                "evidence": w.get("evidence"),
                 "diff": (w.get("diff") or "")[:6000],
             }
         )
@@ -99,6 +100,7 @@ def case_view(rec: dict) -> dict:
         if rec.get("winner")
         else None,
         "winner_semantic": (rec.get("winner") or {}).get("semantic"),
+        "winner_evidence": (rec.get("winner") or {}).get("evidence"),
         "ambiguous": rec.get("ambiguous", False),
         "rejudged": rec.get("rejudged"),
         "workers": workers,

@@ -158,10 +158,29 @@ const money = (x) => (x == null ? "–" : "$" + Number(x).toFixed(4));
 const CHECKS = ["unpatched_trips","diff_scope","build","compiled","patched","tests","behavior","differential","refuzz","safe_fix"];
 const get = (p) => fetch(p).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 
-function diffHtml(d) {
-  return esc(d).split("\n").map((l) => l.startsWith("+") && !l.startsWith("+++") ? `<span class="add">${l}</span>`
-    : l.startsWith("-") && !l.startsWith("---") ? `<span class="del">${l}</span>` : l).join("\n");
+// Changed lines with 2 lines of context each; gaps shown as "…", so the change is in view.
+function compact(d) {
+  const lines = String(d || "").split("\n").filter((l) => !l.startsWith("+++") && !l.startsWith("---"));
+  const changed = (l) => (l.startsWith("+") || l.startsWith("-"));
+  const keep = new Set();
+  lines.forEach((l, i) => { if (changed(l)) for (let j = i - 2; j <= i + 2; j++) keep.add(j); });
+  const out = [];
+  lines.forEach((l, i) => {
+    if (l.startsWith("@@")) return;
+    if (keep.has(i)) out.push(l);
+    else if (out.length && out[out.length - 1] !== "…") out.push("…");
+  });
+  while (out.length && out[out.length - 1] === "…") out.pop();
+  return out.join("\n");
 }
+
+function diffHtml(d) {
+  return esc(compact(d)).split("\n").map((l) => l.startsWith("+") ? `<span class="add">${l}</span>`
+    : l.startsWith("-") ? `<span class="del">${l}</span>` : l).join("\n");
+}
+
+const EV = { strong: "evidence: strong", medium: "evidence: medium", weak: "verified, needs human review" };
+const evBadge = (ev) => ev ? `<span class="chip c-${ev.level === "weak" ? "inconclusive" : "pass"}" title="${esc(`${ev.tests ? "project tests ran" : "no project tests"}; ${ev.output_varies === null ? "harness output not measured" : ev.output_varies ? "harness output varies" : "harness prints nothing to compare"}`)}">${esc(EV[ev.level])}</span>` : "";
 
 async function demo() {
   const cfg = await get("config.json");
@@ -186,7 +205,10 @@ function otherVerified(c) {
   const seen = new Set([c.winner]);
   const rest = c.workers.filter((w) => w.verdict === "verified" && !seen.has(w.diff) && seen.add(w.diff));
   if (!rest.length) return "";
-  return `<details><summary>Other verified candidates (${rest.length})</summary>${rest.map((w) => `<p><code>${esc(w.id)}</code> · ${esc(SEM[w.semantic] || "not reviewed")}</p><pre>${diffHtml(w.diff)}</pre>`).join("")}</details>`;
+  const counts = {};
+  rest.forEach((w) => { const k = SEM[w.semantic] ? (w.semantic === "different_but_correct" ? "different but correct" : w.semantic.split("_")[0]) : "not reviewed"; counts[k] = (counts[k] || 0) + 1; });
+  const summary = Object.entries(counts).map(([k, n]) => (rest.length === n ? (n === 1 ? k : (n === 2 ? `both ${k}` : `all ${k}`)) : `${n} ${k}`)).join(", ");
+  return `<details><summary>Other verified candidates (${rest.length}): ${esc(summary)}</summary>${rest.map((w) => `<p><code>${esc(w.id)}</code> · ${esc(SEM[w.semantic] || "not reviewed")}</p><pre>${diffHtml(w.diff)}</pre>`).join("")}</details>`;
 }
 
 function renderCase(c) {
@@ -203,7 +225,8 @@ function renderCase(c) {
     ${c.root_cause ? `<h3>Root cause (planner)</h3><p>${esc(c.root_cause)}</p>` : ""}
     <h3>Gate matrix</h3>${matrix}
     ${others.length ? `<p class="muted">Not gated: ${others.map((w) => `${esc(w.id)} ${chip(w.verdict)}`).join(" ")}</p>` : ""}
-    ${c.winner ? `<h3>Verified fix <span class="muted">(${esc(c.winner_id)}${c.winner_semantic ? ` · compared with the developer's fix: ${esc(SEM[c.winner_semantic] || c.winner_semantic)}` : ""})</span></h3>${c.ambiguous ? '<p class="muted">Verified candidates behave differently on some inputs (cross-candidate differential): ambiguous.</p>' : ""}<pre>${diffHtml(c.winner)}</pre>` : ""}
+    ${c.winner ? `<h3>Verified fix ${evBadge(c.winner_evidence)} <span class="muted">(${esc(c.winner_id)}${c.winner_semantic ? ` · compared with the developer's fix: ${esc(SEM[c.winner_semantic] || c.winner_semantic)}` : ""})</span></h3>${c.ambiguous ? '<p class="muted">Verified candidates behave differently on some inputs (cross-candidate differential): ambiguous.</p>' : ""}<pre>${diffHtml(c.winner)}</pre>` : ""}
+    ${c.winner_evidence ? '<p class="muted">Evidence: strong = the project\'s tests ran and the harness output varies across the corpus, so a behaviour change could show; medium = one of the two; weak = neither (verified, needs human review).</p>' : ""}
     ${otherVerified(c)}
     ${lineage}</div>`;
 }

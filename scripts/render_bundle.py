@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 from leakproof.config import REPO_ROOT, RUNS_DIR
+from leakproof.evidence import explain
 from leakproof.results import load
 
 CHECK_ORDER = [
@@ -106,6 +107,9 @@ def bundle(rec: dict, case_dir: Path) -> str:
     out += ["", "## Root cause (planner)", "", plan.get("root_cause", "(no planner)"), ""]
     if winner:
         out += ["## The fix", "", _fence(winner["diff"], "diff"), ""]
+        if winner.get("evidence"):
+            ev = winner["evidence"]
+            out += [f"**{ev['label'].capitalize()}** ({explain(ev)}).", ""]
         if winner.get("semantic"):
             out += [
                 f"Compared with the developer's fix (hand review, D-0069): "

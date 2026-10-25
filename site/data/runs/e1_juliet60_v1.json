@@ -42,6 +42,15 @@
    "winner": "--- a/CWE401_Memory_Leak__char_calloc_66a.c\n+++ b/CWE401_Memory_Leak__char_calloc_66a.c\n@@ -38,6 +38,7 @@\n     /* put data in array */\n     dataArray[2] = data;\n     CWE401_Memory_Leak__char_calloc_66b_badSink(dataArray);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -77,6 +86,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -25,8 +25,7 @@\n {\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -111,6 +129,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__char_calloc_66a.c\n+++ b/CWE401_Memory_Leak__char_calloc_66a.c\n@@ -38,6 +38,7 @@\n     /* put data in array */\n     dataArray[2] = data;\n     CWE401_Memory_Leak__char_calloc_66b_badSink(dataArray);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -145,6 +172,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__char_calloc_66b.c\n+++ b/CWE401_Memory_Leak__char_calloc_66b.c\n@@ -25,8 +25,7 @@\n {\n     /* copy data out of dataArray */\n     char * data = dataArray[2];\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -179,6 +215,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__char_calloc_66a.c\n+++ b/CWE401_Memory_Leak__char_calloc_66a.c\n@@ -38,6 +38,7 @@\n     /* put data in array */\n     dataArray[2] = data;\n     CWE401_Memory_Leak__char_calloc_66b_badSink(dataArray);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -208,6 +253,15 @@
    "winner": "--- a/CWE401_Memory_Leak__char_malloc_05.c\n+++ b/CWE401_Memory_Leak__char_malloc_05.c\n@@ -43,7 +43,7 @@\n     if(staticTrue)\n     {\n         /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        free(data);\n     }\n }\n \n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -243,6 +297,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__char_malloc_05.c\n+++ b/CWE401_Memory_Leak__char_malloc_05.c\n@@ -43,7 +43,7 @@\n     if(staticTrue)\n     {\n         /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        free(data);\n     }\n }\n \n"
     },
     {
@@ -277,6 +340,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__char_malloc_05.c\n+++ b/CWE401_Memory_Leak__char_malloc_05.c\n@@ -29,21 +29,15 @@\n \n void CWE401_Memory_Leak__char_malloc_05_bad()\n {\n-    char * data;\n-    data = NULL;\n+    char data[100];\n     if(staticTrue)\n     {\n-        /* POTENTIAL FLAW: Allocate memory on the heap */\n-        data = (char *)malloc(100*sizeof(char));\n-        if (data == NULL) {exit(-1);}\n         /* Initialize and make use of data */\n         strcpy(data, \"A String\");\n         printLine(data);\n     }\n     if(staticTrue)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n     }\n }\n \n"
     },
     {
@@ -311,6 +383,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__char_malloc_05.c\n+++ b/CWE401_Memory_Leak__char_malloc_05.c\n@@ -39,6 +39,8 @@\n         /* Initialize and make use of data */\n         strcpy(data, \"A String\");\n         printLine(data);\n+        free(data);\n+        data = NULL;\n     }\n     if(staticTrue)\n     {\n"
     },
     {
@@ -320,6 +401,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
@@ -349,6 +431,15 @@
    "winner": "--- a/CWE401_Memory_Leak__char_realloc_73a.cpp\n+++ b/CWE401_Memory_Leak__char_realloc_73a.cpp\n@@ -46,6 +46,7 @@\n     dataList.push_back(data);\n     dataList.push_back(data);\n     badSink(dataList);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H2\u00b7w3",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -384,6 +475,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__char_realloc_73b.cpp\n+++ b/CWE401_Memory_Leak__char_realloc_73b.cpp\n@@ -31,8 +31,7 @@\n {\n     /* copy data out of dataList */\n     char * data = dataList.back();\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -393,6 +493,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -427,6 +528,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__char_realloc_73b.cpp\n+++ b/CWE401_Memory_Leak__char_realloc_73b.cpp\n@@ -31,8 +31,7 @@\n {\n     /* copy data out of dataList */\n     char * data = dataList.back();\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -461,6 +571,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__char_realloc_73a.cpp\n+++ b/CWE401_Memory_Leak__char_realloc_73a.cpp\n@@ -46,6 +46,7 @@\n     dataList.push_back(data);\n     dataList.push_back(data);\n     badSink(dataList);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -490,6 +609,15 @@
    "winner": "--- a/CWE401_Memory_Leak__int64_t_calloc_72a.cpp\n+++ b/CWE401_Memory_Leak__int64_t_calloc_72a.cpp\n@@ -46,6 +46,7 @@\n     dataVector.insert(dataVector.end(), 1, data);\n     dataVector.insert(dataVector.end(), 1, data);\n     badSink(dataVector);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -525,6 +653,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int64_t_calloc_72a.cpp\n+++ b/CWE401_Memory_Leak__int64_t_calloc_72a.cpp\n@@ -46,6 +46,7 @@\n     dataVector.insert(dataVector.end(), 1, data);\n     dataVector.insert(dataVector.end(), 1, data);\n     badSink(dataVector);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -559,6 +696,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int64_t_calloc_72b.cpp\n+++ b/CWE401_Memory_Leak__int64_t_calloc_72b.cpp\n@@ -31,8 +31,7 @@\n {\n     /* copy data out of dataVector */\n     int64_t * data = dataVector[2];\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -593,6 +739,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int64_t_calloc_72a.cpp\n+++ b/CWE401_Memory_Leak__int64_t_calloc_72a.cpp\n@@ -46,6 +46,7 @@\n     dataVector.insert(dataVector.end(), 1, data);\n     dataVector.insert(dataVector.end(), 1, data);\n     badSink(dataVector);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -627,6 +782,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int64_t_calloc_72b.cpp\n+++ b/CWE401_Memory_Leak__int64_t_calloc_72b.cpp\n@@ -32,7 +32,7 @@\n     /* copy data out of dataVector */\n     int64_t * data = dataVector[2];\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -656,6 +820,15 @@
    "winner": "--- a/CWE401_Memory_Leak__int64_t_realloc_64a.c\n+++ b/CWE401_Memory_Leak__int64_t_realloc_64a.c\n@@ -35,6 +35,8 @@\n     data[0] = 5LL;\n     printLongLongLine(data[0]);\n     CWE401_Memory_Leak__int64_t_realloc_64b_badSink(&data);\n+    free(data);\n+    data = NULL;\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -691,6 +864,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int64_t_realloc_64b.c\n+++ b/CWE401_Memory_Leak__int64_t_realloc_64b.c\n@@ -27,8 +27,8 @@\n     int64_t * * dataPtr = (int64_t * *)dataVoidPtr;\n     /* dereference dataPtr into data */\n     int64_t * data = (*dataPtr);\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(*dataPtr);\n+    *dataPtr = NULL;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -725,6 +907,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int64_t_realloc_64a.c\n+++ b/CWE401_Memory_Leak__int64_t_realloc_64a.c\n@@ -35,6 +35,8 @@\n     data[0] = 5LL;\n     printLongLongLine(data[0]);\n     CWE401_Memory_Leak__int64_t_realloc_64b_badSink(&data);\n+    free(data);\n+    data = NULL;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -759,6 +950,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int64_t_realloc_64b.c\n+++ b/CWE401_Memory_Leak__int64_t_realloc_64b.c\n@@ -27,8 +27,10 @@\n     int64_t * * dataPtr = (int64_t * *)dataVoidPtr;\n     /* dereference dataPtr into data */\n     int64_t * data = (*dataPtr);\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    if (*dataPtr != NULL) {\n+        free(*dataPtr);\n+        *dataPtr = NULL;\n+    }\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -768,6 +968,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE401_Memory_Leak__int64_t_realloc_64b.c\n+++ b/CWE401_Memory_Leak__int64_t_realloc_64b.c\n@@ -23,12 +23,9 @@\n \n void CWE401_Memory_Leak__int64_t_realloc_64b_badSink(void * dataVoidPtr)\n {\n-    /* cast void pointer to a pointer of the appropriate type */\n-    int64_t * * dataPtr = (int64_t * *)dataVoidPtr;\n-    /* dereference dataPtr into data */\n-    int64_t * data = (*dataPtr);\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    /* Free data */\n+    free(*dataPtr);\n+    *dataPtr = NULL;\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -797,6 +998,15 @@
    "winner": "--- a/CWE401_Memory_Leak__int_calloc_18.c\n+++ b/CWE401_Memory_Leak__int_calloc_18.c\n@@ -36,7 +36,7 @@\n     goto sink;\n sink:\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w2",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -832,6 +1042,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int_calloc_18.c\n+++ b/CWE401_Memory_Leak__int_calloc_18.c\n@@ -35,7 +35,7 @@\n     printIntLine(data[0]);\n     goto sink;\n sink:\n-    /* POTENTIAL FLAW: No deallocation */\n+    free(data);\n     ; /* empty statement needed for some flow variants */\n }\n \n"
     },
     {
@@ -866,6 +1085,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int_calloc_18.c\n+++ b/CWE401_Memory_Leak__int_calloc_18.c\n@@ -35,6 +35,7 @@\n     printIntLine(data[0]);\n     goto sink;\n sink:\n+    free(data);\n     /* POTENTIAL FLAW: No deallocation */\n     ; /* empty statement needed for some flow variants */\n }\n"
     },
     {
@@ -900,6 +1128,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int_calloc_18.c\n+++ b/CWE401_Memory_Leak__int_calloc_18.c\n@@ -36,7 +36,7 @@\n     goto sink;\n sink:\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -934,6 +1171,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int_calloc_18.c\n+++ b/CWE401_Memory_Leak__int_calloc_18.c\n@@ -35,8 +35,7 @@\n     printIntLine(data[0]);\n     goto sink;\n sink:\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -963,6 +1209,15 @@
    "winner": "--- a/CWE401_Memory_Leak__int_malloc_53c.c\n+++ b/CWE401_Memory_Leak__int_malloc_53c.c\n@@ -26,6 +26,7 @@\n \n void CWE401_Memory_Leak__int_malloc_53c_badSink(int * data)\n {\n+    free(data);\n     CWE401_Memory_Leak__int_malloc_53d_badSink(data);\n }\n \n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -998,6 +1253,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int_malloc_53d.c\n+++ b/CWE401_Memory_Leak__int_malloc_53d.c\n@@ -24,7 +24,7 @@\n void CWE401_Memory_Leak__int_malloc_53d_badSink(int * data)\n {\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -1032,6 +1296,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int_malloc_53c.c\n+++ b/CWE401_Memory_Leak__int_malloc_53c.c\n@@ -26,6 +26,7 @@\n \n void CWE401_Memory_Leak__int_malloc_53c_badSink(int * data)\n {\n+    free(data);\n     CWE401_Memory_Leak__int_malloc_53d_badSink(data);\n }\n \n"
     },
     {
@@ -1066,6 +1339,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int_malloc_53b.c\n+++ b/CWE401_Memory_Leak__int_malloc_53b.c\n@@ -26,6 +26,7 @@\n \n void CWE401_Memory_Leak__int_malloc_53b_badSink(int * data)\n {\n+    free(data);\n     CWE401_Memory_Leak__int_malloc_53c_badSink(data);\n }\n \n"
     },
     {
@@ -1100,6 +1382,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int_malloc_53a.c\n+++ b/CWE401_Memory_Leak__int_malloc_53a.c\n@@ -34,6 +34,7 @@\n     /* Initialize and make use of data */\n     data[0] = 5;\n     printIntLine(data[0]);\n+    free(data);\n     CWE401_Memory_Leak__int_malloc_53b_badSink(data);\n }\n \n"
     }
    ],
@@ -1129,6 +1420,15 @@
    "winner": "--- a/CWE401_Memory_Leak__int_realloc_51a.c\n+++ b/CWE401_Memory_Leak__int_realloc_51a.c\n@@ -35,6 +35,7 @@\n     data[0] = 5;\n     printIntLine(data[0]);\n     CWE401_Memory_Leak__int_realloc_51b_badSink(data);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -1164,6 +1464,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int_realloc_51b.c\n+++ b/CWE401_Memory_Leak__int_realloc_51b.c\n@@ -23,8 +23,8 @@\n \n void CWE401_Memory_Leak__int_realloc_51b_badSink(int * data)\n {\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    /* FIX: deallocate data */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -1198,6 +1507,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int_realloc_51a.c\n+++ b/CWE401_Memory_Leak__int_realloc_51a.c\n@@ -35,6 +35,7 @@\n     data[0] = 5;\n     printIntLine(data[0]);\n     CWE401_Memory_Leak__int_realloc_51b_badSink(data);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -1232,6 +1550,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int_realloc_51b.c\n+++ b/CWE401_Memory_Leak__int_realloc_51b.c\n@@ -23,8 +23,7 @@\n \n void CWE401_Memory_Leak__int_realloc_51b_badSink(int * data)\n {\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -1266,6 +1593,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__int_realloc_51a.c\n+++ b/CWE401_Memory_Leak__int_realloc_51a.c\n@@ -35,6 +35,7 @@\n     data[0] = 5;\n     printIntLine(data[0]);\n     CWE401_Memory_Leak__int_realloc_51b_badSink(data);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -1295,6 +1631,15 @@
    "winner": "--- a/CWE401_Memory_Leak__new_array_char_09.cpp\n+++ b/CWE401_Memory_Leak__new_array_char_09.cpp\n@@ -41,7 +41,7 @@\n     if(GLOBAL_CONST_TRUE)\n     {\n         /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete[] data;\n     }\n }\n \n",
    "winner_id": "H1\u00b7w2",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -1330,6 +1675,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_char_09.cpp\n+++ b/CWE401_Memory_Leak__new_array_char_09.cpp\n@@ -40,8 +40,8 @@\n     }\n     if(GLOBAL_CONST_TRUE)\n     {\n+        delete[] data;\n         /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n     }\n }\n \n"
     },
     {
@@ -1364,6 +1718,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_char_09.cpp\n+++ b/CWE401_Memory_Leak__new_array_char_09.cpp\n@@ -40,8 +40,8 @@\n     }\n     if(GLOBAL_CONST_TRUE)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete[] data;\n+        /* deallocation */\n     }\n }\n \n"
     },
     {
@@ -1398,6 +1761,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_char_09.cpp\n+++ b/CWE401_Memory_Leak__new_array_char_09.cpp\n@@ -41,7 +41,7 @@\n     if(GLOBAL_CONST_TRUE)\n     {\n         /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete[] data;\n     }\n }\n \n"
     },
     {
@@ -1432,6 +1804,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_char_09.cpp\n+++ b/CWE401_Memory_Leak__new_array_char_09.cpp\n@@ -40,8 +40,7 @@\n     }\n     if(GLOBAL_CONST_TRUE)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete[] data;\n     }\n }\n \n"
     }
    ],
@@ -1461,6 +1842,15 @@
    "winner": "--- a/CWE401_Memory_Leak__new_array_int64_t_34.cpp\n+++ b/CWE401_Memory_Leak__new_array_int64_t_34.cpp\n@@ -48,6 +48,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete[] data;\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -1471,6 +1861,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -1505,6 +1896,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_int64_t_34.cpp\n+++ b/CWE401_Memory_Leak__new_array_int64_t_34.cpp\n@@ -48,6 +48,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete[] data;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -1514,6 +1914,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -1548,6 +1949,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_int64_t_34.cpp\n+++ b/CWE401_Memory_Leak__new_array_int64_t_34.cpp\n@@ -48,6 +48,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete[] data;\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -1577,6 +1987,15 @@
    "winner": "--- a/CWE401_Memory_Leak__new_array_struct_twoIntsStruct_14.cpp\n+++ b/CWE401_Memory_Leak__new_array_struct_twoIntsStruct_14.cpp\n@@ -43,6 +43,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete[] data;\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -1612,6 +2031,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_struct_twoIntsStruct_14.cpp\n+++ b/CWE401_Memory_Leak__new_array_struct_twoIntsStruct_14.cpp\n@@ -43,6 +43,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete[] data;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -1621,6 +2049,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -1655,6 +2084,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_struct_twoIntsStruct_14.cpp\n+++ b/CWE401_Memory_Leak__new_array_struct_twoIntsStruct_14.cpp\n@@ -41,7 +41,7 @@\n     if(globalFive==5)\n     {\n         /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete[] data; /* empty statement needed for some flow variants */\n     }\n }\n \n"
     },
     {
@@ -1664,6 +2102,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
@@ -1693,6 +2132,15 @@
    "winner": "--- a/CWE401_Memory_Leak__new_array_TwoIntsClass_11.cpp\n+++ b/CWE401_Memory_Leak__new_array_TwoIntsClass_11.cpp\n@@ -43,6 +43,9 @@\n     {\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n+    }\n+    if (data != NULL) {\n+        delete[] data;\n     }\n }\n \n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -1728,6 +2176,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_TwoIntsClass_11.cpp\n+++ b/CWE401_Memory_Leak__new_array_TwoIntsClass_11.cpp\n@@ -43,6 +43,9 @@\n     {\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n+    }\n+    if (data != NULL) {\n+        delete[] data;\n     }\n }\n \n"
     },
     {
@@ -1762,6 +2219,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_TwoIntsClass_11.cpp\n+++ b/CWE401_Memory_Leak__new_array_TwoIntsClass_11.cpp\n@@ -39,10 +39,10 @@\n         printIntLine(data[0].intOne);\n         printIntLine(data[0].intTwo);\n     }\n-    if(globalReturnsTrue())\n+    if (data != NULL)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete[] data;\n+        data = NULL;\n     }\n }\n \n"
     },
     {
@@ -1771,6 +2237,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -1805,6 +2272,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_TwoIntsClass_11.cpp\n+++ b/CWE401_Memory_Leak__new_array_TwoIntsClass_11.cpp\n@@ -43,6 +43,11 @@\n     {\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n+    }\n+    if (data != NULL)\n+    {\n+        delete[] data;\n+        data = NULL;\n     }\n }\n \n"
     }
    ],
@@ -1834,6 +2310,15 @@
    "winner": "--- a/CWE401_Memory_Leak__new_array_twointsStruct_10.cpp\n+++ b/CWE401_Memory_Leak__new_array_twointsStruct_10.cpp\n@@ -44,6 +44,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete[] data;\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -1869,6 +2354,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_twointsStruct_10.cpp\n+++ b/CWE401_Memory_Leak__new_array_twointsStruct_10.cpp\n@@ -44,6 +44,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete[] data;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -1878,6 +2372,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -1912,6 +2407,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_twointsStruct_10.cpp\n+++ b/CWE401_Memory_Leak__new_array_twointsStruct_10.cpp\n@@ -32,8 +32,7 @@\n     data = NULL;\n     if(globalTrue)\n     {\n-        /* POTENTIAL FLAW: Allocate memory on the heap */\n-        data = new twoIntsStruct[100];\n+        twoIntsStruct data[100];\n         /* Initialize and make use of data */\n         data[0].intOne = 0;\n         data[0].intTwo = 0;\n"
     },
     {
@@ -1946,6 +2450,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_twointsStruct_10.cpp\n+++ b/CWE401_Memory_Leak__new_array_twointsStruct_10.cpp\n@@ -44,6 +44,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete[] data;\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -1975,6 +2488,15 @@
    "winner": "--- a/CWE401_Memory_Leak__new_array_wchar_t_63a.cpp\n+++ b/CWE401_Memory_Leak__new_array_wchar_t_63a.cpp\n@@ -39,6 +39,7 @@\n     wcscpy(data, L\"A String\");\n     printWLine(data);\n     badSink(&data);\n+    delete[] data;\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -2010,6 +2532,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_wchar_t_63b.cpp\n+++ b/CWE401_Memory_Leak__new_array_wchar_t_63b.cpp\n@@ -30,7 +30,7 @@\n {\n     wchar_t * data = *dataPtr;\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    delete[] data; /* deallocation */\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -2044,6 +2575,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_wchar_t_63a.cpp\n+++ b/CWE401_Memory_Leak__new_array_wchar_t_63a.cpp\n@@ -39,6 +39,7 @@\n     wcscpy(data, L\"A String\");\n     printWLine(data);\n     badSink(&data);\n+    delete[] data;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -2078,6 +2618,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_wchar_t_63b.cpp\n+++ b/CWE401_Memory_Leak__new_array_wchar_t_63b.cpp\n@@ -30,7 +30,7 @@\n {\n     wchar_t * data = *dataPtr;\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    delete[] data;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -2112,6 +2661,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_array_wchar_t_63a.cpp\n+++ b/CWE401_Memory_Leak__new_array_wchar_t_63a.cpp\n@@ -39,6 +39,7 @@\n     wcscpy(data, L\"A String\");\n     printWLine(data);\n     badSink(&data);\n+    delete[] data;\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -2141,6 +2699,15 @@
    "winner": "--- a/CWE401_Memory_Leak__new_char_33.cpp\n+++ b/CWE401_Memory_Leak__new_char_33.cpp\n@@ -36,6 +36,7 @@\n     /* Initialize and make use of data */\n     *data = 'A';\n     printHexCharLine(*data);\n+    delete data;\n     {\n         char * data = dataRef;\n         /* POTENTIAL FLAW: No deallocation */\n",
    "winner_id": "H1\u00b7w2",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -2151,6 +2718,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -2160,6 +2728,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -2194,6 +2763,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_char_33.cpp\n+++ b/CWE401_Memory_Leak__new_char_33.cpp\n@@ -36,6 +36,7 @@\n     /* Initialize and make use of data */\n     *data = 'A';\n     printHexCharLine(*data);\n+    delete data;\n     {\n         char * data = dataRef;\n         /* POTENTIAL FLAW: No deallocation */\n"
     },
     {
@@ -2228,6 +2806,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_char_33.cpp\n+++ b/CWE401_Memory_Leak__new_char_33.cpp\n@@ -36,6 +36,7 @@\n     /* Initialize and make use of data */\n     *data = 'A';\n     printHexCharLine(*data);\n+    delete data;\n     {\n         char * data = dataRef;\n         /* POTENTIAL FLAW: No deallocation */\n"
     }
    ],
@@ -2257,6 +2844,15 @@
    "winner": "--- a/CWE401_Memory_Leak__new_int64_t_02.cpp\n+++ b/CWE401_Memory_Leak__new_int64_t_02.cpp\n@@ -43,6 +43,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete data;\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -2292,6 +2888,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_int64_t_02.cpp\n+++ b/CWE401_Memory_Leak__new_int64_t_02.cpp\n@@ -37,11 +37,12 @@\n         /* Initialize and make use of data */\n         *data = 5LL;\n         printLongLongLine(*data);\n-    }\n-    if(1)\n-    {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete data;\n+}\n+        if(1)\n+        {\n+            /* POTENTIAL FLAW: No deallocation */\n+            ; /* empty statement needed for some flow variants */\n     }\n }\n \n"
     },
     {
@@ -2326,6 +2931,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_int64_t_02.cpp\n+++ b/CWE401_Memory_Leak__new_int64_t_02.cpp\n@@ -43,6 +43,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete data;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -2335,6 +2949,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -2369,6 +2984,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_int64_t_02.cpp\n+++ b/CWE401_Memory_Leak__new_int64_t_02.cpp\n@@ -43,6 +43,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete data;\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -2398,6 +3022,15 @@
    "winner": "--- a/CWE401_Memory_Leak__new_int_06.cpp\n+++ b/CWE401_Memory_Leak__new_int_06.cpp\n@@ -48,6 +48,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete data;\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -2433,6 +3066,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_int_06.cpp\n+++ b/CWE401_Memory_Leak__new_int_06.cpp\n@@ -46,7 +46,7 @@\n     if(STATIC_CONST_FIVE==5)\n     {\n         /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete data; /* empty statement needed for some flow variants */\n     }\n }\n \n"
     },
     {
@@ -2467,6 +3109,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_int_06.cpp\n+++ b/CWE401_Memory_Leak__new_int_06.cpp\n@@ -48,6 +48,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete data;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -2476,6 +3127,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE401_Memory_Leak__new_int_06.cpp\n+++ b/CWE401_Memory_Leak__new_int_06.cpp\n@@ -16,6 +16,35 @@\n  * */\n \n #include \"std_testcase.h\"\n+#include <memory>\n+>>>>>>> REPLACE</think>\n+CWE401_Memory_Leak__new_int_06.cpp\n+<<<<<<< SEARCH\n+    int * data;\n+    data = NULL;\n+    if(STATIC_CONST_FIVE==5)\n+    {\n+        /* POTENTIAL FLAW: Allocate memory on the heap */\n+        data = new int;\n+        /* Initialize and make use of data */\n+        *data = 5;\n+        printIntLine(*data);\n+    }\n+    if(STATIC_CONST_FIVE==5)\n+    {\n+        /* POTENTIAL FLAW: No deallocation */\n+        ; /* empty statement needed for some flow variants */\n+    }\n+=======\n+    std::unique_ptr<int> data;\n+    if(STATIC_CONST_FIVE==5)\n+    {\n+        /* POTENTIAL FLAW: Allocate memory on the heap */\n+        data = std::make_unique<int>();\n+        /* Initialize and make use of data */\n+        *data = 5;\n+        printIntLine(*data);\n+    }\n \n #ifndef _WIN32\n #include <wchar.h>\n"
     },
     {
@@ -2510,6 +3162,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_int_06.cpp\n+++ b/CWE401_Memory_Leak__new_int_06.cpp\n@@ -33,20 +33,14 @@\n \n void bad()\n {\n-    int * data;\n-    data = NULL;\n+    int data;\n     if(STATIC_CONST_FIVE==5)\n     {\n-        /* POTENTIAL FLAW: Allocate memory on the heap */\n-        data = new int;\n-        /* Initialize and make use of data */\n-        *data = 5;\n-        printIntLine(*data);\n+        data = 5;\n+        printIntLine(data);\n     }\n     if(STATIC_CONST_FIVE==5)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n     }\n }\n \n"
     }
    ],
@@ -2539,6 +3200,15 @@
    "winner": "--- a/CWE401_Memory_Leak__new_struct_twoIntsStruct_22a.cpp\n+++ b/CWE401_Memory_Leak__new_struct_twoIntsStruct_22a.cpp\n@@ -44,6 +44,7 @@\n     printStructLine((twoIntsStruct *)data);\n     badGlobal = 1; /* true */\n     badSink(data);\n+    delete data;\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -2574,6 +3244,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_struct_twoIntsStruct_22b.cpp\n+++ b/CWE401_Memory_Leak__new_struct_twoIntsStruct_22b.cpp\n@@ -34,8 +34,7 @@\n {\n     if(badGlobal)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete data;\n     }\n }\n \n"
     },
     {
@@ -2608,6 +3287,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_struct_twoIntsStruct_22a.cpp\n+++ b/CWE401_Memory_Leak__new_struct_twoIntsStruct_22a.cpp\n@@ -44,6 +44,7 @@\n     printStructLine((twoIntsStruct *)data);\n     badGlobal = 1; /* true */\n     badSink(data);\n+    delete data;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -2642,6 +3330,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_struct_twoIntsStruct_22b.cpp\n+++ b/CWE401_Memory_Leak__new_struct_twoIntsStruct_22b.cpp\n@@ -32,11 +32,7 @@\n \n void badSink(struct _twoIntsStruct * data)\n {\n-    if(badGlobal)\n-    {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n-    }\n+    delete data;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -2676,6 +3373,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_struct_twoIntsStruct_22b.cpp\n+++ b/CWE401_Memory_Leak__new_struct_twoIntsStruct_22b.cpp\n@@ -34,8 +34,7 @@\n {\n     if(badGlobal)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete data;\n     }\n }\n \n"
     }
    ],
@@ -2705,6 +3411,15 @@
    "winner": "--- a/CWE401_Memory_Leak__new_TwoIntsClass_21.cpp\n+++ b/CWE401_Memory_Leak__new_TwoIntsClass_21.cpp\n@@ -51,7 +51,8 @@\n     printIntLine(data->intTwo);\n     badStatic = 1; /* true */\n     badSink(data);\n-}\n+    delete data;\n+    }\n \n #endif /* OMITBAD */\n \n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -2740,6 +3455,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_TwoIntsClass_21.cpp\n+++ b/CWE401_Memory_Leak__new_TwoIntsClass_21.cpp\n@@ -36,6 +36,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete data;\n }\n \n void bad()\n"
     },
     {
@@ -2774,6 +3498,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_TwoIntsClass_21.cpp\n+++ b/CWE401_Memory_Leak__new_TwoIntsClass_21.cpp\n@@ -51,7 +51,8 @@\n     printIntLine(data->intTwo);\n     badStatic = 1; /* true */\n     badSink(data);\n-}\n+    delete data;\n+    }\n \n #endif /* OMITBAD */\n \n"
     },
     {
@@ -2808,6 +3541,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_TwoIntsClass_21.cpp\n+++ b/CWE401_Memory_Leak__new_TwoIntsClass_21.cpp\n@@ -43,7 +43,8 @@\n     TwoIntsClass * data;\n     data = NULL;\n     /* POTENTIAL FLAW: Allocate memory on the heap */\n-    data = new TwoIntsClass;\n+    TwoIntsClass stackData;\n+    data = &stackData;\n     /* Initialize and make use of data */\n     data->intOne = 0;\n     data->intTwo = 0;\n"
     },
     {
@@ -2842,6 +3584,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_TwoIntsClass_21.cpp\n+++ b/CWE401_Memory_Leak__new_TwoIntsClass_21.cpp\n@@ -36,6 +36,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    delete data;\n }\n \n void bad()\n"
     }
    ],
@@ -2871,6 +3622,15 @@
    "winner": "--- a/CWE401_Memory_Leak__new_twoIntsStruct_03.cpp\n+++ b/CWE401_Memory_Leak__new_twoIntsStruct_03.cpp\n@@ -41,8 +41,7 @@\n     }\n     if(5==5)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete data;\n     }\n }\n \n",
    "winner_id": "H1\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -2906,6 +3666,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_twoIntsStruct_03.cpp\n+++ b/CWE401_Memory_Leak__new_twoIntsStruct_03.cpp\n@@ -42,7 +42,7 @@\n     if(5==5)\n     {\n         /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete data; /* empty statement needed for some flow variants */\n     }\n }\n \n"
     },
     {
@@ -2940,6 +3709,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_twoIntsStruct_03.cpp\n+++ b/CWE401_Memory_Leak__new_twoIntsStruct_03.cpp\n@@ -41,8 +41,7 @@\n     }\n     if(5==5)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete data;\n     }\n }\n \n"
     },
     {
@@ -2974,6 +3752,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_twoIntsStruct_03.cpp\n+++ b/CWE401_Memory_Leak__new_twoIntsStruct_03.cpp\n@@ -41,8 +41,7 @@\n     }\n     if(5==5)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete data;\n     }\n }\n \n"
     },
     {
@@ -3008,6 +3795,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__new_twoIntsStruct_03.cpp\n+++ b/CWE401_Memory_Leak__new_twoIntsStruct_03.cpp\n@@ -41,8 +41,7 @@\n     }\n     if(5==5)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        delete data;\n     }\n }\n \n"
     }
    ],
@@ -3037,6 +3833,15 @@
    "winner": "--- a/CWE401_Memory_Leak__strdup_char_54a.c\n+++ b/CWE401_Memory_Leak__strdup_char_54a.c\n@@ -36,6 +36,7 @@\n         printLine(data);\n     }\n     CWE401_Memory_Leak__strdup_char_54b_badSink(data);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -3072,6 +3877,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__strdup_char_54e.c\n+++ b/CWE401_Memory_Leak__strdup_char_54e.c\n@@ -25,7 +25,7 @@\n {\n     /* POTENTIAL FLAW: No deallocation of memory */\n     /* no deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -3106,6 +3920,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__strdup_char_54a.c\n+++ b/CWE401_Memory_Leak__strdup_char_54a.c\n@@ -36,6 +36,7 @@\n         printLine(data);\n     }\n     CWE401_Memory_Leak__strdup_char_54b_badSink(data);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -3115,6 +3938,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3149,6 +3973,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__strdup_char_54e.c\n+++ b/CWE401_Memory_Leak__strdup_char_54e.c\n@@ -23,9 +23,7 @@\n \n void CWE401_Memory_Leak__strdup_char_54e_badSink(char * data)\n {\n-    /* POTENTIAL FLAW: No deallocation of memory */\n-    /* no deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -3178,6 +4011,15 @@
    "winner": "--- a/CWE401_Memory_Leak__strdup_wchar_t_16.c\n+++ b/CWE401_Memory_Leak__strdup_wchar_t_16.c\n@@ -33,6 +33,7 @@\n             data = wcsdup(myString);\n             /* Use data */\n             printWLine(data);\n+            free(data);\n         }\n         break;\n     }\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -3213,6 +4055,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__strdup_wchar_t_16.c\n+++ b/CWE401_Memory_Leak__strdup_wchar_t_16.c\n@@ -33,6 +33,7 @@\n             data = wcsdup(myString);\n             /* Use data */\n             printWLine(data);\n+            free(data);\n         }\n         break;\n     }\n"
     },
     {
@@ -3247,6 +4098,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__strdup_wchar_t_16.c\n+++ b/CWE401_Memory_Leak__strdup_wchar_t_16.c\n@@ -33,6 +33,7 @@\n             data = wcsdup(myString);\n             /* Use data */\n             printWLine(data);\n+            free(data);\n         }\n         break;\n     }\n"
     },
     {
@@ -3281,6 +4141,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__strdup_wchar_t_16.c\n+++ b/CWE401_Memory_Leak__strdup_wchar_t_16.c\n@@ -33,6 +33,7 @@\n             data = wcsdup(myString);\n             /* Use data */\n             printWLine(data);\n+            free(data);\n         }\n         break;\n     }\n"
     },
     {
@@ -3290,6 +4159,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
@@ -3319,6 +4189,15 @@
    "winner": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_calloc_04.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_calloc_04.c\n@@ -43,8 +43,7 @@\n     }\n     if(STATIC_CONST_TRUE)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        free(data);\n     }\n }\n \n",
    "winner_id": "H1\u00b7w2",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -3329,6 +4208,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3363,6 +4243,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_calloc_04.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_calloc_04.c\n@@ -44,7 +44,7 @@\n     if(STATIC_CONST_TRUE)\n     {\n         /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        free(data); /* deallocation */\n     }\n }\n \n"
     },
     {
@@ -3397,6 +4286,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_calloc_04.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_calloc_04.c\n@@ -43,8 +43,7 @@\n     }\n     if(STATIC_CONST_TRUE)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        free(data);\n     }\n }\n \n"
     },
     {
@@ -3431,6 +4329,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_calloc_04.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_calloc_04.c\n@@ -44,7 +44,7 @@\n     if(STATIC_CONST_TRUE)\n     {\n         /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        free(data); /* deallocation */\n     }\n }\n \n"
     }
    ],
@@ -3460,6 +4367,15 @@
    "winner": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_malloc_17.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_malloc_17.c\n@@ -41,6 +41,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -3495,6 +4411,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_malloc_17.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_malloc_17.c\n@@ -41,6 +41,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -3529,6 +4454,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_malloc_17.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_malloc_17.c\n@@ -41,6 +41,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -3563,6 +4497,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_malloc_17.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_malloc_17.c\n@@ -41,6 +41,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -3572,6 +4515,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
@@ -3601,6 +4545,15 @@
    "winner": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_realloc_01.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_realloc_01.c\n@@ -33,7 +33,7 @@\n     data[0].intTwo = 0;\n     printStructLine((twoIntsStruct *)&data[0]);\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w3",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -3636,6 +4589,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_realloc_01.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_realloc_01.c\n@@ -32,8 +32,7 @@\n     data[0].intOne = 0;\n     data[0].intTwo = 0;\n     printStructLine((twoIntsStruct *)&data[0]);\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -3670,6 +4632,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_realloc_01.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_realloc_01.c\n@@ -32,8 +32,7 @@\n     data[0].intOne = 0;\n     data[0].intTwo = 0;\n     printStructLine((twoIntsStruct *)&data[0]);\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data); /* deallocate data */\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -3704,6 +4675,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_realloc_01.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_realloc_01.c\n@@ -32,8 +32,7 @@\n     data[0].intOne = 0;\n     data[0].intTwo = 0;\n     printStructLine((twoIntsStruct *)&data[0]);\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -3738,6 +4718,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__struct_twoIntsStruct_realloc_01.c\n+++ b/CWE401_Memory_Leak__struct_twoIntsStruct_realloc_01.c\n@@ -33,7 +33,7 @@\n     data[0].intTwo = 0;\n     printStructLine((twoIntsStruct *)&data[0]);\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -3764,6 +4753,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [],
@@ -3793,6 +4783,15 @@
    "winner": "--- a/CWE401_Memory_Leak__twoIntsStruct_malloc_31.c\n+++ b/CWE401_Memory_Leak__twoIntsStruct_malloc_31.c\n@@ -38,6 +38,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -3803,6 +4802,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -3837,6 +4837,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__twoIntsStruct_malloc_31.c\n+++ b/CWE401_Memory_Leak__twoIntsStruct_malloc_31.c\n@@ -38,6 +38,7 @@\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n     }\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -3871,6 +4880,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__twoIntsStruct_malloc_31.c\n+++ b/CWE401_Memory_Leak__twoIntsStruct_malloc_31.c\n@@ -37,7 +37,8 @@\n         twoIntsStruct * data = dataCopy;\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n-    }\n+        }\n+        free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -3905,6 +4923,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__twoIntsStruct_malloc_31.c\n+++ b/CWE401_Memory_Leak__twoIntsStruct_malloc_31.c\n@@ -37,8 +37,9 @@\n         twoIntsStruct * data = dataCopy;\n         /* POTENTIAL FLAW: No deallocation */\n         ; /* empty statement needed for some flow variants */\n-    }\n-}\n+       }\n+       free(data);\n+   }\n \n #endif /* OMITBAD */\n \n"
     }
    ],
@@ -3934,6 +4961,15 @@
    "winner": "--- a/CWE401_Memory_Leak__twoIntsStruct_realloc_07.c\n+++ b/CWE401_Memory_Leak__twoIntsStruct_realloc_07.c\n@@ -43,7 +43,7 @@\n     if(staticFive==5)\n     {\n         /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        free(data);\n     }\n }\n \n",
    "winner_id": "H1\u00b7w3",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -3969,6 +5005,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__twoIntsStruct_realloc_07.c\n+++ b/CWE401_Memory_Leak__twoIntsStruct_realloc_07.c\n@@ -42,8 +42,7 @@\n     }\n     if(staticFive==5)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        free(data);\n     }\n }\n \n"
     },
     {
@@ -4003,6 +5048,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__twoIntsStruct_realloc_07.c\n+++ b/CWE401_Memory_Leak__twoIntsStruct_realloc_07.c\n@@ -42,8 +42,7 @@\n     }\n     if(staticFive==5)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        free(data);\n     }\n }\n \n"
     },
     {
@@ -4037,6 +5091,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__twoIntsStruct_realloc_07.c\n+++ b/CWE401_Memory_Leak__twoIntsStruct_realloc_07.c\n@@ -42,8 +42,7 @@\n     }\n     if(staticFive==5)\n     {\n-        /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        free(data);\n     }\n }\n \n"
     },
     {
@@ -4071,6 +5134,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__twoIntsStruct_realloc_07.c\n+++ b/CWE401_Memory_Leak__twoIntsStruct_realloc_07.c\n@@ -43,7 +43,7 @@\n     if(staticFive==5)\n     {\n         /* POTENTIAL FLAW: No deallocation */\n-        ; /* empty statement needed for some flow variants */\n+        free(data);\n     }\n }\n \n"
     }
    ],
@@ -4100,6 +5172,15 @@
    "winner": "--- a/CWE401_Memory_Leak__wchar_t_malloc_61a.c\n+++ b/CWE401_Memory_Leak__wchar_t_malloc_61a.c\n@@ -30,7 +30,7 @@\n     data = NULL;\n     data = CWE401_Memory_Leak__wchar_t_malloc_61b_badSource(data);\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -4135,6 +5216,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__wchar_t_malloc_61a.c\n+++ b/CWE401_Memory_Leak__wchar_t_malloc_61a.c\n@@ -30,7 +30,7 @@\n     data = NULL;\n     data = CWE401_Memory_Leak__wchar_t_malloc_61b_badSource(data);\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -4169,6 +5259,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__wchar_t_malloc_61a.c\n+++ b/CWE401_Memory_Leak__wchar_t_malloc_61a.c\n@@ -30,7 +30,7 @@\n     data = NULL;\n     data = CWE401_Memory_Leak__wchar_t_malloc_61b_badSource(data);\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -4203,6 +5302,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__wchar_t_malloc_61a.c\n+++ b/CWE401_Memory_Leak__wchar_t_malloc_61a.c\n@@ -29,8 +29,7 @@\n     wchar_t * data;\n     data = NULL;\n     data = CWE401_Memory_Leak__wchar_t_malloc_61b_badSource(data);\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -4237,6 +5345,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__wchar_t_malloc_61a.c\n+++ b/CWE401_Memory_Leak__wchar_t_malloc_61a.c\n@@ -30,7 +30,7 @@\n     data = NULL;\n     data = CWE401_Memory_Leak__wchar_t_malloc_61b_badSource(data);\n     /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -4266,6 +5383,15 @@
    "winner": "--- a/CWE401_Memory_Leak__wchar_t_realloc_81a.cpp\n+++ b/CWE401_Memory_Leak__wchar_t_realloc_81a.cpp\n@@ -35,6 +35,7 @@\n     printWLine(data);\n     const CWE401_Memory_Leak__wchar_t_realloc_81_base& baseObject = CWE401_Memory_Leak__wchar_t_realloc_81_bad();\n     baseObject.action(data);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -4301,6 +5427,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__wchar_t_realloc_81a.cpp\n+++ b/CWE401_Memory_Leak__wchar_t_realloc_81a.cpp\n@@ -35,6 +35,7 @@\n     printWLine(data);\n     const CWE401_Memory_Leak__wchar_t_realloc_81_base& baseObject = CWE401_Memory_Leak__wchar_t_realloc_81_bad();\n     baseObject.action(data);\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -4335,6 +5470,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__wchar_t_realloc_81_bad.cpp\n+++ b/CWE401_Memory_Leak__wchar_t_realloc_81_bad.cpp\n@@ -24,8 +24,7 @@\n \n void CWE401_Memory_Leak__wchar_t_realloc_81_bad::action(wchar_t * data) const\n {\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+    free(data);\n }\n \n }\n"
     },
     {
@@ -4369,6 +5513,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__wchar_t_realloc_81a.cpp\n+++ b/CWE401_Memory_Leak__wchar_t_realloc_81a.cpp\n@@ -35,7 +35,8 @@\n     printWLine(data);\n     const CWE401_Memory_Leak__wchar_t_realloc_81_base& baseObject = CWE401_Memory_Leak__wchar_t_realloc_81_bad();\n     baseObject.action(data);\n-}\n+    free(data);\n+   }\n \n #endif /* OMITBAD */\n \n"
     },
     {
@@ -4403,6 +5556,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE401_Memory_Leak__wchar_t_realloc_81_bad.cpp\n+++ b/CWE401_Memory_Leak__wchar_t_realloc_81_bad.cpp\n@@ -24,8 +24,7 @@\n \n void CWE401_Memory_Leak__wchar_t_realloc_81_bad::action(wchar_t * data) const\n {\n-    /* POTENTIAL FLAW: No deallocation */\n-    ; /* empty statement needed for some flow variants */\n+\tfree(data);\n }\n \n }\n"
     }
    ],
@@ -4432,6 +5594,15 @@
    "winner": "--- a/CWE415_Double_Free__malloc_free_char_54a.c\n+++ b/CWE415_Double_Free__malloc_free_char_54a.c\n@@ -32,7 +32,6 @@\n     data = (char *)malloc(100*sizeof(char));\n     if (data == NULL) {exit(-1);}\n     /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-    free(data);\n     CWE415_Double_Free__malloc_free_char_54b_badSink(data);\n }\n \n",
    "winner_id": "H1\u00b7w3",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -4467,6 +5638,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_char_54a.c\n+++ b/CWE415_Double_Free__malloc_free_char_54a.c\n@@ -31,8 +31,6 @@\n     data = NULL;\n     data = (char *)malloc(100*sizeof(char));\n     if (data == NULL) {exit(-1);}\n-    /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-    free(data);\n     CWE415_Double_Free__malloc_free_char_54b_badSink(data);\n }\n \n"
     },
     {
@@ -4501,6 +5681,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_char_54a.c\n+++ b/CWE415_Double_Free__malloc_free_char_54a.c\n@@ -33,6 +33,7 @@\n     if (data == NULL) {exit(-1);}\n     /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n     free(data);\n+    data = NULL;\n     CWE415_Double_Free__malloc_free_char_54b_badSink(data);\n }\n \n--- a/CWE415_Double_Free__malloc_free_char_54e.c\n+++ b/CWE415_Double_Free__malloc_free_char_54e.c\n@@ -23,8 +23,10 @@\n \n void CWE415_Double_Free__malloc_free_char_54e_badSink(char * data)\n {\n-    /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n+    if (data != NULL) {\n+        free(data);\n+        data = NULL;\n+    }\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -4510,6 +5699,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -4544,6 +5734,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_char_54a.c\n+++ b/CWE415_Double_Free__malloc_free_char_54a.c\n@@ -32,7 +32,6 @@\n     data = (char *)malloc(100*sizeof(char));\n     if (data == NULL) {exit(-1);}\n     /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-    free(data);\n     CWE415_Double_Free__malloc_free_char_54b_badSink(data);\n }\n \n"
     }
    ],
@@ -4573,6 +5772,15 @@
    "winner": "--- a/CWE415_Double_Free__malloc_free_int64_t_13.c\n+++ b/CWE415_Double_Free__malloc_free_int64_t_13.c\n@@ -36,7 +36,6 @@\n     if(GLOBAL_CONST_FIVE==5)\n     {\n         /* POTENTIAL FLAW: Possibly freeing memory twice */\n-        free(data);\n     }\n }\n \n",
    "winner_id": "H3\u00b7w2",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -4608,6 +5816,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_int64_t_13.c\n+++ b/CWE415_Double_Free__malloc_free_int64_t_13.c\n@@ -32,6 +32,7 @@\n         if (data == NULL) {exit(-1);}\n         /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n         free(data);\n+        data = NULL;\n     }\n     if(GLOBAL_CONST_FIVE==5)\n     {\n"
     },
     {
@@ -4617,6 +5834,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -4651,6 +5869,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_int64_t_13.c\n+++ b/CWE415_Double_Free__malloc_free_int64_t_13.c\n@@ -36,7 +36,6 @@\n     if(GLOBAL_CONST_FIVE==5)\n     {\n         /* POTENTIAL FLAW: Possibly freeing memory twice */\n-        free(data);\n     }\n }\n \n"
     },
     {
@@ -4685,6 +5912,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_int64_t_13.c\n+++ b/CWE415_Double_Free__malloc_free_int64_t_13.c\n@@ -32,6 +32,7 @@\n         if (data == NULL) {exit(-1);}\n         /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n         free(data);\n+        data = NULL;\n     }\n     if(GLOBAL_CONST_FIVE==5)\n     {\n"
     }
    ],
@@ -4714,6 +5950,15 @@
    "winner": "--- a/CWE415_Double_Free__malloc_free_int_45.c\n+++ b/CWE415_Double_Free__malloc_free_int_45.c\n@@ -29,7 +29,6 @@\n {\n     int * data = CWE415_Double_Free__malloc_free_int_45_badData;\n     /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n }\n \n void CWE415_Double_Free__malloc_free_int_45_bad()\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -4749,6 +5994,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_int_45.c\n+++ b/CWE415_Double_Free__malloc_free_int_45.c\n@@ -40,7 +40,6 @@\n     data = (int *)malloc(100*sizeof(int));\n     if (data == NULL) {exit(-1);}\n     /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-    free(data);\n     CWE415_Double_Free__malloc_free_int_45_badData = data;\n     badSink();\n }\n"
     },
     {
@@ -4783,6 +6037,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_int_45.c\n+++ b/CWE415_Double_Free__malloc_free_int_45.c\n@@ -29,7 +29,6 @@\n {\n     int * data = CWE415_Double_Free__malloc_free_int_45_badData;\n     /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n }\n \n void CWE415_Double_Free__malloc_free_int_45_bad()\n"
     },
     {
@@ -4792,6 +6055,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -4826,6 +6090,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_int_45.c\n+++ b/CWE415_Double_Free__malloc_free_int_45.c\n@@ -40,7 +40,6 @@\n     data = (int *)malloc(100*sizeof(int));\n     if (data == NULL) {exit(-1);}\n     /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-    free(data);\n     CWE415_Double_Free__malloc_free_int_45_badData = data;\n     badSink();\n }\n"
     }
    ],
@@ -4855,6 +6128,15 @@
    "winner": "--- a/CWE415_Double_Free__malloc_free_long_02.c\n+++ b/CWE415_Double_Free__malloc_free_long_02.c\n@@ -36,7 +36,6 @@\n     if(1)\n     {\n         /* POTENTIAL FLAW: Possibly freeing memory twice */\n-        free(data);\n     }\n }\n \n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -4865,6 +6147,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -4899,6 +6182,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_long_02.c\n+++ b/CWE415_Double_Free__malloc_free_long_02.c\n@@ -36,7 +36,6 @@\n     if(1)\n     {\n         /* POTENTIAL FLAW: Possibly freeing memory twice */\n-        free(data);\n     }\n }\n \n"
     },
     {
@@ -4933,6 +6225,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_long_02.c\n+++ b/CWE415_Double_Free__malloc_free_long_02.c\n@@ -32,6 +32,7 @@\n         if (data == NULL) {exit(-1);}\n         /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n         free(data);\n+        data = NULL;\n     }\n     if(1)\n     {\n"
     },
     {
@@ -4967,6 +6268,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_long_02.c\n+++ b/CWE415_Double_Free__malloc_free_long_02.c\n@@ -32,6 +32,7 @@\n         if (data == NULL) {exit(-1);}\n         /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n         free(data);\n+        data = NULL;\n     }\n     if(1)\n     {\n"
     }
    ],
@@ -4996,6 +6306,15 @@
    "winner": "--- a/CWE415_Double_Free__malloc_free_struct_72b.cpp\n+++ b/CWE415_Double_Free__malloc_free_struct_72b.cpp\n@@ -29,10 +29,6 @@\n \n void badSink(vector<twoIntsStruct *> dataVector)\n {\n-    /* copy data out of dataVector */\n-    twoIntsStruct * data = dataVector[2];\n-    /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -5031,6 +6350,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_struct_72a.cpp\n+++ b/CWE415_Double_Free__malloc_free_struct_72a.cpp\n@@ -38,8 +38,6 @@\n     data = NULL;\n     data = (twoIntsStruct *)malloc(100*sizeof(twoIntsStruct));\n     if (data == NULL) {exit(-1);}\n-    /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-    free(data);\n     /* Put data in a vector */\n     dataVector.insert(dataVector.end(), 1, data);\n     dataVector.insert(dataVector.end(), 1, data);\n"
     },
     {
@@ -5065,6 +6393,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_struct_72b.cpp\n+++ b/CWE415_Double_Free__malloc_free_struct_72b.cpp\n@@ -29,10 +29,6 @@\n \n void badSink(vector<twoIntsStruct *> dataVector)\n {\n-    /* copy data out of dataVector */\n-    twoIntsStruct * data = dataVector[2];\n-    /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -5099,6 +6436,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_struct_72a.cpp\n+++ b/CWE415_Double_Free__malloc_free_struct_72a.cpp\n@@ -38,8 +38,6 @@\n     data = NULL;\n     data = (twoIntsStruct *)malloc(100*sizeof(twoIntsStruct));\n     if (data == NULL) {exit(-1);}\n-    /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-    free(data);\n     /* Put data in a vector */\n     dataVector.insert(dataVector.end(), 1, data);\n     dataVector.insert(dataVector.end(), 1, data);\n"
     },
     {
@@ -5133,6 +6479,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_struct_72b.cpp\n+++ b/CWE415_Double_Free__malloc_free_struct_72b.cpp\n@@ -29,10 +29,6 @@\n \n void badSink(vector<twoIntsStruct *> dataVector)\n {\n-    /* copy data out of dataVector */\n-    twoIntsStruct * data = dataVector[2];\n-    /* POTENTIAL FLAW: Possibly freeing memory twice */\n-    free(data);\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -5162,6 +6517,15 @@
    "winner": "--- a/CWE415_Double_Free__malloc_free_wchar_t_32.c\n+++ b/CWE415_Double_Free__malloc_free_wchar_t_32.c\n@@ -34,7 +34,6 @@\n         if (data == NULL) {exit(-1);}\n         /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n         free(data);\n-        *dataPtr1 = data;\n     }\n     {\n         wchar_t * data = *dataPtr2;\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -5197,6 +6561,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_wchar_t_32.c\n+++ b/CWE415_Double_Free__malloc_free_wchar_t_32.c\n@@ -32,8 +32,6 @@\n         wchar_t * data = *dataPtr1;\n         data = (wchar_t *)malloc(100*sizeof(wchar_t));\n         if (data == NULL) {exit(-1);}\n-        /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-        free(data);\n         *dataPtr1 = data;\n     }\n     {\n"
     },
     {
@@ -5231,6 +6604,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_wchar_t_32.c\n+++ b/CWE415_Double_Free__malloc_free_wchar_t_32.c\n@@ -34,7 +34,6 @@\n         if (data == NULL) {exit(-1);}\n         /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n         free(data);\n-        *dataPtr1 = data;\n     }\n     {\n         wchar_t * data = *dataPtr2;\n"
     },
     {
@@ -5265,6 +6647,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_wchar_t_32.c\n+++ b/CWE415_Double_Free__malloc_free_wchar_t_32.c\n@@ -34,12 +34,13 @@\n         if (data == NULL) {exit(-1);}\n         /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n         free(data);\n-        *dataPtr1 = data;\n+        *dataPtr1 = NULL;\n     }\n     {\n         wchar_t * data = *dataPtr2;\n-        /* POTENTIAL FLAW: Possibly freeing memory twice */\n-        free(data);\n+        if (data != NULL) {\n+            free(data);\n+        }\n     }\n }\n \n"
     },
     {
@@ -5299,6 +6690,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__malloc_free_wchar_t_32.c\n+++ b/CWE415_Double_Free__malloc_free_wchar_t_32.c\n@@ -33,7 +33,6 @@\n         data = (wchar_t *)malloc(100*sizeof(wchar_t));\n         if (data == NULL) {exit(-1);}\n         /* POTENTIAL FLAW: Free data in the source - the bad sink frees data as well */\n-        free(data);\n         *dataPtr1 = data;\n     }\n     {\n"
     }
    ],
@@ -5328,6 +6728,15 @@
    "winner": "--- a/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp\n+++ b/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp\n@@ -37,8 +37,6 @@\n     /* Initialize data */\n     data = NULL;\n     data = new int64_t[100];\n-    /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     badData = data;\n     badSink();\n }\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -5363,6 +6772,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp\n+++ b/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp\n@@ -37,8 +37,6 @@\n     /* Initialize data */\n     data = NULL;\n     data = new int64_t[100];\n-    /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     badData = data;\n     badSink();\n }\n"
     },
     {
@@ -5397,6 +6815,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp\n+++ b/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp\n@@ -39,7 +39,7 @@\n     data = new int64_t[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n     delete [] data;\n-    badData = data;\n+    badData = NULL;\n     badSink();\n }\n \n--- a/CWE415_Double_Free__new_delete_array_int64_t_68b.cpp\n+++ b/CWE415_Double_Free__new_delete_array_int64_t_68b.cpp\n@@ -31,8 +31,9 @@\n void badSink()\n {\n     int64_t * data = badData;\n-    /* POTENTIAL FLAW: Possibly deleting memory twice */\n-    delete [] data;\n+    if (data != NULL) {\n+        delete [] data;\n+    }\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -5431,6 +6858,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp\n+++ b/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp\n@@ -39,7 +39,7 @@\n     data = new int64_t[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n     delete [] data;\n-    badData = data;\n+    badData = nullptr;\n     badSink();\n }\n \n--- a/CWE415_Double_Free__new_delete_array_int64_t_68b.cpp\n+++ b/CWE415_Double_Free__new_delete_array_int64_t_68b.cpp\n@@ -31,8 +31,10 @@\n void badSink()\n {\n     int64_t * data = badData;\n-    /* POTENTIAL FLAW: Possibly deleting memory twice */\n-    delete [] data;\n+    if (data != nullptr) {\n+        delete [] data;\n+        badData = nullptr;\n+    }\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -5465,6 +6901,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp\n+++ b/CWE415_Double_Free__new_delete_array_int64_t_68a.cpp\n@@ -37,8 +37,7 @@\n     /* Initialize data */\n     data = NULL;\n     data = new int64_t[100];\n-    /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n+\n     badData = data;\n     badSink();\n }\n"
     }
    ],
@@ -5494,6 +6939,15 @@
    "winner": "--- a/CWE415_Double_Free__new_delete_array_int_41.cpp\n+++ b/CWE415_Double_Free__new_delete_array_int_41.cpp\n@@ -37,7 +37,6 @@\n     data = NULL;\n     data = new int[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     badSink(data);\n }\n \n",
    "winner_id": "H1\u00b7w2",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -5529,6 +6983,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_int_41.cpp\n+++ b/CWE415_Double_Free__new_delete_array_int_41.cpp\n@@ -36,8 +36,6 @@\n     /* Initialize data */\n     data = NULL;\n     data = new int[100];\n-    /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     badSink(data);\n }\n \n"
     },
     {
@@ -5563,6 +7026,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_int_41.cpp\n+++ b/CWE415_Double_Free__new_delete_array_int_41.cpp\n@@ -36,8 +36,6 @@\n     /* Initialize data */\n     data = NULL;\n     data = new int[100];\n-    /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     badSink(data);\n }\n \n"
     },
     {
@@ -5597,6 +7069,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_int_41.cpp\n+++ b/CWE415_Double_Free__new_delete_array_int_41.cpp\n@@ -37,7 +37,6 @@\n     data = NULL;\n     data = new int[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     badSink(data);\n }\n \n"
     },
     {
@@ -5631,6 +7112,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_int_41.cpp\n+++ b/CWE415_Double_Free__new_delete_array_int_41.cpp\n@@ -37,7 +37,6 @@\n     data = NULL;\n     data = new int[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     badSink(data);\n }\n \n"
     }
    ],
@@ -5660,6 +7150,15 @@
    "winner": "--- a/CWE415_Double_Free__new_delete_array_long_42.cpp\n+++ b/CWE415_Double_Free__new_delete_array_long_42.cpp\n@@ -28,7 +28,6 @@\n {\n     data = new long[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     return data;\n }\n \n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -5695,6 +7194,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_long_42.cpp\n+++ b/CWE415_Double_Free__new_delete_array_long_42.cpp\n@@ -28,7 +28,6 @@\n {\n     data = new long[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     return data;\n }\n \n"
     },
     {
@@ -5729,6 +7237,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_long_42.cpp\n+++ b/CWE415_Double_Free__new_delete_array_long_42.cpp\n@@ -28,7 +28,6 @@\n {\n     data = new long[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     return data;\n }\n \n"
     },
     {
@@ -5763,6 +7280,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_long_42.cpp\n+++ b/CWE415_Double_Free__new_delete_array_long_42.cpp\n@@ -28,7 +28,6 @@\n {\n     data = new long[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     return data;\n }\n \n"
     },
     {
@@ -5797,6 +7323,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_long_42.cpp\n+++ b/CWE415_Double_Free__new_delete_array_long_42.cpp\n@@ -28,7 +28,6 @@\n {\n     data = new long[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     return data;\n }\n \n"
     }
    ],
@@ -5826,6 +7361,15 @@
    "winner": "--- a/CWE415_Double_Free__new_delete_array_struct_43.cpp\n+++ b/CWE415_Double_Free__new_delete_array_struct_43.cpp\n@@ -37,8 +37,6 @@\n     /* Initialize data */\n     data = NULL;\n     badSource(data);\n-    /* POTENTIAL FLAW: Possibly deleting memory twice */\n-    delete [] data;\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -5861,6 +7405,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_struct_43.cpp\n+++ b/CWE415_Double_Free__new_delete_array_struct_43.cpp\n@@ -27,8 +27,6 @@\n void badSource(twoIntsStruct * &data)\n {\n     data = new twoIntsStruct[100];\n-    /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n }\n \n void bad()\n"
     },
     {
@@ -5895,6 +7448,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_struct_43.cpp\n+++ b/CWE415_Double_Free__new_delete_array_struct_43.cpp\n@@ -37,8 +37,6 @@\n     /* Initialize data */\n     data = NULL;\n     badSource(data);\n-    /* POTENTIAL FLAW: Possibly deleting memory twice */\n-    delete [] data;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -5929,6 +7491,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_struct_43.cpp\n+++ b/CWE415_Double_Free__new_delete_array_struct_43.cpp\n@@ -29,6 +29,7 @@\n     data = new twoIntsStruct[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n     delete [] data;\n+    data = nullptr;\n }\n \n void bad()\n@@ -38,7 +39,10 @@\n     data = NULL;\n     badSource(data);\n     /* POTENTIAL FLAW: Possibly deleting memory twice */\n-    delete [] data;\n+    if (data != nullptr) {\n+        delete [] data;\n+        data = nullptr;\n+    }\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -5938,6 +7509,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
@@ -5967,6 +7539,15 @@
    "winner": "--- a/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp\n+++ b/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp\n@@ -35,8 +35,6 @@\n     {\n         wchar_t * dataCopy = data;\n         wchar_t * data = dataCopy;\n-        /* POTENTIAL FLAW: Possibly deleting memory twice */\n-        delete [] data;\n     }\n }\n \n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -6002,6 +7583,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp\n+++ b/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp\n@@ -30,12 +30,9 @@\n     /* Initialize data */\n     data = NULL;\n     data = new wchar_t[100];\n-    /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     {\n         wchar_t * dataCopy = data;\n         wchar_t * data = dataCopy;\n-        /* POTENTIAL FLAW: Possibly deleting memory twice */\n         delete [] data;\n     }\n }\n"
     },
     {
@@ -6036,6 +7626,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp\n+++ b/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp\n@@ -35,8 +35,6 @@\n     {\n         wchar_t * dataCopy = data;\n         wchar_t * data = dataCopy;\n-        /* POTENTIAL FLAW: Possibly deleting memory twice */\n-        delete [] data;\n     }\n }\n \n"
     },
     {
@@ -6070,6 +7669,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp\n+++ b/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp\n@@ -32,6 +32,7 @@\n     data = new wchar_t[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n     delete [] data;\n+    data = nullptr;\n     {\n         wchar_t * dataCopy = data;\n         wchar_t * data = dataCopy;\n"
     },
     {
@@ -6104,6 +7712,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp\n+++ b/CWE415_Double_Free__new_delete_array_wchar_t_31.cpp\n@@ -31,7 +31,6 @@\n     data = NULL;\n     data = new wchar_t[100];\n     /* POTENTIAL FLAW: delete the array data in the source - the bad sink deletes the array data as well */\n-    delete [] data;\n     {\n         wchar_t * dataCopy = data;\n         wchar_t * data = dataCopy;\n"
     }
    ],
@@ -6133,6 +7750,15 @@
    "winner": "--- a/CWE415_Double_Free__new_delete_char_52a.cpp\n+++ b/CWE415_Double_Free__new_delete_char_52a.cpp\n@@ -33,8 +33,6 @@\n     /* Initialize data */\n     data = NULL;\n     data = new char;\n-    /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n-    delete data;\n     badSink_b(data);\n }\n \n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -6168,6 +7794,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_char_52a.cpp\n+++ b/CWE415_Double_Free__new_delete_char_52a.cpp\n@@ -33,8 +33,6 @@\n     /* Initialize data */\n     data = NULL;\n     data = new char;\n-    /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n-    delete data;\n     badSink_b(data);\n }\n \n"
     },
     {
@@ -6202,6 +7837,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_char_52a.cpp\n+++ b/CWE415_Double_Free__new_delete_char_52a.cpp\n@@ -35,6 +35,7 @@\n     data = new char;\n     /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n     delete data;\n+    data = nullptr;\n     badSink_b(data);\n }\n \n--- a/CWE415_Double_Free__new_delete_char_52c.cpp\n+++ b/CWE415_Double_Free__new_delete_char_52c.cpp\n@@ -27,7 +27,9 @@\n void badSink_c(char * data)\n {\n     /* POTENTIAL FLAW: Possibly deleting memory twice */\n-    delete data;\n+    if (data != NULL) {\n+        delete data;\n+    }\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -6236,6 +7880,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_char_52c.cpp\n+++ b/CWE415_Double_Free__new_delete_char_52c.cpp\n@@ -26,8 +26,7 @@\n \n void badSink_c(char * data)\n {\n-    /* POTENTIAL FLAW: Possibly deleting memory twice */\n-    delete data;\n+    // removed delete to prevent double-free; sink is now a good sink\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -6270,6 +7923,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_char_52a.cpp\n+++ b/CWE415_Double_Free__new_delete_char_52a.cpp\n@@ -35,6 +35,7 @@\n     data = new char;\n     /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n     delete data;\n+    data = nullptr;\n     badSink_b(data);\n }\n \n--- a/CWE415_Double_Free__new_delete_char_52b.cpp\n+++ b/CWE415_Double_Free__new_delete_char_52b.cpp\n@@ -29,7 +29,9 @@\n \n void badSink_b(char * data)\n {\n-    badSink_c(data);\n+    if (data != nullptr) {\n+        badSink_c(data);\n+    }\n }\n \n #endif /* OMITBAD */\n--- a/CWE415_Double_Free__new_delete_char_52c.cpp\n+++ b/CWE415_Double_Free__new_delete_char_52c.cpp\n@@ -26,8 +26,9 @@\n \n void badSink_c(char * data)\n {\n-    /* POTENTIAL FLAW: Possibly deleting memory twice */\n-    delete data;\n+    if (data != nullptr) {\n+        delete data;\n+    }\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -6299,6 +7961,15 @@
    "winner": "--- a/CWE415_Double_Free__new_delete_int64_t_81_bad.cpp\n+++ b/CWE415_Double_Free__new_delete_int64_t_81_bad.cpp\n@@ -25,7 +25,6 @@\n void CWE415_Double_Free__new_delete_int64_t_81_bad::action(int64_t * data) const\n {\n     /* POTENTIAL FLAW: Possibly deleting memory twice */\n-    delete data;\n }\n \n }\n",
    "winner_id": "H4\u00b7w3",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -6334,6 +8005,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_int64_t_81a.cpp\n+++ b/CWE415_Double_Free__new_delete_int64_t_81a.cpp\n@@ -29,8 +29,6 @@\n     /* Initialize data */\n     data = NULL;\n     data = new int64_t;\n-    /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n-    delete data;\n     const CWE415_Double_Free__new_delete_int64_t_81_base& o = CWE415_Double_Free__new_delete_int64_t_81_bad();\n     o.action(data);\n }\n"
     },
     {
@@ -6343,6 +8023,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -6377,6 +8058,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_int64_t_81_bad.cpp\n+++ b/CWE415_Double_Free__new_delete_int64_t_81_bad.cpp\n@@ -24,8 +24,9 @@\n \n void CWE415_Double_Free__new_delete_int64_t_81_bad::action(int64_t * data) const\n {\n-    /* POTENTIAL FLAW: Possibly deleting memory twice */\n-    delete data;\n+    if (data != nullptr) {\n+        delete data;\n+    }\n }\n \n }\n--- a/CWE415_Double_Free__new_delete_int64_t_81a.cpp\n+++ b/CWE415_Double_Free__new_delete_int64_t_81a.cpp\n@@ -31,6 +31,7 @@\n     data = new int64_t;\n     /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n     delete data;\n+    data = nullptr;\n     const CWE415_Double_Free__new_delete_int64_t_81_base& o = CWE415_Double_Free__new_delete_int64_t_81_bad();\n     o.action(data);\n }\n"
     },
     {
@@ -6411,6 +8101,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_int64_t_81_bad.cpp\n+++ b/CWE415_Double_Free__new_delete_int64_t_81_bad.cpp\n@@ -25,7 +25,6 @@\n void CWE415_Double_Free__new_delete_int64_t_81_bad::action(int64_t * data) const\n {\n     /* POTENTIAL FLAW: Possibly deleting memory twice */\n-    delete data;\n }\n \n }\n"
     }
    ],
@@ -6440,6 +8139,15 @@
    "winner": "--- a/CWE415_Double_Free__new_delete_long_67a.cpp\n+++ b/CWE415_Double_Free__new_delete_long_67a.cpp\n@@ -40,7 +40,6 @@\n     data = NULL;\n     data = new long;\n     /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n-    delete data;\n     myStruct.structFirst = data;\n     badSink(myStruct);\n }\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -6475,6 +8183,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_long_67a.cpp\n+++ b/CWE415_Double_Free__new_delete_long_67a.cpp\n@@ -40,7 +40,6 @@\n     data = NULL;\n     data = new long;\n     /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n-    delete data;\n     myStruct.structFirst = data;\n     badSink(myStruct);\n }\n"
     },
     {
@@ -6509,6 +8226,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_long_67a.cpp\n+++ b/CWE415_Double_Free__new_delete_long_67a.cpp\n@@ -41,6 +41,7 @@\n     data = new long;\n     /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n     delete data;\n+    data = nullptr;\n     myStruct.structFirst = data;\n     badSink(myStruct);\n }\n--- a/CWE415_Double_Free__new_delete_long_67b.cpp\n+++ b/CWE415_Double_Free__new_delete_long_67b.cpp\n@@ -32,8 +32,10 @@\n void badSink(structType myStruct)\n {\n     long * data = myStruct.structFirst;\n-    /* POTENTIAL FLAW: Possibly deleting memory twice */\n-    delete data;\n+    if (data != nullptr)\n+    {\n+        delete data;\n+    }\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -6518,6 +8244,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -6552,6 +8279,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_long_67a.cpp\n+++ b/CWE415_Double_Free__new_delete_long_67a.cpp\n@@ -39,8 +39,6 @@\n     /* Initialize data */\n     data = NULL;\n     data = new long;\n-    /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n-    delete data;\n     myStruct.structFirst = data;\n     badSink(myStruct);\n }\n"
     }
    ],
@@ -6581,6 +8317,15 @@
    "winner": "--- a/CWE415_Double_Free__new_delete_struct_05.cpp\n+++ b/CWE415_Double_Free__new_delete_struct_05.cpp\n@@ -39,7 +39,6 @@\n     {\n         data = new twoIntsStruct;\n         /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n-        delete data;\n     }\n     if(staticTrue)\n     {\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -6616,6 +8361,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_struct_05.cpp\n+++ b/CWE415_Double_Free__new_delete_struct_05.cpp\n@@ -39,7 +39,6 @@\n     {\n         data = new twoIntsStruct;\n         /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n-        delete data;\n     }\n     if(staticTrue)\n     {\n"
     },
     {
@@ -6650,6 +8404,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_struct_05.cpp\n+++ b/CWE415_Double_Free__new_delete_struct_05.cpp\n@@ -40,12 +40,13 @@\n         data = new twoIntsStruct;\n         /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n         delete data;\n-    }\n-    if(staticTrue)\n-    {\n+        data = nullptr;\n+}\n+if(staticTrue)\n+{\n         /* POTENTIAL FLAW: Possibly deleting memory twice */\n         delete data;\n-    }\n+}\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -6684,6 +8447,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_struct_05.cpp\n+++ b/CWE415_Double_Free__new_delete_struct_05.cpp\n@@ -34,16 +34,15 @@\n {\n     twoIntsStruct * data;\n     /* Initialize data */\n-    data = NULL;\n+    bool freed = false;\n     if(staticTrue)\n     {\n         data = new twoIntsStruct;\n-        /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n         delete data;\n+        freed = true;\n     }\n-    if(staticTrue)\n+    if(staticTrue && !freed)\n     {\n-        /* POTENTIAL FLAW: Possibly deleting memory twice */\n         delete data;\n     }\n }\n"
     },
     {
@@ -6718,6 +8490,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE415_Double_Free__new_delete_struct_05.cpp\n+++ b/CWE415_Double_Free__new_delete_struct_05.cpp\n@@ -38,14 +38,12 @@\n     if(staticTrue)\n     {\n         data = new twoIntsStruct;\n-        /* POTENTIAL FLAW: delete data in the source - the bad sink deletes data as well */\n-        delete data;\n     }\n     if(staticTrue)\n     {\n-        /* POTENTIAL FLAW: Possibly deleting memory twice */\n-        delete data;\n+        /* ... */\n     }\n+    delete data;\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -6747,6 +8528,15 @@
    "winner": "--- a/CWE416_Use_After_Free__malloc_free_char_03.c\n+++ b/CWE416_Use_After_Free__malloc_free_char_03.c\n@@ -33,12 +33,12 @@\n         memset(data, 'A', 100-1);\n         data[100-1] = '\\0';\n         /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n-        free(data);\n     }\n     if(5==5)\n     {\n         /* POTENTIAL FLAW: Use of data that may have been freed */\n         printLine(data);\n+        free(data);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n }\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -6782,6 +8572,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__malloc_free_char_03.c\n+++ b/CWE416_Use_After_Free__malloc_free_char_03.c\n@@ -33,12 +33,12 @@\n         memset(data, 'A', 100-1);\n         data[100-1] = '\\0';\n         /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n-        free(data);\n     }\n     if(5==5)\n     {\n         /* POTENTIAL FLAW: Use of data that may have been freed */\n         printLine(data);\n+        free(data);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n }\n"
     },
     {
@@ -6791,6 +8590,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -6825,6 +8625,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__malloc_free_char_03.c\n+++ b/CWE416_Use_After_Free__malloc_free_char_03.c\n@@ -33,7 +33,9 @@\n         memset(data, 'A', 100-1);\n         data[100-1] = '\\0';\n         /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n-        free(data);\n+        // free(data) moved after printLine\n+    printLine(data);\n+    free(data);\n     }\n     if(5==5)\n     {\n"
     },
     {
@@ -6859,6 +8660,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__malloc_free_char_03.c\n+++ b/CWE416_Use_After_Free__malloc_free_char_03.c\n@@ -33,13 +33,11 @@\n         memset(data, 'A', 100-1);\n         data[100-1] = '\\0';\n         /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n-        free(data);\n     }\n     if(5==5)\n     {\n-        /* POTENTIAL FLAW: Use of data that may have been freed */\n         printLine(data);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n+        free(data);\n     }\n }\n \n"
     }
    ],
@@ -6888,6 +8698,15 @@
    "winner": "--- a/CWE416_Use_After_Free__malloc_free_int64_t_14.c\n+++ b/CWE416_Use_After_Free__malloc_free_int64_t_14.c\n@@ -38,7 +38,6 @@\n             }\n         }\n         /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n-        free(data);\n     }\n     if(globalFive==5)\n     {\n@@ -46,6 +45,7 @@\n         printLongLongLine(data[0]);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n+    free(data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -6898,6 +8717,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -6932,6 +8752,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__malloc_free_int64_t_14.c\n+++ b/CWE416_Use_After_Free__malloc_free_int64_t_14.c\n@@ -38,7 +38,6 @@\n             }\n         }\n         /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n-        free(data);\n     }\n     if(globalFive==5)\n     {\n@@ -46,6 +45,7 @@\n         printLongLongLine(data[0]);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n+    free(data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -6966,6 +8795,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__malloc_free_int64_t_14.c\n+++ b/CWE416_Use_After_Free__malloc_free_int64_t_14.c\n@@ -37,14 +37,8 @@\n                 data[i] = 5LL;\n             }\n         }\n-        /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n+        printLongLongLine(data[0]);\n         free(data);\n-    }\n-    if(globalFive==5)\n-    {\n-        /* POTENTIAL FLAW: Use of data that may have been freed */\n-        printLongLongLine(data[0]);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n }\n \n"
     },
     {
@@ -6975,6 +8813,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
@@ -7004,6 +8843,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -7014,6 +8854,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -7023,6 +8864,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -7032,6 +8874,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -7050,6 +8893,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__malloc_free_int_15.c\n+++ b/CWE416_Use_After_Free__malloc_free_int_15.c\n@@ -49,9 +49,16 @@\n     switch(7)\n     {\n     case 7:\n-        /* POTENTIAL FLAW: Use of data that may have been freed */\n+        data = (int *)malloc(100*sizeof(int));\n+        if (data == NULL) {exit(-1);}\n+        {\n+            size_t i;\n+            for(i = 0; i < 100; i++)\n+            {\n+                data[i] = 5;\n+            }\n+        }\n         printIntLine(data[0]);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n         break;\n     default:\n         /* INCIDENTAL: CWE 561 Dead Code, the code below will never run */\n"
     }
    ],
@@ -7079,6 +8923,15 @@
    "winner": "--- a/CWE416_Use_After_Free__malloc_free_long_08.c\n+++ b/CWE416_Use_After_Free__malloc_free_long_08.c\n@@ -39,6 +39,7 @@\n     long * data;\n     /* Initialize data */\n     data = NULL;\n+    long saved = 0;\n     if(staticReturnsTrue())\n     {\n         data = (long *)malloc(100*sizeof(long));\n@@ -51,12 +52,13 @@\n             }\n         }\n         /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n+        saved = data[0];\n         free(data);\n     }\n     if(staticReturnsTrue())\n     {\n         /* POTENTIAL FLAW: Use of data that may have been freed */\n-        printLongLine(data[0]);\n+        printLongLine(saved);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n }\n",
    "winner_id": "H2\u00b7w3",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -7089,6 +8942,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -7098,6 +8952,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__malloc_free_long_08.c\n+++ b/CWE416_Use_After_Free__malloc_free_long_08.c\n@@ -51,12 +51,13 @@\n             }\n         }\n         /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n+        long saved = data[0];\n         free(data);\n     }\n     if(staticReturnsTrue())\n     {\n         /* POTENTIAL FLAW: Use of data that may have been freed */\n-        printLongLine(data[0]);\n+        printLongLine(saved);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n }\n"
     },
     {
@@ -7107,6 +8962,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -7141,6 +8997,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__malloc_free_long_08.c\n+++ b/CWE416_Use_After_Free__malloc_free_long_08.c\n@@ -39,6 +39,7 @@\n     long * data;\n     /* Initialize data */\n     data = NULL;\n+    long saved = 0;\n     if(staticReturnsTrue())\n     {\n         data = (long *)malloc(100*sizeof(long));\n@@ -51,12 +52,13 @@\n             }\n         }\n         /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n+        saved = data[0];\n         free(data);\n     }\n     if(staticReturnsTrue())\n     {\n         /* POTENTIAL FLAW: Use of data that may have been freed */\n-        printLongLine(data[0]);\n+        printLongLine(saved);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n }\n"
     }
    ],
@@ -7170,6 +9035,15 @@
    "winner": "--- a/CWE416_Use_After_Free__malloc_free_struct_07.c\n+++ b/CWE416_Use_After_Free__malloc_free_struct_07.c\n@@ -43,14 +43,8 @@\n                 data[i].intTwo = 2;\n             }\n         }\n-        /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n+        printStructLine(&data[0]);\n         free(data);\n-    }\n-    if(staticFive==5)\n-    {\n-        /* POTENTIAL FLAW: Use of data that may have been freed */\n-        printStructLine(&data[0]);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n }\n \n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -7180,6 +9054,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__malloc_free_struct_07.c\n+++ b/CWE416_Use_After_Free__malloc_free_struct_07.c\n@@ -44,12 +44,13 @@\n             }\n         }\n         /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n-        free(data);\n     }\n     if(staticFive==5)\n     {\n         /* POTENTIAL FLAW: Use of data that may have been freed */\n         printStructLine(&data[0]);\n+    }\n+    free(data);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n }\n"
     },
     {
@@ -7214,6 +9089,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__malloc_free_struct_07.c\n+++ b/CWE416_Use_After_Free__malloc_free_struct_07.c\n@@ -43,14 +43,8 @@\n                 data[i].intTwo = 2;\n             }\n         }\n-        /* POTENTIAL FLAW: Free data in the source - the bad sink attempts to use data */\n+        printStructLine(&data[0]);\n         free(data);\n-    }\n-    if(staticFive==5)\n-    {\n-        /* POTENTIAL FLAW: Use of data that may have been freed */\n-        printStructLine(&data[0]);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not freed */\n     }\n }\n \n"
     },
     {
@@ -7223,6 +9107,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -7232,6 +9117,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
@@ -7258,6 +9144,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [],
@@ -7287,6 +9174,15 @@
    "winner": "--- a/CWE416_Use_After_Free__new_delete_array_class_11.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_class_11.cpp\n@@ -39,14 +39,16 @@\n                 data[i].intTwo = 2;\n             }\n         }\n-        /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-        delete [] data;\n     }\n     if(globalReturnsTrue())\n     {\n         /* POTENTIAL FLAW: Use of data that may have been deleted */\n         printIntLine(data[0].intOne);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n+    }\n+    if (data != NULL) {\n+        delete [] data;\n+        data = NULL;\n     }\n }\n \n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -7322,6 +9218,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_array_class_11.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_class_11.cpp\n@@ -41,11 +41,13 @@\n         }\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n         delete [] data;\n-    }\n-    if(globalReturnsTrue())\n-    {\n-        /* POTENTIAL FLAW: Use of data that may have been deleted */\n-        printIntLine(data[0].intOne);\n+        data = nullptr;\n+    }\n+    if(globalReturnsTrue())\n+    {\n+        if (data != nullptr) {\n+            printIntLine(data[0].intOne);\n+        }\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n     }\n }\n"
     },
     {
@@ -7356,6 +9261,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_array_class_11.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_class_11.cpp\n@@ -39,14 +39,16 @@\n                 data[i].intTwo = 2;\n             }\n         }\n-        /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-        delete [] data;\n     }\n     if(globalReturnsTrue())\n     {\n         /* POTENTIAL FLAW: Use of data that may have been deleted */\n         printIntLine(data[0].intOne);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n+    }\n+    if (data != NULL) {\n+        delete [] data;\n+        data = NULL;\n     }\n }\n \n"
     },
     {
@@ -7390,6 +9304,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_array_class_11.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_class_11.cpp\n@@ -41,11 +41,14 @@\n         }\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n         delete [] data;\n-    }\n-    if(globalReturnsTrue())\n-    {\n-        /* POTENTIAL FLAW: Use of data that may have been deleted */\n-        printIntLine(data[0].intOne);\n+        data = NULL;\n+    }\n+    if(globalReturnsTrue())\n+    {\n+        if (data != NULL)\n+        {\n+            printIntLine(data[0].intOne);\n+        }\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n     }\n }\n"
     },
     {
@@ -7424,6 +9347,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_array_class_11.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_class_11.cpp\n@@ -41,12 +41,14 @@\n         }\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n         delete [] data;\n-    }\n-    if(globalReturnsTrue())\n-    {\n-        /* POTENTIAL FLAW: Use of data that may have been deleted */\n-        printIntLine(data[0].intOne);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n+        data = nullptr;\n+    }\n+    if(globalReturnsTrue())\n+    {\n+        if(data != nullptr)\n+        {\n+            printIntLine(data[0].intOne);\n+        }\n     }\n }\n \n"
     }
    ],
@@ -7453,6 +9385,15 @@
    "winner": "--- a/CWE416_Use_After_Free__new_delete_array_int_13.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_int_13.cpp\n@@ -40,11 +40,15 @@\n         }\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n         delete [] data;\n+        data = nullptr;\n     }\n     if(GLOBAL_CONST_FIVE==5)\n     {\n         /* POTENTIAL FLAW: Use of data that may have been deleted */\n-        printIntLine(data[0]);\n+        if (data != nullptr)\n+{\n+    printIntLine(data[0]);\n+}\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n     }\n }\n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -7488,6 +9429,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_array_int_13.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_int_13.cpp\n@@ -38,14 +38,12 @@\n                 data[i] = 5;\n             }\n         }\n-        /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n+        printIntLine(data[0]);  /* use before delete */\n         delete [] data;\n     }\n     if(GLOBAL_CONST_FIVE==5)\n     {\n-        /* POTENTIAL FLAW: Use of data that may have been deleted */\n-        printIntLine(data[0]);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n+        /* data already used and freed; no further use */\n     }\n }\n \n"
     },
     {
@@ -7522,6 +9472,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_array_int_13.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_int_13.cpp\n@@ -40,11 +40,15 @@\n         }\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n         delete [] data;\n+        data = nullptr;\n     }\n     if(GLOBAL_CONST_FIVE==5)\n     {\n         /* POTENTIAL FLAW: Use of data that may have been deleted */\n-        printIntLine(data[0]);\n+        if (data != nullptr)\n+{\n+    printIntLine(data[0]);\n+}\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n     }\n }\n"
     },
     {
@@ -7556,6 +9515,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__new_delete_array_int_13.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_int_13.cpp\n@@ -39,8 +39,7 @@\n             }\n         }\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-        delete [] data;\n-    }\n+        }\n     if(GLOBAL_CONST_FIVE==5)\n     {\n         /* POTENTIAL FLAW: Use of data that may have been deleted */\n"
     },
     {
@@ -7590,6 +9550,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__new_delete_array_int_13.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_int_13.cpp\n@@ -43,6 +43,8 @@\n     }\n     if(GLOBAL_CONST_FIVE==5)\n     {\n+        data = new int;\n+        data[0] = 5;\n         /* POTENTIAL FLAW: Use of data that may have been deleted */\n         printIntLine(data[0]);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n"
     }
    ],
@@ -7619,6 +9580,15 @@
    "winner": "--- a/CWE416_Use_After_Free__new_delete_array_struct_01.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_struct_01.cpp\n@@ -39,9 +39,9 @@\n         }\n     }\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n+    twoIntsStruct first = data[0];\n     delete [] data;\n-    /* POTENTIAL FLAW: Use of data that may have been deleted */\n-    printStructLine(&data[0]);\n+    printStructLine(&first);\n     /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n }\n \n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -7654,6 +9624,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_array_struct_01.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_struct_01.cpp\n@@ -38,10 +38,10 @@\n             data[i].intTwo = 2;\n         }\n     }\n+    /* POTENTIAL FLAW: Use of data that may have been deleted */\n+    printStructLine(&data[0]);\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n     delete [] data;\n-    /* POTENTIAL FLAW: Use of data that may have been deleted */\n-    printStructLine(&data[0]);\n     /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n }\n \n"
     },
     {
@@ -7688,6 +9667,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_array_struct_01.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_struct_01.cpp\n@@ -39,9 +39,9 @@\n         }\n     }\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n+    twoIntsStruct first = data[0];\n     delete [] data;\n-    /* POTENTIAL FLAW: Use of data that may have been deleted */\n-    printStructLine(&data[0]);\n+    printStructLine(&first);\n     /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n }\n \n"
     },
     {
@@ -7722,6 +9710,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_array_struct_01.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_struct_01.cpp\n@@ -40,8 +40,10 @@\n     }\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n     delete [] data;\n-    /* POTENTIAL FLAW: Use of data that may have been deleted */\n-    printStructLine(&data[0]);\n+    data = nullptr;\n+    if (data != nullptr) {\n+    \tprintStructLine(&data[0]);\n+    }\n     /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n }\n \n"
     },
     {
@@ -7756,6 +9753,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_array_struct_01.cpp\n+++ b/CWE416_Use_After_Free__new_delete_array_struct_01.cpp\n@@ -38,10 +38,10 @@\n             data[i].intTwo = 2;\n         }\n     }\n+    /* POTENTIAL FLAW: Use of data that may have been deleted */\n+    printStructLine(&data[0]);\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n     delete [] data;\n-    /* POTENTIAL FLAW: Use of data that may have been deleted */\n-    printStructLine(&data[0]);\n     /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n }\n \n"
     }
    ],
@@ -7785,6 +9791,15 @@
    "winner": "--- a/CWE416_Use_After_Free__new_delete_class_06.cpp\n+++ b/CWE416_Use_After_Free__new_delete_class_06.cpp\n@@ -40,7 +40,6 @@\n         data->intOne = 1;\n         data->intTwo = 2;\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-        delete data;\n     }\n     if(STATIC_CONST_FIVE==5)\n     {\n@@ -48,6 +47,7 @@\n         printIntLine(data->intOne);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n     }\n+    delete data;\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -7820,6 +9835,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_class_06.cpp\n+++ b/CWE416_Use_After_Free__new_delete_class_06.cpp\n@@ -40,7 +40,6 @@\n         data->intOne = 1;\n         data->intTwo = 2;\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-        delete data;\n     }\n     if(STATIC_CONST_FIVE==5)\n     {\n@@ -48,6 +47,7 @@\n         printIntLine(data->intOne);\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n     }\n+    delete data;\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -7854,6 +9878,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__new_delete_class_06.cpp\n+++ b/CWE416_Use_After_Free__new_delete_class_06.cpp\n@@ -39,8 +39,6 @@\n         data = new TwoIntsClass;\n         data->intOne = 1;\n         data->intTwo = 2;\n-        /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-        delete data;\n     }\n     if(STATIC_CONST_FIVE==5)\n     {\n"
     },
     {
@@ -7888,6 +9913,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_class_06.cpp\n+++ b/CWE416_Use_After_Free__new_delete_class_06.cpp\n@@ -40,12 +40,12 @@\n         data->intOne = 1;\n         data->intTwo = 2;\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-        delete data;\n     }\n     if(STATIC_CONST_FIVE==5)\n     {\n         /* POTENTIAL FLAW: Use of data that may have been deleted */\n         printIntLine(data->intOne);\n+        delete data;\n         /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n     }\n }\n"
     },
     {
@@ -7922,6 +9956,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__new_delete_class_06.cpp\n+++ b/CWE416_Use_After_Free__new_delete_class_06.cpp\n@@ -40,7 +40,6 @@\n         data->intOne = 1;\n         data->intTwo = 2;\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-        delete data;\n     }\n     if(STATIC_CONST_FIVE==5)\n     {\n"
     }
    ],
@@ -7951,6 +9986,15 @@
    "winner": "--- a/CWE416_Use_After_Free__new_delete_int64_t_43.cpp\n+++ b/CWE416_Use_After_Free__new_delete_int64_t_43.cpp\n@@ -29,7 +29,6 @@\n     data = new int64_t;\n     *data = 5LL;\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-    delete data;\n }\n \n void bad()\n@@ -40,6 +39,7 @@\n     badSource(data);\n     /* POTENTIAL FLAW: Use of data that may have been deleted */\n     printLongLongLine(*data);\n+    delete data;\n     /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n }\n \n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -7986,6 +10030,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__new_delete_int64_t_43.cpp\n+++ b/CWE416_Use_After_Free__new_delete_int64_t_43.cpp\n@@ -29,7 +29,6 @@\n     data = new int64_t;\n     *data = 5LL;\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-    delete data;\n }\n \n void bad()\n"
     },
     {
@@ -8020,6 +10065,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_int64_t_43.cpp\n+++ b/CWE416_Use_After_Free__new_delete_int64_t_43.cpp\n@@ -29,7 +29,6 @@\n     data = new int64_t;\n     *data = 5LL;\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-    delete data;\n }\n \n void bad()\n@@ -40,6 +39,7 @@\n     badSource(data);\n     /* POTENTIAL FLAW: Use of data that may have been deleted */\n     printLongLongLine(*data);\n+    delete data;\n     /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n }\n \n"
     },
     {
@@ -8054,6 +10108,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__new_delete_int64_t_43.cpp\n+++ b/CWE416_Use_After_Free__new_delete_int64_t_43.cpp\n@@ -29,7 +29,6 @@\n     data = new int64_t;\n     *data = 5LL;\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-    delete data;\n }\n \n void bad()\n"
     },
     {
@@ -8088,6 +10143,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_int64_t_43.cpp\n+++ b/CWE416_Use_After_Free__new_delete_int64_t_43.cpp\n@@ -29,7 +29,6 @@\n     data = new int64_t;\n     *data = 5LL;\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-    delete data;\n }\n \n void bad()\n@@ -40,7 +39,7 @@\n     badSource(data);\n     /* POTENTIAL FLAW: Use of data that may have been deleted */\n     printLongLongLine(*data);\n-    /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n+    delete data;\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -8117,6 +10181,15 @@
    "winner": "--- a/CWE416_Use_After_Free__new_delete_long_05.cpp\n+++ b/CWE416_Use_After_Free__new_delete_long_05.cpp\n@@ -42,12 +42,7 @@\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n         delete data;\n     }\n-    if(staticTrue)\n-    {\n-        /* POTENTIAL FLAW: Use of data that may have been deleted */\n-        printLongLine(*data);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n-    }\n+    // deleted to fix use-after-free\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H3\u00b7w2",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -8152,6 +10225,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__new_delete_long_05.cpp\n+++ b/CWE416_Use_After_Free__new_delete_long_05.cpp\n@@ -40,7 +40,6 @@\n         data = new long;\n         *data = 5L;\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-        delete data;\n     }\n     if(staticTrue)\n     {\n"
     },
     {
@@ -8161,6 +10235,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -8195,6 +10270,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_long_05.cpp\n+++ b/CWE416_Use_After_Free__new_delete_long_05.cpp\n@@ -42,12 +42,7 @@\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n         delete data;\n     }\n-    if(staticTrue)\n-    {\n-        /* POTENTIAL FLAW: Use of data that may have been deleted */\n-        printLongLine(*data);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n-    }\n+    // deleted to fix use-after-free\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -8229,6 +10313,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__new_delete_long_05.cpp\n+++ b/CWE416_Use_After_Free__new_delete_long_05.cpp\n@@ -40,14 +40,12 @@\n         data = new long;\n         *data = 5L;\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-        delete data;\n-    }\n-    if(staticTrue)\n-    {\n-        /* POTENTIAL FLAW: Use of data that may have been deleted */\n-        printLongLine(*data);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n-    }\n+}\n+        if(staticTrue)\n+        {\n+            /* POTENTIAL FLAW: Use of data that may have been deleted */\n+            printLongLine(*data);\n+        }\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -8258,6 +10343,15 @@
    "winner": "--- a/CWE416_Use_After_Free__new_delete_struct_63a.cpp\n+++ b/CWE416_Use_After_Free__new_delete_struct_63a.cpp\n@@ -36,8 +36,8 @@\n     data->intOne = 1;\n     data->intTwo = 2;\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n+    badSink(&data);\n     delete data;\n-    badSink(&data);\n }\n \n #endif /* OMITBAD */\n",
    "winner_id": "H1\u00b7w0",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -8293,6 +10387,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_struct_63a.cpp\n+++ b/CWE416_Use_After_Free__new_delete_struct_63a.cpp\n@@ -36,8 +36,8 @@\n     data->intOne = 1;\n     data->intTwo = 2;\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n+    badSink(&data);\n     delete data;\n-    badSink(&data);\n }\n \n #endif /* OMITBAD */\n"
     },
     {
@@ -8327,6 +10430,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_struct_63a.cpp\n+++ b/CWE416_Use_After_Free__new_delete_struct_63a.cpp\n@@ -37,6 +37,7 @@\n     data->intTwo = 2;\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n     delete data;\n+    data = NULL;\n     badSink(&data);\n }\n \n--- a/CWE416_Use_After_Free__new_delete_struct_63b.cpp\n+++ b/CWE416_Use_After_Free__new_delete_struct_63b.cpp\n@@ -27,8 +27,9 @@\n void badSink(twoIntsStruct * * dataPtr)\n {\n     twoIntsStruct * data = *dataPtr;\n-    /* POTENTIAL FLAW: Use of data that may have been deleted */\n-    printStructLine(data);\n+    if (data != NULL) {\n+        printStructLine(data);\n+    }\n     /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n }\n \n"
     },
     {
@@ -8361,6 +10473,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_struct_63a.cpp\n+++ b/CWE416_Use_After_Free__new_delete_struct_63a.cpp\n@@ -36,7 +36,6 @@\n     data->intOne = 1;\n     data->intTwo = 2;\n     /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-    delete data;\n     badSink(&data);\n }\n \n--- a/CWE416_Use_After_Free__new_delete_struct_63b.cpp\n+++ b/CWE416_Use_After_Free__new_delete_struct_63b.cpp\n@@ -29,6 +29,7 @@\n     twoIntsStruct * data = *dataPtr;\n     /* POTENTIAL FLAW: Use of data that may have been deleted */\n     printStructLine(data);\n+    delete *dataPtr;\n     /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n }\n \n"
     },
     {
@@ -8395,6 +10516,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__new_delete_struct_63a.cpp\n+++ b/CWE416_Use_After_Free__new_delete_struct_63a.cpp\n@@ -35,9 +35,10 @@\n     data = new twoIntsStruct;\n     data->intOne = 1;\n     data->intTwo = 2;\n-    /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n+    twoIntsStruct * copy = new twoIntsStruct;\n+    *copy = *data;\n+    badSink(&copy);\n     delete data;\n-    badSink(&data);\n }\n \n #endif /* OMITBAD */\n"
     }
    ],
@@ -8424,6 +10546,15 @@
    "winner": "--- a/CWE416_Use_After_Free__new_delete_wchar_t_17.cpp\n+++ b/CWE416_Use_After_Free__new_delete_wchar_t_17.cpp\n@@ -33,14 +33,15 @@\n     {\n         data = new wchar_t;\n         *data = L'A';\n-        /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n         delete data;\n+        data = NULL;\n     }\n     for(j = 0; j < 1; j++)\n     {\n-        /* POTENTIAL FLAW: Use of data that may have been deleted */\n-        printWcharLine(*data);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n+        if (data != NULL)\n+        {\n+            printWcharLine(*data);\n+        }\n     }\n }\n \n",
    "winner_id": "H2\u00b7w1",
    "winner_semantic": null,
+   "winner_evidence": {
+    "level": "strong",
+    "label": "verified",
+    "tests": true,
+    "output_varies": true,
+    "stdout_distinct": null,
+    "refuzz_runs": null,
+    "safe_fix": "absent"
+   },
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -8434,6 +10565,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -8468,6 +10600,15 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": {
+      "level": "strong",
+      "label": "verified",
+      "tests": true,
+      "output_varies": true,
+      "stdout_distinct": null,
+      "refuzz_runs": null,
+      "safe_fix": "absent"
+     },
      "diff": "--- a/CWE416_Use_After_Free__new_delete_wchar_t_17.cpp\n+++ b/CWE416_Use_After_Free__new_delete_wchar_t_17.cpp\n@@ -33,14 +33,15 @@\n     {\n         data = new wchar_t;\n         *data = L'A';\n-        /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n         delete data;\n+        data = NULL;\n     }\n     for(j = 0; j < 1; j++)\n     {\n-        /* POTENTIAL FLAW: Use of data that may have been deleted */\n-        printWcharLine(*data);\n-        /* POTENTIAL INCIDENTAL - Possible memory leak here if data was not deleted */\n+        if (data != NULL)\n+        {\n+            printWcharLine(*data);\n+        }\n     }\n }\n \n"
     },
     {
@@ -8502,6 +10643,7 @@
      },
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": "--- a/CWE416_Use_After_Free__new_delete_wchar_t_17.cpp\n+++ b/CWE416_Use_After_Free__new_delete_wchar_t_17.cpp\n@@ -34,7 +34,6 @@\n         data = new wchar_t;\n         *data = L'A';\n         /* POTENTIAL FLAW: Delete data in the source - the bad sink attempts to use data */\n-        delete data;\n     }\n     for(j = 0; j < 1; j++)\n     {\n"
     },
     {
@@ -8511,6 +10653,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
@@ -8540,6 +10683,7 @@
    "winner": null,
    "winner_id": null,
    "winner_semantic": null,
+   "winner_evidence": null,
    "ambiguous": false,
    "rejudged": null,
    "workers": [
@@ -8550,6 +10694,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -8559,6 +10704,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -8568,6 +10714,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     },
     {
@@ -8577,6 +10724,7 @@
      "checks": {},
      "audit": [],
      "semantic": null,
+     "evidence": null,
      "diff": ""
     }
    ],
