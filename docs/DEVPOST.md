@@ -96,5 +96,6 @@ nvidia-nemotron, nemotron-3-ultra, nemotron-3.5-lightning, nemotron-3-super, neb
 2. `docs/devpost/2_jq_refusal.png` — what a refusal looks like (jq).
 3. `docs/devpost/3_funnel.png` — from "the crash went away" to "verified and correct".
 4. `docs/devpost/4_planner.png` — which model does what: 2 → 4 → 7 of 10.
-5. `docs/devpost/5_gate_matrix.png` — every check, every candidate (mosquitto 42520955: all three candidates verified, two of them wrong — the case for the semantic review).
+5. `docs/devpost/5_gate_matrix.png` — every check, every candidate (jq 42531297: one candidate verified, two refused because re-fuzzing the amplified PoC found a new crash).
+6. `docs/devpost/6_review_findings.png` — wrong fixes a human review found on open bugs, and which machine check now catches them (1 of 5; D-0078).
 - Architecture: `docs/devpost/architecture.png`.

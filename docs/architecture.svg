@@ -55,6 +55,6 @@
   <path d="M580 205H618" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
   <path d="M820 165L848 155" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
   <path d="M820 250L848 258" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
-  <path d="M720 310V355H692" stroke="#d97706" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#a)"/>
+  <path d="M720 310V355H692" stroke="#d97706" stroke-width="1.6" stroke-dasharray="5 4" fill="none" marker-end="url(#a)"/>
   <path d="M390 355H185V60H388" stroke="#d97706" stroke-width="1.6" stroke-dasharray="5 4" fill="none" marker-end="url(#a)"/>
 </svg>
