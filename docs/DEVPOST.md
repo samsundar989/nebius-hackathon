@@ -47,7 +47,7 @@ It works on your own project through a short `leakproof.toml` (`leakproof fix`),
 - **The planner matters on real code:** same Lightning workers, 10 cases. No planner: 2 verified; Super: 4; Ultra: 7. Ultra was also cheaper per verified fix, because failed attempts cost money too.
 - **Juliet CWE-401 (synthetic):** 94/100, every reproducible case, at $0.011 per fix.
 - **CUDA (compute-sanitizer on a T4):** 3/3 verified. Two candidate patches silenced the sanitizer but printed the wrong answer; the gate rejected them.
-- **Bugs that are still open upstream:** 14 open GitHub issues with sanitizer reports → 6 still reproduce at upstream HEAD → 4 without a fix PR → 3 verified by the gate → 1 ready to propose after review (toybox #572; a human decides whether to send it, nothing was posted). Without tests or a fuzz harness the gate checks only the reproducer, and 6 of the 7 distinct verified diffs were wrong or defensive on review.
+- **Bugs that are still open upstream:** 30 open GitHub issues with sanitizer reports → 7 still reproduce at upstream HEAD with no fix PR → 5 verified by the gate → 1 ready to propose after review (toybox #572, which also passes toybox's 13 `patch` tests; a human decides whether to send it, nothing was posted). Without tests or an output-printing harness the gate checks only the reproducer, and most verified diffs were defensive or incomplete on review.
 
 ## How we built it
 

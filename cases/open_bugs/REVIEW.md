@@ -50,3 +50,43 @@ the iterator's lifetime across garbage collection needs a design change the work
 
 14 issues triaged → 10 configured → 6 reproduce at upstream HEAD → 4 without an open fix PR →
 3 verified by the gate → **1 ready to propose after review** (toybox #572, H2·w1, not the selected winner).
+
+# Round 2 (review #7 order 5)
+
+Runs `runs/open_bugs_r2` (one repair round each, $0.22). Hand review only (the Ultra review of
+round 1 added little over it).
+
+## cNBT #28, bug 1 (leak in `parse_unnamed_tag`): not ready — defensive
+
+All four verified candidates (identical in substance) free the node's payload on `parse_error`.
+That plugs this leak, but: (1) when `CHECKED_MALLOC(node)` fails, `parse_error` is reached with
+`node == NULL` and the new `switch (node->type)` dereferences it (the original `free(NULL)` was
+safe); (2) the cause stays — `parse_named_tag` keeps parsing after `read_string` fails, with `errno`
+already set, so a successfully parsed payload is thrown away; a `TAG_COMPOUND` payload still leaks.
+The issue's own suggestion (stop when `name == NULL`) addresses the cause. Evidence: medium (tests
+none; harness with corpus differential, refuzz and LeakSanitizer all clean).
+
+## jsmn #249 (out-of-bounds read in `example/jsondump.c`): not ready as written
+
+The verified candidate (H2·w3) fixes the real off-by-one: a child at `t + 1 + j` has `count - 1 - j`
+tokens left, not `count - j`. But when a malformed object's `size` claims more children than were
+parsed, the loop continues after the count reaches 0: `dump(key, 0)` returns 0 and the next line
+reads `key->size` at `t + count`, one past the last parsed token (in bounds only while the token
+array has spare capacity). It needs `if (j >= count - 1) break;` before taking the next key. With
+that addition it would be ready; jsmn's own tests pass. Upstream PR #250 (a `size` bounds check) was
+closed by its author, not rejected.
+
+## tidy-html5 #1177: no candidate
+
+All eight attempts (round 1 and the repair round) failed to apply or build: the windows shown did
+not include the end of `freeStack` in `lexer.c`, where the fix belongs.
+
+## Funnel, round 2
+
+16 issues triaged → 5 configured → 3 reproduce at HEAD (cNBT bug 2 is an allocation-size DoS the
+gate does not judge; struct2json's demo exits 2 without a LeakSanitizer report in our build) →
+2 verified → **0 ready to propose as written** (1 needs a one-line guard added in review).
+
+## Both rounds
+
+30 issues triaged → 9 reproduce at HEAD without an open fix PR, of which 7 were attempted → 5 verified → 1 ready to propose (toybox #572, QUESTION 0017). Model spend $0.92 ($0.70 + $0.22).
