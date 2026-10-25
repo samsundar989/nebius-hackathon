@@ -145,6 +145,9 @@ def main() -> int:
     )
     ap.add_argument("--audit-model", default="lightning", help="'none' disables check 8")
     ap.add_argument("--runner", default="docker", choices=["docker", "sandboxes"])
+    ap.add_argument(
+        "--select-model", default="none", help="D-0070 pairwise winner ranking, e.g. ultra"
+    )
     ap.add_argument("--repair-rounds", type=int, default=0, help="B2: one repair round = 1")
     args = ap.parse_args()
     load_dotenv()
@@ -183,6 +186,7 @@ def main() -> int:
             audit_model=None if args.audit_model == "none" else args.audit_model,
             reference_builder=developer_reference if args.reference == "developer" else None,
             repair_rounds=args.repair_rounds,
+            select_model=None if args.select_model == "none" else args.select_model,
         )
 
     # Resume: a case with a finished record (not an infrastructure error) is not re-run, so a

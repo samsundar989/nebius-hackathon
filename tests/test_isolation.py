@@ -13,8 +13,9 @@ WORKER_PATH = [
     "fix.py",
     "feedback.py",
     "audit.py",
+    "winner.py",
 ]
-GATE_SIDE = {"leakproof.gate", "leakproof.gate_fuzz", "leakproof.calibrate"}
+GATE_SIDE = {"leakproof.gate", "leakproof.gate_fuzz", "leakproof.calibrate", "leakproof.semantic"}
 
 
 def _imports(path: Path) -> set[str]:

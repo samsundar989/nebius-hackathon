@@ -19,6 +19,7 @@ from leakproof.feedback import hot_files, summarize
 from leakproof.llm import LLMClient
 from leakproof.planner import no_planner_hypotheses, plan
 from leakproof.runner import ImageRef, Runner
+from leakproof.winner import choose, ultra_judge
 
 # Juliet keeps the kickoff's 6K. Real files are 1-3K lines and Lightning's reasoning ran into
 # 6K mid-fix on 3/4 ARVO workers (mosquitto 42520955, E1 run 1), hence 12K there (D-0040).
@@ -103,11 +104,14 @@ def fix_case(
     audit_model: str | None = "lightning",
     reference_builder: Callable[[Any, Runner, Any], tuple[str | None, Any]] | None = None,
     repair_rounds: int = 0,
+    select_model: str | None = None,
 ) -> dict[str, Any]:
     """`client` must be this case's own (its ledger's spend is the case's cost).
 
     reference_builder(case, runner, baseline) -> (image ref or None, record): supplied by a
     gate-side script (calibration, ARVO batch); called after the workers, before the gate.
+    select_model: rank several verified candidates by pairwise review (D-0070); None keeps
+    the smallest verified diff.
     """
     reference: str | None = None
     t0 = time.monotonic()
@@ -272,6 +276,11 @@ def fix_case(
         reference = refs["ref"]
         rec["workers"] = workers
         best = best_of(workers)
+        verified = [w for w in workers if w["verdict"] == "verified"]
+        if select_model and len({w["diff"] for w in verified}) > 1:
+            judge = ultra_judge(client, case.finding, root_cause, select_model)
+            diff, rec["selection"] = choose([w["diff"] for w in verified], judge)
+            best = next(w for w in verified if w["diff"] == diff)
         rec["verdict"] = best["verdict"] if best else "no_candidate"
         rec["verified_in_round"] = best["round"] if best and best["verdict"] == "verified" else None
         rec["winner"] = (

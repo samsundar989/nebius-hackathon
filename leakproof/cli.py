@@ -41,6 +41,7 @@ def _fix(args: argparse.Namespace) -> int:
         runner,
         planner_model=None if args.planner == "none" else args.planner,
         n_workers=args.workers,
+        select_model=None if args.select == "none" else args.select,
     )
     workers = rec.get("workers", [])
     print(f"\nverdict: {rec['verdict']}   ${rec.get('usd', 0):.4f}   {rec.get('elapsed_s')} s")
@@ -122,7 +123,14 @@ def _batch(args: argparse.Namespace) -> int:
         rep = Path(args.findings).resolve() / c.representative
         case_id = f"project:{config}#poc={rep}"
         client = LLMClient(ledger=CostLedger(budget=args.budget), run_id=f"{run_id}:c{i}")
-        rec = fix_case(case_id, run_dir, client, runner, n_workers=args.workers)
+        rec = fix_case(
+            case_id,
+            run_dir,
+            client,
+            runner,
+            n_workers=args.workers,
+            select_model=None if args.select == "none" else args.select,
+        )
         check = None
         if rec["verdict"] == "verified":
             case = ProjectCase.load(case_id)
@@ -205,6 +213,9 @@ def main(argv: list[str] | None = None) -> int:
     fx.add_argument("--runner", default="docker", choices=["docker", "sandboxes"])
     fx.add_argument("--planner", default="ultra", choices=["ultra", "super", "none"])
     fx.add_argument("--workers", type=int, default=4)
+    fx.add_argument(
+        "--select", default="ultra", choices=["ultra", "none"], help="rank several verified fixes"
+    )
     fx.add_argument("--budget", type=float, default=0.5, help="USD cap for this run")
     fx.add_argument("--run-id")
     fx.add_argument("--json", action="store_true", help="also print the full record")
@@ -213,6 +224,7 @@ def main(argv: list[str] | None = None) -> int:
     bt.add_argument("--findings", required=True, help="directory of crash inputs")
     bt.add_argument("--runner", default="docker", choices=["docker", "sandboxes"])
     bt.add_argument("--workers", type=int, default=4)
+    bt.add_argument("--select", default="ultra", choices=["ultra", "none"])
     bt.add_argument("--budget", type=float, default=0.5, help="USD cap per cluster")
     bt.add_argument("--run-id")
     args = ap.parse_args(argv)
