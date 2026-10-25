@@ -277,7 +277,7 @@ Model spend for review #7: $0.22.
 
 ## Day 5 (cont.) · Sun 2026-10-25, 13:30–14:30 CDT — review #8
 
-Strategist notes 2026-10-25 13:30 CDT (review #8): acknowledged; orders 1, 2, 3 and 5 done; 4 (`leakproof init`) next; 6 (Pages fallback) due Mon 12:00 if Render is still not applied.
+Strategist notes 2026-10-25 13:30 CDT (review #8): acknowledged; orders 1–5 done; 6 (Pages fallback) due Mon 12:00 if Render is still not applied.
 
 1. **Harness-less gate (D-0078)**: generated inputs from the PoC (amplified, 8 truncations, 200 seeded mutations) through the project's own reproducer, patched and unpatched; same-bug / new-crash / pre-existing crash rule; behaviour rule on clean inputs. Re-gate of every verified open-bugs diff ($0): toybox #571's wrong fix is now rejected (`refuzz_same_bug`, 7 of 169 inputs); both correct #572 fixes still verified; four other review findings still missed (table in `cases/open_bugs/REVIEW.md`, README gate section, NUMBERS). Allocation-failure check (advisory): on cNBT #28 it reached only 4 allocations — inconclusive. The "20 Juliet cases" acceptance check does not apply (Juliet programs take no input); D-0078 says so.
 2. **Video v3** (2:36): caption band, top-anchored terminal, fix split into plan → verdict and the highlighted diff, calibration summary card, cards at 70–85 % of frame height, 104 px end-card numbers. A blank calibration scene (Playwright records nothing for a static page) was found by pulling frames; card scenes are now screenshots. NOTE 0016: ready for narration.
@@ -292,3 +292,5 @@ Strategist notes 2026-10-25 13:30 CDT (review #8): acknowledged; orders 1, 2, 3 
 Model spend for review #8 so far: $0.
 
 4. **`leakproof init`** (`leakproof/init.py`, `scripts/init_eval.py`, 6 unit tests): drafts a `leakproof.toml` from a repo (build system, sanitizer flags, tests, editable globs) and an issue's text (Nano: command and inline input). On the 10 hand-configured open-bugs projects: **6 of 10 drafts build unchanged; 0 of 10 build and reproduce unchanged** (`cases/open_bugs/INIT_EVAL.md`, job 3856). Three rounds; two found deterministic bugs that were fixed (exec bits, `$CC` flags, `build/` binaries). The reproducer is what a person still writes: 6 of 10 issues use a program the project does not build. README "Use it on your own project" says so. Nano $0.005.
+
+Model spend for review #8: $0.01 (Nemotron Nano, `init`).
