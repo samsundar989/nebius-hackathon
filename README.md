@@ -114,6 +114,8 @@ On the synthetic Juliet subset the planner barely matters (Lightning-only 93%, U
 
 ## Use it on your own project
 
+Start with a draft: `uv run leakproof init path/to/repo --issue-text bug.md` detects the build system (meson, autotools, make, CMake), keeps the sanitizer flags in the build, picks the test command and the editable source directories, and has Nemotron Nano pull the reporter's command and inline input out of the issue. Measured on our 10 hand-configured open-bug projects, **6 drafts build unchanged and none reproduces unchanged**: most reporters ran their own harness or test program, which the project does not build ([INIT_EVAL](cases/open_bugs/INIT_EVAL.md)). Expect to write the `reproduce` line yourself; `leakproof fix` then checks that it trips a sanitizer.
+
 ```toml
 # leakproof.toml
 [project]
