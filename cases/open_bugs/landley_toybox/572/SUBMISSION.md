@@ -59,25 +59,18 @@ receive patches, and keep the description short and in your own words.
 
 ## Send it in 5 minutes (only after reading the patch and running the tests; nothing here has been run)
 
-A ready PR description is in `generated/PR_BODY.md` (what changed, how it was tested, the
-disclosure); replace its first paragraph with the "Why" above if you prefer the reviewed wording.
-toybox also takes patches on its mailing list (see the project README); if you go that way, send
-the patch file with `git send-email` instead.
+toybox's README says the maintainer prefers patches **sent to the mailing list as a file
+attachment** (the list holds messages from non-subscribers for moderation for a day or two), and
+that its main repository is on Codeberg (https://codeberg.org/landley/toybox); GitHub is a mirror.
+So, in order of preference:
 
-**GitHub, in the browser**
-1. Open https://github.com/landley/toybox and click **Fork**.
-2. In your fork, open `toys/posix/patch.c`, click the pencil (Edit), change the line shown above,
-   and commit it to a new branch (for example `leakproof-fix-572`).
-3. Click **Compare & pull request**; title: `patch: reject a quoted filename that ends inside an
-   escape`; paste the PR description.
+1. **Mailing list.** Subscribe or post via https://lists.landley.net/mailman/listinfo/toybox.
+   Write a short e-mail in your own words: the issue link
+   (https://github.com/landley/toybox/issues/572), the one-line change, how you tested it, and the
+   disclosure above. Attach `0001-patch.private.patch` (the gitignored copy with your identity).
+   `generated/PR_BODY.md` has a draft of that text.
+2. **Codeberg pull request**, which the maintainer applies with `git am`: fork
+   https://codeberg.org/landley/toybox, apply the patch on a branch (`git am
+   0001-patch.private.patch`), push, and open a pull request with the same text.
 
-**Command line** (needs `gh`, logged in)
-```
-gh repo fork landley/toybox --clone && cd toybox
-git checkout -b leakproof-fix-572
-git am /path/to/0001-patch-private.patch   # the gitignored copy with your identity
-git push -u origin leakproof-fix-572
-gh pr create --repo landley/toybox --title "patch: reject a quoted filename that ends inside an escape" --body-file /path/to/generated/PR_BODY.md
-```
-
-If the maintainer prefers to fix it differently, thank them and close the PR.
+If the maintainer prefers to fix it differently, thank him and leave it there.
