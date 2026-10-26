@@ -98,7 +98,8 @@ from the PoC (the PoC, an amplified copy, 8 truncations, 200 seeded mutations), 
 reproducer with the patched and the unpatched build (`runs/open_bugs_regate/`, job 3850, $0).
 Then the adversary (D-0079): Nemotron 3 Ultra and Nemotron 3 Super each read one candidate's diff
 and proposed up to 8 inputs; only a sanitizer report confirmed by the machine rejects
-(`runs/adversary/open/`, job 3862, $0.13 for both models over 12 candidates).
+(`runs/adversary/open/`, job 3862). The final version costs about $0.004 (Super) or $0.019 (Ultra)
+per candidate; developing it, with three prompt versions and repair calls, cost $2.44 in total (D-0079).
 
 | case | candidate | human review said | verdict now | caught by |
 |---|---|---|---|---|
