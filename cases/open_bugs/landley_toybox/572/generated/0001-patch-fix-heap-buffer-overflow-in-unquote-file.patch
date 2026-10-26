@@ -1,13 +1,15 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: <your git identity>
-Date: Mon, 26 Oct 2026 06:34:48 +0000
+Date: Mon, 26 Oct 2026 13:10:22 +0000
 Subject: [PATCH] patch: fix heap-buffer-overflow in unquote_file()
 
-In unquote_file(), the buffer allocation at line 283 uses strlen(s) + 1
-where s points just past the opening quote. This assumes the quoted
-string has no embedded null bytes and that the closing quote coincides
-with the string terminator.
-AddressSanitizer: heap-buffer-overflow at toys/posix/patch.c:287.
+AddressSanitizer reports a heap-buffer-overflow in unquote_file()
+(toys/posix/patch.c:287).
+
+The change, in toys/posix/patch.c:
+
+    -    if (!s[1]) error_exit("bad %s", filename);
+    +    if (!*s || !s[1]) error_exit("bad %s", filename);
 
 Fixes #572.
 ---

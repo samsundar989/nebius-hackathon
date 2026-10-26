@@ -23,8 +23,11 @@ diff --git a/src/csvsplit.c b/src/csvsplit.c
          return NULL;
 ```
 
-Why, as Leakproof's planner (a model) explained it before the fix was written. Check it against
-the diff: the commit message body below is built from it.
+## Planner's analysis (written before the fix; check it against the diff)
+
+Nemotron 3 Ultra wrote this root-cause analysis before any patch existed. It can describe a
+different mechanism than the one the final diff fixes, so it is here for the reviewer and never
+in the commit message.
 
 > In copy_quoted(), line 22 allocates `inner` bytes (n-2) for the unquoted content but does not reserve space for the terminating NUL. The loop writes `out` characters (up to `inner`), then line 33 writes `field[out] = '\0'`, which writes one byte past the allocation when there are no escaped quotes (or when escaped quotes don't reduce the output length enough).
 
@@ -48,9 +51,13 @@ the diff: the commit message body below is built from it.
 ```
 csvsplit: fix heap-buffer-overflow in copy_quoted()
 
-In copy_quoted(), line 22 allocates `inner` bytes (n-2) for the unquoted
-content but does not reserve space for the terminating NUL.
-AddressSanitizer: heap-buffer-overflow at src/csvsplit.c:33.
+AddressSanitizer reports a heap-buffer-overflow in copy_quoted()
+(src/csvsplit.c:33).
+
+The change, in src/csvsplit.c:
+
+    -    char *field = malloc(inner); /* room for the content */
+    +    char *field = malloc(inner + 1); /* room for the content and NUL terminator */
 ```
 
 ## AI-assistance disclosure (put it in the PR or e-mail text)
@@ -62,7 +69,7 @@ AddressSanitizer: heap-buffer-overflow at src/csvsplit.c:33.
 ## Before sending
 
 - [ ] Read the diff and the root cause; make sure you can explain the fix in your own words.
-- [ ] Rewrite the commit message body if the planner's explanation is not what the diff fixes.
+- [ ] Add a sentence on *why* the change fixes the bug to the commit message, in your words.
 - [ ] Run the project's own tests in your build (the gate's results are above; yours count).
 - [ ] Check the project's contribution guide and AI-contribution policy, and how it takes patches.
 - [ ] Set your identity as the author (`git commit --amend --reset-author`).

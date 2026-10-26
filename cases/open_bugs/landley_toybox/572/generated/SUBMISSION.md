@@ -24,8 +24,11 @@ diff --git a/toys/posix/patch.c b/toys/posix/patch.c
      if (*s != '\\') *t++ = *s;
 ```
 
-Why, as Leakproof's planner (a model) explained it before the fix was written. Check it against
-the diff: the commit message body below is built from it.
+## Planner's analysis (written before the fix; check it against the diff)
+
+Nemotron 3 Ultra wrote this root-cause analysis before any patch existed. It can describe a
+different mechanism than the one the final diff fixes, so it is here for the reviewer and never
+in the commit message.
 
 > In unquote_file(), the buffer allocation at line 283 uses strlen(s) + 1 where s points just past the opening quote. This assumes the quoted string has no embedded null bytes and that the closing quote coincides with the string terminator. If a malformed patch file contains an embedded null inside the quoted filename (e.g., "foo\0bar"), strlen(s) stops at the first null, underestimating the distance to the closing quote. The loop at line 283-295 continues processing characters past the embedded null until it finds the closing quote, writing more bytes than allocated and causing the heap buffer overflow at line 287.
 
@@ -49,11 +52,13 @@ the diff: the commit message body below is built from it.
 ```
 patch: fix heap-buffer-overflow in unquote_file()
 
-In unquote_file(), the buffer allocation at line 283 uses strlen(s) + 1
-where s points just past the opening quote. This assumes the quoted
-string has no embedded null bytes and that the closing quote coincides
-with the string terminator.
-AddressSanitizer: heap-buffer-overflow at toys/posix/patch.c:287.
+AddressSanitizer reports a heap-buffer-overflow in unquote_file()
+(toys/posix/patch.c:287).
+
+The change, in toys/posix/patch.c:
+
+    -    if (!s[1]) error_exit("bad %s", filename);
+    +    if (!*s || !s[1]) error_exit("bad %s", filename);
 
 Fixes #572.
 ```
@@ -67,7 +72,7 @@ Fixes #572.
 ## Before sending
 
 - [ ] Read the diff and the root cause; make sure you can explain the fix in your own words.
-- [ ] Rewrite the commit message body if the planner's explanation is not what the diff fixes.
+- [ ] Add a sentence on *why* the change fixes the bug to the commit message, in your words.
 - [ ] Run the project's own tests in your build (the gate's results are above; yours count).
 - [ ] Check the project's contribution guide and AI-contribution policy, and how it takes patches.
 - [ ] Set your identity as the author (`git commit --amend --reset-author`).

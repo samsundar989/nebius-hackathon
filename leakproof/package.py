@@ -78,21 +78,37 @@ def _site(finding: dict[str, Any]) -> tuple[str, str]:
     return func, loc
 
 
-def commit_message(finding: dict[str, Any], root_cause: str, issue: str | None) -> str:
-    """Subject (`<file>: fix <kind> in <function>()`), a 3-5 line body from the root cause."""
+def _changed(diff: str) -> tuple[list[str], dict[str, list[int]]]:
+    """(the +/- lines, {file: [added, removed]}) of a unified diff."""
+    lines, files, cur = [], {}, None
+    for line in diff.splitlines():
+        if line.startswith("+++ b/"):
+            cur = line[6:].split("\t")[0]
+            files[cur] = [0, 0]
+        elif cur and line[:1] in "+-" and not line.startswith(("+++", "---")):
+            lines.append(line)
+            files[cur][0 if line[0] == "+" else 1] += 1
+    return lines, files
+
+
+def commit_message(finding: dict[str, Any], diff: str, issue: str | None) -> str:
+    """Describes the diff, never the plan (review #12): the subject names the defect and the
+    function from the sanitizer report; the body says what the report showed and quotes the
+    changed lines when the change is small (at most 6), else summarises them per file."""
     func, loc = _site(finding)
     kind = finding.get("kind") or "memory error"
     stem = Path(loc.split(":")[0]).stem or "fix"
-    subject = f"{stem}: fix {kind} in {func}()" if func else f"{stem}: fix {kind}"
-    # Whole sentences only, up to ~4 lines of 72 columns (at least the first sentence).
-    sentences = re.split(r"(?<=[.!?])\s+", " ".join(root_cause.split()))
-    kept: list[str] = []
-    for s in sentences:
-        if kept and len(" ".join([*kept, s])) > 280:
-            break
-        kept.append(s)
-    body = textwrap.wrap(" ".join(kept), 72)
-    body.append(f"AddressSanitizer: {kind} at {loc}." if loc else f"Sanitizer: {kind}.")
+    where = f"{func}()" if func else Path(loc.split(":")[0]).name or "the reported code"
+    subject = f"{stem}: fix {kind} in {where}"
+    lines, files = _changed(repo_diff(diff))
+    report = f"AddressSanitizer reports a {kind} in {where}" + (f" ({loc})." if loc else ".")
+    body = textwrap.wrap(report, 72)
+    if 0 < len(lines) <= 6:
+        body += ["", f"The change, in {', '.join(files)}:", ""]
+        body += [f"    {ln}" for ln in lines]
+    elif lines:
+        parts = [f"{f} (+{a}/-{d})" for f, (a, d) in files.items()]
+        body += textwrap.wrap("This changes " + ", ".join(parts) + ".", 72)
     msg = subject + "\n\n" + "\n".join(body)
     if issue:
         msg += f"\n\nFixes #{issue.lstrip('#')}."
@@ -172,10 +188,13 @@ author is `{PLACEHOLDER}` unless `--author` was given; fix it with
 {diff.rstrip()}
 ```
 
-Why, as Leakproof's planner (a model) explained it before the fix was written. Check it against
-the diff: the commit message body below is built from it.
+## Planner's analysis (written before the fix; check it against the diff)
 
-> {" ".join(root_cause.split())[:900]}
+Nemotron 3 Ultra wrote this root-cause analysis before any patch existed. It can describe a
+different mechanism than the one the final diff fixes, so it is here for the reviewer and never
+in the commit message.
+
+> {" ".join(root_cause.split())[:900] or "(no planner analysis in this run)"}
 
 ## Evidence (from `{source}`)
 
@@ -198,7 +217,7 @@ the diff: the commit message body below is built from it.
 ## Before sending
 
 - [ ] Read the diff and the root cause; make sure you can explain the fix in your own words.
-- [ ] Rewrite the commit message body if the planner's explanation is not what the diff fixes.
+- [ ] Add a sentence on *why* the change fixes the bug to the commit message, in your words.
 - [ ] Run the project's own tests in your build (the gate's results are above; yours count).
 - [ ] Check the project's contribution guide and AI-contribution policy, and how it takes patches.
 - [ ] Set your identity as the author (`git commit --amend --reset-author`).
@@ -221,7 +240,7 @@ def package(
     issue_url: str | None = None,
 ) -> tuple[Path, Path]:
     diff = repo_diff(diff)
-    message = commit_message(finding, root_cause, issue)
+    message = commit_message(finding, diff, issue)
     slug = re.sub(r"[^a-z0-9]+", "-", message.split("\n")[0].lower()).strip("-")[:52]
     patch_name = f"0001-{slug}.patch"
     out.mkdir(parents=True, exist_ok=True)

@@ -22,14 +22,15 @@ def test_repo_diff_strips_the_container_prefix() -> None:
     assert "1 file(s) changed, 1 insertion(s)(+), 1 deletion(s)(-)" in pk.diffstat(d)
 
 
-def test_commit_message_from_finding_and_root_cause() -> None:
-    msg = pk.commit_message(FINDING, "One. Two sentences here. " + "Long. " * 80, "572")
+def test_commit_message_describes_the_diff_not_the_plan() -> None:
+    msg = pk.commit_message(FINDING, DIFF, "572")
     subject, _, body = msg.partition("\n\n")
     assert subject == "a: fix heap-buffer-overflow in copy()"
-    assert body.startswith("One. Two sentences here.")
-    assert "AddressSanitizer: heap-buffer-overflow at src/a.c:33." in body
+    assert body.startswith("AddressSanitizer reports a heap-buffer-overflow in copy()")
+    assert "    -char *f = malloc(n);" in body and "    +char *f = malloc(n + 1);" in body
     assert msg.endswith("Fixes #572.")
-    assert all(len(line) <= 72 for line in body.splitlines())
+    big = DIFF + "".join(f"+line {i}\n" for i in range(10))
+    assert "This changes src/a.c (+11/-1)." in pk.commit_message(FINDING, big, None)
 
 
 def test_evidence_rows_cover_checks_that_did_not_run() -> None:
