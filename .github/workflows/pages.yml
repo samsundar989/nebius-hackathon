@@ -1,0 +1,33 @@
+# Fallback hosting for the dashboard (review #10 order 7): deploy site/ to GitHub Pages. Pages
+# needs the repository to be public (or a paid plan), so this runs only when started by hand,
+# after the visibility change: Settings -> Pages -> Source: GitHub Actions, then Actions -> pages
+# -> Run workflow. The static site needs no secrets; the live-fix service is not part of it.
+name: pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: github.repository == 'samsundar989/nebius-hackathon'
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
