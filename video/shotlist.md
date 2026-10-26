@@ -1,6 +1,6 @@
-# Video draft v3: shot list
+# Video draft v4: shot list
 
-`video/leakproof_draft.mp4` — 2:36, 1920×1080, silent, captions burned in (40 px in a band along the bottom 150 px that nothing else uses; also `captions.srt`). It follows `docs/VIDEO_SCRIPT.md` v2. Record your voice over it, or upload it with `captions.srt` if time is short. Rebuild with:
+`video/leakproof_draft.mp4` — 2:50, 1920×1080, silent, captions burned in (40 px in a band along the bottom 150 px that nothing else uses; also `captions.srt`). It follows `docs/VIDEO_SCRIPT.md` v2. Record your voice over it, or upload it with `captions.srt` if time is short. Rebuild with:
 
 ```
 uv run python video/build_transcripts.py      # terminal transcripts from recorded runs
@@ -23,7 +23,8 @@ Readable at 1080p and on a phone: terminal scenes use a 28 px font, at most 19 l
 | 9 | 1:45–1:56 | `leakproof batch` | terminal: 10 inputs → 1 cluster → all clean | replay of `runs/demo_batch` |
 | 10 | 1:56–2:10 | CUDA panel | two `silenced_only` candidates | dashboard |
 | 11 | 2:10–2:30 | mosquitto | "Other verified candidates (2): both wrong", expanded | dashboard |
-| 12 | 2:30–2:36 | end card | 15/27 · 14/27 · 24/27 · 2 → 7 (104 px numbers, 34 px labels); repo and dashboard links | `video/card.html` |
+| 12 | 2:30–2:44 | open bugs | 30 open GitHub issues → 7 reproduce without a fix PR → 5 verified → 1 ready (toybox #572, one line, 13/13 of toybox's tests); the review-finding table with the "caught by" column (generated inputs, adversary inputs, still missed) | `video/card.html?type=openbugs` (reads `cases/open_bugs/REVIEW.md`) |
+| 13 | 2:44–2:50 | end card | 15/27 · 14/27 · 24/27 · 2 → 7 (104 px numbers, 34 px labels); repo link (the dashboard link goes in when Render or Pages is live) | `video/card.html` |
 
 Notes:
 - The terminal scenes are replays of recorded runs, rebuilt from their run records (each starts with a `# replay of a recorded run` line); no new model calls. Narrate them as "a recorded run", or re-record steps 2–4 of `scripts/demo_run.sh` live if you prefer.
