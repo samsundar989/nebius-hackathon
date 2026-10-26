@@ -14,7 +14,7 @@ Numbers come from `docs/NUMBERS.md`; re-check them on Wed Oct 29 before the fina
 
 - Repository: [GitHub URL] — `uv run leakproof fix --config examples/csvsplit/leakproof.toml` (Docker and a Nebius Token Factory key; about one cent per fix).
 - Dashboard: [dashboard URL] — every run, every gate check, the calibration and the planner comparison.
-- Video: [YouTube URL] — 2:49.
+- Video: [YouTube URL] — 2:50.
 
 ---
 
@@ -34,8 +34,11 @@ Given a sanitizer finding (a crash input plus a build), Leakproof:
 2. has **Nemotron 3 Ultra** find the root cause and propose up to four fix hypotheses;
 3. has four **Nemotron 3.5 Lightning** workers each write a patch on its own branch of the baseline checkpoint;
 4. runs every candidate through an **evidence gate** in a separate process with the network off. A candidate passes only if it rebuilds, actually compiles into the binary, no longer crashes, passes the project's tests, behaves the same on a corpus, survives amplified and fuzzed inputs that the developer's real fix survives, and adds no leak or use-after-free;
-5. when several candidates verify, lets Ultra pick the one that best preserves the code's intent;
-6. writes an evidence bundle for each case: the diff, every check with its evidence, and the cost.
+5. has **Nemotron 3 Super** attack each candidate that passed every check: it reads that one diff and writes up to 8 inputs meant to break it; each input runs on the patched and unpatched builds, and only a sanitizer report or an output difference rejects;
+6. when several candidates verify, lets Ultra pick the one that best preserves the code's intent;
+7. writes an evidence bundle for each case: the diff, every check with its evidence, and the cost.
+
+**Which model does what:** Nemotron 3 Ultra plans (and picks between verified fixes), Nemotron 3.5 Lightning writes patches, Nemotron 3 Super attacks them, Nemotron 3 Nano reads issue reports for `leakproof init`.
 
 It works on your own project through a short `leakproof.toml` (`leakproof fix`), triages piles of crash reports (`leakproof batch` clusters them, fixes each cluster once and re-checks every report), and ships a GitHub Action template.
 
@@ -47,7 +50,17 @@ It works on your own project through a short `leakproof.toml` (`leakproof fix`),
 - **The planner matters on real code:** same Lightning workers, 10 cases. No planner: 2 verified; Super: 4; Ultra: 7. Ultra was also cheaper per verified fix, because failed attempts cost money too.
 - **Juliet CWE-401 (synthetic):** 94/100, every reproducible case, at $0.011 per fix.
 - **CUDA (compute-sanitizer on a T4):** 3/3 verified. Two candidate patches silenced the sanitizer but printed the wrong answer; the gate rejected them.
-- **Bugs that are still open upstream:** 30 open GitHub issues with sanitizer reports → 7 still reproduce at upstream HEAD with no fix PR → 5 verified by the gate → 1 ready to propose after review (toybox #572, which also passes toybox's 13 `patch` tests; a human decides whether to send it, nothing was posted). Without tests or an output-printing harness the gate checks only the reproducer, and most verified diffs were defensive or incomplete on review.
+- **Bugs that are still open upstream:** 30 open GitHub issues with sanitizer reports → 7 still reproduce at upstream HEAD with no fix PR → 5 verified by the gate → 1 ready to propose after review (toybox #572, which also passes toybox's 13 `patch` tests; a human decides whether to send it, nothing was posted). Without tests or an output-printing harness the gate sees little, and most verified diffs were defensive or incomplete on review. Of the five wrong-or-incomplete findings that review made, two are now caught by a machine check:
+
+  | case | review said | caught by |
+  |---|---|---|
+  | toybox #571 | the overflow recurs on other strings | inputs generated from the PoC |
+  | toybox #572 (2 patches) | wrong: depends on the byte after the terminator | adversary inputs (Ultra: `\n--- "\"`) |
+  | berry #544 | defensive; the undefined behaviour stays | still missed |
+  | jsmn #249 | needs one more guard | still missed |
+  | cNBT #28 | out-of-memory path still dereferences NULL | inconclusive |
+
+  The adversary rejected none of the 24 developer fixes it attacked on real OSS-Fuzz bugs, and none of the correct open-bug fixes.
 
 ## How we built it
 
@@ -86,7 +99,7 @@ nvidia-nemotron, nemotron-3-ultra, nemotron-3.5-lightning, nemotron-3-super, neb
 
 - **Token Factory:** truly OpenAI-compatible; rate limits (600 RPM) are far above folklore; thinking control works through `chat_template_kwargs`. Needs work: `json_schema` numeric fields can decode digit by digit until `max_tokens`; `reasoning_effort` levels are ignored except on Super; the Batch API returned "temporarily unavailable"; there's no cost field in responses.
 - **Sandboxes:** the checkpoint-and-branch model fits "baseline → N candidates → gate" exactly, and `networking.enabled=false` is honoured. Needs work: the SDK lacks the networking field; "not approved" returns 200 with all permissions false; the importer fails on older images with `NotImplementedError: chmod: follow_symlinks unavailable on this platform`; two different "project id" formats.
-- **Nemotron:** Ultra is a strong planner and a useful first-pass reviewer (we overrode 8 of its 67 judgments). Lightning is a fast, cheap patch worker when its thinking budget is bounded.
+- **Nemotron:** Ultra is a strong planner and a useful first-pass reviewer (we overrode 8 of its 67 judgments). Lightning is a fast, cheap patch worker when its thinking budget is bounded. Super is a cheap adversary ($0.004 a call) but with thinking on it spent a 32k-token budget reasoning and returned nothing, and with thinking off it gave no usable JSON on about a third of calls.
 - **compute-sanitizer:** exact reports, but the exit code is 0 on errors unless `--error-exitcode` is set, and it cannot attach under WSL2 yet prints a clean-looking report.
 
 ## Gallery images (rendered by `docs/devpost/render_assets.py`, 3:2 at 2×)
@@ -97,5 +110,5 @@ nvidia-nemotron, nemotron-3-ultra, nemotron-3.5-lightning, nemotron-3-super, neb
 3. `docs/devpost/3_funnel.png` — from "the crash went away" to "verified and correct".
 4. `docs/devpost/4_planner.png` — which model does what: 2 → 4 → 7 of 10.
 5. `docs/devpost/5_gate_matrix.png` — every check, every candidate (jq 42531297: one candidate verified, two refused because re-fuzzing the amplified PoC found a new crash).
-6. `docs/devpost/6_review_findings.png` — wrong fixes a human review found on open bugs, and which machine check now catches them (1 of 5; D-0078).
+6. `docs/devpost/6_review_findings.png` — wrong fixes a human review found on open bugs, and which machine check now catches them (2 of 5: generated inputs and the adversary; D-0078, D-0079).
 - Architecture: `docs/devpost/architecture.png`.
