@@ -264,6 +264,8 @@ def _package(args: argparse.Namespace) -> int:
         author=args.author,
         issue=args.issue,
         issue_url=args.issue_url,
+        repo_subdir=args.repo_subdir,
+        partial=args.partial,
         **src,
     )
     print(f"wrote {sp}\nwrote {pp}")
@@ -332,6 +334,10 @@ def main(argv: list[str] | None = None) -> int:
     pk.add_argument("--issue", help="issue number for `Fixes #N`")
     pk.add_argument("--issue-url")
     pk.add_argument("--out", default="submission")
+    pk.add_argument("--partial", action="store_true", help="`Part of #N` instead of `Fixes #N`")
+    pk.add_argument(
+        "--repo-subdir", default="", help="the upstream clone's folder inside the case (e.g. src)"
+    )
     pk.add_argument("--force", action="store_true", help="package a candidate that is not verified")
     args = ap.parse_args(argv)
     if args.cmd == "package":

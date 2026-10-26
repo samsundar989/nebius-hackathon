@@ -100,7 +100,7 @@ details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
     <nav class="start" aria-label="Start here">
       <span class="start-l">Start here:</span>
       <a href="#refusal">A patch that passed the tests, refused</a>
-      <a href="https://github.com/samsundar989/nebius-hackathon/blob/main/cases/open_bugs/REVIEW.md">Still-open bugs: 30 issues → 1 fix ready</a>
+      <a id="ob-link" href="https://github.com/samsundar989/nebius-hackathon/blob/main/cases/open_bugs/REVIEW.md">Still-open bugs: 40 issues → 1 fix ready + 2 partial</a>
       <a href="https://github.com/samsundar989/nebius-hackathon/blob/main/cases/open_bugs/landley_toybox/572/generated/SUBMISSION.md">toybox #572: the generated submission</a>
       <a href="https://github.com/samsundar989/nebius-hackathon/blob/main/docs/WALKTHROUGH.md">Try it: the walkthrough</a>
       <a href="#calibration">Does the gate accept correct fixes?</a>
@@ -293,6 +293,10 @@ async function showRun(run, btn) {
   if (num && num.precision) stats.push([`${num.precision.correct}/${num.precision.judged}`, "verified diffs that are correct (gate precision, all ARVO runs)"]);
   if (cal) stats.push([`${cal.adjudicated.classes.accepted}/${cal.adjudicated.judged}`, "developers' own fixes the gate accepts"]);
   $("#headline").innerHTML = stats.map(([n, l, cls]) => `<div class="panel stat"><div class="n ${cls || ""}">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join("");
+  if (num && num.open_bugs) {
+    const t = num.open_bugs.total;
+    $("#ob-link").textContent = `Still-open bugs: ${t.triaged} issues → ${t.verified} verified → ${t.ready} ready + ${t.ready_partial} partial`;
+  }
   if (num && num.jq_refusal) {
     const j = num.jq_refusal;
     $("#refusal").innerHTML = `<h3>What a refusal looks like: jq ${esc(j.case)}</h3>

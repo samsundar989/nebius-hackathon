@@ -1,0 +1,14 @@
+{
+ "_note": "Hand-reviewed outcomes of the open-bugs rounds (cases/open_bugs/REVIEW.md); scripts/readme_numbers.py publishes them to docs/NUMBERS.md and site/data/numbers.json.",
+ "rounds": [
+  {"round": 1, "date": "2026-10-25", "triaged": 14, "reproduce_no_pr": 4, "verified": 3, "ready": 1, "ready_partial": 0, "usd": 0.70},
+  {"round": 2, "date": "2026-10-25", "triaged": 16, "reproduce_no_pr": 3, "verified": 2, "ready": 0, "ready_partial": 0, "usd": 0.22},
+  {"round": 3, "date": "2026-10-26", "triaged": 10, "reproduce_no_pr": 4, "verified": 2, "ready": 0, "ready_partial": 2, "usd": 0.18,
+   "path": "leakproof init -> hand-finished reproducer -> leakproof fix --adversary auto -> leakproof package"}
+ ],
+ "ready_cases": [
+  {"issue": "landley/toybox#572", "kind": "complete", "question": "0017", "package": "cases/open_bugs/landley_toybox/572/generated/SUBMISSION.md"},
+  {"issue": "cesanta/elk#82", "kind": "partial: the unclosed-string over-read; the number path stays", "question": "0020", "package": "cases/open_bugs/round3/cesanta_elk/generated/SUBMISSION.md"},
+  {"issue": "me7alix/utf8.h#1", "kind": "partial: the out-of-bounds read; overlong/surrogate validation stays", "question": "0020", "package": "cases/open_bugs/round3/me7alix_utf8.h/generated/SUBMISSION.md"}
+ ]
+}

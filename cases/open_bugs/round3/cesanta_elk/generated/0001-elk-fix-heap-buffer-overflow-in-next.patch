@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: <your git identity>
+Date: Mon, 26 Oct 2026 16:34:46 +0000
+Subject: [PATCH] elk: fix heap-buffer-overflow in next()
+
+AddressSanitizer reports a heap-buffer-overflow in next() (elk.c:535).
+
+The change, in elk.c:
+
+    -      if (buf[0] == buf[js->tlen]) js->tok = TOK_STRING, js->tlen++;
+    +      if (js->toff + js->tlen < js->clen && buf[0] == buf[js->tlen]) js->tok = TOK_STRING, js->tlen++;
+
+Part of #82.
+---
+ elk.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/elk.c b/elk.c
+--- a/elk.c
++++ b/elk.c
+@@ -532,7 +532,7 @@
+         }
+         js->tlen += increment;
+       }
+-      if (buf[0] == buf[js->tlen]) js->tok = TOK_STRING, js->tlen++;
++      if (js->toff + js->tlen < js->clen && buf[0] == buf[js->tlen]) js->tok = TOK_STRING, js->tlen++;
+       break;
+     case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': {
+       char *end;
+--
+leakproof package

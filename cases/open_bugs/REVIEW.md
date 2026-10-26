@@ -91,6 +91,46 @@ gate does not judge; struct2json's demo exits 2 without a LeakSanitizer report i
 
 30 issues triaged → 7 reproduce at HEAD without an open fix PR, all attempted → 5 verified → 1 ready to propose (toybox #572, QUESTION 0017). Model spend $0.92 ($0.70 + $0.22).
 
+## Round 3 (full product path: init → fix --adversary auto → package)
+
+### elk #82 (`js_eval(buf, len)` reads past a bounded slice): ready to propose as a partial fix
+All three verified candidates are the same one line: after the string loop, read `buf[js->tlen]`
+only while `js->toff + js->tlen < js->clen`, so an unclosed string in a bounded slice stays
+`TOK_ERR` (`next()` sets it first). That is the issue's own suggested fix for strings, and the
+escape branches already stay in bounds. **Partial:** the issue reports a second defect, numbers
+parsed with `strtod` past `len`; our reproducer covers only the string case, so that half is
+untouched. elk's unit test fails at upstream HEAD (`test_basic` assertion), so the gate could not
+use it ("verified, needs human review"). Package: `round3/cesanta_elk/generated/` (`Part of #82`).
+
+### utf8.h #1 (`utf8_decode` reads continuation bytes past the end): ready to propose as a partial fix
+The winner (H1·w0) checks `p[1]`, then `p[2]`, `p[3]` against the terminator before each read
+(short-circuit `||`) and returns U+FFFD with `bytes_read = 1` for a truncated sequence; Super's
+adversary input found nothing. Correct for the out-of-bounds read on NUL-terminated input (the
+API's contract). **Partial:** the issue also asks for overlong, surrogate and non-continuation
+rejection, which the patch does not add. Package: `round3/me7alix_utf8.h/generated/` (`Part of #1`).
+
+### toybox #573 (mkpasswd `get_salt`): refused, correctly
+Every patch bounded the loops but changed behaviour: the differential found different output on
+43 of 169 inputs that ran clean unpatched, and none stops `s` running past the algorithm name.
+
+### special-fun #17 (`facf`): refused, correctly; the planner misread the report
+The planner blamed the table index; the overflow is `MAXNUMF`, declared `extern double` in
+`facf.c` and defined `float` in `constf.c`, so every out-of-range call reads 8 bytes of a 4-byte
+global. All four patches still crashed at the same line (`rejected:still_crashes`).
+
+## Funnel, round 3
+
+10 issues triaged → 4 configured (`leakproof init` drafted each; none had a build system the tool
+could use, so the build and reproducer lines were hand-written) → 4 reproduce at HEAD →
+2 verified → **0 complete fixes, 2 ready to propose as partial fixes** (QUESTION 0020).
+Model spend $0.18.
+
+## All three rounds
+
+40 issues triaged → 11 reproduce at HEAD without an open fix PR, all attempted → 7 verified →
+1 complete fix ready (toybox #572) + 2 partial fixes ready (elk #82, utf8.h #1). Model spend $1.10.
+Machine-readable: `funnel.json` (published to NUMBERS and the dashboard).
+
 ## Review finding → caught by which check (D-0078 re-gate, D-0079 adversary)
 
 Every distinct verified open-bugs diff re-gated with the harness-less checks: inputs generated

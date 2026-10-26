@@ -145,3 +145,11 @@ Then tell me (`## ANSWER 0018`), or I will see the run when the repo is public. 
 One honest limit: the caps are kept in memory, and Render's free instance restarts after it sleeps, which resets them. The real bound over the judging window is the daily cap × the days live runs are on (with the defaults, at most $0.50 a day; $7.50 over 15 days if someone woke it every day). Set `DEMO_DAILY_USD=0.15` for a ~$2 worst case.
 
 Options: (a) turn live runs on (`DEMO_ENABLED=true` in Render's environment) with `DEMO_DAILY_USD=0.15`; (b) leave them off and keep the labelled recorded runs. **Default if no answer: (b), off.**
+
+## QUESTION 0020 — Two partial fixes for still-open bugs are packaged (your decision; nothing has been posted)
+2026-10-26, per strategist review #13 order 3 (open bugs round 3, full product path). Two verified fixes are correct for the sanitizer finding but cover only part of their issue, so their commit messages say `Part of #N`, not `Fixes`:
+
+- **cesanta/elk #82** — https://github.com/cesanta/elk/issues/82. One line in `next()`: stop reading after an unclosed string at the end of a bounded slice (the issue's own suggestion for strings). The issue's second defect (numbers parsed past `len`) is not fixed. elk's unit test already fails at upstream HEAD, so only the reproducer verified it. Package: `cases/open_bugs/round3/cesanta_elk/generated/` (patch applies to upstream `71a86fa`).
+- **me7alix/utf8.h #1** — https://github.com/me7alix/utf8.h/issues/1. `utf8_decode` stops at the terminator before reading each continuation byte and returns U+FFFD. The issue's other requests (reject overlong, surrogate and non-continuation sequences) are not done. Package: `cases/open_bugs/round3/me7alix_utf8.h/generated/` (applies to upstream `c08d482`).
+
+Neither repository states an AI-contribution policy. Options: (a) send one or both under your name with the disclosure in each SUBMISSION.md, saying plainly what is and isn't fixed; (b) leave them. **Default if no answer: (b), nothing is sent.**

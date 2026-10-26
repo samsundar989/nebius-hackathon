@@ -37,11 +37,14 @@ CHECKS = [
 PLACEHOLDER = "<your git identity>"
 
 
-def repo_diff(diff: str) -> str:
-    """Container paths (a/src/<project>/x) -> repository paths (a/x), with `diff --git` headers."""
+def repo_diff(diff: str, subdir: str = "") -> str:
+    """Container paths (a/src/<project>/x) -> repository paths (a/x), with `diff --git` headers.
+    `subdir`: where the upstream repository sits inside the case tree (a config with src = "."
+    and the clone in src/), stripped as well so the patch applies upstream."""
     out = []
+    prefix = r"src/[^/]+/" + (re.escape(subdir.strip("/")) + "/" if subdir else "")
     for line in diff.splitlines():
-        line = re.sub(r"^(--- a|\+\+\+ b)/src/[^/]+/", r"\1/", line)
+        line = re.sub(rf"^(--- a|\+\+\+ b)/{prefix}", r"\1/", line)
         if line.startswith("--- a/"):
             path = line[6:].split("\t")[0]
             out.append(f"diff --git a/{path} b/{path}")
@@ -101,7 +104,9 @@ def _changed(diff: str) -> tuple[list[str], dict[str, list[int]]]:
     return lines, files
 
 
-def commit_message(finding: dict[str, Any], diff: str, issue: str | None) -> str:
+def commit_message(
+    finding: dict[str, Any], diff: str, issue: str | None, partial: bool = False
+) -> str:
     """Describes the diff, never the plan (review #12): the subject names the defect and the
     function from the sanitizer report; the body says what the report showed and quotes the
     changed lines when the change is small (at most 6), else summarises them per file."""
@@ -121,7 +126,7 @@ def commit_message(finding: dict[str, Any], diff: str, issue: str | None) -> str
         body += textwrap.wrap("This changes " + ", ".join(parts) + ".", 72)
     msg = subject + "\n\n" + "\n".join(body)
     if issue:
-        msg += f"\n\nFixes #{issue.lstrip('#')}."
+        msg += f"\n\n{'Part of' if partial else 'Fixes'} #{issue.lstrip('#')}."
     return msg
 
 
@@ -248,9 +253,18 @@ def package(
     author: str | None = None,
     issue: str | None = None,
     issue_url: str | None = None,
+    repo_subdir: str = "",
+    partial: bool = False,
 ) -> tuple[Path, Path]:
-    diff = repo_diff(diff)
-    message = commit_message(finding, diff, issue)
+    diff = repo_diff(diff, repo_subdir)
+    if repo_subdir:
+        loc = re.sub(
+            rf"^(/src/[^/]+/){re.escape(repo_subdir.strip('/'))}/",
+            r"\1",
+            finding.get("location") or "",
+        )
+        finding = finding | {"location": loc}
+    message = commit_message(finding, diff, issue, partial)
     slug = re.sub(r"[^a-z0-9]+", "-", message.split("\n")[0].lower()).strip("-")[:52]
     patch_name = f"0001-{slug}.patch"
     out.mkdir(parents=True, exist_ok=True)

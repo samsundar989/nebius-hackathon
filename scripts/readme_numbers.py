@@ -437,6 +437,34 @@ def main() -> int:
             "(Nebius billing agreed within $0.01 on 2026-10-24).",
             f"- Nebius Sandboxes: {units:.2f} units, not billed during the beta.",
         ]
+    fj = REPO_ROOT / "cases" / "open_bugs" / "funnel.json"
+    if fj.exists():
+        f = json.loads(fj.read_text(encoding="utf-8"))
+        tot = {
+            k: sum(r[k] for r in f["rounds"])
+            for k in ("triaged", "reproduce_no_pr", "verified", "ready", "ready_partial", "usd")
+        }
+        tot["usd"] = round(tot["usd"], 2)
+        nums["open_bugs"] = {"rounds": f["rounds"], "total": tot, "ready_cases": f["ready_cases"]}
+        out += [
+            "",
+            "## Open bugs: still-open GitHub issues (hand-reviewed, cases/open_bugs/REVIEW.md)",
+            "",
+            "| round | triaged | reproduce at HEAD, no fix PR | verified | ready to propose | $ |",
+            "|---|---|---|---|---|---|",
+        ]
+        for r in f["rounds"]:
+            ready = f"{r['ready']}" + (
+                f" + {r['ready_partial']} partial" if r["ready_partial"] else ""
+            )
+            out.append(
+                f"| {r['round']} | {r['triaged']} | {r['reproduce_no_pr']} | {r['verified']} | "
+                f"{ready} | {r['usd']:.2f} |"
+            )
+        out.append(
+            f"| all | {tot['triaged']} | {tot['reproduce_no_pr']} | {tot['verified']} | "
+            f"{tot['ready']} + {tot['ready_partial']} partial | {tot['usd']:.2f} |"
+        )
     OUT.write_text("\n".join(out) + "\n", encoding="utf-8", newline="\n")
     SITE.parent.mkdir(parents=True, exist_ok=True)
     SITE.write_text(json.dumps(nums, indent=1) + "\n", encoding="utf-8", newline="\n")
