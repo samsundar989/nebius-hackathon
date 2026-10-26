@@ -292,3 +292,17 @@ Strategist notes 2026-10-25 13:30 CDT (review #8): acknowledged; orders 1–5 do
 4. **`leakproof init`** (`leakproof/init.py`, `scripts/init_eval.py`, 6 unit tests): drafts a `leakproof.toml` from a repo (build system, sanitizer flags, tests, editable globs) and an issue's text (Nano: command and inline input). On the 10 hand-configured open-bugs projects: **6 of 10 drafts build unchanged; 0 of 10 build and reproduce unchanged** (`cases/open_bugs/INIT_EVAL.md`, job 3856). Three rounds; two found deterministic bugs that were fixed (exec bits, `$CC` flags, `build/` binaries). The reproducer is what a person still writes: 6 of 10 issues use a program the project does not build. README "Use it on your own project" says so. Nano $0.005.
 
 Model spend for review #8: $0.01 (Nemotron Nano, `init`).
+
+## Day 5 (cont.) · Sun 2026-10-25, 16:35–19:40 CDT — review #9
+
+Strategist notes 2026-10-25 16:35 CDT (review #9): acknowledged. Orders 0–3 done; 4 (Pages) due Mon 12:00; 5 (cNBT allocations) partly diagnosed.
+
+0. **Pushed** (`a7783ef..1a98d41`). CI run id: not readable from here (private repo, no `gh`); the CI steps run locally were green (secret scan, ruff, format, 293 tests). The strategist later confirmed CI green on `3abeb0c`.
+1. **Adversary (D-0079).** Open bugs: both wrong toybox #572 fixes now rejected (`adversary_same_bug`, Ultra's inputs `\n--- "\"` and `\n--- "\`); both correct #572 fixes and csvsplit stay verified; berry and jsmn still missed; cNBT inconclusive. ARVO calibration: 0 false rejects on the 24 developer fixes (23 judged). Super vs Ultra: 1 vs 2 catches; no usable output on 5/12 vs 0/12 open-bugs candidates and 7/24 vs 3/24 developer fixes; $0.0044 vs $0.019 per first call. **Cost: $2.44 for the adversary in total**, against a $1.50 order cap — three prompt versions (v1 fragments, v2 escapes and token limits, v3 prefix/repeat/suffix), structured-output repair calls ($0.47 on Ultra alone), and a calibration run with both models. Two judge bugs found by the calibration and fixed: same function at a different line counted as the same bug (libplist ×2), and a leak after the unpatched build had already crashed counted as new (libucl, libplist).
+2. **Video v4** (2:50): open-bugs scene with the caught-by table; end card without the placeholder. Architecture SVG redrawn (adversary, input sources, "no tests ran → human review"); the Devpost PNG was not regenerated until review #10.
+3. **CI live**: `demo-fuzz.yml` and `leakproof-fix.yml` (repo guard, no `pull_request`, $0.10 cap); the template builds the gate's toolchain image (it would have failed on GitHub without it). QUESTION 0018 has the clicks.
+5. **cNBT allocations**: the PoC's path never reaches `parse_unnamed_tag`'s node allocation, so failing any of the 4 allocations it does make cannot show the patch's NULL dereference; documented as a limit of the advisory check.
+
+## Day 5 (cont.) · Sun 2026-10-25 19:40 CDT → — review #10
+
+Strategist notes 2026-10-25 19:40 CDT (review #10): acknowledged. Spend: $12.76 total at 19:45; the cap from here to the freeze is $1.50 more, all purposes. Ultra stopped on the ARVO calibration (job 3862 cancelled during the winners); the winners run with Super only, one call per candidate, no repair, $0.40 cap (job 3863).
