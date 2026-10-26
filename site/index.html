@@ -156,6 +156,7 @@ details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
   <section id="limitations">
     <h2>Limitations</h2>
     <div class="panel"><ul>
+      <li>ARVO's developer fixes have been public for years, so the models may have seen them during training. The still-open bugs, where no fix exists anywhere, are the clean test: 40 issues → 11 reproduce → 7 verified → 1 complete and 2 partial fixes ready after review; none sent yet.</li>
       <li>ARVO has no memory-leak cases; leak results come from Juliet, which is synthetic.</li>
       <li>The gate proves absence of the reported crash and of new sanitizer reports on the inputs it tries. It cannot prove a fix correct for every input (for example, a stack buffer sized from input length).</li>
       <li>Calibration false rejects come from known limits: a strict rule for patches that remove a <code>free</code>, and crashes the original bug used to mask.</li>

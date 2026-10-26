@@ -54,11 +54,6 @@ It works on your own project through a short `leakproof.toml` (`leakproof init` 
 ## Results (real numbers, failed runs included)
 
 - **27 real OSS-Fuzz bugs (ARVO, 13 projects):** the crash went away in 18. **15 verified** at $0.070 of model spend per verified fix. Compared by hand with the developers' own fixes, the chosen fix is correct in **14**.
-- **The gate isn't just strict:** it accepts 24 of 27 of the developers' own fixes. One rejection is correct (that upstream fix leaks).
-- **Gate precision:** 52 of 67 verified patches (78%) are correct when compared with the developer's fix. We publish the 8 that are wrong and explain how each fooled the gate.
-- **The planner matters on real code:** same Lightning workers, 10 cases. No planner: 2 verified; Super: 4; Ultra: 7. Ultra was also cheaper per verified fix, because failed attempts cost money too.
-- **Juliet CWE-401 (synthetic):** 94/100, every reproducible case, at $0.011 per fix.
-- **CUDA (compute-sanitizer on a T4):** 3/3 verified. Two candidate patches silenced the sanitizer but printed the wrong answer; the gate rejected them.
 - **Bugs that are still open upstream:** 40 open GitHub issues with sanitizer reports (three rounds) → 11 still reproduce at upstream HEAD with no fix PR → 7 verified by the gate → after review, 1 complete fix ready to propose (toybox #572, which also passes toybox's 13 `patch` tests) and 2 partial fixes (elk #82, utf8.h #1), each packaged for a maintainer; a human decides whether to send them, nothing was posted. Without tests or an output-printing harness the gate sees little, and most verified diffs were defensive or incomplete on review. Of the five wrong-or-incomplete findings that review made, two are now caught by a machine check:
 
   | case | review said | caught by |
@@ -71,6 +66,12 @@ It works on your own project through a short `leakproof.toml` (`leakproof init` 
 
   The ARVO numbers above come from the gate before the adversary existed. Calibrated on them afterwards, the adversary rejected none of the 24 developer fixes, every correct winner it reached (12 of 14) stayed verified, and it rejected none of the correct open-bug fixes.
 
+- **The gate isn't just strict:** it accepts 24 of 27 of the developers' own fixes. One rejection is correct (that upstream fix leaks).
+- **Gate precision:** 52 of 67 verified patches (78%) are correct when compared with the developer's fix. We publish the 8 that are wrong and explain how each fooled the gate.
+- **The planner matters on real code:** same Lightning workers, 10 cases. No planner: 2 verified; Super: 4; Ultra: 7. Ultra was also cheaper per verified fix, because failed attempts cost money too.
+- **Juliet CWE-401 (synthetic):** 94/100, every reproducible case, at $0.011 per fix.
+- **CUDA (compute-sanitizer on a T4):** 3/3 verified. Two candidate patches silenced the sanitizer but printed the wrong answer; the gate rejected them.
+
 ## How we built it
 
 Python 3.12 with the plain `openai` SDK against Nebius Token Factory. There's no agent framework: the loop is planner → workers → gate. Every model call is metered into a cost ledger with a hard budget stop, and the ledger matched the Token Factory billing page to within a cent. The gate runs on local Docker or on **Nebius Sandboxes** with `networking.enabled=false`. We wrote a small REST runner because the SDK has no networking switch. Workers branch from one saved checkpoint. A unit test fails if any worker-side module imports gate code, so workers can never see the tests, the corpus or the developer's fix. ARVO supplies reproducible OSS-Fuzz bugs; we calibrate the gate by running the developers' own fix commits through it.
@@ -78,6 +79,8 @@ Python 3.12 with the plain `openai` SDK against Nebius Token Factory. There's no
 ## Challenges we ran into
 
 Our own gate lied to us, seven different ways: it "verified" binaries the patch never compiled into; its fuzzer silently never ran; a slow input counted as a crash; the model could edit the fuzz harness; OSS-Fuzz build scripts can't run twice; line numbers moved under a pre-existing bug; and a fuzz harness can only see what it prints (two mosquitto patches passed every check yet pointed the config at the wrong listener). Each is in the README's "How a gate lies". Each fix was re-calibrated against the developers' own patches.
+
+**A caveat we owe you:** ARVO's developer fixes have been public for years, so the models may have seen them during training. The still-open bugs, where no fix exists anywhere, are the clean test: 40 issues → 11 reproduce → 7 verified → 1 complete and 2 partial fixes ready after review; none sent yet.
 
 ## Accomplishments that we're proud of
 
