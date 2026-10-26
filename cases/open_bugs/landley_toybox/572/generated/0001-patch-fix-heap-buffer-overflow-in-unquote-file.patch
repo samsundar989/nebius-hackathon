@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: <your git identity>
+Date: Mon, 26 Oct 2026 06:34:48 +0000
+Subject: [PATCH] patch: fix heap-buffer-overflow in unquote_file()
+
+In unquote_file(), the buffer allocation at line 283 uses strlen(s) + 1
+where s points just past the opening quote. This assumes the quoted
+string has no embedded null bytes and that the closing quote coincides
+with the string terminator.
+AddressSanitizer: heap-buffer-overflow at toys/posix/patch.c:287.
+
+Fixes #572.
+---
+ toys/posix/patch.c | 2 +-
+ 1 file(s) changed, 1 insertion(s)(+), 1 deletion(s)(-)
+
+diff --git a/toys/posix/patch.c b/toys/posix/patch.c
+--- a/toys/posix/patch.c
++++ b/toys/posix/patch.c
+@@ -281,7 +281,7 @@
+ 
+   // quoted and escaped filenames are larger than the original
+   for (t = newfile = xmalloc(strlen(s) + 1); *s != '"'; s++) {
+-    if (!s[1]) error_exit("bad %s", filename);
++    if (!*s || !s[1]) error_exit("bad %s", filename);
+ 
+     // don't accept escape sequences unless the filename is quoted
+     if (*s != '\\') *t++ = *s;
+--
+leakproof package

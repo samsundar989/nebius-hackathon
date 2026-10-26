@@ -67,12 +67,20 @@ jobs:
           uv run python scripts/render_bundle.py ci --all --out bundle || true
           cat bundle/*.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "no bundle" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Submission package (when verified)
+        if: steps.fix.outputs.exit == '0'
+        run: |
+          rec=$(ls leakproof-runs/ci/*.json | grep -v summary | head -1)
+          uv run leakproof package "$rec" --out submission
+          echo "A ready-to-review patch and SUBMISSION.md are in the leakproof-evidence artifact." >> "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: leakproof-evidence
           path: |
             bundle/
+            submission/
             leakproof-runs/ci/
 
       - name: Verdict

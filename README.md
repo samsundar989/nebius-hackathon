@@ -133,6 +133,8 @@ uv run leakproof fix   --config examples/csvsplit/leakproof.toml
 uv run leakproof batch --config examples/csvsplit/leakproof.toml --findings examples/csvsplit/findings
 ```
 
+When a fix is verified, `uv run leakproof package runs/<run-id>/<case>.json --issue N` turns it into what a maintainer receives: a `git format-patch` file (author left as a placeholder unless `--author`) and a `SUBMISSION.md` with the evidence table (every check, including the ones that did not run), the commit message, an AI-assistance note and a "before sending" checklist. No model call; the commit message body comes from the planner's root cause, so read it against the diff ([toybox #572 example](cases/open_bugs/landley_toybox/572/generated/SUBMISSION.md)).
+
 `batch` is triage at scale: it reproduces every crash input on one build, groups them by signature (defect kind + top in-project frames), fixes one per group, and re-runs every member's input against the winning patch. On the demo: 10 inputs → 6 crashes → 1 group → fixed once, all 6 clean ($0.009).
 
 In CI: [examples/github-action](examples/github-action/) is a workflow template that runs `leakproof fix` on the crash input of a failed fuzzing run and uploads the evidence bundle. It never pushes code. It has not run on GitHub yet (we have no demo repository with the secret).

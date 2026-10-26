@@ -247,6 +247,29 @@ def _init(args: argparse.Namespace) -> int:
     return 0
 
 
+def _package(args: argparse.Namespace) -> int:
+    from leakproof import package as pk
+
+    if args.gate_dir:
+        src = pk.from_gate_dir(
+            Path(args.gate_dir), args.candidate, Path(args.record) if args.record else None
+        )
+    else:
+        src = pk.from_record(Path(args.record_json), args.candidate)
+    if not src["verdict"].startswith("verified") and not args.force:
+        print(f"candidate verdict is {src['verdict']}; pass --force to package it anyway")
+        return 2
+    sp, pp = pk.package(
+        out=Path(args.out),
+        author=args.author,
+        issue=args.issue,
+        issue_url=args.issue_url,
+        **src,
+    )
+    print(f"wrote {sp}\nwrote {pp}")
+    return 0
+
+
 def _winner_files(rec: dict) -> dict[str, str]:
     w = rec["winner"]
     for worker in rec.get("workers", []):
@@ -298,7 +321,21 @@ def main(argv: list[str] | None = None) -> int:
     it.add_argument("--out", help="where to write (default: <repo-dir>/leakproof.toml)")
     it.add_argument("--force", action="store_true")
     it.add_argument("--budget", type=float, default=0.05, help="USD cap for the issue read")
+    pk = sub.add_parser("package", help="SUBMISSION.md + format-patch from a verified fix")
+    pk.add_argument(
+        "record_json", nargs="?", help="a `leakproof fix` record (runs/<id>/<case>.json)"
+    )
+    pk.add_argument("--record", help="with --gate-dir: a fix record for the root-cause text")
+    pk.add_argument("--gate-dir", help="a gate run on stored candidates (gate_manual.py)")
+    pk.add_argument("--candidate", default="winner", help="winner | HYP:IDX | an id in --gate-dir")
+    pk.add_argument("--author", help='"Name <mail>" (default: a placeholder)')
+    pk.add_argument("--issue", help="issue number for `Fixes #N`")
+    pk.add_argument("--issue-url")
+    pk.add_argument("--out", default="submission")
+    pk.add_argument("--force", action="store_true", help="package a candidate that is not verified")
     args = ap.parse_args(argv)
+    if args.cmd == "package":
+        return _package(args)
     if args.cmd == "init":
         return _init(args)
     return _batch(args) if args.cmd == "batch" else _fix(args)

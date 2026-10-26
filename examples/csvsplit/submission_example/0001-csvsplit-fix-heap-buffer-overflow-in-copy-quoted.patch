@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: <your git identity>
+Date: Mon, 26 Oct 2026 06:34:49 +0000
+Subject: [PATCH] csvsplit: fix heap-buffer-overflow in copy_quoted()
+
+In copy_quoted(), line 22 allocates `inner` bytes (n-2) for the unquoted
+content but does not reserve space for the terminating NUL.
+AddressSanitizer: heap-buffer-overflow at src/csvsplit.c:33.
+---
+ src/csvsplit.c | 2 +-
+ 1 file(s) changed, 1 insertion(s)(+), 1 deletion(s)(-)
+
+diff --git a/src/csvsplit.c b/src/csvsplit.c
+--- a/src/csvsplit.c
++++ b/src/csvsplit.c
+@@ -19,7 +19,7 @@
+  * quote, `n` counts every byte up to and including the closing quote. */
+ static char *copy_quoted(const char *raw, size_t n) {
+     size_t inner = n >= 2 ? n - 2 : 0;
+-    char *field = malloc(inner); /* room for the content */
++    char *field = malloc(inner + 1); /* room for the content and NUL terminator */
+     size_t out = 0;
+     if (field == NULL) {
+         return NULL;
+--
+leakproof package
