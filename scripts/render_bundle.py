@@ -90,7 +90,11 @@ def bundle(rec: dict, case_dir: Path) -> str:
         None,
     )
     title = arvo.get("project") or rec.get("suite", "")
-    out = [f"# {title} {case}: {rec['verdict']}", ""]
+    if str(case).startswith("project:"):
+        # A bring-your-own case id is a config path (a queue snapshot path, on a queued run).
+        proj = rec.get("project")
+        title, case = "", (proj.get("project") if isinstance(proj, dict) else proj) or "project"
+    out = [f"# {title} {case}: {rec['verdict']}".replace("#  ", "# "), ""]
     if rec["verdict"] != "verified":
         # Refused cases lead with why (strategist order D): the first failed check of each
         # distinct gated candidate, or what stopped the workers before the gate.

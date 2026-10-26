@@ -9,7 +9,7 @@
 > - **The aha:** a patch for a real jq bug passed jq's own tests; Leakproof doubled one number in the crash input, the patched jq overflowed, and the patch was refused.
 > - **Proof:** 15/27 real OSS-Fuzz bugs verified · 14 correct when compared with the developers' fixes · the gate accepts 24/27 of the developers' own fixes.
 > - **Which model does what:** Nemotron 3 Ultra plans and four Nemotron 3.5 Lightning workers patch; on real bugs Ultra's plan takes the same workers from 2 to 7 verified fixes out of 10.
-> - **Try it:** `uv run leakproof fix --config examples/csvsplit/leakproof.toml` (Docker and a Nebius Token Factory key; about one cent).
+> - **Try it:** `uv run leakproof fix --config examples/csvsplit/leakproof.toml` (Docker and a Nebius Token Factory key; about one cent). The [walkthrough](docs/WALKTHROUGH.md) goes from `init` to a ready-to-send patch, with real outputs.
 
 **Verified fixes, or nothing.** Leakproof is an agent that fixes memory-safety defects in C, C++ and CUDA code — leaks, use-after-free, double free, buffer overflows, data races — and reports a fix only when an evidence gate verifies it. On Nebius Token Factory, Nemotron 3 Ultra plans, Nemotron 3.5 Lightning patches, and Nemotron 3 Super attacks every candidate on projects without tests; a separate gate process, with the network off, decides.
 
