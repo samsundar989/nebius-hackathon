@@ -93,5 +93,5 @@ One repeat on 10 cases: read the gap between no planner and Ultra, not small dif
 
 ## Spend
 
-- Every model call in the project, failed runs included: **$10.2928** (Nebius billing agreed within $0.01 on 2026-10-24).
-- Nebius Sandboxes: 9.42 units, not billed during the beta.
+- Every model call in the project, failed runs included: **$12.7640** (Nebius billing agreed within $0.01 on 2026-10-24).
+- Nebius Sandboxes: 9.43 units, not billed during the beta.
