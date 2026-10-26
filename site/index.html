@@ -155,7 +155,7 @@ const head = (v) => String(v || "").split(":")[0];
 const chip = (v, title) => `<span class="chip c-${esc(head(v))}"${title ? ` title="${esc(title)}"` : ""}>${esc(v)}</span>`;
 const pct = (a, b) => (b ? Math.round((100 * a) / b) + "%" : "–");
 const money = (x) => (x == null ? "–" : "$" + Number(x).toFixed(4));
-const CHECKS = ["unpatched_trips","diff_scope","build","compiled","patched","tests","behavior","differential","refuzz","safe_fix"];
+const CHECKS = ["unpatched_trips","diff_scope","build","compiled","patched","tests","behavior","differential","refuzz","safe_fix","adversary"];
 const get = (p) => fetch(p).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 
 // Changed lines with 2 lines of context each; gaps shown as "…", so the change is in view.

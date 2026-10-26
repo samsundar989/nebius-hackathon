@@ -40,6 +40,7 @@ CHECKS = [
     "differential",
     "refuzz",
     "safe_fix",
+    "adversary",
 ]
 
 

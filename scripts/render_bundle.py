@@ -30,6 +30,7 @@ CHECK_ORDER = [
     "differential",
     "refuzz",
     "safe_fix",
+    "adversary",
 ]
 ICON = {"pass": "pass", "fail": "**fail**", "skipped": "skipped", "inconclusive": "inconclusive"}
 

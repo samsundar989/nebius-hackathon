@@ -202,6 +202,9 @@ def decide(checks: dict[str, Check]) -> str:
         return "silenced_only"
     if "inconclusive" in (st("tests"), st("behavior")):
         return "inconclusive:tests"
+    if st("adversary") == "fail":
+        # D-0079: only a machine-confirmed input (sanitizer report or output difference).
+        return "rejected:" + checks["adversary"].detail.split(":", 1)[0]
     return "verified"
 
 
@@ -601,6 +604,60 @@ class ArvoGate:
         path.with_suffix(".log").write_text(report, encoding="utf-8")
         return [str(path), str(path.with_suffix(".log"))]
 
+    def adversary(self, cand: dict[str, Any], model: str, client: Any) -> tuple[Check, list[str]]:
+        """D-0079: `model` proposes inputs against this one candidate; the machine judges them.
+        Runs only on a candidate every other check verified. Never raises: a model failure or
+        a build failure is a skipped check, which leaves the verdict alone."""
+        from leakproof import adversary as adv
+
+        try:
+            poc = self.runner.read(self.baseline, "/tmp/poc")
+        except Exception:  # noqa: BLE001 - no PoC file: the prompt says so
+            poc = b""
+        originals = {}
+        for path in cand["files"]:
+            try:
+                originals[path] = self.runner.read(self.baseline, path).decode("utf-8", "replace")
+            except Exception:  # noqa: BLE001 - a new file has no original
+                originals[path] = ""
+        report = json.dumps(self.case.finding)[:4000]
+        text = adv.prompt(report, adv.how(self.case), poc, originals, cand["files"], cand["diff"])
+        try:
+            inputs, _ = adv.attack(client, model, text)
+        except Exception as exc:  # noqa: BLE001 - invalid output or budget: no inputs
+            return Check("skipped", f"{model}: no inputs ({str(exc)[:160]})"), []
+        if not inputs:
+            return Check("skipped", f"{model}: no inputs"), []
+        try:
+            base = adv.run_inputs(self.runner, self.case, self.baseline, inputs)
+            pat = adv.run_inputs(self.runner, self.case, self.baseline, inputs, cand["files"])
+            ref = (
+                adv.run_inputs(self.runner, self.case, self.reference, inputs)
+                if self.reference
+                else None
+            )
+        except RuntimeError as exc:
+            return Check("skipped", f"{model}: {str(exc)[:200]}"), []
+        target = (gf._norm(self.case.finding.get("kind", "")), gf.finding_site(self.case.finding))
+        verdict, detail, rows = adv.judge(
+            base, pat, ref, target, self.case.finding.get("location") or ""
+        )
+        saved: list[str] = []
+        if self.artifacts is not None:
+            d = self.artifacts / f"{cand['hypothesis_id']}_w{cand['worker_index']}_adversary"
+            d.mkdir(parents=True, exist_ok=True)
+            for i in inputs:
+                (d / i["name"]).write_bytes(i["data"])
+                saved.append(str(d / i["name"]))
+            reasons = {i["name"]: (i["expect"], i["reason"]) for i in inputs}
+            for r in rows:
+                r["expect"], r["reason"] = reasons.get(r["input"], ("", ""))
+                r["report"] = pat.reports.get(r["input"], "")[:3000]
+            (d / "adversary.json").write_text(json.dumps({"model": model, "rows": rows}, indent=1))
+        if verdict in ("pass", "inconclusive"):
+            return Check("pass" if verdict == "pass" else "skipped", f"{model}: {detail}"), saved
+        return Check("fail", f"{verdict}: {model}: {detail}"), saved
+
     def candidate(self, cand: dict[str, Any], checks: dict[str, Check]) -> str:
         tests = self.case.tests_cmd
         hash_cmd = f"md5sum {self.artifact} > /tmp/hash 2>&1" if self.artifact else ": > /tmp/hash"
@@ -724,6 +781,8 @@ def run_gate(
     reference: ImageRef | None = None,
     runner_name: str = "docker",
     fuzz_seed: int = 1,
+    adversary: str = "off",
+    adversary_budget: float = 0.0,
 ) -> dict[str, Any]:
     # Every gate run has networking off whichever backend runs it (Docker --network=none,
     # Sandboxes networking.enabled=false).
@@ -749,6 +808,15 @@ def run_gate(
     kind = (finding or {}).get("kind") or getattr(gate.case, "finding", {}).get("kind", "")
     unpatched = gate.unpatched()
     results = []
+    adv_client = None
+    if adversary != "off" and isinstance(gate, ArvoGate) and adversary_budget > 0:
+        # Gate-side model calls (D-0079): metered to the same ledger, capped by what is left of
+        # the run's budget. Workers have finished; nothing here goes back to them.
+        from leakproof.llm import CostLedger, LLMClient
+
+        adv_client = LLMClient(
+            ledger=CostLedger(budget=adversary_budget), run_id=f"gate-adversary:{case_id}"
+        )
     for cand in candidates:
         c0 = time.monotonic()
         checks: dict[str, Check] = {"unpatched_trips": unpatched}
@@ -766,14 +834,19 @@ def run_gate(
         report = ""
         if unpatched.status == "pass" and checks["diff_scope"].status == "pass":
             report = gate.candidate(cand, checks)
+        verdict = decide(checks)
+        adv_saved: list[str] = []
+        if verdict == "verified" and adv_client is not None:
+            checks["adversary"], adv_saved = gate.adversary(cand, adversary, adv_client)
+            verdict = decide(checks)
         r = GateResult(
             cand["hypothesis_id"],
             cand["worker_index"],
-            decide(checks),
+            verdict,
             checks,
             report[-4000:],
             round(time.monotonic() - c0, 2),
-            cand.pop("_artifacts", []),
+            cand.pop("_artifacts", []) + adv_saved,
             cand.pop("_amplification", {}),
             cand.pop("_evidence", {}),
         )
@@ -794,6 +867,10 @@ def run_gate(
         },
         "tests_baseline": tb.to_dict() if (tb := getattr(gate, "tests_baseline", None)) else None,
         "results": results,
+        "adversary": {
+            "model": adversary if adv_client else "off",
+            "usd": round(adv_client.ledger.spent, 6) if adv_client else 0.0,
+        },
         "elapsed_s": round(time.monotonic() - t0, 2),
         "runner": runner_name,
         # Sandboxes: every saved run (parent image -> child image), for the lineage view.
@@ -815,6 +892,8 @@ def main() -> int:
     ap.add_argument(
         "--fuzz-seed", type=int, default=1, help="libFuzzer -seed (repair rounds: fresh)"
     )
+    ap.add_argument("--adversary", default="off", choices=["off", "super", "ultra"])
+    ap.add_argument("--adversary-budget", type=float, default=0.0, help="USD for its calls")
     args = ap.parse_args()
     payload = json.loads(args.candidates.read_text())
     out = run_gate(
@@ -828,6 +907,8 @@ def main() -> int:
         ImageRef(args.runner, args.reference) if args.reference else None,
         args.runner,
         args.fuzz_seed,
+        args.adversary,
+        args.adversary_budget,
     )
     args.out.write_text(json.dumps(out, indent=1))
     return 0

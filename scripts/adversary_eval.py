@@ -25,7 +25,6 @@ from leakproof import gate_cli as gc
 from leakproof import gate_fuzz as gf
 from leakproof.cases import load_case
 from leakproof.cases.project import ProjectCase
-from leakproof.gate import split
 from leakproof.llm import CostLedger, LLMClient
 from leakproof.results import records, strict
 from leakproof.runner import LocalDockerRunner
@@ -91,38 +90,6 @@ def worker_files(rec_path: Path, hyp: str, idx: str) -> tuple[dict[str, str], st
     return w["files"], w["diff"]
 
 
-def how(case: Any) -> str:
-    if case.harness_path:
-        return (
-            f"A libFuzzer harness ({case.harness_path}) is run with the input file as its only "
-            "argument; it passes the file's bytes to the code under test."
-        )
-    return (
-        f"The input is written to /tmp/poc, then this command runs in {case.workdir}:\n"
-        f"{case.reproduce_cmd}"
-    )
-
-
-def run_inputs(runner, case, image, inputs, files=None):  # noqa: ANN001, ANN201
-    repro = f"{case.harness_path} /tmp/poc" if case.harness_path else case.reproduce_cmd
-    names = [i["name"] for i in inputs]
-    build = case.gate_build_cmd(files) if files else None
-    res = runner.run(
-        image,
-        adv.run_script(names, repro, build),
-        files=gc.files([(i["name"], i["data"]) for i in inputs], repro)
-        | ({k: v.encode() for k, v in files.items()} if files else {}),
-        env=case.build_env | (getattr(case, "reproduce_env", None) or {}),
-        cwd=case.workdir,
-        timeout_s=3600,
-        network=False,
-    )
-    sec = split(res.stdout)
-    if "build_failed" in sec:
-        raise RuntimeError("candidate build failed: " + sec["build_failed"][-500:])
-    return gc.Run.parse(sec)
-
-
 def attack_case(
     runner,
     client,
@@ -153,7 +120,7 @@ def attack_case(
                     originals[p] = runner.read(baseline, p).decode("utf-8", "replace")
                 except Exception:  # noqa: BLE001 - a new file has no original
                     originals[p] = ""
-            text = adv.prompt(report, how(case), poc, originals, files, diff)
+            text = adv.prompt(report, adv.how(case), poc, originals, files, diff)
             row: dict[str, Any] = {"case": case.id, "candidate": cid, "models": {}}
             inputs = []
             for model in models:
@@ -192,14 +159,14 @@ def attack_case(
                 row["error"] = "no inputs"
                 results.append(row)
                 continue
-            base = run_inputs(runner, case, baseline, inputs)
+            base = adv.run_inputs(runner, case, baseline, inputs)
             try:
-                pat = run_inputs(runner, case, baseline, inputs, files)
+                pat = adv.run_inputs(runner, case, baseline, inputs, files)
             except RuntimeError as e:
                 row["error"] = str(e)
                 results.append(row)
                 continue
-            refr = run_inputs(runner, case, ref, inputs) if ref else None
+            refr = adv.run_inputs(runner, case, ref, inputs) if ref else None
             for model in models:
                 keep = {i["name"] for i in inputs if i["model"] == model}
 

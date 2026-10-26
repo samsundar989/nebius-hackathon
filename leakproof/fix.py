@@ -61,6 +61,8 @@ def run_gate_process(
     reference: str | None = None,
     runner_name: str = "docker",
     fuzz_seed: int = 1,
+    adversary: str = "off",
+    adversary_budget: float = 0.0,
 ) -> dict[str, Any]:
     cpath, vpath = case_dir / "candidates.json", case_dir / "gate.json"
     cpath.write_text(json.dumps({"finding": finding, "candidates": candidates}, indent=1))
@@ -85,6 +87,8 @@ def run_gate_process(
         cmd += ["--runner", runner_name]
     if fuzz_seed != 1:
         cmd += ["--fuzz-seed", str(fuzz_seed)]
+    if adversary != "off":
+        cmd += ["--adversary", adversary, "--adversary-budget", f"{adversary_budget:.4f}"]
     proc = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True, check=False)
     if proc.returncode != 0 or not vpath.exists():
         raise RuntimeError(f"gate process failed ({proc.returncode}): {proc.stderr[-2000:]}")
@@ -105,6 +109,7 @@ def fix_case(
     reference_builder: Callable[[Any, Runner, Any], tuple[str | None, Any]] | None = None,
     repair_rounds: int = 0,
     select_model: str | None = None,
+    adversary: str = "off",
 ) -> dict[str, Any]:
     """`client` must be this case's own (its ledger's spend is the case's cost).
 
@@ -212,7 +217,11 @@ def fix_case(
                     reference=refs["ref"],
                     runner_name=getattr(runner, "name", "docker"),
                     fuzz_seed=rnd,  # a repair round re-gates with a fresh libFuzzer seed
+                    adversary=adversary,
+                    adversary_budget=max(0.0, client.ledger.budget - client.ledger.spent),
                 )
+                # The gate's adversary calls (D-0079) count against this case's budget and cost.
+                client.ledger.spent += (gate.get("adversary") or {}).get("usd", 0.0)
                 rec["gate" if rnd == 1 else f"gate_round{rnd}"] = {
                     k: v for k, v in gate.items() if k != "results"
                 }

@@ -262,3 +262,38 @@ def run_script(names: list[str], repro: str, build: str | None = None) -> str:
         f"{{ printf '\\n{gc.MARK} build_failed\\n'; tail -c 3000 {gf.LP}/build.log; exit 97; }}\n"
         + run
     )
+
+
+def how(case: Any) -> str:
+    """How the reproducer runs, for the prompt."""
+    if case.harness_path:
+        return (
+            f"A libFuzzer harness ({case.harness_path}) is run with the input file as its only "
+            "argument; it passes the file's bytes to the code under test."
+        )
+    return (
+        f"The input is written to /tmp/poc, then this command runs in {case.workdir}:\n"
+        f"{case.reproduce_cmd}"
+    )
+
+
+def run_inputs(runner: Any, case: Any, image: Any, inputs: list[dict[str, Any]], files=None):  # noqa: ANN001, ANN201
+    """Run the inputs on `image` (building `files` into it first when given); a gc.Run."""
+    from leakproof.gate import split  # gate imports this module
+
+    repro = f"{case.harness_path} /tmp/poc" if case.harness_path else case.reproduce_cmd
+    build = case.gate_build_cmd(files) if files else None
+    res = runner.run(
+        image,
+        run_script([i["name"] for i in inputs], repro, build),
+        files=gc.files([(i["name"], i["data"]) for i in inputs], repro)
+        | ({k: v.encode() for k, v in files.items()} if files else {}),
+        env=case.build_env | (getattr(case, "reproduce_env", None) or {}),
+        cwd=case.workdir,
+        timeout_s=3600,
+        network=False,
+    )
+    sec = split(res.stdout)
+    if "build_failed" in sec:
+        raise RuntimeError("candidate build failed: " + sec["build_failed"][-500:])
+    return gc.Run.parse(sec)

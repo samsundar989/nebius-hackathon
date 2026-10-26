@@ -61,3 +61,27 @@ def test_leak_after_unpatched_crash_is_not_attributed() -> None:
     assert adv.judge(base, pat, None, TARGET)[0] == "pass"
     clean = _run({"a": ("0", "x", "")})
     assert adv.judge(clean, pat, None, TARGET)[0] == "adversary_new_crash"
+
+
+def test_decide_adversary_rejects_only_on_fail() -> None:
+    from leakproof.gate import Check, decide
+
+    base = {
+        k: Check("pass") for k in ("unpatched_trips", "diff_scope", "build", "compiled", "patched")
+    }
+    assert decide(base | {"adversary": Check("skipped", "super: no inputs")}) == "verified"
+    rej = decide(base | {"adversary": Check("fail", "adversary_same_bug: super: target crash")})
+    assert rej == "rejected:adversary_same_bug"
+
+
+def test_adversary_setting_auto(tmp_path) -> None:  # noqa: ANN001
+    from leakproof.cli import adversary_setting
+
+    cfg = tmp_path / "leakproof.toml"
+    cfg.write_text('[project]\nname = "x"\nbuild = "make"\nreproduce = "./x"\n')
+    assert adversary_setting("auto", str(cfg)) == "super"
+    cfg.write_text('[project]\nname = "x"\nbuild = "make"\nreproduce = "./x"\ntest = "make test"\n')
+    assert adversary_setting("auto", str(cfg)) == "off"
+    cfg.write_text(cfg.read_text() + '[gate]\nadversary = "ultra"\n')
+    assert adversary_setting("auto", str(cfg)) == "ultra"
+    assert adversary_setting("off", str(cfg)) == "off"

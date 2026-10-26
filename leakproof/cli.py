@@ -45,6 +45,7 @@ def _fix(args: argparse.Namespace) -> int:
         n_workers=args.workers,
         select_model=None if args.select == "none" else args.select,
         repair_rounds=args.repair_rounds,
+        adversary=adversary_setting(args.adversary, args.config),
     )
     workers = rec.get("workers", [])
     print(f"\nverdict: {rec['verdict']}   ${rec.get('usd', 0):.4f}   {rec.get('elapsed_s')} s")
@@ -63,6 +64,9 @@ def _fix(args: argparse.Namespace) -> int:
         if win is not None:
             ev = strength(win["gate"]["checks"], corpus if "stdout_distinct" in corpus else None)
             print(f"\n{ev['label'].upper()}: {explain(ev)}")
+            adv = win["gate"]["checks"].get("adversary")
+            if adv:
+                print(f"adversary ({adv['status']}): {adv['detail'][:300]}")
         print("\nwinning diff:\n" + rec["winner"]["diff"])
     print(f"\nrecord: {run_dir / (case_slug(rec['case']) + '.json')}")
     if args.json:
@@ -140,6 +144,7 @@ def _batch(args: argparse.Namespace) -> int:
             runner,
             n_workers=args.workers,
             select_model=None if args.select == "none" else args.select,
+            adversary=adversary_setting(args.adversary, args.config),
         )
         check = None
         if rec["verdict"] == "verified":
@@ -203,6 +208,20 @@ def _batch(args: argparse.Namespace) -> int:
     return 0
 
 
+def adversary_setting(choice: str, config: str) -> str:
+    """--adversary auto: the config's [gate].adversary, else "super" for a project with neither a
+    test suite nor a fuzz harness (where the gate observes least) and "off" otherwise (D-0079)."""
+    if choice != "auto":
+        return choice
+    import tomllib
+
+    cfg = tomllib.loads(Path(config).read_text(encoding="utf-8"))
+    if "adversary" in cfg.get("gate", {}):
+        return str(cfg["gate"]["adversary"])
+    proj = cfg.get("project", {})
+    return "off" if proj.get("test") or proj.get("harness") else "super"
+
+
 def _init(args: argparse.Namespace) -> int:
     from leakproof import init
 
@@ -256,6 +275,12 @@ def main(argv: list[str] | None = None) -> int:
         "--select", default="ultra", choices=["ultra", "none"], help="rank several verified fixes"
     )
     fx.add_argument("--budget", type=float, default=0.5, help="USD cap for this run")
+    fx.add_argument(
+        "--adversary",
+        default="auto",
+        choices=["auto", "super", "ultra", "off"],
+        help="model that attacks each verified candidate with inputs (D-0079)",
+    )
     fx.add_argument("--run-id")
     fx.add_argument("--json", action="store_true", help="also print the full record")
     bt = sub.add_parser("batch", help="triage many crash inputs: cluster, fix once each, re-check")
@@ -265,6 +290,7 @@ def main(argv: list[str] | None = None) -> int:
     bt.add_argument("--workers", type=int, default=4)
     bt.add_argument("--select", default="ultra", choices=["ultra", "none"])
     bt.add_argument("--budget", type=float, default=0.5, help="USD cap per cluster")
+    bt.add_argument("--adversary", default="auto", choices=["auto", "super", "ultra", "off"])
     bt.add_argument("--run-id")
     it = sub.add_parser("init", help="draft a leakproof.toml for a C/C++ repository")
     it.add_argument("repo_dir")
