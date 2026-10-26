@@ -15,6 +15,15 @@ Numbers come from `docs/NUMBERS.md`; re-check them on Wed Oct 29 before the fina
 - Repository: [GitHub URL] — `uv run leakproof fix --config examples/csvsplit/leakproof.toml` (Docker and a Nebius Token Factory key; about one cent per fix).
 - Dashboard: [dashboard URL] — every run, every gate check, the calibration and the planner comparison.
 - Video: [YouTube URL] — 2:50.
+- Walkthrough: [docs/WALKTHROUGH.md](https://github.com/samsundar989/nebius-hackathon/blob/main/docs/WALKTHROUGH.md) — from `leakproof init` to a ready-to-send patch on the csvsplit example, with real outputs.
+
+## The 30-second version
+
+**A patch that passed the tests, refused.** For a real jq bug (OSS-Fuzz 42530604), the model's patch passed jq's own test suite and the original crash input ran clean. Leakproof doubled one number in that input, and the patched jq overflowed a heap buffer. The unpatched program and the developer's real fix are both clean on that input, so the patch was refused.
+
+**Proof:** 15 of 27 real OSS-Fuzz bugs verified · 14 of them correct against the developers' own fixes · the gate accepts 24 of 27 developer fixes, so it is strict without being impossible.
+
+**On bugs that are still open:** toybox #572 — a one-line fix, verified and passing toybox's 13 `patch` tests, packaged for a maintainer and not sent: a person decides.
 
 ---
 
@@ -34,13 +43,13 @@ Given a sanitizer finding (a crash input plus a build), Leakproof:
 2. has **Nemotron 3 Ultra** find the root cause and propose up to four fix hypotheses;
 3. has four **Nemotron 3.5 Lightning** workers each write a patch on its own branch of the baseline checkpoint;
 4. runs every candidate through an **evidence gate** in a separate process with the network off. A candidate passes only if it rebuilds, actually compiles into the binary, no longer crashes, passes the project's tests, behaves the same on a corpus, survives amplified and fuzzed inputs that the developer's real fix survives, and adds no leak or use-after-free;
-5. has **Nemotron 3 Super** attack each candidate that passed every check: it reads that one diff and writes up to 8 inputs meant to break it; each input runs on the patched and unpatched builds, and only a sanitizer report or an output difference rejects;
+5. on projects without tests or a fuzz harness (by default; opt-in elsewhere), has **Nemotron 3 Super** attack each candidate that passed every other check: it reads that one diff and writes up to 8 inputs meant to break it; each input runs on the patched and unpatched builds, and only a sanitizer report or an output difference rejects (Ultra steps in once if Super gives no usable input);
 6. when several candidates verify, lets Ultra pick the one that best preserves the code's intent;
 7. writes an evidence bundle for each case: the diff, every check with its evidence, and the cost.
 
 **Which model does what:** Nemotron 3 Ultra plans (and picks between verified fixes), Nemotron 3.5 Lightning writes patches, Nemotron 3 Super attacks them, Nemotron 3 Nano reads issue reports for `leakproof init`.
 
-It works on your own project through a short `leakproof.toml` (`leakproof fix`), triages piles of crash reports (`leakproof batch` clusters them, fixes each cluster once and re-checks every report), and ships a GitHub Action template.
+It works on your own project through a short `leakproof.toml` (`leakproof init` drafts one, `leakproof fix` runs), triages piles of crash reports (`leakproof batch`), turns a verified fix into a ready-to-send patch (`leakproof package`), and ships a GitHub Action. Details: README and docs/NUMBERS.md.
 
 ## Results (real numbers, failed runs included)
 
@@ -60,7 +69,7 @@ It works on your own project through a short `leakproof.toml` (`leakproof fix`),
   | jsmn #249 | needs one more guard | still missed |
   | cNBT #28 | out-of-memory path still dereferences NULL | inconclusive |
 
-  The adversary rejected none of the 24 developer fixes it attacked on real OSS-Fuzz bugs, and none of the correct open-bug fixes.
+  The ARVO numbers above come from the gate before the adversary existed. Calibrated on them afterwards, the adversary rejected none of the 24 developer fixes, every correct winner it reached (12 of 14) stayed verified, and it rejected none of the correct open-bug fixes.
 
 ## How we built it
 
@@ -68,16 +77,7 @@ Python 3.12 with the plain `openai` SDK against Nebius Token Factory. There's no
 
 ## Challenges we ran into
 
-Our own gate lied to us, seven different ways (all in the README's "How a gate lies"):
-- it "verified" binaries the patch never compiled into;
-- its fuzzer silently never ran;
-- a slow input counted as a crash;
-- the model could edit the fuzz harness;
-- OSS-Fuzz build scripts can't run twice;
-- line numbers moved under a pre-existing bug;
-- a fuzz harness can only see what it prints. Two mosquitto patches passed every check yet pointed the config at the wrong listener.
-
-Each fix was re-calibrated against the developers' own patches.
+Our own gate lied to us, seven different ways: it "verified" binaries the patch never compiled into; its fuzzer silently never ran; a slow input counted as a crash; the model could edit the fuzz harness; OSS-Fuzz build scripts can't run twice; line numbers moved under a pre-existing bug; and a fuzz harness can only see what it prints (two mosquitto patches passed every check yet pointed the config at the wrong listener). Each is in the README's "How a gate lies". Each fix was re-calibrated against the developers' own patches.
 
 ## Accomplishments that we're proud of
 
