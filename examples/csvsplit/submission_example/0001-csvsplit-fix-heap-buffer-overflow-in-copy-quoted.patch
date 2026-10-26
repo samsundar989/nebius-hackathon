@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: <your git identity>
-Date: Mon, 26 Oct 2026 13:10:23 +0000
+Date: Mon, 26 Oct 2026 15:53:30 +0000
 Subject: [PATCH] csvsplit: fix heap-buffer-overflow in copy_quoted()
 
 AddressSanitizer reports a heap-buffer-overflow in copy_quoted()
@@ -12,7 +12,7 @@ The change, in src/csvsplit.c:
     +    char *field = malloc(inner + 1); /* room for the content and NUL terminator */
 ---
  src/csvsplit.c | 2 +-
- 1 file(s) changed, 1 insertion(s)(+), 1 deletion(s)(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/csvsplit.c b/src/csvsplit.c
 --- a/src/csvsplit.c

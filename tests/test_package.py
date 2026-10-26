@@ -19,7 +19,7 @@ DIFF = (
 def test_repo_diff_strips_the_container_prefix() -> None:
     d = pk.repo_diff(DIFF)
     assert d.startswith("diff --git a/src/a.c b/src/a.c\n--- a/src/a.c\n+++ b/src/a.c")
-    assert "1 file(s) changed, 1 insertion(s)(+), 1 deletion(s)(-)" in pk.diffstat(d)
+    assert pk.diffstat(d).endswith(" 1 file changed, 1 insertion(+), 1 deletion(-)")
 
 
 def test_commit_message_describes_the_diff_not_the_plan() -> None:

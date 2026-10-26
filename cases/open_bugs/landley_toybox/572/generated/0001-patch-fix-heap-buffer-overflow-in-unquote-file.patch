@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: <your git identity>
-Date: Mon, 26 Oct 2026 13:10:22 +0000
+Date: Mon, 26 Oct 2026 15:53:29 +0000
 Subject: [PATCH] patch: fix heap-buffer-overflow in unquote_file()
 
 AddressSanitizer reports a heap-buffer-overflow in unquote_file()
@@ -14,7 +14,7 @@ The change, in toys/posix/patch.c:
 Fixes #572.
 ---
  toys/posix/patch.c | 2 +-
- 1 file(s) changed, 1 insertion(s)(+), 1 deletion(s)(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/toys/posix/patch.c b/toys/posix/patch.c
 --- a/toys/posix/patch.c

@@ -60,9 +60,19 @@ def diffstat(diff: str) -> str:
             files[cur][0] += 1
         elif cur and line.startswith("-") and not line.startswith("---"):
             files[cur][1] += 1
-    rows = [f" {f} | {a + d} {'+' * a}{'-' * d}" for f, (a, d) in files.items()]
+    # git diff --stat's own layout: names padded to one column, counts right-aligned, and a
+    # summary that pluralises and leaves out zero insertions or deletions.
+    width = max((len(f) for f in files), default=0)
+    count = max((len(str(a + d)) for a, d in files.values()), default=1)
+    rows = [f" {f:<{width}} | {a + d:>{count}} {'+' * a}{'-' * d}" for f, (a, d) in files.items()]
     ins, dels = sum(v[0] for v in files.values()), sum(v[1] for v in files.values())
-    rows.append(f" {len(files)} file(s) changed, {ins} insertion(s)(+), {dels} deletion(s)(-)")
+    n = len(files)
+    summary = f" {n} file{'s' if n != 1 else ''} changed"
+    if ins:
+        summary += f", {ins} insertion{'s' if ins != 1 else ''}(+)"
+    if dels:
+        summary += f", {dels} deletion{'s' if dels != 1 else ''}(-)"
+    rows.append(summary)
     return "\n".join(rows)
 
 
