@@ -5,6 +5,8 @@
 Issue: https://github.com/cesanta/elk/issues/82
 Defect: heap-buffer-overflow in `next` (`elk.c:535`). Gate verdict: **verified**; evidence: verified, needs human review.
 
+**Partial fix.** Not fixed here: numbers are still parsed with strtod past the slice length (the issue's first case).
+
 ## The patch
 
 `0001-elk-fix-heap-buffer-overflow-in-next.patch` (this directory), `git format-patch` form: apply with `git am 0001-elk-fix-heap-buffer-overflow-in-next.patch`. The
@@ -78,3 +80,28 @@ Part of #82.
 - [ ] Check the project's contribution guide and AI-contribution policy, and how it takes patches.
 - [ ] Set your identity as the author (`git commit --amend --reset-author`).
 - [ ] Keep the PR or e-mail short, in your own words, with the disclosure above.
+
+## Send it in 5 minutes (only after the checklist; nothing here has been run)
+
+The PR description is ready in `PR_BODY.md` (this directory): what changed, what is not fixed,
+how it was tested, and the disclosure. Read it and change anything you would not say yourself.
+First check the project's README or CONTRIBUTING for how it takes patches; some prefer a mailing
+list, in which case send the patch file with `git send-email` instead.
+
+**GitHub, in the browser**
+1. Open https://github.com/cesanta/elk and click **Fork**.
+2. In your fork, open the file the diff above changes, click the pencil (Edit), make the same
+   change, and commit it to a new branch (for example `leakproof-fix-82`).
+3. Click **Compare & pull request**; title: `elk: fix heap-buffer-overflow in next()`; paste `PR_BODY.md` as the description.
+
+**Command line** (needs `gh`, logged in)
+```
+gh repo fork cesanta/elk --clone && cd elk
+git checkout -b leakproof-fix-82
+git am /path/to/0001-elk-fix-heap-buffer-overflow-in-next.patch
+git commit --amend --reset-author --no-edit
+git push -u origin leakproof-fix-82
+gh pr create --repo cesanta/elk --title "elk: fix heap-buffer-overflow in next()" --body-file /path/to/PR_BODY.md
+```
+
+If the maintainer prefers to fix it differently, thank them and close the PR.

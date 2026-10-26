@@ -5,6 +5,8 @@
 Issue: https://github.com/me7alix/utf8.h/issues/1
 Defect: global-buffer-overflow in `utf8_decode` (`utf8.h:37`). Gate verdict: **verified**; evidence: verified, needs human review.
 
+**Partial fix.** Not fixed here: overlong encodings, surrogates and non-continuation bytes are still accepted (the issue's other requests).
+
 ## The patch
 
 `0001-utf8-fix-global-buffer-overflow-in-utf8-decode.patch` (this directory), `git format-patch` form: apply with `git am 0001-utf8-fix-global-buffer-overflow-in-utf8-decode.patch`. The
@@ -98,3 +100,28 @@ Part of #1.
 - [ ] Check the project's contribution guide and AI-contribution policy, and how it takes patches.
 - [ ] Set your identity as the author (`git commit --amend --reset-author`).
 - [ ] Keep the PR or e-mail short, in your own words, with the disclosure above.
+
+## Send it in 5 minutes (only after the checklist; nothing here has been run)
+
+The PR description is ready in `PR_BODY.md` (this directory): what changed, what is not fixed,
+how it was tested, and the disclosure. Read it and change anything you would not say yourself.
+First check the project's README or CONTRIBUTING for how it takes patches; some prefer a mailing
+list, in which case send the patch file with `git send-email` instead.
+
+**GitHub, in the browser**
+1. Open https://github.com/me7alix/utf8.h and click **Fork**.
+2. In your fork, open the file the diff above changes, click the pencil (Edit), make the same
+   change, and commit it to a new branch (for example `leakproof-fix-1`).
+3. Click **Compare & pull request**; title: `utf8: fix global-buffer-overflow in utf8_decode()`; paste `PR_BODY.md` as the description.
+
+**Command line** (needs `gh`, logged in)
+```
+gh repo fork me7alix/utf8.h --clone && cd utf8.h
+git checkout -b leakproof-fix-1
+git am /path/to/0001-utf8-fix-global-buffer-overflow-in-utf8-decode.patch
+git commit --amend --reset-author --no-edit
+git push -u origin leakproof-fix-1
+gh pr create --repo me7alix/utf8.h --title "utf8: fix global-buffer-overflow in utf8_decode()" --body-file /path/to/PR_BODY.md
+```
+
+If the maintainer prefers to fix it differently, thank them and close the PR.

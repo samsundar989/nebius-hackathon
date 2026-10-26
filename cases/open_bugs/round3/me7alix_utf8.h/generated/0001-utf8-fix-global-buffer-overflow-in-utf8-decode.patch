@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: <your git identity>
-Date: Mon, 26 Oct 2026 16:34:47 +0000
+Date: Mon, 26 Oct 2026 19:15:06 +0000
 Subject: [PATCH] utf8: fix global-buffer-overflow in utf8_decode()
 
 AddressSanitizer reports a global-buffer-overflow in utf8_decode()

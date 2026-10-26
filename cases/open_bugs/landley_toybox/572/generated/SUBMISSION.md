@@ -77,3 +77,28 @@ Fixes #572.
 - [ ] Check the project's contribution guide and AI-contribution policy, and how it takes patches.
 - [ ] Set your identity as the author (`git commit --amend --reset-author`).
 - [ ] Keep the PR or e-mail short, in your own words, with the disclosure above.
+
+## Send it in 5 minutes (only after the checklist; nothing here has been run)
+
+The PR description is ready in `PR_BODY.md` (this directory): what changed, what is not fixed,
+how it was tested, and the disclosure. Read it and change anything you would not say yourself.
+First check the project's README or CONTRIBUTING for how it takes patches; some prefer a mailing
+list, in which case send the patch file with `git send-email` instead.
+
+**GitHub, in the browser**
+1. Open https://github.com/landley/toybox and click **Fork**.
+2. In your fork, open the file the diff above changes, click the pencil (Edit), make the same
+   change, and commit it to a new branch (for example `leakproof-fix-572`).
+3. Click **Compare & pull request**; title: `patch: fix heap-buffer-overflow in unquote_file()`; paste `PR_BODY.md` as the description.
+
+**Command line** (needs `gh`, logged in)
+```
+gh repo fork landley/toybox --clone && cd toybox
+git checkout -b leakproof-fix-572
+git am /path/to/0001-patch-fix-heap-buffer-overflow-in-unquote-file.patch
+git commit --amend --reset-author --no-edit
+git push -u origin leakproof-fix-572
+gh pr create --repo landley/toybox --title "patch: fix heap-buffer-overflow in unquote_file()" --body-file /path/to/PR_BODY.md
+```
+
+If the maintainer prefers to fix it differently, thank them and close the PR.

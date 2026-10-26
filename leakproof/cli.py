@@ -266,6 +266,7 @@ def _package(args: argparse.Namespace) -> int:
         issue_url=args.issue_url,
         repo_subdir=args.repo_subdir,
         partial=args.partial,
+        not_fixed=args.not_fixed,
         **src,
     )
     print(f"wrote {sp}\nwrote {pp}")
@@ -335,6 +336,7 @@ def main(argv: list[str] | None = None) -> int:
     pk.add_argument("--issue-url")
     pk.add_argument("--out", default="submission")
     pk.add_argument("--partial", action="store_true", help="`Part of #N` instead of `Fixes #N`")
+    pk.add_argument("--not-fixed", default="", help="for a partial fix: what it leaves")
     pk.add_argument(
         "--repo-subdir", default="", help="the upstream clone's folder inside the case (e.g. src)"
     )

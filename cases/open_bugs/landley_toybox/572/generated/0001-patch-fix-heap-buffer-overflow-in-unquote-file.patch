@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: <your git identity>
-Date: Mon, 26 Oct 2026 15:53:29 +0000
+Date: Mon, 26 Oct 2026 19:15:04 +0000
 Subject: [PATCH] patch: fix heap-buffer-overflow in unquote_file()
 
 AddressSanitizer reports a heap-buffer-overflow in unquote_file()

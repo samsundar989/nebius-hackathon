@@ -56,3 +56,28 @@ Fixes #572.
 
 The repository states no AI-contribution policy. Check the project's README for how it prefers to
 receive patches, and keep the description short and in your own words.
+
+## Send it in 5 minutes (only after reading the patch and running the tests; nothing here has been run)
+
+A ready PR description is in `generated/PR_BODY.md` (what changed, how it was tested, the
+disclosure); replace its first paragraph with the "Why" above if you prefer the reviewed wording.
+toybox also takes patches on its mailing list (see the project README); if you go that way, send
+the patch file with `git send-email` instead.
+
+**GitHub, in the browser**
+1. Open https://github.com/landley/toybox and click **Fork**.
+2. In your fork, open `toys/posix/patch.c`, click the pencil (Edit), change the line shown above,
+   and commit it to a new branch (for example `leakproof-fix-572`).
+3. Click **Compare & pull request**; title: `patch: reject a quoted filename that ends inside an
+   escape`; paste the PR description.
+
+**Command line** (needs `gh`, logged in)
+```
+gh repo fork landley/toybox --clone && cd toybox
+git checkout -b leakproof-fix-572
+git am /path/to/0001-patch-private.patch   # the gitignored copy with your identity
+git push -u origin leakproof-fix-572
+gh pr create --repo landley/toybox --title "patch: reject a quoted filename that ends inside an escape" --body-file /path/to/generated/PR_BODY.md
+```
+
+If the maintainer prefers to fix it differently, thank them and close the PR.
