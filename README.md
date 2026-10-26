@@ -110,7 +110,7 @@ On the synthetic Juliet subset the planner barely matters (Lightning-only 93%, U
 ## How we use Nebius
 
 - **Token Factory** for every model call, with thinking control and structured outputs. Every call is metered into a cost ledger; on 2026-10-24 the ledger's model spend ($3.28) matched the billing page ($3.27).
-- **Sandboxes** (beta) through a small REST client: the gate runs with `networking.enabled=false`, workers branch from one saved checkpoint, and each case records its checkpoint lineage. The Juliet runs used it (100 reproductions in 41 s, 8 in parallel). ARVO images do not import yet (`NotImplementedError: chmod: follow_symlinks unavailable on this platform`), so ARVO runs on local Docker — details in [docs/FEEDBACK.md](docs/FEEDBACK.md).
+- **Sandboxes** (beta) through a small REST client: the gate runs with `networking.enabled=false`, workers branch from one saved checkpoint, and each case records its checkpoint lineage. The Juliet runs used it (100 reproductions in 41 s, 8 in parallel), and so does the bring-your-own path: `leakproof fix --config examples/csvsplit/leakproof.toml --runner sandboxes --adversary super` verified csvsplit there (baseline checkpoint, worker branches and every gate run with networking off, all in the run's lineage; 352 s against 134 s for the same run on local Docker, same verdict, $0.019). ARVO images do not import yet (`NotImplementedError: chmod: follow_symlinks unavailable on this platform`), so ARVO runs on local Docker — details in [docs/FEEDBACK.md](docs/FEEDBACK.md).
 
 ## Use it on your own project
 

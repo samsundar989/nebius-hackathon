@@ -16,7 +16,7 @@ Numbers are from `docs/NUMBERS.md` and the dashboard (both generated from the sa
 
 Accuracy notes for the narration (do not drop when shortening):
 - The jq refusal is P3 run 1, case 42530604 (worker H2·w1); the verified one-line fix (`digits + 20`) is from run 2.
-- Say "on Nebius Sandboxes" only about the gate in general: the Juliet runs used Sandboxes; ARVO images do not import there yet, so ARVO ran on local Docker (README).
+- Say "on Nebius Sandboxes" only about the gate in general: the Juliet runs and a bring-your-own run (csvsplit, `--runner sandboxes`) used Sandboxes; ARVO images do not import there yet, so ARVO ran on local Docker, and the recorded terminal scenes are local Docker runs (README).
 - The planner comparison is one repeat on 10 cases (2/4/7 verified; verified and correct 2/3/5, from `site/data/numbers.json`).
 
 B-roll to capture (dashboard served locally or on Render, 1440×900):
