@@ -73,4 +73,4 @@ So, in order of preference:
    https://codeberg.org/landley/toybox, apply the patch on a branch (`git am
    0001-patch.private.patch`), push, and open a pull request with the same text.
 
-If the maintainer prefers to fix it differently, thank him and leave it there.
+If the maintainer prefers to fix it differently, thank them and leave it there.
