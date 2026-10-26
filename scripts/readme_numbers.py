@@ -391,6 +391,19 @@ def main() -> int:
                 rej = sum(1 for x in judged if str(x.get("verdict", "")).startswith(("adv", "beh")))
                 cells.append(f"{rej} / {len(judged)} / {len(ms)}" if ms else "not run")
             out.append(f"| {label} | {cells[0]} | {cells[1]} |")
+        v4 = [RUNS_DIR / "adversary" / f"{n}_v4" / "summary.json" for n in ("open", "arvo-dev")]
+        v4rows = [r for p in v4 if p.exists() for r in json.loads(p.read_text())]
+        if v4rows:
+            ms = [r["models"]["super_fb"] for r in v4rows if "super_fb" in r.get("models", {})]
+            used = Counter(m.get("model_used") for m in ms if m.get("n_inputs", 0) > 0)
+            rej = sum(1 for m in ms if str(m.get("verdict", "")).startswith(("adv", "beh")))
+            usd = sum(m.get("usd", 0) for m in ms)
+            out += [
+                "",
+                f"Prompt v4 with the Ultra fallback (D-0080), re-run on the {len(ms)} cases Super had "
+                f"left empty: usable {sum(used.values())}/{len(ms)} (Super {used.get('super', 0)}, "
+                f"Ultra fallback {used.get('ultra', 0)}), rejected {rej}, ${usd:.3f}.",
+            ]
     cu = RUNS_DIR / "p5_cuda" / "verdicts.json"
     if cu.exists():
         d = json.loads(cu.read_text())
