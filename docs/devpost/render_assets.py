@@ -40,7 +40,7 @@ FINDINGS = r"""(rows) => {
   const box = document.createElement('div'); box.id = 'findings'; box.className = 'panel';
   const cell = (s) => s.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   box.innerHTML = `<h3>Wrong fixes a human review found on open bugs: caught by a machine check?</h3>
-    <p class="muted">Every distinct verified diff, re-gated with inputs generated from the PoC (D-0078).</p>
+    <p class="muted">Every distinct verified diff, re-gated with inputs generated from the PoC (D-0078) and inputs an adversary model wrote against it (D-0079).</p>
     <table class="matrix"><tr>${rows[0].map((h) => `<th>${h}</th>`).join('')}</tr>
     ${rows.slice(1).map((r) => `<tr>${r.map((c) => `<td>${cell(c)}</td>`).join('')}</tr>`).join('')}</table>`;
   document.querySelector('main').append(box);

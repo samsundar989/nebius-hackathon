@@ -27,10 +27,10 @@
   <text x="485" y="330" text-anchor="middle" font-size="13">never the gate, tests or dev fix</text>
   <text x="485" y="354" text-anchor="middle" font-size="12" fill="#6b7280">Nebius Token Factory</text>
   <!-- adversary -->
-  <rect x="620" y="14" width="230" height="78" rx="8" fill="#fdf4ff" stroke="#a21caf"/>
+  <rect x="596" y="10" width="278" height="84" rx="8" fill="#fdf4ff" stroke="#a21caf"/>
   <text x="735" y="42" text-anchor="middle" font-weight="600">Adversary: Nemotron 3 Super</text>
-  <text x="735" y="62" text-anchor="middle" font-size="13">sees one candidate's diff;</text>
-  <text x="735" y="79" text-anchor="middle" font-size="13">proposes up to 8 inputs to break it</text>
+  <text x="735" y="62" text-anchor="middle" font-size="13">proposes inputs against one candidate;</text>
+  <text x="735" y="79" text-anchor="middle" font-size="12">only a sanitizer report or output difference rejects</text>
   <!-- gate -->
   <rect x="620" y="120" width="230" height="330" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
   <text x="735" y="148" text-anchor="middle" font-weight="600">Evidence gate</text>
