@@ -35,6 +35,23 @@ CHECK_ORDER = [
 ICON = {"pass": "pass", "fail": "**fail**", "skipped": "skipped", "inconclusive": "inconclusive"}
 
 
+# Model ids (and short names) as the docs name them.
+DISPLAY = {
+    "ultra": "Nemotron 3 Ultra",
+    "lightning": "Nemotron 3.5 Lightning",
+    "super": "Nemotron 3 Super",
+    "nano": "Nemotron 3 Nano",
+    "nvidia/Nemotron-3-Ultra-550b-a55b": "Nemotron 3 Ultra",
+    "nvidia/Nemotron-3_5-Lightning": "Nemotron 3.5 Lightning",
+    "nvidia/nemotron-3-super-120b-a12b": "Nemotron 3 Super",
+    "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B": "Nemotron 3 Nano",
+}
+
+
+def display(model: str) -> str:
+    return DISPLAY.get(model, model.split("/")[-1])
+
+
 def _fence(text: str, lang: str = "") -> str:
     text = text.strip("\n")
     fence = "````" if "```" in text else "```"
@@ -95,12 +112,11 @@ def bundle(rec: dict, case_dir: Path) -> str:
     out += [
         f"- **Defect:** {finding.get('kind', '?')} at `{finding.get('location', '?')}`"
         + (f" (ARVO crash type: {arvo['crash_type']})" if arvo.get("crash_type") else ""),
-        f"- **Models:** planner `{rec.get('planner_model')}`, {rec.get('n_workers')} x "
-        f"`{rec.get('worker_model')}` workers; reviewer notes `lightning` (advisory, D-0060)",
+        f"- **Models:** planner {display(rec.get('planner_model') or 'none')}, "
+        f"{rec.get('n_workers')} x {display(rec.get('worker_model') or '?')} workers; "
+        "reviewer notes Nemotron 3.5 Lightning (advisory, D-0060)",
         f"- **Cost:** ${rec.get('usd', 0):.4f} "
-        + " · ".join(
-            f"{m.split('/')[-1]} ${v:.4f}" for m, v in rec.get("usd_by_model", {}).items()
-        ),
+        + " · ".join(f"{display(m)} ${v:.4f}" for m, v in rec.get("usd_by_model", {}).items()),
         f"- **Wall time:** {rec.get('elapsed_s')} s",
     ]
     if arvo.get("patch_url"):

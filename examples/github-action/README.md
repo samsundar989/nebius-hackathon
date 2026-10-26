@@ -11,4 +11,4 @@ Setup:
 
 Each run is capped at `LEAKPROOF_BUDGET_USD` of model spend ($0.50 in the template). The csvsplit demo cost $0.01 per fix. The gate runs in Docker on the runner with networking off.
 
-Status: this template has not run on GitHub yet; we have no demo repository with the secret. It runs the same `leakproof fix` and `render_bundle.py` commands as `scripts/demo_run.sh` (steps 3 and 1). They were last run end to end on 2026-10-24 (`runs/p5_byo_csvsplit`: verified, $0.0100, 130 s).
+Status: this repository carries a live copy (`.github/workflows/demo-fuzz.yml` and `leakproof-fix.yml`, on the csvsplit demo); its first run on GitHub is waiting for the repository secret. A verified fix also gets a `leakproof package` submission (patch + SUBMISSION.md) in the uploaded artifact. It runs the same `leakproof fix` and `render_bundle.py` commands as `scripts/demo_run.sh` (steps 3 and 1). They were last run end to end on 2026-10-24 (`runs/p5_byo_csvsplit`: verified, $0.0100, 130 s).

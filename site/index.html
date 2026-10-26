@@ -338,7 +338,7 @@ async function showRun(run, btn) {
       ["lightning", "super", "ultra"].filter((k) => pa[k]).map((k) => `<tr><td>${esc(pa[k].label)}</td><td>${pa[k].verified}/${pa[k].cases}</td><td>${pa[k].strict}/${pa[k].cases}</td><td>${money(pa[k].usd_per_verified)}</td></tr>`).join("")}</tbody></table></div><h3>Synthetic: Juliet</h3>`;
   }
   if (lb && lb.configs && Object.keys(lb.configs).length) {
-    $("#leaderboard").innerHTML = arvoLb + `<p class="muted">${lb.cases} Juliet cases, repeated runs per configuration; workers are always 4 × Nemotron Lightning.</p><div class="scroll"><table><thead><tr><th>planner</th><th>repeats</th><th>verified (mean, min–max)</th><th>$ / verified</th><th>p50 latency</th></tr></thead><tbody>${
+    $("#leaderboard").innerHTML = arvoLb + `<p class="muted">${lb.cases} Juliet cases, repeated runs per configuration; workers are always 4 × Nemotron 3.5 Lightning.</p><div class="scroll"><table><thead><tr><th>planner</th><th>repeats</th><th>verified (mean, min–max)</th><th>$ / verified</th><th>p50 latency</th></tr></thead><tbody>${
       Object.entries(lb.configs).map(([k, r]) => `<tr><td>${esc(k)}</td><td>${r.repeats}</td><td>${pct(r.verified_rate_mean, 1)} (${pct(r.verified_rate_min, 1)}–${pct(r.verified_rate_max, 1)})</td><td>${money(r.usd_per_verified)}</td><td>${r.p50_latency_s} s</td></tr>`).join("")}</tbody></table></div>`;
   }
 })();
