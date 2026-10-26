@@ -51,3 +51,29 @@ Same rules: open, public, reproducer written from the issue text, no open fix PR
 | [madler/zlib#1299](https://github.com/madler/zlib/issues/1299), [rxi/fe#34](https://github.com/rxi/fe/issues/34), [OpenDMARC#441](https://github.com/trusteddomainproject/OpenDMARC/issues/441), [vincenthz/libjson#31](https://github.com/vincenthz/libjson/issues/31), [antirez/gguf-tools#25](https://github.com/antirez/gguf-tools/issues/25), [cesanta/mjs#104/#108/#158/#167/#170](https://github.com/cesanta/mjs/issues) | various | excluded: the reproducer is an attachment, a crafted binary, or a link to another repository (not downloaded) | — |
 | [cesanta/elk#81](https://github.com/cesanta/elk/issues/81) | missing `nargs` check in the ESP32 example's `delay()` | skipped: the code is an Arduino example the offline toolchain does not build | — |
 | [nothings/stb#1860](https://github.com/nothings/stb/issues/1860) | 16-bit PNG conversion overflow | skipped: needs a 23171×23171 PNG and attachments | — |
+
+## Round 3 (review #13 order 3, 2026-10-26)
+
+Same source and rules (GitHub issue search for open C issues with a sanitizer report, created
+2025-01-01..2026-09-25; inline reproducer only; no open fix PR; nothing posted). This round
+uses the full product path: `leakproof init --issue-text` drafts each config
+(`round3/*/leakproof.draft.toml`, kept), a person finishes the reproducer, then
+`leakproof fix --adversary auto` and `leakproof package`. No AI-contribution policy found in the
+README/CONTRIBUTING of any configured project.
+
+| issue | defect | status |
+|---|---|---|
+| [cesanta/elk#82](https://github.com/cesanta/elk/issues/82) | `js_eval(buf, len)` reads past a bounded slice (unclosed string) | configured (`round3/cesanta_elk`) |
+| [landley/toybox#573](https://github.com/landley/toybox/issues/573) | global-buffer-overflow in mkpasswd's `get_salt` | configured (`round3/landley_toybox_573`) |
+| [me7alix/utf8.h#1](https://github.com/me7alix/utf8.h/issues/1) | `utf8_decode` reads continuation bytes past the end | configured (`round3/me7alix_utf8.h`) |
+| [vks/special-fun#17](https://github.com/vks/special-fun/issues/17) | `facf` reads an 8-byte `double` from a 4-byte `float` global | configured (`round3/vks_special-fun`) |
+| [libxmq/xmq#40](https://github.com/libxmq/xmq/issues/40) | uninitialised stack read in `installTheme` | skipped: a MemorySanitizer finding; the gate runs ASan/UBSan |
+| [lecram/gifdec#37](https://github.com/lecram/gifdec/issues/37) | heap write overflow in `read_image_data` | skipped: the 36-byte GIF is described, not given inline |
+| [vincenthz/libjson#33](https://github.com/vincenthz/libjson/issues/33) | stack offset bounds in `json_parser_dom_callback` | skipped: open fix PR #34 |
+| [DaveGamble/cJSON#1081](https://github.com/DaveGamble/cJSON/issues/1081) | use-after-free in `cJSON_ReplaceItemInObject` | skipped: open fix PR #1083 |
+| [DaveGamble/cJSON#1082](https://github.com/DaveGamble/cJSON/issues/1082) | use-after-free in `cJSONUtils_ApplyPatches` | skipped: open fix PR #1084 |
+| [DaveGamble/cJSON#1035](https://github.com/DaveGamble/cJSON/issues/1035) | NULL dereference in `cJSON_GetErrorPtr` | skipped: open fix PR #1066 |
+
+`leakproof init` on the three non-toybox projects: no build system detected in any (two are a
+single header or file plus the reporter's own program), so the reproducer and build line were
+written by hand, as INIT_EVAL predicts.
