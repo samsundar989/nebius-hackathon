@@ -363,6 +363,34 @@ def main() -> int:
             gen = f"{m[1]} ({m[2]})" if m else "?"
             for r in g["results"]:
                 out.append(f"| {p.parent.name} | {gen} | {r['hypothesis_id']} | {r['verdict']} |")
+    adv_sets = [
+        ("open", "open bugs (+ csvsplit)"),
+        ("arvo-dev", "ARVO: developer fixes (calibration)"),
+        ("arvo-win", "ARVO: verified-and-correct winners"),
+    ]
+    if any((RUNS_DIR / "adversary" / s / "summary.json").exists() for s, _ in adv_sets):
+        out += [
+            "",
+            "## The adversary (D-0079): rejections per model",
+            "",
+            "Rejected / judged with inputs / candidates; a candidate is judged when the model's "
+            "answer gave at least one input.",
+            "",
+            "| set | Super | Ultra |",
+            "|---|---|---|",
+        ]
+        for name, label in adv_sets:
+            p = RUNS_DIR / "adversary" / name / "summary.json"
+            if not p.exists():
+                continue
+            rows = json.loads(p.read_text())
+            cells = []
+            for m in ("super", "ultra"):
+                ms = [r["models"][m] for r in rows if m in r.get("models", {})]
+                judged = [x for x in ms if x.get("n_inputs", 0) > 0]
+                rej = sum(1 for x in judged if str(x.get("verdict", "")).startswith(("adv", "beh")))
+                cells.append(f"{rej} / {len(judged)} / {len(ms)}" if ms else "not run")
+            out.append(f"| {label} | {cells[0]} | {cells[1]} |")
     cu = RUNS_DIR / "p5_cuda" / "verdicts.json"
     if cu.exists():
         d = json.loads(cu.read_text())

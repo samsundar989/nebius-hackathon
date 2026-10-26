@@ -87,11 +87,21 @@ One repeat on 10 cases: read the gap between no planner and Ultra, not small dif
 | toybox_572 | 183 (12) | H3w2 | verified |
 | toybox_572 | 183 (12) | H1w0 | verified |
 
+## The adversary (D-0079): rejections per model
+
+Rejected / judged with inputs / candidates; a candidate is judged when the model's answer gave at least one input.
+
+| set | Super | Ultra |
+|---|---|---|
+| open bugs (+ csvsplit) | 1 / 7 / 12 | 2 / 12 / 12 |
+| ARVO: developer fixes (calibration) | 0 / 17 / 24 | 0 / 21 / 24 |
+| ARVO: verified-and-correct winners | 0 / 12 / 14 | not run |
+
 ## CUDA on a Kaggle T4 (compute-sanitizer)
 
 - 3/3 cases verified (oob_global: global-out-of-bounds, leak_cudamalloc: leak, race_shared: race); 2 candidate(s) silenced the sanitizer but printed the wrong checksum.
 
 ## Spend
 
-- Every model call in the project, failed runs included: **$12.7640** (Nebius billing agreed within $0.01 on 2026-10-24).
+- Every model call in the project, failed runs included: **$12.7872** (Nebius billing agreed within $0.01 on 2026-10-24).
 - Nebius Sandboxes: 9.43 units, not billed during the beta.
