@@ -363,3 +363,12 @@ Strategist notes 2026-10-26 13:50 CDT (review #14): acknowledged. Orders 1–5 d
 5. **`scripts/freeze_check.sh`**: run now → 8 PASS, 2 expected FAIL: link placeholders (6: README "(link when …)", DEVPOST `[GitHub URL]`/`[YouTube URL]`/`[dashboard URL]`/…, end card without the dashboard line — `set_links.py` fills them Tuesday) and the final video (needs the narration and `mux.sh`).
 
 Model spend for review #14: $0; total ledger $13.11.
+
+## Day 6 (cont.) · Mon 2026-10-26, 16:55–17:15 CDT — review #15
+
+Strategist notes 2026-10-26 16:55 CDT (review #15): acknowledged.
+
+1. **Better fallback voice: not done, on purpose.** Downloading and running Piper plus a voice model is a download-and-execute step I take only on Samuel's own OK in chat, not on a note in a file; he has not been reachable today. Per the order's fallback, Zira stays; NOTE 0016 says how to ask for Piper (one CC BY 4.0 / CC0 / MIT voice) and what it would take.
+2. **No stale end card in the final cut:** `video/mux.sh` records the narration it mixed (`video/.narration_path`, gitignored); `set_links.py --rebuild-video` re-records the silent cut and then re-mixes that narration into `leakproof_final.mp4`; `freeze_check.sh` now FAILs when the final video is older than `video/card.html`, the silent cut or the narration. SUBMISSION_CHECKLIST step (d) is two passes (dashboard + rebuild before the upload, video URL after it).
+
+Model spend for review #15: $0.
