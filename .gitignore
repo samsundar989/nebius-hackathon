@@ -61,3 +61,7 @@ video/*.mp4
 
 # local copies with real identities (review #8 order 5)
 *.private.*
+
+# narration recordings (yours or the TTS fallback)
+video/*.wav
+video/*.m4a

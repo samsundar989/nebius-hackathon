@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Mix a narration onto the silent cut: video/mux.sh narration.wav -> video/leakproof_final.mp4
+# Mix a narration onto the silent cut: video/mux.sh narration.wav [out.mp4] -> video/leakproof_final.mp4
 #
 # The voice is loudness-normalised (EBU R128, -16 LUFS, the usual target for online video).
 # The output is as long as the longer of the two; if the narration runs past the video, the last
@@ -8,9 +8,9 @@
 set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
-voice="${1:?usage: video/mux.sh narration.wav}"
+voice="${1:?usage: video/mux.sh narration.wav [out.mp4]}"
 video="$here/leakproof_draft.mp4"
-out="$here/leakproof_final.mp4"
+out="${2:-$here/leakproof_final.mp4}"
 [ -f "$voice" ] || { echo "no such file: $voice" >&2; exit 1; }
 [ -f "$video" ] || { echo "no silent cut at $video: run video/record.py first" >&2; exit 1; }
 
