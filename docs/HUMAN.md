@@ -113,6 +113,8 @@ After your answer I set `site/config.json` to the service URL, push, and test fr
 
 **Update 2026-10-25 (video v4, strategist review #9 order 2): v4 ready for narration.** 2:50. New 14 s scene after the mosquitto limitation: the open-bugs funnel (30 → 7 → 5 → 1 ready: toybox #572, one line, passes toybox's 13 tests) and the review-finding table, whose "caught by" column now shows the adversary catching both wrong #572 fixes. The end card no longer has the dashboard placeholder line. Scene times: `video/shotlist.md`.
 
+**Update 2026-10-26 (review #11 order 4): the simplest way to record.** One continuous take while the silent video plays: open `video/leakproof_draft.mp4` on one screen and `docs/VIDEO_SCRIPT.md` (the "say" column; scene times in `video/shotlist.md`) on the other, start Windows Voice Recorder (or Audacity: File → Export → WAV), press play on the video and read along. Small timing slips are fine; keep the whole take under 2:59. Then `bash video/mux.sh path/to/narration.wav` normalises the loudness, mixes it onto the video and writes `video/leakproof_final.mp4`; it refuses anything over 2:59. Voice Recorder saves `.m4a`; mux.sh takes that too.
+
 ## QUESTION 0017 — One fix for a still-open upstream bug is ready for your review (your decision; nothing has been posted)
 2026-10-25, per strategist review #6 order 1. Leakproof ran on 14 open, public GitHub issues with sanitizer reports (`cases/open_bugs/TRIAGE.md`): 6 still reproduce at upstream HEAD, 4 have no open fix PR, 3 were verified by the gate, and after Ultra's review and mine **one** is ready to propose (`cases/open_bugs/REVIEW.md`; model spend $0.70).
 
