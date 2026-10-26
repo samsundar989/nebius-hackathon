@@ -55,6 +55,15 @@ table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--muted); font-weight: 600; }
 .scroll { overflow-x: auto; }
+.start { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; margin: 10px 0 12px;
+  padding: 10px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+.start-l { font-weight: 650; }
+@media (max-width: 600px) {
+  .bar { grid-template-columns: 1fr 52px; }
+  .bar .lab { grid-column: 1 / -1; }
+  .start { flex-direction: column; gap: 4px; }
+  pre, code { overflow-wrap: anywhere; }
+}
 .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
 .tabs button, .btn { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink);
   border-radius: 8px; padding: 6px 12px; cursor: pointer; }
@@ -88,6 +97,14 @@ details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
   <header>
     <h1>Leakproof</h1>
     <p class="lede">An agent that fixes memory-safety defects in C/C++ code and reports a fix only when an evidence gate verifies it: the crash is gone, the program still behaves the same on a corpus, re-fuzzing with amplified inputs finds nothing new, LeakSanitizer is clean, and the tests pass. Verified fixes, or nothing. Nemotron 3 Ultra and 3.5 Lightning on Nebius Token Factory.</p>
+    <nav class="start" aria-label="Start here">
+      <span class="start-l">Start here:</span>
+      <a href="#refusal">A patch that passed the tests, refused</a>
+      <a href="https://github.com/samsundar989/nebius-hackathon/blob/main/cases/open_bugs/REVIEW.md">Still-open bugs: 30 issues → 1 fix ready</a>
+      <a href="https://github.com/samsundar989/nebius-hackathon/blob/main/cases/open_bugs/landley_toybox/572/generated/SUBMISSION.md">toybox #572: the generated submission</a>
+      <a href="#calibration">Does the gate accept correct fixes?</a>
+      <a href="#limitations">Limitations</a>
+    </nav>
     <div class="row" id="demo-row"></div>
   </header>
 
@@ -135,7 +152,7 @@ details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
     <div class="panel" id="leaderboard"><p class="muted">Leaderboard runs pending.</p></div>
   </section>
 
-  <section>
+  <section id="limitations">
     <h2>Limitations</h2>
     <div class="panel"><ul>
       <li>ARVO has no memory-leak cases; leak results come from Juliet, which is synthetic.</li>
