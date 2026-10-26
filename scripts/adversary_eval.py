@@ -124,10 +124,10 @@ def attack_case(
             row: dict[str, Any] = {"case": case.id, "candidate": cid, "models": {}}
             inputs = []
             for model in models:
-                cache = (
-                    out
-                    / f"{case.id.split(':')[-1].split('/')[-1]}__{cid}__{model}.v{adv.PROMPT_VERSION}.inputs.json"
-                )
+                # The project name for bring-your-own cases: their id is a config path, which on
+                # Windows made the old cache name absolute and wrote it next to the config.
+                slug = case.project if case.id.startswith("project:") else case.id
+                cache = out / f"{slug}__{cid}__{model}.v{adv.PROMPT_VERSION}.inputs.json"
                 if cache.exists():
                     got = json.loads(cache.read_text())
                     for g in got["inputs"]:
