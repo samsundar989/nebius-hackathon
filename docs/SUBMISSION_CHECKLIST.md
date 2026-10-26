@@ -24,17 +24,23 @@ General → Danger Zone → Change repository visibility → Change to public �
 deployment → Source: **GitHub Actions**. Then Actions → **pages** → Run workflow (branch `main`).
 When it finishes, the URL is on the run page (`https://samsundar989.github.io/nebius-hackathon/`).
 
-**(d) Put the links in, everywhere at once.**
+**(d) Put the links in, everywhere at once** (two passes: the video URL only exists after (f)).
 
 ```
-uv run python scripts/set_links.py --dashboard <dashboard-url> --video <youtube-url> --dry-run
-uv run python scripts/set_links.py --dashboard <dashboard-url> --video <youtube-url> --rebuild-video
-git add -A && git commit -m "Links: dashboard and video" && git push
+uv run python scripts/set_links.py --dashboard <dashboard-url> --dry-run
+uv run python scripts/set_links.py --dashboard <dashboard-url> --rebuild-video
+git add -A && git commit -m "Links: dashboard" && git push
 ```
 
-It replaces the placeholders in README, DEVPOST.md and the video end card, and `--rebuild-video`
-re-records the silent cut so the end card shows the dashboard. Then re-mix the narration:
-`bash video/mux.sh narration.wav` (the step (f) upload uses the result).
+This replaces the dashboard placeholders in README, DEVPOST.md and the video end card;
+`--rebuild-video` re-records the silent cut with the new end card **and re-mixes your narration
+into `video/leakproof_final.mp4` automatically** (mux.sh remembers which recording it used), so
+the uploaded video shows the dashboard URL. After the YouTube upload in (f):
+
+```
+uv run python scripts/set_links.py --video <youtube-url>
+git add -A && git commit -m "Links: video" && git push
+```
 
 **(e) Devpost, field by field** (text in `docs/DEVPOST.md`):
 

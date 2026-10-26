@@ -38,3 +38,8 @@ hold="$(awk -v a="$vd" -v b="$ad" 'BEGIN { d = b - a; print (d > 0 ? d : 0) }')"
   -map "[v]" -map "[a]" -t "$total" \
   -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -c:a aac -b:a 160k "$out"
 echo "wrote $out ($(duration "$out")s)"
+# Remember which narration made the final cut, so set_links.py can re-mix it after the end card
+# changes (the final video would otherwise keep the old end card).
+if [ "$out" = "$here/leakproof_final.mp4" ]; then
+  (cd "$(dirname "$voice")" && printf '%s\n' "$(pwd)/$(basename "$voice")") > "$here/.narration_path"
+fi

@@ -85,6 +85,13 @@ if os.path.exists(final):
     h, m_, s = re.search(r"Duration: (\d+):(\d+):([\d.]+)", err).groups()
     secs = int(h) * 3600 + int(m_) * 60 + float(s)
     ok &= say(secs <= 179, f"final video {final}: {secs:.0f} s (limit 179)")
+    # The final cut must be newer than everything baked into it: the end card, the silent cut
+    # and the narration (set_links.py --rebuild-video re-mixes after the links change).
+    inputs = ["video/card.html", "video/leakproof_draft.mp4"]
+    if os.path.exists("video/.narration_path"):
+        inputs.append(open("video/.narration_path", encoding="utf-8").read().strip())
+    stale = [f for f in inputs if os.path.exists(f) and os.path.getmtime(f) > os.path.getmtime(final)]
+    ok &= say(not stale, "final video newer than its inputs" + (f": older than {stale}" if stale else ""))
 else:
     ok &= say(False, f"final video missing ({final}: run video/mux.sh with the narration)")
 

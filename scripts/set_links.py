@@ -85,6 +85,15 @@ def main() -> int:
     print(f"{changed} replacement(s){' (dry run)' if a.dry_run else ''}")
     if a.rebuild_video and not a.dry_run:
         subprocess.run([sys.executable, str(ROOT / "video" / "record.py")], check=True)
+        # A narrated final cut made before this keeps the old end card: re-mix it from the
+        # narration video/mux.sh recorded.
+        saved = ROOT / "video" / ".narration_path"
+        if saved.exists():
+            voice = saved.read_text(encoding="utf-8").strip()
+            subprocess.run(["bash", str(ROOT / "video" / "mux.sh"), voice], check=True)
+            print(f"re-mixed video/leakproof_final.mp4 with {voice}")
+        else:
+            print("no narration recorded yet: run video/mux.sh after recording")
     return 0
 
 
