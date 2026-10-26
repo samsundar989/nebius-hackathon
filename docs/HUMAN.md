@@ -138,3 +138,10 @@ Your clicks on github.com/samsundar989/nebius-hackathon:
 3. **Actions → demo-fuzz → Run workflow** (branch `main`) → Run workflow. When it finishes red ("found a crash"), `leakproof-fix` starts by itself; it takes about 10 minutes.
 
 Then tell me (`## ANSWER 0018`), or I will see the run when the repo is public. Default if not done: the README keeps saying the template has not run on GitHub.
+
+## QUESTION 0019 — Live runs on the dashboard during judging (Dec 1–15)? (money; default: off)
+2026-10-26, per strategist review #11 order 5. The demo service can run one real Juliet fix per click (about $0.01–0.02 each: Ultra plan, two Lightning workers, the gate). It is now safe to leave on: `DEMO_TOTAL_USD` (default $2.00) and `DEMO_DAILY_USD` (default $0.50) stop live runs before any model call, plus 25 runs a day, 3 per visitor per 10 minutes, one at a time, and only the Juliet ids in `service/juliet/cases.txt`. When live runs are off, asleep or out of budget, the dashboard's button shows a real earlier run, labelled "recorded run" with the reason.
+
+One honest limit: the caps are kept in memory, and Render's free instance restarts after it sleeps, which resets them. The real bound over the judging window is the daily cap × the days live runs are on (with the defaults, at most $0.50 a day; $7.50 over 15 days if someone woke it every day). Set `DEMO_DAILY_USD=0.15` for a ~$2 worst case.
+
+Options: (a) turn live runs on (`DEMO_ENABLED=true` in Render's environment) with `DEMO_DAILY_USD=0.15`; (b) leave them off and keep the labelled recorded runs. **Default if no answer: (b), off.**

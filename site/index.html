@@ -185,17 +185,29 @@ const evBadge = (ev) => ev ? `<span class="chip c-${ev.level === "weak" ? "incon
 async function demo() {
   const cfg = await get("config.json");
   const row = $("#demo-row");
-  if (!cfg || !cfg.service_url) { row.innerHTML = '<button class="btn" disabled>Run a live fix</button><span class="muted">The live demo service is not deployed yet; the recorded runs below are real.</span>'; return; }
-  row.innerHTML = `<button class="btn" id="run-live">Run a live fix (one Juliet case)</button><span class="muted" id="live-state"></span>`;
+  // A recorded run is a real earlier run, always labelled as such with the reason no live run
+  // happened (service off, asleep, or out of its demo budget).
+  const recorded = async (why) => {
+    const recs = (await get("data/demo_recorded.json")) || [];
+    const j = recs[Math.floor(Math.random() * recs.length)];
+    return j ? { ...j, recorded: true, reason: why } : null;
+  };
+  const show = (st, j) => {
+    st.innerHTML = j
+      ? ` ${chip(j.verdict || "error")} ${esc(j.case || "")} ${money(j.usd)} ${j.recorded ? `<strong>recorded run</strong> <span class="muted">(${esc(j.reason || "live runs unavailable")}; this is a real earlier run, not a live one)</span>` : "<strong>live run</strong>"}`
+      : "no recorded run available";
+  };
+  row.innerHTML = `<button class="btn" id="run-live">Run a fix (one Juliet case)</button><span class="muted" id="live-state"></span>`;
   $("#run-live").onclick = async () => {
-    const st = $("#live-state"); st.textContent = "waking up the service (~1 min if idle)…";
+    const st = $("#live-state");
+    if (!cfg || !cfg.service_url) { show(st, await recorded("the live demo service is off")); return; }
+    st.textContent = "waking up the service (~1 min if idle)…";
     try {
       await fetch(cfg.service_url + "/healthz");
       st.textContent = "running: plan, workers, gate…";
       const r = await fetch(cfg.service_url + "/run", { method: "POST" });
-      const j = await r.json();
-      st.innerHTML = ` ${chip(j.verdict || "error")} ${esc(j.case || "")} ${j.recorded ? "(recorded result: demo cap reached)" : ""} ${money(j.usd)}`;
-    } catch (e) { st.textContent = "service unavailable; recorded runs below"; }
+      show(st, await r.json());
+    } catch (e) { show(st, await recorded("the live demo service did not answer")); }
   };
 }
 

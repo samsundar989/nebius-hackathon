@@ -8,10 +8,19 @@ A live run (D-0061): one whitelisted Juliet case, an Ultra plan, 2 Lightning wor
 (its own process), all on `LocalProcessRunner`: model-written code is built and run as `nobody`
 with a cleared environment, so it can neither inherit nor read the API key. One run at a time;
 caps and the service budget (LEAKPROOF_BUDGET_USD) fall back to a labelled recorded result.
+
+Caps for leaving it on during judging (review #11 order 5), all checked before any model call:
+  DEMO_TOTAL_USD    model spend for this instance's lifetime (default 2.00)
+  DEMO_DAILY_USD    model spend per rolling 24 h (default 0.50)
+  DEMO_MAX_RUNS_PER_DAY, DEMO_MAX_RUNS_PER_IP_10MIN   run counts (25, 3)
+A request may name a case ({"case": "<Juliet id>"}); only ids in juliet/cases.txt run live.
+The caps live in memory: a restart (Render free instances sleep when idle) resets them, so the
+real bound over a judging window is the daily cap times the days live runs are on.
 """
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import random
@@ -35,6 +44,25 @@ app.add_middleware(
 _lock = threading.Lock()
 _day: deque[float] = deque()
 _by_ip: dict[str, deque[float]] = {}
+_spend: deque[tuple[float, float]] = deque()  # (time, usd) of finished live runs
+CASES = Path(__file__).parent / "juliet" / "cases.txt"
+
+
+def _money_left() -> tuple[bool, str]:
+    """Both USD caps, before a run starts."""
+    now = time.time()
+    total = float(os.environ.get("DEMO_TOTAL_USD", "2.00"))
+    daily = float(os.environ.get("DEMO_DAILY_USD", "0.50"))
+    with _lock:
+        while _spend and now - _spend[0][0] > 86400:
+            _spend.popleft()
+        spent_day = sum(u for _, u in _spend)
+    spent_all = _ledger.spent if _ledger is not None else 0.0
+    if spent_all >= total:
+        return False, f"the demo's total budget (${total:.2f}) is used up"
+    if spent_day >= daily:
+        return False, f"today's demo budget (${daily:.2f}) is used up"
+    return True, ""
 
 
 def _allowed(ip: str) -> tuple[bool, str]:
@@ -74,7 +102,7 @@ _busy = threading.Lock()
 _ledger = None
 
 
-def _live() -> dict:
+def _live(case: str | None = None) -> dict:
     global _ledger
     import tempfile
 
@@ -85,11 +113,14 @@ def _live() -> dict:
     if _ledger is None:
         _ledger = CostLedger(
             path=Path(tempfile.gettempdir()) / "demo_ledger.jsonl",
-            budget=float(os.environ.get("LEAKPROOF_BUDGET_USD", "0.50")),
+            budget=min(
+                float(os.environ.get("LEAKPROOF_BUDGET_USD", "0.50")),
+                float(os.environ.get("DEMO_TOTAL_USD", "2.00")),
+            ),
         )
     _ledger.check()  # BudgetExceeded once the service budget is spent
-    cases = (Path(__file__).parent / "juliet" / "cases.txt").read_text().split()
-    case_id = random.choice(cases)
+    case_id = case or random.choice(CASES.read_text().split())
+    spent0 = _ledger.spent
     client = LLMClient(ledger=_ledger, run_id=f"demo:{case_id}")
     with tempfile.TemporaryDirectory() as tmp:
         rec = fix_case(
@@ -101,6 +132,8 @@ def _live() -> dict:
             n_workers=2,
             audit_model=None,
         )
+    with _lock:
+        _spend.append((time.time(), _ledger.spent - spent0))
     return {
         "case": rec["case"],
         "verdict": rec["verdict"],
@@ -118,14 +151,28 @@ def _live() -> dict:
 
 
 @app.post("/run")
-def run(request: Request) -> dict:
+async def run(request: Request) -> dict:
+    try:
+        body = await request.json()
+    except Exception:  # noqa: BLE001 - no body or not JSON: a random allowed case
+        body = {}
+    case = (body or {}).get("case") if isinstance(body, dict) else None
+    if case is not None and case not in CASES.read_text().split():
+        return _recorded("that case is not on the demo's allow-list")
+    ok, why = _money_left()
+    if not ok:
+        return _recorded(why)
     ok, why = _allowed(request.client.host if request.client else "?")
     if not ok:
         return _recorded(why)
+    return await asyncio.to_thread(_run_locked, case)
+
+
+def _run_locked(case: str | None) -> dict:
     if not _busy.acquire(blocking=False):
         return _recorded("another live run is in progress")
     try:
-        return _live()
+        return _live(case)
     except Exception as exc:  # noqa: BLE001 - budget, API or build failure: never a 500
         return _recorded(f"live run unavailable ({type(exc).__name__})")
     finally:

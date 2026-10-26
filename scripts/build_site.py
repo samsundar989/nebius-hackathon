@@ -205,6 +205,9 @@ def main() -> int:
         keep["workers"] = [{"id": w["id"], "verdict": w["verdict"]} for w in c["workers"]]
         keep["source"] = f"runs/{juliet.name}/{p.name}"
         (rec_dir / p.name).write_text(json.dumps(keep, indent=1), encoding="utf-8")
+    # The same recorded runs for the dashboard itself, shown when the service is off or asleep.
+    recorded = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(rec_dir.glob("*.json"))]
+    (SITE / "demo_recorded.json").write_text(json.dumps(recorded, indent=1), encoding="utf-8")
     print(json.dumps(index, indent=1))
     return 0
 
