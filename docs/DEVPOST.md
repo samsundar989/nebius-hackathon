@@ -93,7 +93,7 @@ More real tests in the gate. jq, mosquitto (about 210 CUnit tests, after install
 
 ## Built with
 
-nvidia-nemotron, nemotron-3-ultra, nemotron-3.5-lightning, nemotron-3-super, nebius-token-factory, nebius-sandboxes, python, docker, addresssanitizer, leaksanitizer, libfuzzer, oss-fuzz, arvo, compute-sanitizer, cuda, kaggle, render, github-actions
+nvidia-nemotron, nemotron-3-ultra, nemotron-3.5-lightning, nemotron-3-super, nemotron-3-nano, nebius-token-factory, nebius-sandboxes, python, docker, addresssanitizer, leaksanitizer, libfuzzer, oss-fuzz, arvo, compute-sanitizer, cuda, kaggle, render, github-actions
 
 ## Feedback for Nebius and NVIDIA (short form; full version in docs/FEEDBACK.md)
 
