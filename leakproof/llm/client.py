@@ -263,9 +263,11 @@ class LLMClient:
         purpose: str,
         name: str = "result",
         use_response_format: bool | None = None,
+        repair: bool = True,
         **kwargs: Any,
     ) -> tuple[Any, ChatResult]:
-        """Return (validated JSON value, last ChatResult). One repair retry on invalid output."""
+        """Return (validated JSON value, last ChatResult). One repair retry on invalid output;
+        `repair=False` makes one call only (no fallback, no repair) and raises on invalid output."""
         spec = get(model)
         if use_response_format is None:
             caps = self.capabilities.get(spec.id, {})
@@ -293,7 +295,7 @@ class LLMClient:
             result = self.chat(spec.id, msgs, purpose=purpose, **kwargs)
             rf_kwargs = {}
 
-        if rf_kwargs and result.finish_reason == "length":
+        if rf_kwargs and result.finish_reason == "length" and repair:
             # Constrained decoding can run away on numeric fields (measured on Lightning and
             # Ultra: digits until max_tokens). Fall back to the schema-in-prompt path.
             result = self.chat(spec.id, msgs, purpose=f"{purpose}:no_rf", **kwargs)
@@ -301,7 +303,9 @@ class LLMClient:
         error = self._validate(result.text, schema)
         if error is None:
             return extract_json(result.text), result
-        repair = [
+        if not repair:
+            raise StructuredOutputError(f"invalid structured output (no repair): {error}")
+        repair_msgs = [
             *msgs,
             {"role": "assistant", "content": result.text},
             {
@@ -310,7 +314,7 @@ class LLMClient:
                 "corrected JSON value.",
             },
         ]
-        result = self.chat(spec.id, repair, purpose=f"{purpose}:repair", **rf_kwargs, **kwargs)
+        result = self.chat(spec.id, repair_msgs, purpose=f"{purpose}:repair", **rf_kwargs, **kwargs)
         error = self._validate(result.text, schema)
         if error is None:
             return extract_json(result.text), result

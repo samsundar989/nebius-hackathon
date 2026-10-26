@@ -160,7 +160,11 @@ def attack(
         SCHEMA,
         purpose="adversary",
         thinking=thinking,
-        max_completion_tokens=32000 if thinking else 12000,
+        # One call per candidate: invalid output counts as zero inputs (no repair call; the
+        # repair retries were a fifth of the adversary's development spend). 5k tokens covers
+        # 8 prompt-v3 inputs (the longest valid answer measured: ~3k).
+        max_completion_tokens=32000 if thinking else 5000,
+        repair=False,
     )
     out = []
     for i, item in enumerate(value.get("inputs", [])[:MAX_INPUTS]):

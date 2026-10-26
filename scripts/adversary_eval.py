@@ -14,6 +14,7 @@ scripts/adversary_eval.py arvo-win ROOT   the verified-and-correct ARVO r1 winne
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -33,7 +34,10 @@ from leakproof.runner import LocalDockerRunner
 # 32k-token budget reasoning and cost ~$0.03 a call, so it is not in the default set.
 VARIANTS = {"super": ("super", False), "ultra": ("ultra", False), "super_think": ("super", True)}
 MODELS = ("super", "ultra")
-BUDGET = 1.50
+# Review #10: the adversary overran its $1.50 order cap ($2.44 with three prompt versions and
+# repairs); the remaining runs are Super only, $0.40 at most.
+BUDGET = float(os.environ.get("LEAKPROOF_ADVERSARY_BUDGET", "0.40"))
+ACTIVE = tuple(os.environ.get("LEAKPROOF_ADVERSARY_MODELS", "super").split(","))
 
 # case dir -> (config, [(id, record:HYP:worker)]); the D-0078 re-gate list plus csvsplit.
 OPEN = {
@@ -275,7 +279,7 @@ def main() -> int:
     for case, cands, mode in jobs:
         try:
             if mode is None:
-                summary += attack_case(runner, client, case, out, cands)
+                summary += attack_case(runner, client, case, out, cands, models=ACTIVE)
                 continue
             c = load_case(case)
             # The developer's fix comes from the upstream commit (preparation step, network on).
@@ -287,7 +291,7 @@ def main() -> int:
                 continue
             if mode == "arvo-dev":
                 cands = [("developer", dev["files"], dev.get("diff", ""))]
-                summary += attack_case(runner, client, c, out, cands)
+                summary += attack_case(runner, client, c, out, cands, models=ACTIVE)
             else:
                 rec = next(r for r in records("p3_arvo27_r1") if r["case"] == case)
                 w = rec["winner"]
@@ -298,7 +302,13 @@ def main() -> int:
                     == (w["hypothesis_id"], w["worker_index"])
                 )
                 summary += attack_case(
-                    runner, client, c, out, [("winner", files, w["diff"])], ref_files=dev["files"]
+                    runner,
+                    client,
+                    c,
+                    out,
+                    [("winner", files, w["diff"])],
+                    ref_files=dev["files"],
+                    models=ACTIVE,
                 )
         except Exception as exc:  # noqa: BLE001 - record and continue with the next case
             summary.append(
