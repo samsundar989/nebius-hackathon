@@ -1,0 +1,9 @@
+# me7alix/utf8.h issue #1: utf8_decode reads continuation bytes past the end (round 3).
+# Upstream source in ./src (shallow clone, not committed); repro.c is the issue's inline sample.
+[project]
+name = "utf8h_1"
+src = "."
+build = '''clang $CFLAGS -Isrc -o repro repro.c'''
+reproduce = '''./repro'''
+artifact = "repro"
+editable = ["src/utf8.h"]

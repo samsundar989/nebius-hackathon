@@ -1,0 +1,9 @@
+# vks/special-fun issue #17: global-buffer-overflow in cephes-single facf (round 3).
+# Upstream source in ./src (shallow clone, not committed); repro.c calls facf out of range.
+[project]
+name = "specialfun_17"
+src = "."
+build = '''clang $CFLAGS -w -Isrc/cephes-single -o repro repro.c src/cephes-single/facf.c src/cephes-single/constf.c src/cephes-single/mtherrf.c'''
+reproduce = '''./repro'''
+artifact = "repro"
+editable = ["src/cephes-single/*.c", "src/cephes-single/*.h"]

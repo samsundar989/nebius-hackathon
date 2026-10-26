@@ -1,0 +1,9 @@
+# Drafted by `leakproof init` (none); check it with `leakproof fix`.
+[project]
+name = "src"
+src = "src"
+# TODO build = '''...'''
+reproduce = '''./a.out'''
+artifact = "a.out"
+# test = '''...'''  # optional
+editable = ["*.c", "*.h"]

@@ -33,8 +33,8 @@ def configs(cases: Path) -> list[Path]:
     )
 
 
-def reproduce(cases: Path) -> int:
-    OUT.mkdir(parents=True, exist_ok=True)
+def reproduce(cases: Path, out: Path = OUT) -> int:
+    out.mkdir(parents=True, exist_ok=True)
     runner = LocalDockerRunner(memory="4g", cpus=2)
     rows = []
     for toml in configs(cases):
@@ -59,7 +59,7 @@ def reproduce(cases: Path) -> int:
         row["s"] = round(time.monotonic() - t0, 1)
         rows.append(row)
         print(json.dumps(row)[:400], flush=True)
-        (OUT / "reproduce.json").write_text(json.dumps(rows, indent=1))
+        (out / "reproduce.json").write_text(json.dumps(rows, indent=1))
     return 0
 
 
@@ -69,8 +69,10 @@ def fix(
     only: set[str] | None,
     repair_rounds: int = 0,
     run_id: str = "open_bugs_fix",
+    out: Path = OUT,
+    adversary: str = "off",
 ) -> int:
-    rows = json.loads((OUT / "reproduce.json").read_text())
+    rows = json.loads((out / "reproduce.json").read_text())
     for row in rows:
         if not row.get("reproduces") or (only and row["case"] not in only):
             continue
@@ -87,6 +89,8 @@ def fix(
             str(budget),
             "--repair-rounds",
             str(repair_rounds),
+            "--adversary",
+            adversary,
         ]
         print("$", " ".join(cmd[2:]), flush=True)
         subprocess.run(cmd, check=False)
@@ -101,12 +105,15 @@ def main() -> int:
     ap.add_argument("--only", help="comma-separated case names (fix)")
     ap.add_argument("--repair-rounds", type=int, default=0)
     ap.add_argument("--run-id", default="open_bugs_fix")
+    ap.add_argument("--out", default="open_bugs", help="runs/<out>/reproduce.json")
+    ap.add_argument("--adversary", default="off", choices=["auto", "super", "ultra", "off"])
     args = ap.parse_args()
     cases = args.cases_dir.resolve()
+    out = RUNS_DIR / args.out
     if args.step == "reproduce":
-        return reproduce(cases)
+        return reproduce(cases, out)
     only = set(args.only.split(",")) if args.only else None
-    return fix(cases, args.budget, only, args.repair_rounds, args.run_id)
+    return fix(cases, args.budget, only, args.repair_rounds, args.run_id, out, args.adversary)
 
 
 if __name__ == "__main__":

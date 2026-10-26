@@ -1,0 +1,12 @@
+# landley/toybox issue #573: global-buffer-overflow in mkpasswd's get_salt (KLEE-found), round 3.
+# Upstream source in ../../landley_toybox/src (shallow clone shared by the toybox cases, not committed).
+[project]
+name = "toybox_573"
+src = "../../landley_toybox/src"
+build = '''chmod +x scripts/*.sh scripts/*/*.sh 2>/dev/null; make defconfig > /dev/null && make -j4 toybox'''
+# The issue's second argument, `-mmd5^` (the first contains a control character).
+reproduce = '''./generated/unstripped/toybox mkpasswd "$(cat /tmp/poc)" < /dev/null || true'''
+poc = "../../round3/landley_toybox_573/poc.arg"
+test = '''CFLAGS="-fsanitize=address -g -O0" LDFLAGS="-fsanitize=address" VERBOSE=all bash scripts/test.sh mkpasswd'''
+artifact = "generated/unstripped/toybox"
+editable = ["toys/*/*.c", "lib/*.c", "lib/*.h"]

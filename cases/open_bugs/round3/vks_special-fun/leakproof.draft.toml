@@ -1,0 +1,10 @@
+# Drafted by `leakproof init` (none); check it with `leakproof fix`.
+[project]
+name = "src"
+src = "src"
+# TODO build = '''...'''
+reproduce = '''./target/debug/replay_special_fun0 "$(cat /tmp/poc)"'''
+poc = "../poc.bin"
+artifact = "target/debug/replay_special_fun0"
+# test = '''...'''  # optional
+editable = ["cephes-double/*.c", "cephes-single/*.c", "cephes-single/*.h", "cephes-double/*.h"]

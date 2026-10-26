@@ -1,0 +1,10 @@
+# cesanta/elk issue #82: js_eval(buf, len) reads past a bounded slice (round 3).
+# Upstream source in ./src (shallow clone, not committed); repro.c is the issue's inline reproducer.
+[project]
+name = "elk_82"
+src = "."
+build = '''clang $CFLAGS -Isrc -o repro repro.c src/elk.c -lm'''
+reproduce = '''./repro'''
+test = '''cd src/test && clang -g -O0 -fsanitize=address -I.. unit_test.c -lm -o ut && ./ut'''
+artifact = "repro"
+editable = ["src/elk.c", "src/elk.h"]
