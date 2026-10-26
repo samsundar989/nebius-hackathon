@@ -622,12 +622,11 @@ class ArvoGate:
                 originals[path] = ""
         report = json.dumps(self.case.finding)[:4000]
         text = adv.prompt(report, adv.how(self.case), poc, originals, cand["files"], cand["diff"])
-        try:
-            inputs, _ = adv.attack(client, model, text)
-        except Exception as exc:  # noqa: BLE001 - invalid output or budget: no inputs
-            return Check("skipped", f"{model}: no inputs ({str(exc)[:160]})"), []
+        # Super falls back to Ultra once when it gives no usable input (D-0080).
+        inputs, model, notes = adv.attack_with_fallback(client, model, text)
         if not inputs:
-            return Check("skipped", f"{model}: no inputs"), []
+            return Check("skipped", f"no inputs ({'; '.join(notes)[:200]})"), []
+        n_in = f"{model}, {len(inputs)} inputs" + (" (fallback)" if notes else "")
         try:
             base = adv.run_inputs(self.runner, self.case, self.baseline, inputs)
             pat = adv.run_inputs(self.runner, self.case, self.baseline, inputs, cand["files"])
@@ -653,10 +652,12 @@ class ArvoGate:
             for r in rows:
                 r["expect"], r["reason"] = reasons.get(r["input"], ("", ""))
                 r["report"] = pat.reports.get(r["input"], "")[:3000]
-            (d / "adversary.json").write_text(json.dumps({"model": model, "rows": rows}, indent=1))
+            (d / "adversary.json").write_text(
+                json.dumps({"model": model, "fallback_notes": notes, "rows": rows}, indent=1)
+            )
         if verdict in ("pass", "inconclusive"):
-            return Check("pass" if verdict == "pass" else "skipped", f"{model}: {detail}"), saved
-        return Check("fail", f"{verdict}: {model}: {detail}"), saved
+            return Check("pass" if verdict == "pass" else "skipped", f"{n_in}: {detail}"), saved
+        return Check("fail", f"{verdict}: {n_in}: {detail}"), saved
 
     def candidate(self, cand: dict[str, Any], checks: dict[str, Check]) -> str:
         tests = self.case.tests_cmd

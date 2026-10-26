@@ -36,7 +36,9 @@ def test_behaviour_change_compares_with_reference_when_present() -> None:
 def test_decode() -> None:
     hexed = {"encoding": "hex", "prefix": "41", "repeat": "42", "count": 3, "suffix": "0a"}
     assert adv.decode(hexed) == b"ABBB\n"
-    assert adv.decode({"encoding": "hex", "prefix": "zz"}) is None
+    assert adv.decode({"encoding": "hex", "prefix": "zz"}) == b"zz"  # mislabelled text
+    assert adv.decode({"encoding": "hex", "prefix": "0x41, 0x42", "count": "0"}) == b"AB"
+    assert adv.decode({"encoding": "text", "prefix": "", "count": "0"}) is None
     assert adv.decode({"encoding": "text", "prefix": "a", "repeat": "", "count": 0}) == b"a"
 
 
@@ -85,3 +87,24 @@ def test_adversary_setting_auto(tmp_path) -> None:  # noqa: ANN001
     cfg.write_text(cfg.read_text() + '[gate]\nadversary = "ultra"\n')
     assert adversary_setting("auto", str(cfg)) == "ultra"
     assert adversary_setting("off", str(cfg)) == "off"
+
+
+def test_super_falls_back_to_ultra_once() -> None:
+    calls = []
+
+    def fake(client, model, text, thinking=False):  # noqa: ANN001, ANN202, ARG001
+        calls.append(model)
+        if model == "super":
+            return [], 0.0
+        return [{"name": "adv_0", "data": b"x", "expect": "", "reason": ""}], 0.0
+
+    real = adv.attack
+    adv.attack = fake
+    try:
+        inputs, used, notes = adv.attack_with_fallback(None, "super", "t")
+        assert used == "ultra" and inputs and calls == ["super", "ultra"]
+        calls.clear()
+        adv.attack_with_fallback(None, "ultra", "t")
+        assert calls == ["ultra"]
+    finally:
+        adv.attack = real

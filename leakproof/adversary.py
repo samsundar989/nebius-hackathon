@@ -27,6 +27,7 @@ from __future__ import annotations
 import binascii
 import difflib
 import posixpath
+import re
 from typing import Any
 
 from leakproof import gate_cli as gc
@@ -34,7 +35,7 @@ from leakproof import gate_fuzz as gf
 from leakproof.findings import parse_report, primary
 
 MAX_INPUTS = 8
-PROMPT_VERSION = 3  # part of the answer cache key: a new prompt asks the models again
+PROMPT_VERSION = 4  # part of the answer cache key: a new prompt asks the models again
 MAX_INPUT_BYTES = 1 << 16
 CONTEXT = 40  # unpatched lines shown around each hunk
 
@@ -43,6 +44,9 @@ SCHEMA = {
     "properties": {
         "inputs": {
             "type": "array",
+            # minItems: under constrained decoding Super otherwise answered `{"inputs": []}`
+            # (6 completion tokens) on 6 of 26 calls (D-0080).
+            "minItems": 1,
             "maxItems": MAX_INPUTS,
             "items": {
                 "type": "object",
@@ -50,7 +54,9 @@ SCHEMA = {
                     "encoding": {"type": "string", "enum": ["text", "hex"]},
                     "prefix": {"type": "string"},
                     "repeat": {"type": "string"},
-                    "count": {"type": "integer", "minimum": 0, "maximum": 100000},
+                    # A string, not an integer: constrained decoding runs away on numeric
+                    # fields (D-0012); Super hit its token cap on 5 of 26 calls with v3.
+                    "count": {"type": "string", "description": "decimal digits; 0 for no run"},
                     "suffix": {"type": "string"},
                     "expect": {
                         "type": "string",
@@ -131,20 +137,27 @@ def prompt(
     )
 
 
+def _hex(s: str) -> bytes | None:
+    """Lenient hex: whitespace, commas, `0x` and `\\x` prefixes are ignored."""
+    s = re.sub(r"0x|\\x|[\s,]", "", s, flags=re.I)
+    try:
+        return binascii.unhexlify(s)
+    except (binascii.Error, ValueError):
+        return None
+
+
 def decode(item: dict[str, Any]) -> bytes | None:
-    """prefix + repeat x count + suffix, each hex or text; None when the hex does not parse."""
+    """prefix + repeat x count + suffix. Hex that does not parse is used as text (the model
+    labelled the encoding wrong); None only when nothing usable remains."""
     parts = []
     for key in ("prefix", "repeat", "suffix"):
         s = item.get(key, "") or ""
-        if item.get("encoding") == "hex":
-            try:
-                parts.append(binascii.unhexlify("".join(s.split())))
-            except (binascii.Error, ValueError):
-                return None
-        else:
-            parts.append(s.encode("utf-8", "surrogateescape"))
-    count = max(0, min(int(item.get("count") or 0), MAX_INPUT_BYTES))
-    return (parts[0] + parts[1] * count + parts[2])[:MAX_INPUT_BYTES]
+        b = _hex(s) if item.get("encoding") == "hex" else None
+        parts.append(b if b is not None else s.encode("utf-8", "surrogateescape"))
+    digits = re.sub(r"\D", "", str(item.get("count") or "0"))[:6]
+    count = min(int(digits or 0), MAX_INPUT_BYTES)
+    data = (parts[0] + parts[1] * count + parts[2])[:MAX_INPUT_BYTES]
+    return data or None
 
 
 def attack(
@@ -163,7 +176,7 @@ def attack(
         # One call per candidate: invalid output counts as zero inputs (no repair call; the
         # repair retries were a fifth of the adversary's development spend). 5k tokens covers
         # 8 prompt-v3 inputs (the longest valid answer measured: ~3k).
-        max_completion_tokens=32000 if thinking else 5000,
+        max_completion_tokens=32000 if thinking else 4000,
         repair=False,
     )
     out = []
@@ -179,6 +192,24 @@ def attack(
                 }
             )
     return out, res.usd
+
+
+def attack_with_fallback(
+    client: Any, model: str, text: str
+) -> tuple[list[dict[str, Any]], str, list[str]]:
+    """(inputs, model that produced them, notes). Super falls back to Ultra once when it gives
+    no usable input (D-0080): a user would rather pay ~$0.02 than lose the check."""
+    notes: list[str] = []
+    for m in (model, "ultra") if model == "super" else (model,):
+        try:
+            inputs, _ = attack(client, m, text)
+        except Exception as exc:  # noqa: BLE001 - invalid output or budget
+            notes.append(f"{m}: {str(exc)[:160]}")
+            continue
+        if inputs:
+            return inputs, m, notes
+        notes.append(f"{m}: no usable input")
+    return [], model, notes
 
 
 def _loc(run: gc.Run, name: str) -> str:

@@ -31,7 +31,12 @@ from leakproof.runner import LocalDockerRunner
 
 # variant -> (model, thinking). super_think ran once on the open bugs (prompt v1): it spent its
 # 32k-token budget reasoning and cost ~$0.03 a call, so it is not in the default set.
-VARIANTS = {"super": ("super", False), "ultra": ("ultra", False), "super_think": ("super", True)}
+VARIANTS = {
+    "super": ("super", False),
+    "ultra": ("ultra", False),
+    "super_think": ("super", True),
+    "super_fb": ("super", False),  # Super, Ultra once on no usable input (D-0080)
+}
 MODELS = ("super", "ultra")
 # Review #10: the adversary overran its $1.50 order cap ($2.44 with three prompt versions and
 # repairs); the remaining runs are Super only, $0.40 at most.
@@ -134,19 +139,34 @@ def attack_case(
                         g["data"] = bytes.fromhex(g["data"])
                     usd = got["usd"]
                 else:
+                    spent0 = client.ledger.spent
+                    used, notes = VARIANTS[model][0], []
                     try:
-                        got_inputs, usd = adv.attack(
-                            client, VARIANTS[model][0], text, VARIANTS[model][1]
-                        )
+                        if model == "super_fb":
+                            # D-0080: Super, then Ultra once when Super gives no usable input.
+                            got_inputs, used, notes = adv.attack_with_fallback(
+                                client, "super", text
+                            )
+                        else:
+                            got_inputs, _ = adv.attack(
+                                client, VARIANTS[model][0], text, VARIANTS[model][1]
+                            )
                     except Exception as exc:  # noqa: BLE001 - e.g. no JSON: no inputs, not cached
                         print("model error", model, str(exc)[:200], flush=True)
-                        row["models"][model] = {"usd": 0.0, "n_inputs": 0, "error": str(exc)[:300]}
+                        row["models"][model] = {
+                            "usd": client.ledger.spent - spent0,
+                            "n_inputs": 0,
+                            "error": str(exc)[:300],
+                        }
                         continue
-                    got = {"inputs": got_inputs, "usd": usd}
+                    usd = client.ledger.spent - spent0
+                    got = {"inputs": got_inputs, "usd": usd, "model_used": used, "notes": notes}
                     cache.write_text(
                         json.dumps(
                             {
                                 "usd": usd,
+                                "model_used": used,
+                                "notes": notes,
                                 "inputs": [i | {"data": i["data"].hex()} for i in got_inputs],
                             },
                             indent=1,
@@ -154,7 +174,12 @@ def attack_case(
                     )
                 for i in got["inputs"]:
                     inputs.append(i | {"name": f"{model}_{i['name']}", "model": model})
-                row["models"][model] = {"usd": usd, "n_inputs": len(got["inputs"])}
+                row["models"][model] = {
+                    "usd": usd,
+                    "n_inputs": len(got["inputs"]),
+                    "model_used": got.get("model_used", VARIANTS[model][0]),
+                    "notes": got.get("notes", []),
+                }
             if not inputs:
                 row["error"] = "no inputs"
                 results.append(row)
@@ -207,7 +232,7 @@ def attack_case(
 def main() -> int:
     which, root = sys.argv[1], Path(sys.argv[2]).resolve()
     only = set(sys.argv[3].split(",")) if len(sys.argv) > 3 else None
-    out = root / "runs" / "adversary" / which
+    out = root / "runs" / "adversary" / (which + os.environ.get("LEAKPROOF_ADVERSARY_TAG", ""))
     out.mkdir(parents=True, exist_ok=True)
     runner = LocalDockerRunner(memory="6g", cpus=4)
     client = LLMClient(ledger=CostLedger(budget=BUDGET), run_id=f"adversary:{which}")
