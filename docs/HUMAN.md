@@ -176,3 +176,10 @@ Render dashboard → **leakproof-demo** → Environment. Set these, then **Save,
 | `DEMO_ENABLED` | `true` (live Juliet runs; per #16/#17 and QUESTION 0019 = yes) |
 
 `NEBIUS_API_KEY` / `NEBIUS_PROJECT_ID` must be the dedicated demo key you entered at Blueprint creation. The new **Re-verify without AI** button (the gate on a stored patch, no model call, $0) works without any of these. Tell me the passcode in chat (or put it in `.env` as `DEMO_PASSCODE=...`) so I can test the live button end to end. **Default if no answer: live runs stay off; the dashboard shows labelled recorded runs and Re-verify still works.**
+
+## QUESTION 0022 — assimp #6927 (glTF data-URI overflow): a verified but **partial** fix is packaged (your decision; nothing has been sent)
+- Issue: https://github.com/assimp/assimp/issues/6927 (opened 2026-10-13, labelled **Security Risk**, still open, no fix PR).
+- Leakproof verified 3 of 4 candidates ($0.07; assimp's 720 gtest tests ran, 233 generated inputs re-fuzzed). Package: `cases/real_world/assimp_assimp/6927/generated/` (applies to upstream `a2a586d`).
+- My review: **correct but partial.** It bounds-checks the raw-data `memcpy` the PoC reaches. The root cause, `ParseDataURI` storing the data offset in a signed `char` (`glTFCommon.cpp:88`), stays, and so do its other callers (glTF2 base64 branch, glTF2 image URIs, the glTF 1 importer). The maintainers would likely prefer fixing `ParseDataURI` itself.
+- assimp's rules: AIToolPolicy.md requires you to read and understand every line, run the tests yourself, and add an `Assisted-by: Leakproof (NVIDIA Nemotron)` trailer. SECURITY.md routes security reports to kim.kulling@assimp.org, but this issue is already public.
+- Options: (a) post a short comment on the issue offering the partial patch and pointing at the root cause; (b) open a PR marked "Part of #6927" with the trailer; (c) send nothing. **Default if no answer: (c).**
