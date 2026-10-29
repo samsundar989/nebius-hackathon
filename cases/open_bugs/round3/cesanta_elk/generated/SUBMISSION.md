@@ -58,19 +58,17 @@ elk: fix heap-buffer-overflow in next()
 
 AddressSanitizer reports a heap-buffer-overflow in next() (elk.c:535).
 
-The change, in elk.c:
-
-    -      if (buf[0] == buf[js->tlen]) js->tok = TOK_STRING, js->tlen++;
-    +      if (js->toff + js->tlen < js->clen && buf[0] == buf[js->tlen]) js->tok = TOK_STRING, js->tlen++;
+The change is in elk.c (+1/-1), so the reported access no longer
+happens.
 
 Part of #82.
 ```
 
 ## AI-assistance disclosure (put it in the PR or e-mail text)
 
-> This fix was developed with Leakproof, an AI repair agent (Nemotron models on Nebius Token
-> Factory); its candidate passed the sanitizer-based checks above. I reviewed the change and ran
-> the project's tests myself before sending.
+<!-- Make every sentence below true before sending: review the change yourself, and say you ran
+the project's tests only if you did. -->
+> This patch was developed with Leakproof, an AI repair agent (Nemotron models on Nebius Token Factory); its candidate passed sanitizer-based checks. I reviewed the change myself.
 
 ## Before sending
 

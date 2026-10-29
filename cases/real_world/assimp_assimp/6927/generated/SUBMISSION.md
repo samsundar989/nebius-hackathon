@@ -60,22 +60,17 @@ glTF2Asset: fix heap-buffer-underflow in glTF2::Buffer::Read()
 AddressSanitizer reports a heap-buffer-underflow in
 glTF2::Buffer::Read() (code/AssetLib/glTF2/glTF2Asset.inl:606).
 
-The change, in code/AssetLib/glTF2/glTF2Asset.inl:
-
-    +            }
-    +
-    +            // Bounds check: ensure dataURI.data points within the original URI string
-    +            if (dataURI.data == nullptr || dataURI.data < uri || dataURI.data + dataURI.dataLength > uri + it->GetStringLength()) {
-    +                throw DeadlyImportError("GLTF: buffer \"", id, "\" has invalid data URI");
+The change is in code/AssetLib/glTF2/glTF2Asset.inl (+5/-0), so the
+reported access no longer happens.
 
 Part of #6927.
 ```
 
 ## AI-assistance disclosure (put it in the PR or e-mail text)
 
-> This fix was developed with Leakproof, an AI repair agent (Nemotron models on Nebius Token
-> Factory); its candidate passed the sanitizer-based checks above. I reviewed the change and ran
-> the project's tests myself before sending.
+<!-- Make every sentence below true before sending: review the change yourself, and say you ran
+the project's tests only if you did. -->
+> This patch was developed with Leakproof, an AI repair agent (Nemotron models on Nebius Token Factory); its candidate passed sanitizer-based checks. I reviewed the change and ran the project's tests myself.
 
 ## Before sending
 

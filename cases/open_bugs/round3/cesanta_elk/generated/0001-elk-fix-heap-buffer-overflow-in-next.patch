@@ -1,14 +1,12 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: <your git identity>
-Date: Mon, 26 Oct 2026 19:15:05 +0000
+Date: Thu, 29 Oct 2026 17:50:33 +0000
 Subject: [PATCH] elk: fix heap-buffer-overflow in next()
 
 AddressSanitizer reports a heap-buffer-overflow in next() (elk.c:535).
 
-The change, in elk.c:
-
-    -      if (buf[0] == buf[js->tlen]) js->tok = TOK_STRING, js->tlen++;
-    +      if (js->toff + js->tlen < js->clen && buf[0] == buf[js->tlen]) js->tok = TOK_STRING, js->tlen++;
+The change is in elk.c (+1/-1), so the reported access no longer
+happens.
 
 Part of #82.
 ---

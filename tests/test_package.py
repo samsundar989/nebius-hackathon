@@ -27,10 +27,23 @@ def test_commit_message_describes_the_diff_not_the_plan() -> None:
     subject, _, body = msg.partition("\n\n")
     assert subject == "a: fix heap-buffer-overflow in copy()"
     assert body.startswith("AddressSanitizer reports a heap-buffer-overflow in copy()")
-    assert "    -char *f = malloc(n);" in body and "    +char *f = malloc(n + 1);" in body
+    # One plain sentence, never the diff pasted into the message (review #23).
+    assert "malloc" not in body
+    assert "The change is in src/a.c (+1/-1)" in " ".join(body.split())
     assert msg.endswith("Fixes #572.")
     big = DIFF + "".join(f"+line {i}\n" for i in range(10))
-    assert "This changes src/a.c (+11/-1)." in pk.commit_message(FINDING, big, None)
+    assert "src/a.c (+11/-1)" in pk.commit_message(FINDING, big, None)
+
+
+def test_disclosure_claims_tests_only_when_they_passed() -> None:
+    assert "ran the project's tests" in pk.disclosure({"tests": {"status": "pass"}})
+    assert "ran the project's tests" not in pk.disclosure({"tests": {"status": "skipped"}})
+    lines = pk.tested_lines(
+        {"adversary": {"status": "pass", "detail": "super, 1 inputs: 1 adversary inputs: x"}}
+    )
+    assert lines == [
+        "1 input(s) Nemotron Super wrote to break the patch found nothing attributable to it"
+    ]
 
 
 def test_evidence_rows_cover_checks_that_did_not_run() -> None:

@@ -81,16 +81,18 @@ utf8: fix global-buffer-overflow in utf8_decode()
 
 AddressSanitizer reports a global-buffer-overflow in utf8_decode()
 (utf8.h:37).
-This changes utf8.h (+12/-0).
+
+The change is in utf8.h (+12/-0), so the reported access no longer
+happens.
 
 Part of #1.
 ```
 
 ## AI-assistance disclosure (put it in the PR or e-mail text)
 
-> This fix was developed with Leakproof, an AI repair agent (Nemotron models on Nebius Token
-> Factory); its candidate passed the sanitizer-based checks above. I reviewed the change and ran
-> the project's tests myself before sending.
+<!-- Make every sentence below true before sending: review the change yourself, and say you ran
+the project's tests only if you did. -->
+> This patch was developed with Leakproof, an AI repair agent (Nemotron models on Nebius Token Factory); its candidate passed sanitizer-based checks. I reviewed the change myself.
 
 ## Before sending
 

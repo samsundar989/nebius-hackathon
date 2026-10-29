@@ -1,18 +1,13 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: <your git identity>
-Date: Thu, 29 Oct 2026 06:19:04 +0000
+Date: Thu, 29 Oct 2026 17:50:18 +0000
 Subject: [PATCH] glTF2Asset: fix heap-buffer-underflow in glTF2::Buffer::Read()
 
 AddressSanitizer reports a heap-buffer-underflow in
 glTF2::Buffer::Read() (code/AssetLib/glTF2/glTF2Asset.inl:606).
 
-The change, in code/AssetLib/glTF2/glTF2Asset.inl:
-
-    +            }
-    +
-    +            // Bounds check: ensure dataURI.data points within the original URI string
-    +            if (dataURI.data == nullptr || dataURI.data < uri || dataURI.data + dataURI.dataLength > uri + it->GetStringLength()) {
-    +                throw DeadlyImportError("GLTF: buffer \"", id, "\" has invalid data URI");
+The change is in code/AssetLib/glTF2/glTF2Asset.inl (+5/-0), so the
+reported access no longer happens.
 
 Part of #6927.
 ---

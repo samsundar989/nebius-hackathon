@@ -109,8 +109,8 @@ def commit_message(
     finding: dict[str, Any], diff: str, issue: str | None, partial: bool = False
 ) -> str:
     """Describes the diff, never the plan (review #12): the subject names the defect and the
-    function from the sanitizer report; the body says what the report showed and quotes the
-    changed lines when the change is small (at most 6), else summarises them per file."""
+    function from the sanitizer report; the body says what the report showed and, in one plain
+    sentence, which files the change touches (never the diff itself, review #23)."""
     func, loc = _site(finding)
     kind = finding.get("kind") or "memory error"
     stem = Path(loc.split(":")[0]).stem or "fix"
@@ -119,12 +119,11 @@ def commit_message(
     lines, files = _changed(repo_diff(diff))
     report = f"AddressSanitizer reports a {kind} in {where}" + (f" ({loc})." if loc else ".")
     body = textwrap.wrap(report, 72)
-    if 0 < len(lines) <= 6:
-        body += ["", f"The change, in {', '.join(files)}:", ""]
-        body += [f"    {ln}" for ln in lines]
-    elif lines:
+    if lines:
         parts = [f"{f} (+{a}/-{d})" for f, (a, d) in files.items()]
-        body += textwrap.wrap("This changes " + ", ".join(parts) + ".", 72)
+        body += [""] + textwrap.wrap(
+            f"The change is in {', '.join(parts)}, so the reported access no longer happens.", 72
+        )
     msg = subject + "\n\n" + "\n".join(body)
     if issue:
         msg += f"\n\n{'Part of' if partial else 'Fixes'} #{issue.lstrip('#')}."
@@ -174,11 +173,24 @@ def tested_lines(checks: dict[str, Any]) -> list[str]:
         out.append(f"the project's own tests could not be used ({tests.get('detail', '')[:80]})")
     adv = checks.get("adversary") or {}
     if adv.get("status") == "pass":
-        out.append("inputs written to break the patch found nothing (" + adv["detail"][:60] + ")")
+        m = re.match(r"(\w+), (\d+) inputs?", adv.get("detail") or "")
+        who = f"{m.group(2)} input(s) Nemotron {m.group(1).capitalize()} wrote" if m else "inputs"
+        out.append(f"{who} to break the patch found nothing attributable to it")
     refuzz = checks.get("refuzz") or {}
     if refuzz.get("status") == "pass":
         out.append("variants of the crash input found no new crash")
     return out
+
+
+def disclosure(checks: dict[str, Any]) -> str:
+    """The AI-assistance sentence; it claims the project's tests only when the gate ran them and
+    they passed (review #23). The sender makes it true before sending."""
+    tests = (checks.get("tests") or {}).get("status") == "pass"
+    return (
+        "This patch was developed with Leakproof, an AI repair agent (Nemotron models on Nebius "
+        "Token Factory); its candidate passed sanitizer-based checks. I reviewed the change"
+        + (" and ran the project's tests myself." if tests else " myself.")
+    )
 
 
 def pr_body(message: str, checks: dict[str, Any], not_fixed: str = "") -> str:
@@ -191,10 +203,7 @@ def pr_body(message: str, checks: dict[str, Any], not_fixed: str = "") -> str:
     if not_fixed:
         parts.append(f"Not fixed here: {not_fixed}")
     parts.append("Tested: " + "; ".join(tested_lines(checks)) + ".")
-    parts.append(
-        "This patch was developed with Leakproof, an AI repair agent; its candidate passed "
-        "sanitizer-based checks. I reviewed the change and ran the project's tests myself."
-    )
+    parts.append(disclosure(checks))
     if ref:
         parts.append(ref)
     return "\n\n".join(parts) + "\n"
@@ -269,9 +278,9 @@ in the commit message.
 
 ## AI-assistance disclosure (put it in the PR or e-mail text)
 
-> This fix was developed with Leakproof, an AI repair agent (Nemotron models on Nebius Token
-> Factory); its candidate passed the sanitizer-based checks above. I reviewed the change and ran
-> the project's tests myself before sending.
+<!-- Make every sentence below true before sending: review the change yourself, and say you ran
+the project's tests only if you did. -->
+> {disclosure(checks)}
 
 ## Before sending
 
