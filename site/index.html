@@ -88,6 +88,8 @@ footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
 .steps .bar { grid-template-columns: 170px 1fr 52px; }
 details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
 .stat .n.ok { color: var(--ok); }
+#hero { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin: 10px 0 4px; }
+@media (max-width: 560px) { #hero { grid-template-columns: repeat(3, 1fr); gap: 6px; } #hero .stat { padding: 8px; } #hero .n { font-size: 20px; } #hero .l { font-size: 11px; } }
 #headline { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 .demo-box { margin: 6px 0; }
 .demo-box input, .demo-box select { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 6px 8px; max-width: 100%; }
@@ -100,6 +102,8 @@ details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
   <header>
     <h1>Leakproof</h1>
     <p class="lede">An agent that fixes memory-safety defects in C/C++ code and reports a fix only when an evidence gate verifies it: the crash is gone, the program still behaves the same on a corpus, re-fuzzing with amplified inputs finds nothing new, LeakSanitizer is clean, and the tests pass. Verified fixes, or nothing. On Nebius Token Factory, Nemotron 3 Ultra plans, 3.5 Lightning patches, and 3 Super attacks every candidate on projects without tests.</p>
+    <div class="grid" id="hero" aria-label="proof in three numbers"></div>
+    <div class="row" id="demo-row"></div>
     <nav class="start" aria-label="Start here">
       <span class="start-l">Start here:</span>
       <a href="#refusal">A patch that passed the tests, refused</a>
@@ -109,7 +113,6 @@ details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
       <a href="#calibration">Does the gate accept correct fixes?</a>
       <a href="#limitations">Limitations</a>
     </nav>
-    <div class="row" id="demo-row"></div>
   </header>
 
   <section>
@@ -226,13 +229,13 @@ async function demo() {
   };
   row.innerHTML = `<div class="demo-box">
       <div class="row"><button class="btn" id="run-live">Run live (one Juliet case)</button>
-        <input id="passcode" type="password" autocomplete="off" placeholder="passcode (Devpost testing instructions)" aria-label="passcode for live runs"></div>
+        <input id="passcode" type="password" autocomplete="off" placeholder="passcode (see Devpost)" aria-label="passcode for live runs"></div>
       <div class="muted" id="live-state"></div>
     </div>
     <div class="demo-box">
       <div class="row"><button class="btn" id="reverify">Re-verify without AI</button>
         <select id="rv-which" aria-label="which stored patch"><option value="verified">a patch the gate verified</option><option value="rejected">a patch the gate rejected</option></select></div>
-      <div class="muted" id="rv-state">The full gate re-runs here on a stored worker patch: no model call, $0, about a minute.</div>
+      <div class="muted" id="rv-state">The full gate re-runs here on a stored worker patch: no model call, $0, under a minute.</div>
     </div>
     <div id="rv-out"></div>`;
   $("#run-live").onclick = async () => {
@@ -326,6 +329,12 @@ async function showRun(run, btn) {
   }
   if (num && num.precision) stats.push([`${num.precision.correct}/${num.precision.judged}`, "verified diffs that are correct (gate precision, all ARVO runs)"]);
   if (cal) stats.push([`${cal.adjudicated.classes.accepted}/${cal.adjudicated.judged}`, "developers' own fixes the gate accepts"]);
+  const silent = await get("data/silent.json");
+  const hero = [];
+  if (r1) hero.push([`${r1.verified}/${r1.cases}`, "real OSS-Fuzz bugs with a verified fix", "ok"]);
+  if (silent) hero.push([`${silent.arvo.not_fixes} of ${silent.arvo.silenced}`, `patches that silenced the sanitizer were not fixes; the gate caught ${silent.arvo.rejected_total}`]);
+  if (cal) hero.push([`${cal.adjudicated.classes.accepted}/${cal.adjudicated.judged}`, "developers' own fixes the gate accepts: strict, not impossible"]);
+  $("#hero").innerHTML = hero.map(([n, l, cls]) => `<div class="panel stat"><div class="n ${cls || ""}">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join("");
   $("#headline").innerHTML = stats.map(([n, l, cls]) => `<div class="panel stat"><div class="n ${cls || ""}">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join("");
   if (num && num.open_bugs) {
     const t = num.open_bugs.total;
