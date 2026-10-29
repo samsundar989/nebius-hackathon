@@ -14,6 +14,8 @@ Numbers come from `docs/NUMBERS.md`; re-check them on Wed Oct 29 before the fina
 
 - Repository: https://github.com/samsundar989/nebius-hackathon — `uv run leakproof fix --config examples/csvsplit/leakproof.toml` (Docker and a Nebius Token Factory key; about one cent per fix).
 - Dashboard: https://leakproof-dashboard.onrender.com — every run, every gate check, the calibration and the planner comparison.
+
+**Testing instructions (for the Devpost field):** open the dashboard. **Re-verify without AI** re-runs the whole evidence gate on a stored worker patch from a real run (choose a patch the gate verified or one it rejected) on the demo server, with no model call and no cost, and shows today's verdict next to the original one; it takes under a minute (the free server sleeps when idle, so the first click can take a minute longer to wake it). **Run live** fixes one Juliet case end to end with Nemotron on Nebius Token Factory; enter the passcode **[PASSCODE: Samuel types it on Devpost only, never in this file]** first. Live runs are capped at $0.50 a day and $3 in total; past the cap, or without the passcode, the button shows a labelled recorded run instead.
 - Video: [YouTube URL] — 2:50.
 - Walkthrough: [docs/WALKTHROUGH.md](https://github.com/samsundar989/nebius-hackathon/blob/main/docs/WALKTHROUGH.md) — from `leakproof init` to a ready-to-send patch on the csvsplit example, with real outputs.
 
