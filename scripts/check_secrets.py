@@ -64,7 +64,8 @@ def scan(paths: list[Path]) -> list[str]:
             if ALLOW_MARKER in line:
                 continue
             for rule, pattern in RULES:
-                if pattern.search(line):
+                # A run of one or two characters (a fuzz input's padding) is not a secret.
+                if any(len(set(m.group(0))) > 2 for m in pattern.finditer(line)):
                     hits.append(f"{path}:{lineno}: {rule}")
     return hits
 

@@ -31,3 +31,13 @@ def test_allows_names_without_values(tmp_path: Path) -> None:
 
 def test_allow_marker(tmp_path: Path) -> None:
     assert not _scan(tmp_path, "a.py", f"NEBIUS_API_KEY={FAKE}  # secret-scan: allow\n")
+
+
+def test_padding_runs_are_not_secrets(tmp_path: Path) -> None:
+    scan = check_secrets.scan
+    f = tmp_path / "poc.gltf"
+    f.write_text('{"uri":"data:' + "A" * 133 + ',X"}')
+    assert scan([f]) == []
+    g = tmp_path / "leak.txt"
+    g.write_text("k=" + "aB3dE5" * 25)
+    assert scan([g])
