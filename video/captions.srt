@@ -31,17 +31,17 @@ The gate accepts 24 of 27 of the developers' own fixes.
 Same Lightning workers, 10 real bugs: no planner 2, Super 4, Ultra 7 verified.
 
 9
-00:01:45,300 --> 00:01:55,700
-Batch mode: 10 crash reports, 1 root cause, fixed once, every report re-checked.
+00:01:45,300 --> 00:01:57,700
+Judges can re-run the gate without AI: a stored patch re-checked on our server, $0 (recorded).
 
 10
-00:01:56,300 --> 00:02:09,699
+00:01:58,300 --> 00:02:11,700
 On the GPU: two patches silenced compute-sanitizer and printed the wrong answer. Rejected.
 
 11
-00:02:10,300 --> 00:02:29,700
+00:02:12,300 --> 00:02:31,700
 Where it falls short: two mosquitto fixes passed every check yet were wrong. We report verified and correct.
 
 12
-00:02:30,300 --> 00:02:43,700
-Still-open GitHub issues: 30 triaged, 7 reproduce, 5 verified, 1 ready to propose.
+00:02:32,300 --> 00:02:47,700
+New bugs (October 2026): a correct gpac fix verified; quickjs's own tests refused two silencers.
