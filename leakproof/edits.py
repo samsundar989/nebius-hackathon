@@ -379,6 +379,11 @@ def apply_blocks(
     for block in (b for b in resolved if b.kind == "search"):
         out[block.path], how = apply_block(out[block.path], block)
         strategies.append(how)
+    # Keep a CRLF file CRLF: the line-based edits join with "\n", which would turn a one-line fix
+    # into a whole-file diff (gpac #4006 on a Windows checkout).
+    for path, text in out.items():
+        if text != files[path] and "\r\n" in files[path]:
+            out[path] = text.replace("\r\n", "\n").replace("\n", "\r\n")
     return out, strategies
 
 

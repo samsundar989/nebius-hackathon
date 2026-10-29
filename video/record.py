@@ -89,11 +89,11 @@ SCENES = [
         "Same Lightning workers, 10 real bugs: no planner 2, Super 4, Ultra 7 verified.",
     ),
     (
-        "08_batch",
-        "term",
-        "07_batch&d=1000",
-        11,
-        "Batch mode: 10 crash reports, 1 root cause, fixed once, every report re-checked.",
+        "08_reverify",
+        "demo",
+        "#demo-row",
+        13,
+        "Judges can re-run the gate without AI: a stored patch re-checked on our server, $0 (recorded).",
     ),
     (
         "09_cuda",
@@ -110,17 +110,28 @@ SCENES = [
         "Where it falls short: two mosquitto fixes passed every check yet were wrong. We report verified and correct.",
     ),
     (
-        "11_open_bugs",
-        "card",
-        "openbugs",
-        14,
-        "Still-open GitHub issues: 30 triaged, 7 reproduce, 5 verified, 1 ready to propose.",
+        "11_real_world",
+        "dash",
+        "#real-world",
+        16,
+        "New bugs (October 2026): quickjs's own tests refused two silencers; an assimp fix verified, partial.",
     ),
     ("12_end", "card", "end", 6, ""),
 ]
 
 # Stage width per dashboard card: narrower stages zoom further, so short cards fill the frame.
-STAGE = {"#refusal": 820, "funnel": 600, "#planner": 660, "#cuda": 560, "mosquitto": 880}
+STAGE = {
+    "#refusal": 820,
+    "funnel": 600,
+    "#planner": 660,
+    "#cuda": 560,
+    "mosquitto": 880,
+    "#demo-row": 900,
+    "#real-world": 1100,
+}
+# The Re-verify scene replays a real response captured from the Render demo service
+# (video/reverify_render.json), so the recording does not wait on a sleeping free instance.
+REVERIFY = VIDEO / "reverify_render.json"
 
 # Isolate one element at a stage width, zoom it to fill the frame above the 150 px caption band,
 # and pan linearly only when it is far taller than the frame (zooming it to fit would be too small).
@@ -167,9 +178,25 @@ def play(page, base: str, kind: str, target: str, seconds: int) -> None:  # noqa
         return
     elif kind == "term":
         page.goto(f"{base}/video/terminal.html?t={target}")
+    elif kind == "demo":
+        svc = "https://leakproof-demo.onrender.com"
+        page.route("**/site/config.json", lambda r: r.fulfill(json={"service_url": svc}))
+        page.route(f"{svc}/healthz", lambda r: r.fulfill(json={"ok": True}))
+        page.route(
+            f"{svc}/reverify",
+            lambda r: r.fulfill(body=REVERIFY.read_text(), content_type="application/json"),
+        )
+        page.goto(f"{base}/site/index.html")
+        page.wait_for_selector("#reverify")
+        page.select_option("#rv-which", "rejected")
+        page.click("#reverify")
+        page.wait_for_selector("#rv-out .panel")
+        page.evaluate(ISOLATE, [target, seconds, STAGE[target]])
     else:
         page.goto(f"{base}/site/index.html")
         page.wait_for_selector("#headline .stat")
+        if target == "#real-world":
+            page.wait_for_selector("#rw tbody tr")
         page.wait_for_selector("#cases button")
         sel = target
         if target == "funnel":

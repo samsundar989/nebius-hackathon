@@ -94,3 +94,20 @@ def test_inl_files_are_sources() -> None:
 
     assert SOURCE_PATH.search("code/AssetLib/glTF2/glTF2Asset.inl")
     assert "code/AssetLib/glTF2/glTF2Asset.inl".endswith(SOURCE_EXT)
+
+
+def test_crlf_files_stay_crlf() -> None:
+    from leakproof.edits import apply_blocks, parse_blocks, unified_diff
+
+    src = "int a;\r\nint b;\r\nint c;\r\n"
+    reply = "x.c\n<<<<<<< SEARCH\nint b;\n=======\nint b2;\n>>>>>>> REPLACE\n"
+    out, _ = apply_blocks({"x.c": src}, parse_blocks(reply))
+    assert out["x.c"] == "int a;\r\nint b2;\r\nint c;\r\n"
+    diff = unified_diff({"x.c": src}, out)
+    assert (
+        sum(
+            ln.startswith(("+", "-")) and not ln.startswith(("+++", "---"))
+            for ln in diff.splitlines()
+        )
+        == 2
+    )
