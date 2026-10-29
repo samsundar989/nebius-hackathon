@@ -24,7 +24,7 @@ jq: a patch passed jq's own tests. Leakproof doubled one number in the input; it
 
 7
 00:01:28,300 --> 00:01:40,700
-New bugs, reported after the models' training: our 2-line gpac fix matches the fix gpac shipped on Oct 29.
+New bugs, after the models' training: our gpac fix verified hours before gpac fixed the same line.
 
 8
 00:01:41,300 --> 00:01:54,700

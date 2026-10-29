@@ -163,6 +163,7 @@ def play(page, base: str, kind: str, target: str, seconds: int) -> None:  # noqa
         svc = "https://leakproof-demo.onrender.com"
         page.route("**/site/config.json", lambda r: r.fulfill(json={"service_url": svc}))
         page.route(f"{svc}/healthz", lambda r: r.fulfill(json={"ok": True}))
+        page.route(f"{svc}/status", lambda r: r.fulfill(json={"ok": True}))  # wake()'s ping
         page.route(
             f"{svc}/reverify",
             lambda r: r.fulfill(body=REVERIFY.read_text(), content_type="application/json"),
