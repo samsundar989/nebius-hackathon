@@ -34,6 +34,8 @@ link-mode = "copy"
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+# Issue texts copied verbatim from upstream trackers are data, not our code.
+extend-exclude = ["cases/real_world/**/issue.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]

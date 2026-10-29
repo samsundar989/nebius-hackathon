@@ -41,3 +41,37 @@ def test_newly_failing_or_missing_test_fails() -> None:
 def test_test_names_with_spaces_stay_distinct() -> None:
     r = parse_results("PASS: patch create file\nFAIL: patch dry run doesn't create file\n")
     assert r == {"patch create file": True, "patch dry run doesn't create file": False}
+
+
+def test_gtest_results_skip_the_summary_repeat() -> None:
+    log = "\n".join(
+        [
+            "[ RUN      ] utSTLImporterExporter.importSTLFile",
+            "[       OK ] utSTLImporterExporter.importSTLFile (12 ms)",
+            "[ RUN      ] utSTLImporterExporter.exporterTest",
+            "[  FAILED  ] utSTLImporterExporter.exporterTest (3 ms)",
+            "[  FAILED  ] 1 test, listed below:",
+            "[  FAILED  ] utSTLImporterExporter.exporterTest",
+        ]
+    )
+    assert parse_results(log) == {
+        "utSTLImporterExporter.importSTLFile": True,
+        "utSTLImporterExporter.exporterTest": False,
+    }
+
+
+def test_gtest_lines_pass_the_shell_filter() -> None:
+    import re
+    import subprocess
+
+    from leakproof.gate import TEST_LINES
+
+    lines = "[       OK ] A.b (1 ms)\n[  FAILED  ] A.c (2 ms)\n[  FAILED  ] A.c\nnoise\n"
+    pat = TEST_LINES.strip("'")
+    kept = [ln for ln in lines.splitlines() if re.search(pat, ln)]
+    assert kept == ["[       OK ] A.b (1 ms)", "[  FAILED  ] A.c (2 ms)"]
+    if subprocess.run(["sh", "-c", "command -v grep"], capture_output=True).returncode == 0:
+        out = subprocess.run(
+            ["sh", "-c", f"grep -E {TEST_LINES}"], input=lines, capture_output=True, text=True
+        ).stdout
+        assert out.splitlines() == kept

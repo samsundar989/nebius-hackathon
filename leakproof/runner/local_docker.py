@@ -8,6 +8,7 @@ is simply N runs from the same tag. Peak memory comes from the container's cgrou
 from __future__ import annotations
 
 import io
+import os
 import shlex
 import subprocess
 import tarfile
@@ -52,13 +53,15 @@ class LocalDockerRunner:
 
     def __init__(
         self,
-        memory: str = "4g",
-        cpus: float = 2.0,
+        memory: str | None = None,
+        cpus: float | None = None,
         gpus: bool = False,
         snapshot_repo: str = "leakproof/snap",
     ) -> None:
-        self.memory = memory
-        self.cpus = cpus
+        # Defaults 4g / 2 CPUs; LEAKPROOF_DOCKER_MEMORY / _CPUS raise them for a large project
+        # (a C++ library under ASan), and reach the gate's own process through the environment.
+        self.memory = memory or os.environ.get("LEAKPROOF_DOCKER_MEMORY", "4g")
+        self.cpus = cpus or float(os.environ.get("LEAKPROOF_DOCKER_CPUS", "2"))
         self.gpus = gpus
         self.snapshot_repo = snapshot_repo
 

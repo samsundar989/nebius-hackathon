@@ -31,9 +31,7 @@ def _fix(args: argparse.Namespace) -> int:
     run_dir = RUNS_DIR / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     runner = (
-        LocalDockerRunner(memory="4g", cpus=2)
-        if args.runner == "docker"
-        else get_runner(args.runner, run_id=run_id)
+        LocalDockerRunner() if args.runner == "docker" else get_runner(args.runner, run_id=run_id)
     )
     client = LLMClient(ledger=CostLedger(budget=args.budget), run_id=f"{run_id}:project")
     rec = fix_case(
@@ -114,9 +112,7 @@ def _batch(args: argparse.Namespace) -> int:
     run_dir = RUNS_DIR / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     runner = (
-        LocalDockerRunner(memory="4g", cpus=2)
-        if args.runner == "docker"
-        else get_runner(args.runner, run_id=run_id)
+        LocalDockerRunner() if args.runner == "docker" else get_runner(args.runner, run_id=run_id)
     )
     t0 = time.monotonic()
     # 1. Reproduce every input on one baseline build and cluster by signature.

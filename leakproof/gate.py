@@ -223,16 +223,22 @@ def behavior_check(cwe: str, before: str, after: str) -> Check:
     )
 
 
-# One line per test result: automake (`PASS: tests/x`) and CUnit (`Test: name ...passed`).
-TEST_LINES = "'^(PASS|FAIL|XFAIL|XPASS|ERROR): |^Suite: |Test: .*[.]{3}(passed|FAILED)'"
+# One line per test result: automake (`PASS: tests/x`), CUnit (`Test: name ...passed`) and
+# GoogleTest (`[       OK ] Suite.Name (3 ms)`, `[  FAILED  ] Suite.Name (3 ms)`).
+TEST_LINES = (
+    "'^(PASS|FAIL|XFAIL|XPASS|ERROR): |^Suite: |Test: .*[.]{3}(passed|FAILED)"
+    "|^[[] +(OK|FAILED) +[]] [^ ]+ [(]'"
+)
 # The whole rest of the line names the test: automake prints a path, toybox a sentence.
 _AUTOMAKE = re.compile(r"^(PASS|FAIL|XFAIL|XPASS|ERROR): (.+?)\s*$")
 _CUNIT_SUITE = re.compile(r"^Suite: (.+)")
 _CUNIT_TEST = re.compile(r"Test: (.+?) \.\.\.(passed|FAILED)")
+# With the duration only: gtest's closing summary repeats failed names without one.
+_GTEST = re.compile(r"^\[ +(OK|FAILED) +\] (\S+) \(\d+ ms\)")
 
 
 def test_results(text: str) -> dict[str, bool]:
-    """{test name: passed} from a suite's output (automake or CUnit)."""
+    """{test name: passed} from a suite's output (automake, CUnit or GoogleTest)."""
     out: dict[str, bool] = {}
     suite = ""
     for line in text.splitlines():
@@ -242,6 +248,8 @@ def test_results(text: str) -> dict[str, bool]:
             suite = m.group(1).strip()
         elif m := _CUNIT_TEST.search(line):
             out[f"{suite}/{m.group(1)}"] = m.group(2) == "passed"
+        elif m := _GTEST.match(line):
+            out[m.group(2)] = m.group(1) == "OK"
     return out
 
 
@@ -788,7 +796,7 @@ def run_gate(
     # Every gate run has networking off whichever backend runs it (Docker --network=none,
     # Sandboxes networking.enabled=false).
     runner = (
-        LocalDockerRunner(memory="4g", cpus=2)
+        LocalDockerRunner()
         if runner_name == "docker"
         else get_runner(runner_name, run_id=f"gate:{case_id}")
     )
