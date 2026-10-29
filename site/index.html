@@ -3,404 +3,583 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leakproof Results</title>
-<meta name="description" content="Leakproof: an agent that fixes memory-safety defects in C/C++ and only reports the fixes an evidence gate verifies. Nemotron 3 Ultra plans, 3.5 Lightning patches, 3 Super attacks every candidate on projects without tests.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f7a4d'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11' stroke='white' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<title>Leakproof</title>
+<meta name="description" content="Leakproof fixes memory-safety bugs in C, C++ and CUDA and ships only the fixes it can prove. NVIDIA Nemotron on Nebius Token Factory.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231E7A4F'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11' stroke='white' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
+/* Leakproof dashboard. One idea up top: of the patches that made a real crash go away, how many
+   were not fixes, and how many of those would ship under each kind of check. Everything else is
+   evidence a reader can open. Numbers are computed in the browser from site/data/*.json. */
 :root {
-  --bg: #f7f7f5; --panel: #ffffff; --ink: #1d1f23; --muted: #5d6470; --line: #e3e4e8;
-  --accent: #2d5bd7; --ok: #1f7a4d; --ok-bg: #e3f3ea; --bad: #b3261e; --bad-bg: #fbe6e4;
-  --warn: #8a5a00; --warn-bg: #fdf1d8; --skip: #6b7280; --skip-bg: #eef0f3;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --paper: #f3f6f5;      /* cool lab-paper */
+  --sheet: #ffffff;
+  --ink: #18221f;
+  --soft: #4d5d58;
+  --rule: #d6dfdb;
+  --cobalt: #2747b3;     /* interactive */
+  --ok: #1e7a4f;         /* correct fix */
+  --warn: #c9a227;       /* defensive */
+  --bad: #c0392b;        /* not a fix */
+  --ok-tint: #e2f1e9; --bad-tint: #f9e3e0; --warn-tint: #f8f0d4; --skip-tint: #e9eeec;
+  --code: #eef2f0;
+  --sans: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #111317; --panel: #191c21; --ink: #e8eaed; --muted: #a0a7b3; --line: #2b3038;
-    --accent: #7ea2ff; --ok: #6fd39e; --ok-bg: #173226; --bad: #ff8a80; --bad-bg: #3a1d1b;
-    --warn: #f3c165; --warn-bg: #3a2e15; --skip: #9aa1ab; --skip-bg: #23272e;
+    --paper: #14191c; --sheet: #1b2226; --ink: #e6ecea; --soft: #a3b1ac; --rule: #2d373c;
+    --cobalt: #8ea6ff; --ok: #2e9a66; --warn: #c6a23a; --bad: #dd5747;
+    --ok-tint: #173326; --bad-tint: #3b1f1c; --warn-tint: #352e17; --skip-tint: #232b2f; --code: #10161a;
+    color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #111317; --panel: #191c21; --ink: #e8eaed; --muted: #a0a7b3; --line: #2b3038;
-  --accent: #7ea2ff; --ok: #6fd39e; --ok-bg: #173226; --bad: #ff8a80; --bad-bg: #3a1d1b;
-  --warn: #f3c165; --warn-bg: #3a2e15; --skip: #9aa1ab; --skip-bg: #23272e;
+  --paper: #14191c; --sheet: #1b2226; --ink: #e6ecea; --soft: #a3b1ac; --rule: #2d373c;
+  --cobalt: #8ea6ff; --ok: #2e9a66; --warn: #c6a23a; --bad: #dd5747;
+  --ok-tint: #173326; --bad-tint: #3b1f1c; --warn-tint: #352e17; --skip-tint: #232b2f; --code: #10161a;
+  color-scheme: dark;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink);
-  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
-h1 { font-size: 28px; margin: 0 0 4px; letter-spacing: -0.01em; }
-h2 { font-size: 19px; margin: 36px 0 12px; }
-h3 { font-size: 15px; margin: 18px 0 8px; }
-p { margin: 0 0 10px; }
-.lede { color: var(--muted); max-width: 70ch; }
-a { color: var(--accent); }
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
-.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-.stat .n { font-size: 30px; font-weight: 650; font-variant-numeric: tabular-nums; }
-.stat .l { color: var(--muted); font-size: 13px; }
-.funnel { display: grid; gap: 8px; }
-.bar { display: grid; grid-template-columns: 190px 1fr 64px; gap: 10px; align-items: center; }
-.bar .track { height: 22px; background: var(--skip-bg); border-radius: 5px; overflow: hidden; }
-.bar .fill { height: 100%; background: var(--accent); }
-.bar .fill.v1 { background: var(--ok); }
-.bar .num { font-variant-numeric: tabular-nums; text-align: right; }
-.bar .lab { font-size: 13px; }
-.chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; white-space: nowrap; }
-.c-verified, .c-pass { background: var(--ok-bg); color: var(--ok); }
-.c-rejected, .c-fail, .c-build_failed, .c-silenced_only, .c-error { background: var(--bad-bg); color: var(--bad); }
-.c-inconclusive, .c-no_candidate { background: var(--warn-bg); color: var(--warn); }
-.c-skipped { background: var(--skip-bg); color: var(--skip); }
-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { color: var(--muted); font-weight: 600; }
-.scroll { overflow-x: auto; }
-.start { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; margin: 10px 0 12px;
-  padding: 10px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
-.start-l { font-weight: 650; }
-@media (max-width: 600px) {
-  .bar { grid-template-columns: 1fr 52px; }
-  .bar .lab { grid-column: 1 / -1; }
-  .start { flex-direction: column; gap: 4px; }
-  pre, code { overflow-wrap: anywhere; }
-}
-.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.tabs button, .btn { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink);
-  border-radius: 8px; padding: 6px 12px; cursor: pointer; }
-.tabs button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
-.cases { display: flex; flex-wrap: wrap; gap: 6px; }
-.cases button { font: 12.5px var(--mono); border: 1px solid var(--line); background: var(--panel);
-  color: var(--ink); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
-.cases button[aria-pressed="true"] { outline: 2px solid var(--accent); }
-.cases .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
-pre { font: 12.5px/1.45 var(--mono); background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
-  padding: 10px; overflow-x: auto; margin: 0; }
-.del { color: var(--bad); } .add { color: var(--ok); }
-.matrix td.cell { text-align: center; }
-.cell .chip { cursor: help; }
-.muted { color: var(--muted); }
-.row { display: flex; flex-wrap: wrap; gap: 8px 18px; }
-footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
-.cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-top: 12px; }
-.card h3 { margin-top: 0; }
-.card pre { font-size: 12px; max-height: 120px; }
-.steps { display: grid; gap: 6px; margin: 8px 0; }
-.steps .bar { grid-template-columns: 170px 1fr 52px; }
-details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
-.stat .n.ok { color: var(--ok); }
-#hero { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin: 10px 0 4px; }
-@media (max-width: 560px) { #hero { grid-template-columns: repeat(3, 1fr); gap: 6px; } #hero .stat { padding: 8px; } #hero .n { font-size: 20px; } #hero .l { font-size: 11px; } }
-#headline { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
-.demo-box { margin: 6px 0; }
-.demo-box input, .demo-box select { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 6px 8px; max-width: 100%; }
-#rv-out { width: 100%; }
-@media (max-width: 560px) { .bar { grid-template-columns: 1fr 56px; } .bar .lab { grid-column: 1 / -1; } }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.55 var(--sans); }
+a { color: var(--cobalt); text-underline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 2px; border-radius: 4px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+@media (max-width: 600px) { .wrap { padding: 0 16px; } body { font-size: 16px; } }
+
+/* top bar */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 0; }
+.mark { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 19px; color: var(--ink); text-decoration: none; }
+.mark svg { width: 26px; height: 26px; }
+.top nav { display: flex; gap: 18px; flex-wrap: wrap; font-size: 15px; }
+.top nav a { color: var(--soft); text-decoration: none; }
+.top nav a:hover { color: var(--ink); text-decoration: underline; }
+@media (max-width: 600px) { .top { flex-wrap: wrap; gap: 8px; padding: 14px 0; } .top nav { gap: 14px; font-size: 14px; width: 100%; } }
+
+/* hero */
+.hero { padding: 36px 0 8px; }
+.hero h1 { font-size: clamp(34px, 5.6vw, 64px); line-height: 1.04; letter-spacing: -0.02em; margin: 0; max-width: 17ch; font-weight: 700; }
+.hero .sub { font-size: clamp(18px, 2.2vw, 22px); color: var(--soft); margin: 18px 0 0; max-width: 46ch; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; align-items: center; }
+.btn { font: 700 16px var(--sans); border-radius: 10px; padding: 12px 18px; cursor: pointer; border: 2px solid var(--ink); background: var(--ink); color: var(--paper); }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn:disabled { opacity: .55; cursor: progress; }
+.btn:hover:not(:disabled) { filter: brightness(1.15); }
+.pass { font: 15px var(--sans); border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 10px; padding: 11px 12px; width: 13em; max-width: 100%; }
+.demo-note { color: var(--soft); font-size: 15px; margin: 10px 0 0; min-height: 1.5em; }
+#demo-out:not(:empty) { margin-top: 14px; }
+
+/* the comparison: the one memorable element */
+.verdicts { margin-top: 48px; background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 18px; padding: 28px; }
+.verdicts h2 { font-size: clamp(22px, 2.8vw, 30px); line-height: 1.2; margin: 0; max-width: 40ch; letter-spacing: -0.01em; }
+.verdicts .basis { color: var(--soft); margin: 8px 0 0; font-size: 15px; }
+.waffle { display: grid; grid-template-columns: repeat(26, 1fr); gap: 4px; margin: 24px 0 14px; max-width: 760px; }
+@media (max-width: 600px) { .waffle { grid-template-columns: repeat(13, 1fr); gap: 3px; } .verdicts { padding: 20px 16px; } }
+.tile { aspect-ratio: 1; border-radius: 4px; border: 0; padding: 0; cursor: pointer; position: relative; }
+.tile.ok { background: var(--ok); }
+.tile.def { background: repeating-linear-gradient(135deg, var(--warn) 0 3px, color-mix(in srgb, var(--warn) 55%, var(--sheet)) 3px 6px); }
+.tile.wrong { background: var(--bad); }
+.tile.caught { background: transparent; box-shadow: inset 0 0 0 2px var(--bad); }
+.tile.caught::after { content: ""; position: absolute; inset: 22%; background:
+  linear-gradient(45deg, transparent 44%, var(--bad) 44% 56%, transparent 56%),
+  linear-gradient(-45deg, transparent 44%, var(--bad) 44% 56%, transparent 56%); }
+.tile:hover, .tile:focus-visible { transform: scale(1.18); z-index: 1; }
+@media (prefers-reduced-motion: no-preference) { .tile { transition: transform .12s ease; } }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 15px; color: var(--ink); margin: 0; padding: 0; list-style: none; }
+.legend li { display: flex; align-items: center; gap: 8px; }
+.legend .tile { width: 14px; height: 14px; cursor: default; display: inline-block; }
+.legend .tile:hover { transform: none; }
+.legend b { font-variant-numeric: tabular-nums; }
+.tip { position: fixed; z-index: 10; pointer-events: none; background: var(--ink); color: var(--paper); font-size: 13px; line-height: 1.35; padding: 7px 9px; border-radius: 7px; max-width: 280px; }
+
+.ship { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 30px; border-top: 1.5px solid var(--rule); padding-top: 24px; }
+@media (max-width: 760px) { .ship { grid-template-columns: 1fr; gap: 22px; } }
+.ship h3 { font-size: 17px; margin: 0; }
+.ship .q { color: var(--soft); font-size: 15px; margin: 2px 0 10px; }
+.row { display: grid; grid-template-columns: 10em 1fr 2.4em; align-items: center; gap: 12px; margin: 10px 0; }
+@media (max-width: 600px) { .row { grid-template-columns: 1fr 2.4em; } .row .who { grid-column: 1 / -1; } }
+.row .who { font-size: 15px; }
+.row .who strong { font-weight: 700; }
+.row .cells { display: flex; flex-wrap: wrap; gap: 2px; }
+.row .cells i { width: 10px; height: 10px; border-radius: 2px; background: var(--bad); display: block; }
+.row.lp .cells i { background: var(--bad); }
+.row .n { font-weight: 700; font-size: 22px; text-align: right; font-variant-numeric: tabular-nums; }
+.row.lp .who strong { color: var(--ok); }
+.ship .foot { color: var(--soft); font-size: 14px; margin: 8px 0 0; }
+
+/* proof lines */
+.proof { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin: 40px 0 0; }
+@media (max-width: 860px) { .proof { grid-template-columns: 1fr; } }
+.proof div { padding: 6px 24px 6px 0; }
+@media (min-width: 861px) { .proof div + div { padding-left: 24px; border-left: 1.5px solid var(--rule); } }
+@media (max-width: 860px) { .proof div + div { border-top: 1.5px solid var(--rule); padding-top: 16px; margin-top: 10px; } }
+.proof .big { font-size: 40px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.proof p { margin: 6px 0 0; color: var(--soft); max-width: 32ch; }
+
+/* sections */
+section.block { margin-top: 64px; }
+section.block > h2 { font-size: clamp(24px, 3vw, 32px); margin: 0 0 6px; letter-spacing: -0.01em; }
+section.block > p.lead { color: var(--soft); margin: 0 0 20px; max-width: 62ch; }
+
+/* pipeline (a real sequence, so numbered) */
+.pipe { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; counter-reset: s; }
+@media (max-width: 900px) { .pipe { grid-template-columns: 1fr; } }
+.pipe li { counter-increment: s; padding: 16px 18px 16px 0; position: relative; }
+@media (min-width: 901px) { .pipe li + li { padding-left: 18px; border-left: 1.5px solid var(--rule); } }
+@media (max-width: 900px) { .pipe li { padding: 12px 0 12px 44px; } .pipe li::before { position: absolute; left: 0; top: 12px; } }
+.pipe li::before { content: counter(s); display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--ink); font-weight: 700; font-size: 15px; margin-bottom: 10px; }
+.pipe b { display: block; font-size: 18px; }
+.pipe .model { display: block; color: var(--cobalt); font-size: 15px; margin: 2px 0 6px; }
+.pipe span.d { color: var(--soft); font-size: 15px; display: block; }
+.planner { margin-top: 18px; background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 14px; padding: 18px 20px; }
+.planner p { margin: 0 0 10px; }
+.pbar { display: grid; grid-template-columns: 11em 1fr 3em; gap: 12px; align-items: center; margin: 6px 0; font-size: 15px; }
+@media (max-width: 600px) { .pbar { grid-template-columns: 1fr 3em; } .pbar .who { grid-column: 1 / -1; } }
+.pbar .track { height: 14px; background: var(--skip-tint); border-radius: 4px; overflow: hidden; }
+.pbar .fill { height: 100%; background: var(--cobalt); border-radius: 4px; }
+.pbar .n { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* tables */
+.table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.table th { text-align: left; font-weight: 700; color: var(--soft); padding: 8px 10px; border-bottom: 1.5px solid var(--rule); }
+.table td { padding: 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.sheet { background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 14px; padding: 6px 8px; }
+
+/* verdict badges: color plus a symbol, never color alone */
+.v { display: inline-flex; align-items: center; gap: 5px; padding: 1px 9px; border-radius: 999px; font-size: 13.5px; font-weight: 700; white-space: nowrap; }
+.v::before { font-size: 12px; }
+.v.ok { background: var(--ok-tint); color: var(--ok); } .v.ok::before { content: "✓"; }
+.v.bad { background: var(--bad-tint); color: var(--bad); } .v.bad::before { content: "✕"; }
+.v.warn { background: var(--warn-tint); color: color-mix(in srgb, var(--warn) 70%, var(--ink)); } .v.warn::before { content: "◐"; }
+.v.skip { background: var(--skip-tint); color: var(--soft); } .v.skip::before { content: "–"; }
+
+/* code */
+pre { font: 13px/1.5 var(--mono); background: var(--code); border-radius: 10px; padding: 12px 14px; overflow-x: auto; margin: 10px 0; }
+.add { color: var(--ok); } .del { color: var(--bad); }
+code { font-family: var(--mono); font-size: .88em; }
+
+/* refusal */
+.refusal { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 860px) { .refusal { grid-template-columns: 1fr; } }
+.refusal .sheet { padding: 18px 20px; min-width: 0; }
+.ship > div, .explore > div { min-width: 0; }
+.refusal h3 { margin: 0 0 4px; font-size: 18px; }
+.refusal p { margin: 0; color: var(--soft); }
+
+/* explorer */
+.explore { display: grid; grid-template-columns: 260px 1fr; gap: 18px; align-items: start; }
+@media (max-width: 860px) { .explore { grid-template-columns: 1fr; } }
+.explore select { font: 15px var(--sans); width: 100%; padding: 9px 10px; border-radius: 10px; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); }
+.caselist { list-style: none; margin: 10px 0 0; padding: 0; max-height: 440px; overflow: auto; border: 1.5px solid var(--rule); border-radius: 12px; background: var(--sheet); }
+.caselist button { all: unset; box-sizing: border-box; display: flex; gap: 8px; align-items: center; width: 100%; padding: 9px 12px; cursor: pointer; font-size: 15px; border-bottom: 1px solid var(--rule); }
+.caselist button[aria-current="true"] { background: var(--skip-tint); font-weight: 700; }
+.caselist button:focus-visible { outline: 3px solid var(--cobalt); outline-offset: -3px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.dot.ok { background: var(--ok); } .dot.bad { background: var(--bad); } .dot.warn { background: var(--warn); } .dot.skip { background: var(--soft); }
+.case { background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 14px; padding: 18px 20px; min-width: 0; }
+.case h3 { margin: 0; font-size: 20px; }
+.case .meta { color: var(--soft); font-size: 15px; margin: 4px 0 12px; }
+.case h4 { margin: 18px 0 6px; font-size: 16px; }
+.matrix td, .matrix th { text-align: center; white-space: nowrap; }
+.matrix td:first-child, .matrix th:first-child { text-align: left; }
+.matrix .v { padding: 1px 6px; }
+.matrix .v.ok::after, .matrix .v.bad::after, .matrix .v.warn::after, .matrix .v.skip::after { content: ""; }
+
+/* details */
+details.more { border-top: 1.5px solid var(--rule); padding: 14px 0; }
+details.more:last-of-type { border-bottom: 1.5px solid var(--rule); }
+details.more > summary { cursor: pointer; font-weight: 700; font-size: 18px; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::after { content: "+"; font-size: 22px; line-height: 1; color: var(--soft); }
+details.more[open] > summary::after { content: "−"; }
+details.more > div { padding-top: 12px; }
+details.more p { max-width: 70ch; }
+.limits { margin: 0; padding-left: 20px; max-width: 72ch; }
+.limits li { margin: 8px 0; }
+footer { margin: 72px 0 40px; color: var(--soft); font-size: 14px; border-top: 1.5px solid var(--rule); padding-top: 18px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 </style>
 </head>
 <body>
-<main>
-  <header>
-    <h1>Leakproof</h1>
-    <p class="lede">An agent that fixes memory-safety defects in C/C++ code and reports a fix only when an evidence gate verifies it: the crash is gone, the program still behaves the same on a corpus, re-fuzzing with amplified inputs finds nothing new, LeakSanitizer is clean, and the tests pass. Verified fixes, or nothing. On Nebius Token Factory, Nemotron 3 Ultra plans, 3.5 Lightning patches, and 3 Super attacks every candidate on projects without tests.</p>
-    <div class="grid" id="hero" aria-label="proof in three numbers"></div>
-    <div class="row" id="demo-row"></div>
-    <nav class="start" aria-label="Start here">
-      <span class="start-l">Start here:</span>
-      <a href="#refusal">A patch that passed the tests, refused</a>
-      <a id="ob-link" href="https://github.com/samsundar989/nebius-hackathon/blob/main/cases/open_bugs/REVIEW.md">Still-open bugs: 40 issues → 1 fix ready + 2 partial</a>
-      <a href="https://github.com/samsundar989/nebius-hackathon/blob/main/cases/open_bugs/landley_toybox/572/generated/SUBMISSION.md">toybox #572: the generated submission</a>
-      <a href="https://github.com/samsundar989/nebius-hackathon/blob/main/docs/WALKTHROUGH.md">Try it: the walkthrough</a>
-      <a href="#calibration">Does the gate accept correct fixes?</a>
-      <a href="#limitations">Limitations</a>
+<div class="wrap">
+  <header class="top">
+    <a class="mark" href="#" aria-label="Leakproof home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--ok)"/><path d="M9 16.5l4.5 4.5L23 11" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Leakproof
+    </a>
+    <nav aria-label="Links">
+      <a href="#how">How it works</a>
+      <a href="#real">Real bugs</a>
+      <a href="#runs">Every run</a>
+      <a id="nav-video" href="#" hidden>Video</a>
+      <a href="https://github.com/samsundar989/nebius-hackathon">GitHub</a>
     </nav>
   </header>
 
-  <section>
-    <h2>Real OSS-Fuzz bugs (ARVO), run 1</h2>
-    <div class="grid" id="headline"></div>
-    <div class="cards">
-      <div class="panel card" id="refusal"></div>
-      <div class="panel card" id="planner"></div>
-    </div>
-  </section>
+  <main>
+    <section class="hero" aria-labelledby="h1">
+      <h1 id="h1">1 in 4 AI patches that make a crash go away isn't a fix.</h1>
+      <p class="sub">Leakproof repairs memory bugs in C, C++ and CUDA, then tries to break every patch. It ships only the ones that survive.</p>
+      <div class="actions">
+        <button class="btn" id="reverify" type="button">Re-check a stored patch</button>
+        <button class="btn ghost" id="run-live" type="button">Run a live fix</button>
+        <input class="pass" id="passcode" type="password" autocomplete="off" placeholder="Passcode for live runs" aria-label="Passcode for live runs (in the Devpost testing instructions)">
+      </div>
+      <p class="demo-note" id="demo-note">Re-checking runs the full gate again on a real patch from our runs. No AI, no cost, about 30 seconds.</p>
+      <div id="demo-out" aria-live="polite"></div>
 
-  <section>
-    <div class="panel" style="margin-top:12px">
-      <h3 style="margin-top:0">From "the crash went away" to "verified"</h3>
-      <p class="muted">Most repair agents stop at the first bar. Each later bar is a stricter check of the same candidate patches.</p>
-      <div class="funnel" id="funnel"></div>
-    </div>
-  </section>
+      <div class="verdicts" aria-labelledby="vh">
+        <h2 id="vh">Patches that silenced a real OSS-Fuzz crash</h2>
+        <p class="basis" id="basis">Loading the run records…</p>
+        <div class="waffle" id="waffle" role="group" aria-label="One square per patch"></div>
+        <ul class="legend" id="legend"></ul>
+        <div class="ship" id="ship"></div>
+      </div>
 
-  <section>
-    <h2>Runs</h2>
-    <div class="scroll panel"><table id="runs"><thead><tr><th>run</th><th>cases</th><th>crash gone</th><th>builds, crash gone, tests, in scope</th><th>verified</th><th>$ / verified</th><th>gate</th></tr></thead><tbody></tbody></table></div>
-  </section>
+      <div class="proof" id="proof" aria-label="Results"></div>
+    </section>
 
-  <section>
-    <h2>Case explorer</h2>
-    <div class="tabs" id="run-tabs" role="group" aria-label="run"></div>
-    <div class="cases" id="cases"></div>
-    <div id="case" style="margin-top:14px"></div>
-  </section>
+    <section class="block" id="how" aria-labelledby="how-h">
+      <h2 id="how-h">How it works</h2>
+      <p class="lead">Four NVIDIA Nemotron models on Nebius Token Factory, each with one job. The gate runs separately, offline, and decides.</p>
+      <ol class="pipe">
+        <li><b>Reproduce</b><span class="model">Docker or Nebius Sandboxes</span><span class="d">Build the project with sanitizers and confirm the crash.</span></li>
+        <li><b>Diagnose</b><span class="model">Nemotron 3 Ultra</span><span class="d">Find the root cause and propose up to four fixes.</span></li>
+        <li><b>Patch</b><span class="model">4 × Nemotron 3.5 Lightning</span><span class="d">Each writes one patch on its own copy. None sees the tests.</span></li>
+        <li><b>Attack</b><span class="model">Nemotron 3 Super</span><span class="d">Writes inputs meant to break each surviving patch.</span></li>
+        <li><b>Gate</b><span class="model">Sanitizers, tests, re-fuzzing</span><span class="d">Ship with the evidence, or refuse and say why.</span></li>
+      </ol>
+      <div class="planner" id="planner"></div>
+    </section>
 
-  <section>
-    <h2>Does the gate accept correct fixes? Calibration with the developers' own patches</h2>
-    <div class="panel" id="calibration"><p class="muted">No calibration data.</p></div>
-  </section>
+    <section class="block" id="real" aria-labelledby="real-h">
+      <h2 id="real-h">Bugs that are still open</h2>
+      <p class="lead" id="real-lead">Reported in October 2026, after the models' training data. No fix existed to copy.</p>
+      <div class="sheet scroll"><table class="table" id="rw"><thead><tr><th>Project</th><th>Bug</th><th>Leakproof</th><th>Our review</th><th></th></tr></thead><tbody></tbody></table></div>
+    </section>
 
-  <section>
-    <h2>CUDA: compute-sanitizer on a T4</h2>
-    <div class="panel" id="cuda"><p class="muted">No CUDA run yet.</p></div>
-  </section>
+    <section class="block" id="refusal-sec" aria-labelledby="ref-h">
+      <h2 id="ref-h">What a refusal looks like</h2>
+      <p class="lead">A patch for a real jq bug passed jq's own tests. Leakproof doubled one number in the crash input and the patched jq overflowed.</p>
+      <div class="refusal" id="refusal"></div>
+    </section>
 
-  <section>
-    <h2>Model leaderboard</h2>
-    <div class="panel" id="leaderboard"><p class="muted">Leaderboard runs pending.</p></div>
-  </section>
+    <section class="block" id="runs" aria-labelledby="runs-h">
+      <h2 id="runs-h">Every run, every check</h2>
+      <p class="lead">Pick a run and a bug to see each patch, each check and its evidence.</p>
+      <div class="explore">
+        <div>
+          <label class="sr" for="run-pick">Run</label>
+          <select id="run-pick"></select>
+          <ul class="caselist" id="cases"></ul>
+        </div>
+        <div class="case" id="case"><p>Pick a bug from the list.</p></div>
+      </div>
+    </section>
 
-  <section id="real-world" hidden>
-    <h2>Real world: still-open bugs in popular projects (October 2026)</h2>
-    <p class="muted">Issues opened after the models' training data, with no fix PR linked when we chose them (three turned out to be fixed upstream already). Every verified diff is reviewed by hand before anything is sent; nothing is sent without Samuel's decision.</p>
-    <div class="scroll panel"><table id="rw"><thead><tr><th>project</th><th>issue</th><th>opened</th><th>bug</th><th>reproduces</th><th>gate</th><th>hand review</th><th>package</th><th>sent</th></tr></thead><tbody></tbody></table></div>
-  </section>
+    <section class="block" aria-labelledby="more-h">
+      <h2 id="more-h">More numbers</h2>
+      <details class="more" id="cal-d"><summary>Does the gate accept correct fixes?</summary><div id="calibration"></div></details>
+      <details class="more"><summary>CUDA on an NVIDIA T4</summary><div id="cuda"></div></details>
+      <details class="more"><summary>Model comparison</summary><div id="leaderboard"></div></details>
+      <details class="more"><summary>All runs</summary><div class="scroll"><table class="table" id="runs-t"><thead><tr><th>Run</th><th>Bugs</th><th>Crash gone</th><th>Verified</th><th>Model $ per verified fix</th></tr></thead><tbody></tbody></table></div></details>
+      <details class="more" id="limitations"><summary>Limits</summary><div><ul class="limits">
+        <li>The old OSS-Fuzz bugs were fixed upstream years ago, so the models may have seen those fixes in training. The still-open bugs above are the clean test.</li>
+        <li>The gate proves the reported crash is gone and that nothing it tried causes a new sanitizer report. It can't prove a fix correct for every input, which is why a person reviews each fix before it is sent.</li>
+        <li>Without project tests, a verified patch is labelled "verified, needs human review".</li>
+        <li>Leak results come from Juliet, which is synthetic; the OSS-Fuzz set has no leak cases.</li>
+        <li>Nebius Sandboxes runs Juliet and bring-your-own projects; the OSS-Fuzz images run on local Docker.</li>
+      </ul></div></details>
+    </section>
+  </main>
 
-  <section id="limitations">
-    <h2>Limitations</h2>
-    <div class="panel"><ul>
-      <li>ARVO's developer fixes have been public for years, so the models may have seen them during training. The still-open bugs, where no fix exists anywhere, are the clean test: 40 issues → 11 reproduce → 7 verified → 1 complete and 2 partial fixes ready after review; none sent yet.</li>
-      <li>ARVO has no memory-leak cases; leak results come from Juliet, which is synthetic.</li>
-      <li>The gate proves absence of the reported crash and of new sanitizer reports on the inputs it tries. It cannot prove a fix correct for every input (for example, a stack buffer sized from input length).</li>
-      <li>Calibration false rejects come from known limits: a strict rule for patches that remove a <code>free</code>, and crashes the original bug used to mask.</li>
-      <li>Reviewer notes are an LLM review shown for context only: they flag verified and rejected candidates at about the same rate, so they are not evidence and never change a verdict.</li>
-      <li>Nebius Sandboxes runs the Juliet suite with the gate offline; ARVO images do not import there yet, so ARVO runs on local Docker.</li>
-    </ul></div>
-  </section>
+  <footer>
+    <span>Every number on this page is computed from the run records in the repository.</span>
+    <span>NVIDIA Nemotron on Nebius Token Factory</span>
+  </footer>
+</div>
+<div class="tip" id="tip" hidden></div>
 
-  <footer>Every number on this page is generated from run records by <code>scripts/build_site.py</code>. Model calls: NVIDIA Nemotron on Nebius Token Factory (Ultra plans, Lightning workers and reviewer notes).</footer>
-</main>
 <script>
 const $ = (s) => document.querySelector(s);
-const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const head = (v) => String(v || "").split(":")[0];
-const chip = (v, title) => `<span class="chip c-${esc(head(v))}"${title ? ` title="${esc(title)}"` : ""}>${esc(v)}</span>`;
-const pct = (a, b) => (b ? Math.round((100 * a) / b) + "%" : "–");
-const money = (x) => (x == null ? "–" : "$" + Number(x).toFixed(4));
-const CHECKS = ["unpatched_trips","diff_scope","build","compiled","patched","tests","behavior","differential","refuzz","safe_fix","adversary"];
+const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const get = (p) => fetch(p).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+const money = (x) => (x == null ? "–" : "$" + Number(x).toFixed(x < 0.1 ? 3 : 2));
+const GH = "https://github.com/samsundar989/nebius-hackathon/blob/main/";
 
-// Changed lines with 2 lines of context each; gaps shown as "…", so the change is in view.
+// verdict -> {cls, text}: plain words, colour plus symbol
+function verdictOf(v, sem) {
+  const h = String(v || "").split(":")[0];
+  if (h === "verified") {
+    if (sem === "wrong") return { cls: "bad", text: "verified, but wrong" };
+    if (sem === "defensive") return { cls: "warn", text: "verified, defensive" };
+    return { cls: "ok", text: "verified" };
+  }
+  if (h === "rejected" || h === "silenced_only") {
+    const why = { "rejected:refuzz_new_crash": "refused: re-fuzzing crashed it", "rejected:safe_fix": "refused: new leak or use-after-free",
+      silenced_only: "refused: wrong output", "rejected:adversary_same_bug": "refused: attacker input crashed it",
+      "rejected:adversary_new_crash": "refused: attacker found a new crash", "rejected:behaviour_change": "refused: output changed" }[v];
+    const rest = String(v).split(":")[1];
+    return { cls: "bad", text: why || (rest ? "refused: " + rest.replace(/_/g, " ").replace("refuzz", "re-fuzzing") : "refused") };
+  }
+  if (h === "build_failed" || h === "no_candidate" || h === "inconclusive" || h === "error") return { cls: "skip", text: h.replace("_", " ") };
+  return { cls: "skip", text: String(v || "–").replace(/_/g, " ") };
+}
+const badge = (v, sem, title) => { const o = verdictOf(v, sem); return `<span class="v ${o.cls}"${title ? ` title="${esc(title)}"` : ""}>${esc(o.text)}</span>`; };
+const checkBadge = (c) => { const s = c && c.s; const cls = s === "pass" ? "ok" : s === "fail" ? "bad" : "skip"; return `<span class="v ${cls}" title="${esc(c && c.d)}">${esc(s || "")}</span>`; };
+
 function compact(d) {
   const lines = String(d || "").split("\n").filter((l) => !l.startsWith("+++") && !l.startsWith("---"));
-  const changed = (l) => (l.startsWith("+") || l.startsWith("-"));
+  const changed = (l) => l.startsWith("+") || l.startsWith("-");
   const keep = new Set();
   lines.forEach((l, i) => { if (changed(l)) for (let j = i - 2; j <= i + 2; j++) keep.add(j); });
   const out = [];
-  lines.forEach((l, i) => {
-    if (l.startsWith("@@")) return;
-    if (keep.has(i)) out.push(l);
-    else if (out.length && out[out.length - 1] !== "…") out.push("…");
-  });
+  lines.forEach((l, i) => { if (l.startsWith("@@")) return; if (keep.has(i)) out.push(l); else if (out.length && out[out.length - 1] !== "…") out.push("…"); });
   while (out.length && out[out.length - 1] === "…") out.pop();
   return out.join("\n");
 }
+const diffHtml = (d) => esc(compact(d)).split("\n").map((l) => (l.startsWith("+") ? `<span class="add">${l}</span>` : l.startsWith("-") ? `<span class="del">${l}</span>` : l)).join("\n");
 
-function diffHtml(d) {
-  return esc(compact(d)).split("\n").map((l) => l.startsWith("+") ? `<span class="add">${l}</span>`
-    : l.startsWith("-") ? `<span class="del">${l}</span>` : l).join("\n");
+// tooltip for the squares
+const tip = $("#tip");
+function showTip(e, html) { tip.innerHTML = html; tip.hidden = false; const r = e.target.getBoundingClientRect(); const x = Math.min(window.innerWidth - 290, Math.max(8, r.left)); tip.style.left = x + "px"; tip.style.top = (r.bottom + 8) + "px"; }
+function hideTip() { tip.hidden = true; }
+
+/* ---------- the comparison ---------- */
+let RUNS = {};
+async function verdictsPanel() {
+  const ids = ["p3_arvo27_r1", "p3_arvo27_r2"];
+  const rows = [];
+  for (const id of ids) {
+    const d = RUNS[id] || (RUNS[id] = await get(`data/runs/${id}.json`));
+    if (!d) continue;
+    d.cases.forEach((c) => c.workers.forEach((w) => {
+      const ch = w.checks || {};
+      if (!ch.patched || ch.patched.s !== "pass") return;
+      const verified = w.verdict === "verified";
+      const state = !verified ? "caught" : w.semantic === "wrong" ? "wrong" : w.semantic === "defensive" ? "def" : "ok";
+      rows.push({ run: id, c, w, state, tests: ch.tests ? ch.tests.s : "none" });
+    }));
+  }
+  if (!rows.length) { $("#basis").textContent = "Run records not found."; return; }
+  const order = { ok: 0, def: 1, wrong: 2, caught: 3 };
+  rows.sort((a, b) => order[a.state] - order[b.state]);
+  const n = (f) => rows.filter(f).length;
+  const cnt = { ok: n((r) => r.state === "ok"), def: n((r) => r.state === "def"), wrong: n((r) => r.state === "wrong"), caught: n((r) => r.state === "caught") };
+  const notFix = cnt.wrong + cnt.caught;
+  const bugs = new Set(rows.map((r) => r.c.case)).size;
+  $("#basis").textContent = `${rows.length} patches from Nemotron workers made the reported crash disappear on ${bugs} real bugs from Google's OSS-Fuzz. We checked each against the developer's own fix. ${notFix} were not fixes.`;
+  const label = { ok: "correct fix", def: "defensive: safe, but treats the symptom", wrong: "wrong, and Leakproof shipped it", caught: "not a fix: Leakproof refused it" };
+  $("#waffle").innerHTML = rows.map((r, i) => `<button class="tile ${r.state}" data-i="${i}" aria-label="${esc(r.c.project)} ${esc(r.c.case)}: ${esc(label[r.state])}"></button>`).join("");
+  $("#waffle").querySelectorAll(".tile").forEach((t) => {
+    const r = rows[+t.dataset.i];
+    const html = `<b>${esc(r.c.project)}</b> ${esc(r.c.case)}<br>${esc(label[r.state])}${r.state === "caught" ? `<br>${esc(verdictOf(r.w.verdict).text)}` : ""}<br><span style="opacity:.75">Click to open its evidence</span>`;
+    t.onmouseenter = (e) => showTip(e, html); t.onfocus = (e) => showTip(e, html);
+    t.onmouseleave = hideTip; t.onblur = hideTip;
+    t.onclick = () => { hideTip(); openCase(r.run, r.c.case); };
+  });
+  $("#legend").innerHTML = [["ok", "correct fix", cnt.ok], ["def", "defensive", cnt.def], ["wrong", "wrong, shipped", cnt.wrong], ["caught", "not a fix, refused", cnt.caught]]
+    .map(([k, l, v]) => `<li><span class="tile ${k}" aria-hidden="true"></span>${l} <b>${v}</b></li>`).join("");
+
+  const tested = rows.filter((r) => r.tests === "pass" || r.tests === "fail");
+  const testedBadPassing = tested.filter((r) => r.tests === "pass" && (r.state === "wrong" || r.state === "caught")).length;
+  const testedLp = tested.filter((r) => r.state === "wrong").length;
+  const cells = (k) => `<span class="cells" aria-hidden="true">${"<i></i>".repeat(k)}</span>`;
+  $("#ship").innerHTML = `
+    <div>
+      <h3>All ${rows.length} patches</h3><p class="q">Bad patches that would ship</p>
+      <div class="row"><span class="who">Crash is gone</span>${cells(notFix)}<span class="n">${notFix}</span></div>
+      <div class="row lp"><span class="who"><strong>Leakproof</strong></span>${cells(cnt.wrong)}<span class="n">${cnt.wrong}</span></div>
+      <p class="foot">The usual check for AI repair: the sanitizer goes quiet on the reported input.</p>
+    </div>
+    <div>
+      <h3>The ${tested.length} where the project's own tests ran</h3><p class="q">Bad patches that would ship</p>
+      <div class="row"><span class="who">Crash gone, tests pass</span>${cells(testedBadPassing)}<span class="n">${testedBadPassing}</span></div>
+      <div class="row lp"><span class="who"><strong>Leakproof</strong></span>${cells(testedLp)}<span class="n">${testedLp}</span></div>
+      <p class="foot">Passing the project's own test suite still let these through. Re-fuzzing caught most of them.</p>
+    </div>`;
 }
 
-const EV = { strong: "evidence: strong", medium: "evidence: medium", weak: "verified, needs human review" };
-const evBadge = (ev) => ev ? `<span class="chip c-${ev.level === "weak" ? "inconclusive" : "pass"}" title="${esc(`${ev.tests ? "project tests ran" : "no project tests"}; ${ev.output_varies === null ? "harness output not measured" : ev.output_varies ? "harness output varies" : "harness prints nothing to compare"}`)}">${esc(EV[ev.level])}</span>` : "";
+/* ---------- proof strip ---------- */
+async function proofStrip(num, cal, rw) {
+  const out = [];
+  const r1 = num && num.arvo && num.arvo.p3_arvo27_r1;
+  if (r1) out.push([`${r1.verified} of ${r1.cases}`, `real OSS-Fuzz bugs fixed and verified, ${r1.strict} of them correct against the developer's fix`]);
+  if (cal) out.push([`${cal.adjudicated.classes.accepted} of ${cal.adjudicated.judged}`, "developers' own fixes accepted by the same gate, so it's strict, not impossible"]);
+  const gp = rw && rw.targets && rw.targets.find((t) => /gpac/.test(t.repo) && /correct/.test(String(t.review)));
+  if (gp) out.push([`gpac #${gp.issue}`, `a still-open bug in a ${gp.stars ? gp.stars + "★" : "popular"} project, fixed in 2 lines and reviewed`]);
+  $("#proof").innerHTML = out.map(([b, p]) => `<div><div class="big">${esc(b)}</div><p>${esc(p)}</p></div>`).join("");
+}
 
+/* ---------- planner ---------- */
+function plannerPanel(num) {
+  const pa = num && num.planners_arvo; if (!pa) return;
+  const order = ["lightning", "super", "ultra"].filter((k) => pa[k]);
+  const n = pa[order[0]].cases;
+  const names = { lightning: "No planner", super: "Nemotron 3 Super", ultra: "Nemotron 3 Ultra" };
+  $("#planner").innerHTML = `<p><b>The planner matters on real code.</b> Same four Lightning workers on ${n} real bugs, only the planner changes:</p>
+    ${order.map((k) => `<div class="pbar"><span class="who">${names[k]}</span><span class="track"><span class="fill" style="display:block;width:${(100 * pa[k].verified) / n}%"></span></span><span class="n">${pa[k].verified}/${n}</span></div>`).join("")}`;
+}
+
+/* ---------- real world ---------- */
+function realWorld(rw, num) {
+  if (!rw || !rw.targets) { $("#real").hidden = true; return; }
+  const t = num && num.open_bugs && num.open_bugs.total;
+  if (t) $("#real-lead").textContent = `Reported in October 2026, after the models' training data, so there was no fix to copy. Across all our open-bug rounds: ${t.triaged} issues checked, ${t.verified} fixes verified, ${t.ready} complete and ${t.ready_partial} partial fixes ready after review.`;
+  const rev = (r) => { const s = String(r.review || "").toLowerCase();
+    if (s.startsWith("correct")) return `<span class="v ok" title="${esc(r.review)}">correct</span>`;
+    if (s.startsWith("partial")) return `<span class="v warn" title="${esc(r.review)}">partial</span>`;
+    if (s.startsWith("control")) return `<span class="v ok" title="${esc(r.review)}">right call: not a bug</span>`;
+    if (s.startsWith("no fix")) return `<span class="v skip" title="${esc(r.review)}">no fix</span>`;
+    return ""; };
+  const lp = (r) => { const v = String(r.verdict || "");
+    if (/^no/i.test(String(r.reproduces || ""))) return `<span class="v skip" title="${esc(r.reproduces)}">already fixed upstream</span>`;
+    if (v === "verified") return `<span class="v ok">verified</span>`;
+    if (/^rejected|silenced/.test(v)) return `<span class="v bad" title="${esc(v)}">${esc(verdictOf(v).text.replace("refused: ", "refused, "))}</span>`;
+    if (v === "no_candidate") return `<span class="v skip">no patch</span>`;
+    return v ? `<span class="v skip">${esc(v.replace(/_/g, " "))}</span>` : "–"; };
+  $("#rw tbody").innerHTML = rw.targets.map((r) => `<tr>
+    <td><b>${esc(r.repo.split("/").pop())}</b>${r.stars ? `<br><span style="color:var(--soft);font-size:14px">${esc(r.stars)}★</span>` : ""}</td>
+    <td><a href="${esc(r.url)}" rel="noopener">#${esc(r.issue)}</a> ${esc(String(r.bug || "").split(" in ")[0])}</td>
+    <td>${lp(r)}</td><td>${rev(r)}</td>
+    <td>${r.package ? `<a href="${GH}${esc(r.package)}" rel="noopener">Patch</a>` : ""}</td></tr>`).join("");
+}
+
+/* ---------- refusal ---------- */
+function refusal(num) {
+  const j = num && num.jq_refusal; if (!j) { $("#refusal-sec").hidden = true; return; }
+  $("#refusal").innerHTML = `
+    <div class="sheet"><h3>Refused <span class="v bad">re-fuzzing crashed it</span></h3><p>Passed jq's tests and the original crash input.</p><pre>${diffHtml(j.refused_diff)}</pre></div>
+    ${j.verified_diff ? `<div class="sheet"><h3>Shipped <span class="v ok">verified</span></h3><p>A one-line fix from another run. Same as the developer's.</p><pre>${diffHtml(j.verified_diff)}</pre></div>` : ""}`;
+}
+
+/* ---------- explorer ---------- */
+const CHECKS = [["unpatched_trips", "bug reproduces"], ["diff_scope", "edits in scope"], ["build", "builds"], ["compiled", "patch compiled in"], ["patched", "crash gone"], ["tests", "project tests"], ["behavior", "same output"], ["differential", "same output on corpus"], ["refuzz", "re-fuzzing"], ["safe_fix", "no new leak"], ["adversary", "attacker inputs"]];
+let IDX = [];
+async function openCase(run, caseId) {
+  document.getElementById("runs").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  $("#run-pick").value = run; await showRun(run, caseId);
+}
+async function showRun(run, pickCase) {
+  const d = RUNS[run] || (RUNS[run] = await get(`data/runs/${run}.json`));
+  if (!d) { $("#cases").innerHTML = ""; return; }
+  const rank = (c) => { const v = verdictOf(c.verdict, c.winner_semantic).cls; return { ok: 0, warn: 1, bad: 2, skip: 3 }[v]; };
+  const cases = [...d.cases].sort((a, b) => rank(a) - rank(b));
+  $("#cases").innerHTML = cases.map((c, i) => `<li><button data-i="${i}" aria-current="false"><span class="dot ${verdictOf(c.verdict, c.winner_semantic).cls}"></span>${esc(c.project)} <span style="color:var(--soft)">${esc(c.case.length > 22 ? c.case.slice(-16) : c.case)}</span></button></li>`).join("");
+  const btns = [...$("#cases").querySelectorAll("button")];
+  btns.forEach((b) => (b.onclick = () => { btns.forEach((x) => x.setAttribute("aria-current", String(x === b))); renderCase(cases[+b.dataset.i]); }));
+  const start = pickCase ? cases.findIndex((c) => c.case === pickCase) : 0;
+  if (btns[Math.max(0, start)]) btns[Math.max(0, start)].click();
+}
+function renderCase(c) {
+  const ws = c.workers.filter((w) => Object.keys(w.checks || {}).length);
+  const cols = CHECKS.filter(([k]) => ws.some((w) => w.checks[k]));
+  const matrix = ws.length ? `<div class="scroll"><table class="table matrix"><thead><tr><th>Patch</th>${cols.map(([, l]) => `<th>${esc(l)}</th>`).join("")}<th>Result</th></tr></thead><tbody>${
+    ws.map((w) => `<tr><td><code>${esc(w.id)}</code></td>${cols.map(([k]) => `<td>${w.checks[k] ? checkBadge(w.checks[k]) : ""}</td>`).join("")}<td>${badge(w.verdict, w.semantic)}</td></tr>`).join("")}</tbody></table></div><p style="color:var(--soft);font-size:14px;margin:6px 0 0">Hover a check to see its evidence.</p>` : "<p>No patch reached the gate.</p>";
+  $("#case").innerHTML = `<h3>${esc(c.project)} <code>${esc(c.case)}</code> ${badge(c.verdict, c.winner_semantic)}</h3>
+    <p class="meta">${esc(c.finding.kind)} in <code>${esc(String(c.finding.location).split("/").slice(-2).join("/"))}</code>, model cost ${money(c.usd)}${c.dev_fix ? `, <a href="${esc(c.dev_fix)}" rel="noopener">developer's fix</a>` : ""}</p>
+    ${c.root_cause ? `<h4>Diagnosis by Nemotron 3 Ultra</h4><p style="margin:0">${esc(c.root_cause)}</p>` : ""}
+    <h4>Checks for each patch</h4>${matrix}
+    ${c.winner ? `<h4>Shipped fix</h4><pre>${diffHtml(c.winner)}</pre>` : ""}`;
+}
+
+/* ---------- demo (re-check and live run) ---------- */
 async function demo() {
   const cfg = await get("config.json");
-  const row = $("#demo-row");
   const svc = cfg && cfg.service_url;
-  // A recorded run is a real earlier run, always labelled as such with the reason no live run
-  // happened (service off, asleep, wrong passcode, or out of its demo budget).
-  const recorded = async (why) => {
-    const recs = (await get("data/demo_recorded.json")) || [];
-    const j = recs[Math.floor(Math.random() * recs.length)];
-    return j ? { ...j, recorded: true, reason: why } : null;
-  };
-  const show = (st, j) => {
-    st.innerHTML = j
-      ? ` ${chip(j.verdict || "error")} ${esc(j.case || "")} ${money(j.usd)} ${j.recorded ? `<strong>recorded run</strong> <span class="muted">(${esc(j.reason || "live runs unavailable")}; this is a real earlier run, not a live one)</span>` : "<strong>live run</strong>"}`
-      : "no recorded run available";
-  };
-  const wake = async (st) => {
-    st.textContent = "waking up the service (~1 min if idle)…";
-    await fetch(svc + "/healthz");
-  };
-  row.innerHTML = `<div class="demo-box">
-      <div class="row"><button class="btn" id="run-live">Run live (one Juliet case)</button>
-        <input id="passcode" type="password" autocomplete="off" placeholder="passcode (see Devpost)" aria-label="passcode for live runs"></div>
-      <div class="muted" id="live-state"></div>
-    </div>
-    <div class="demo-box">
-      <div class="row"><button class="btn" id="reverify">Re-verify without AI</button>
-        <select id="rv-which" aria-label="which stored patch"><option value="verified">a patch the gate verified</option><option value="rejected">a patch the gate rejected</option></select></div>
-      <div class="muted" id="rv-state">The full gate re-runs here on a stored worker patch: no model call, $0, under a minute.</div>
-    </div>
-    <div id="rv-out"></div>`;
-  $("#run-live").onclick = async () => {
-    const st = $("#live-state");
-    if (!svc) { show(st, await recorded("the live demo service is off")); return; }
-    try {
-      await wake(st);
-      st.textContent = "running: plan, workers, gate…";
-      const r = await fetch(svc + "/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ passcode: $("#passcode").value }) });
-      show(st, await r.json());
-    } catch (e) { show(st, await recorded("the live demo service did not answer")); }
+  if (cfg && cfg.video_url) { const v = $("#nav-video"); v.href = cfg.video_url; v.hidden = false; }
+  const note = $("#demo-note"), out = $("#demo-out");
+  // A sleeping Render instance answers with a loading page without CORS headers: retry until awake.
+  const wake = async () => {
+    note.textContent = "Waking the demo service (up to a minute if it was asleep)…";
+    for (let i = 0; i < 20; i++) {
+      try { if ((await fetch(svc + "/healthz")).ok) return; } catch (e) { /* still waking */ }
+      await new Promise((r) => setTimeout(r, 5000));
+    }
+    throw new Error("demo service asleep");
   };
   $("#reverify").onclick = async () => {
-    const st = $("#rv-state"), out = $("#rv-out");
-    if (!svc) { st.textContent = "The demo service is not configured; see the walkthrough to re-run the gate locally."; return; }
-    $("#reverify").disabled = true;
+    if (!svc) { note.textContent = "The demo service isn't configured. The walkthrough shows how to re-run the gate locally."; return; }
+    const b = $("#reverify"); b.disabled = true;
     try {
-      await wake(st);
-      st.textContent = "re-running the gate: build, sanitizer run, good-path build, output check…";
-      const r = await fetch(svc + "/reverify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ candidate: $("#rv-which").value }) });
+      await wake();
+      note.textContent = "Re-running the gate: build, sanitizer run, output check…";
+      const which = Math.random() < 0.5 ? "verified" : "rejected";
+      const r = await fetch(svc + "/reverify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ candidate: which }) });
       const j = await r.json();
-      if (j.error) { st.textContent = j.error; return; }
-      st.innerHTML = `${chip(j.verdict)} now · ${chip(j.verdict_then)} in the original run · <strong>${j.matches ? "same verdict" : "different verdict"}</strong> · ${esc(j.elapsed_s)} s · ${j.model_calls} model calls · $0`;
-      const checks = Object.entries(j.checks).map(([k, v]) => `${esc(k)} ${chip(v.status, v.detail)}`).join(" ");
-      out.innerHTML = `<div class="panel"><p><code>${esc(j.case)}</code> · unpatched: ${chip(j.unpatched.status, j.unpatched.detail)} · stored patch from <a href="https://github.com/samsundar989/nebius-hackathon/blob/main/${esc(j.source)}" rel="noopener"><code>${esc(j.source)}</code></a></p><pre>${diffHtml(j.diff)}</pre><p>${checks}</p><p class="muted">Hover a check for its evidence.</p></div>`;
-    } catch (e) { st.textContent = "the demo service did not answer; try again in a minute"; }
-    finally { $("#reverify").disabled = false; }
+      if (j.error) { note.textContent = j.error; return; }
+      note.innerHTML = `${j.matches ? "Same verdict as the original run." : "Different verdict from the original run."} ${esc(j.elapsed_s)} s, ${esc(j.model_calls)} model calls, $0.`;
+      out.innerHTML = `<div class="case"><h3><code>${esc(j.case)}</code> ${badge(j.verdict)} <span style="color:var(--soft);font-weight:400;font-size:15px">originally ${esc(verdictOf(j.verdict_then).text)}</span></h3>
+        <pre>${diffHtml(j.diff)}</pre>
+        <p style="margin:0">${Object.entries(j.checks).map(([k, v]) => `${esc((CHECKS.find(([c]) => c === k) || [k, k])[1])} ${checkBadge({ s: v.status, d: v.detail })}`).join(" &nbsp; ")}</p>
+        <p style="color:var(--soft);font-size:14px;margin:8px 0 0">Stored patch from <a href="${GH}${esc(j.source)}" rel="noopener">${esc(j.source.split("/").slice(-2).join("/"))}</a>. Hover a check for its evidence.</p></div>`;
+    } catch (e) { note.textContent = "The demo service didn't answer. Try again in a minute."; }
+    finally { b.disabled = false; }
+  };
+  $("#run-live").onclick = async () => {
+    const showRec = async (why) => {
+      const recs = (await get("data/demo_recorded.json")) || []; const j = recs[Math.floor(Math.random() * recs.length)];
+      note.innerHTML = j ? `Showing a recorded run (${esc(why)}): <code>${esc(j.case)}</code> ${badge(j.verdict)} ${money(j.usd)}. This is a real earlier run, not a live one.` : esc(why);
+    };
+    if (!svc) return showRec("live runs are off");
+    const pass = $("#passcode").value.trim();
+    if (!pass) { note.textContent = "Live runs call the models, so they need the passcode from the Devpost testing instructions. Re-checking a stored patch needs none."; $("#passcode").focus(); return; }
+    const b = $("#run-live"); b.disabled = true;
+    try {
+      await wake();
+      note.textContent = "Running live: Ultra plans, four Lightning workers patch, then the gate. About a minute…";
+      const r = await fetch(svc + "/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ passcode: pass }) });
+      const j = await r.json();
+      if (j.recorded || j.error) return showRec(j.reason || j.error || "live runs are unavailable");
+      note.innerHTML = `Live run: <code>${esc(j.case)}</code> ${badge(j.verdict)} ${money(j.usd)}, ${esc(j.elapsed_s)} s.`;
+      if (j.winner) out.innerHTML = `<div class="case"><h3>Shipped fix</h3><pre>${diffHtml(j.winner)}</pre></div>`;
+    } catch (e) { showRec("the demo service didn't answer"); }
+    finally { b.disabled = false; }
   };
 }
 
-const SEM = { equivalent: "equivalent", different_but_correct: "different but correct", defensive: "defensive (safe, guards the symptom)", wrong: "wrong (no crash, but incorrect)" };
-
-function otherVerified(c) {
-  const seen = new Set([c.winner]);
-  const rest = c.workers.filter((w) => w.verdict === "verified" && !seen.has(w.diff) && seen.add(w.diff));
-  if (!rest.length) return "";
-  const counts = {};
-  rest.forEach((w) => { const k = SEM[w.semantic] ? (w.semantic === "different_but_correct" ? "different but correct" : w.semantic.split("_")[0]) : "not reviewed"; counts[k] = (counts[k] || 0) + 1; });
-  const summary = Object.entries(counts).map(([k, n]) => (rest.length === n ? (n === 1 ? k : (n === 2 ? `both ${k}` : `all ${k}`)) : `${n} ${k}`)).join(", ");
-  return `<details><summary>Other verified candidates (${rest.length}): ${esc(summary)}</summary>${rest.map((w) => `<p><code>${esc(w.id)}</code> · ${esc(SEM[w.semantic] || "not reviewed")}</p><pre>${diffHtml(w.diff)}</pre>`).join("")}</details>`;
-}
-
-function renderCase(c) {
-  const ws = c.workers.filter((w) => Object.keys(w.checks).length);
-  const cols = CHECKS.filter((k) => ws.some((w) => w.checks[k]));
-  const matrix = ws.length ? `<div class="scroll"><table class="matrix"><thead><tr><th>worker</th>${cols.map((k) => `<th>${esc(k)}</th>`).join("")}<th>verdict</th><th>reviewer notes</th></tr></thead><tbody>${
-    ws.map((w) => `<tr><td><code>${esc(w.id)}</code></td>${cols.map((k) => `<td class="cell">${w.checks[k] ? chip(w.checks[k].s, w.checks[k].d) : ""}</td>`).join("")}<td>${chip(w.verdict)}</td><td class="muted">${esc(w.audit.join(", ") || "–")}</td></tr>`).join("")
-  }</tbody></table></div><p class="muted">Hover a cell for the evidence.</p>` : '<p class="muted">No candidate reached the gate.</p>';
-  const others = c.workers.filter((w) => !Object.keys(w.checks).length);
-  const lineage = c.lineage && c.lineage.length ? `<h3>Sandboxes checkpoint lineage</h3><pre>${esc(c.lineage.map((e) => `${e.op.padEnd(4)} ${String(e.parent).slice(0, 12)} → ${e.image ? String(e.image).slice(0, 12) : "(disposable)"}  net=${e.network ? "on" : "off"}  exit=${e.exit}  ${e.s}s`).join("\n"))}</pre>` : "";
-  $("#case").innerHTML = `<div class="panel">
-    <div class="row"><strong>${esc(c.project)} · <code>${esc(c.case)}</code></strong> ${chip(c.verdict)}</div>
-    <p class="muted">${esc(c.finding.kind)} at <code>${esc(c.finding.location)}</code> · ${money(c.usd)} · ${esc(c.elapsed_s)} s · planner ${esc(c.planner || "none")} · gate ${esc(c.gate_version)}${c.dev_fix ? ` · <a href="${esc(c.dev_fix)}" rel="noopener">developer's fix</a>` : ""}</p>
-    ${c.root_cause ? `<h3>Root cause (planner)</h3><p>${esc(c.root_cause)}</p>` : ""}
-    <h3>Gate matrix</h3>${matrix}
-    ${others.length ? `<p class="muted">Not gated: ${others.map((w) => `${esc(w.id)} ${chip(w.verdict)}`).join(" ")}</p>` : ""}
-    ${c.winner ? `<h3>Verified fix ${evBadge(c.winner_evidence)} <span class="muted">(${esc(c.winner_id)}${c.winner_semantic ? ` · compared with the developer's fix: ${esc(SEM[c.winner_semantic] || c.winner_semantic)}` : ""})</span></h3>${c.ambiguous ? '<p class="muted">Verified candidates behave differently on some inputs (cross-candidate differential): ambiguous.</p>' : ""}<pre>${diffHtml(c.winner)}</pre>` : ""}
-    ${c.winner_evidence ? '<p class="muted">Evidence: strong = the project\'s tests ran and the harness output varies across the corpus, so a behaviour change could show; medium = one of the two; weak = neither (verified, needs human review).</p>' : ""}
-    ${otherVerified(c)}
-    ${lineage}</div>`;
-}
-
-async function showRun(run, btn) {
-  document.querySelectorAll("#run-tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
-  const data = await get(`data/runs/${run}.json`);
-  if (!data) return;
-  const order = (c) => ["verified","rejected","silenced_only","build_failed","inconclusive","no_candidate","error"].indexOf(head(c.verdict));
-  const cases = [...data.cases].sort((a, b) => order(a) - order(b));
-  $("#cases").innerHTML = cases.map((c, i) => `<button data-i="${i}" title="${esc(c.verdict)}"><span class="dot c-${esc(head(c.verdict))}" style="background:currentColor"></span>${esc(c.project)} ${esc(c.case.length > 24 ? c.case.slice(-18) : c.case)}</button>`).join("");
-  $("#cases").querySelectorAll("button").forEach((b) => (b.onclick = () => {
-    $("#cases").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    renderCase(cases[+b.dataset.i]);
-  }));
-  $("#case").innerHTML = '<p class="muted">Pick a case.</p>';
+/* ---------- more numbers ---------- */
+function more(idx, cal, num) {
+  if (cal) {
+    const a = cal.adjudicated;
+    $("#calibration").innerHTML = `<p>We ran each developer's real fix through the same gate, judged exactly like a model patch. <b>${a.classes.accepted} of ${a.judged}</b> were accepted. ${a.classes.true_reject || 0} was rejected because that fix really leaks memory. ${a.classes.false_reject || 0} were rejected by known limits of the gate.</p>
+      <div class="scroll"><table class="table"><thead><tr><th>Bug</th><th>Project</th><th>Result</th></tr></thead><tbody>${cal.rows.filter((r) => ["accepted", "true_reject", "false_reject"].includes(r.class)).map((r) => `<tr><td><code>${esc(r.case)}</code></td><td>${esc(r.project)}</td><td>${r.class === "accepted" ? '<span class="v ok">accepted</span>' : r.class === "true_reject" ? '<span class="v ok">rightly refused</span>' : `<span class="v warn" title="${esc(r.why || "")}">false reject</span>`}</td></tr>`).join("")}</tbody></table></div>`;
+  }
+  get("data/cuda.json").then((cu) => {
+    if (!cu) return;
+    const names = Object.keys(cu).filter((k) => !k.startsWith("_"));
+    $("#cuda").innerHTML = `<p>Each patch is built with nvcc and run under NVIDIA compute-sanitizer, and it must also print the right answer. That last check caught two patches that only silenced the sanitizer.</p><div class="scroll"><table class="table"><thead><tr><th>Bug</th><th>Kind</th><th>Patches</th></tr></thead><tbody>${
+      names.map((n) => `<tr><td><code>${esc(n)}</code></td><td>${esc(cu[n].baseline_kind)}</td><td>${cu[n].candidates.map((c) => badge(c.verdict)).join(" ")}</td></tr>`).join("")}</tbody></table></div>`;
+  });
+  get("data/leaderboard.json").then((lb) => {
+    const pa = num && num.planners_arvo; let h = "";
+    if (pa) h += `<p><b>Real bugs</b>, ${pa.ultra ? pa.ultra.cases : ""} cases, workers always Nemotron 3.5 Lightning:</p><div class="scroll"><table class="table"><thead><tr><th>Planner</th><th>Verified</th><th>Verified and correct</th><th>Model $ per verified fix</th></tr></thead><tbody>${
+      ["lightning", "super", "ultra"].filter((k) => pa[k]).map((k) => `<tr><td>${esc(pa[k].label)}</td><td>${pa[k].verified}/${pa[k].cases}</td><td>${pa[k].strict}/${pa[k].cases}</td><td>${money(pa[k].usd_per_verified)}</td></tr>`).join("")}</tbody></table></div>`;
+    if (lb && lb.configs) h += `<p style="margin-top:16px"><b>Synthetic Juliet cases</b> (${lb.cases}), repeated runs:</p><div class="scroll"><table class="table"><thead><tr><th>Planner</th><th>Verified (mean)</th><th>Model $ per verified fix</th></tr></thead><tbody>${
+      Object.entries(lb.configs).map(([k, r]) => `<tr><td>${esc(k)}</td><td>${Math.round(100 * r.verified_rate_mean)}%</td><td>${money(r.usd_per_verified)}</td></tr>`).join("")}</tbody></table></div>`;
+    $("#leaderboard").innerHTML = h || "<p>No comparison runs yet.</p>";
+  });
+  $("#runs-t tbody").innerHTML = idx.map((r) => `<tr><td>${esc(r.label)}</td><td>${r.cases}</td><td>${r.raw}</td><td><b>${r.verified}</b></td><td>${money(r.usd_per_verified)}</td></tr>`).join("");
 }
 
 (async () => {
   demo();
-  const idx = await get("data/index.json");
-  if (!idx) return;
-  const runs = idx.runs;
-  const arvo = runs.find((r) => r.suite === "arvo");
-  const cal = await get("data/calibration.json");
-  const num = await get("data/numbers.json");
-  const r1 = num && num.arvo && num.arvo.p3_arvo27_r1;
-  const stats = [];
-  if (r1) {
-    stats.push([`${r1.verified}/${r1.cases}`, "real bugs with a verified fix", "ok"]);
-    stats.push([`${r1.strict}/${r1.cases}`, "verified, and the fix is correct when compared with the developer's (hand-reviewed)"]);
-    stats.push(["$" + Number(r1.per_fix).toFixed(3), "model cost per verified fix"]);
-  }
-  if (num && num.precision) stats.push([`${num.precision.correct}/${num.precision.judged}`, "verified diffs that are correct (gate precision, all ARVO runs)"]);
-  if (cal) stats.push([`${cal.adjudicated.classes.accepted}/${cal.adjudicated.judged}`, "developers' own fixes the gate accepts"]);
-  const rw = await get("data/real_world.json");
-  if (rw && rw.targets && rw.targets.length) {
-    const gh = "https://github.com/samsundar989/nebius-hackathon/blob/main/";
-    $("#rw tbody").innerHTML = rw.targets.map((r) => `<tr><td>${esc(r.repo)}${r.stars ? ` <span class="muted">${esc(r.stars)}★</span>` : ""}</td><td><a href="${esc(r.url)}" rel="noopener">#${esc(r.issue)}</a></td><td>${esc(r.opened)}</td><td>${esc(r.bug)}</td><td>${esc(r.reproduces)}</td><td>${r.verdict ? chip(r.verdict) : "–"}</td><td>${esc(r.review || "–")}</td><td>${r.package ? `<a href="${gh}${esc(r.package)}" rel="noopener">package</a>` : "–"}</td><td>${esc(r.sent || "no")}</td></tr>`).join("");
-    $("#real-world").hidden = false;
-  }
-  const silent = await get("data/silent.json");
-  const hero = [];
-  if (r1) hero.push([`${r1.verified}/${r1.cases}`, "real OSS-Fuzz bugs with a verified fix", "ok"]);
-  if (silent) hero.push([`${silent.arvo.not_fixes} of ${silent.arvo.silenced}`, `patches that silenced the sanitizer were not fixes; the gate caught ${silent.arvo.rejected_total}`]);
-  if (cal) hero.push([`${cal.adjudicated.classes.accepted}/${cal.adjudicated.judged}`, "developers' own fixes the gate accepts: strict, not impossible"]);
-  $("#hero").innerHTML = hero.map(([n, l, cls]) => `<div class="panel stat"><div class="n ${cls || ""}">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join("");
-  $("#headline").innerHTML = stats.map(([n, l, cls]) => `<div class="panel stat"><div class="n ${cls || ""}">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join("");
-  if (num && num.open_bugs) {
-    const t = num.open_bugs.total;
-    $("#ob-link").textContent = `Still-open bugs: ${t.triaged} issues → ${t.verified} verified → ${t.ready} ready + ${t.ready_partial} partial`;
-  }
-  if (num && num.jq_refusal) {
-    const j = num.jq_refusal;
-    $("#refusal").innerHTML = `<h3>What a refusal looks like: jq ${esc(j.case)}</h3>
-      <p>The model's patch passed jq's own tests ${chip(j.tests)} and the original crash input ${chip(j.patched)}. Leakproof doubled the longest digit run in that input: the patched jq overflowed a heap buffer, where the unpatched program and the developer's fix are clean. ${chip("rejected:refuzz_new_crash")}</p>
-      <pre>${diffHtml(j.refused_diff)}</pre>
-      ${j.verified_diff ? `<p>In run 2, a one-line buffer-size fix passed every check ${chip("verified")} (compared with the developer's fix: ${esc(SEM[j.verified_semantic] || "–")}).</p><pre>${diffHtml(j.verified_diff)}</pre>` : ""}`;
-  }
-  if (num && num.planners_arvo) {
-    const order = ["lightning", "super", "ultra"].filter((k) => num.planners_arvo[k]);
-    const n = num.planners_arvo[order[0]].cases;
-    $("#planner").innerHTML = `<h3>Which model does what: the planner on real bugs</h3>
-      <p class="muted">${n} calibrated ARVO cases; the four workers are always Nemotron 3.5 Lightning. Only the planner changes.</p>
-      <div class="steps">${order.map((k) => { const p = num.planners_arvo[k]; return `<div class="bar"><div class="lab">${esc(p.label)}</div><div class="track"><div class="fill v1" style="width:${(100 * p.verified) / n}%"></div></div><div class="num">${p.verified}/${n}</div></div>`; }).join("")}</div>
-      <p>Verified and correct: ${order.map((k) => `${esc(num.planners_arvo[k].label)} ${num.planners_arvo[k].strict}`).join(" · ")}. With Ultra's plan each verified fix also cost less (${money(num.planners_arvo.ultra && num.planners_arvo.ultra.usd_per_verified)} vs ${money(num.planners_arvo.lightning && num.planners_arvo.lightning.usd_per_verified)} without a planner): failed attempts cost money too. One repeat.</p>`;
-  }
-  if (arvo) {
-    const bars = [["Crash gone (what most agents report)", arvo.raw, ""], ["Builds, crash gone, tests pass, edits in scope", arvo.v0, ""], ["Verified: also survives corpus, re-fuzz and leak checks", arvo.verified, "v1"]];
-    if (r1) bars.push(["Verified and correct (hand review)", r1.strict, "v1"]);
-    $("#funnel").innerHTML = bars.map(([l, n, cls]) => `<div class="bar"><div class="lab">${esc(l)}</div><div class="track"><div class="fill ${cls}" style="width:${(100 * n) / Math.max(arvo.cases, 1)}%"></div></div><div class="num">${n}/${arvo.cases}</div></div>`).join("");
-  }
-  $("#runs tbody").innerHTML = runs.map((r) => `<tr><td>${esc(r.label)}</td><td>${r.cases}</td><td>${r.raw} (${pct(r.raw, r.cases)})</td><td>${r.v0}</td><td>${chip(`verified ${r.verified}`)} ${pct(r.verified, r.cases)}</td><td>${money(r.usd_per_verified)}</td><td>${esc(r.gate_version)}</td></tr>`).join("");
-  $("#run-tabs").innerHTML = runs.map((r) => `<button data-run="${esc(r.run)}" aria-pressed="false">${esc(r.label)}</button>`).join("");
-  $("#run-tabs").querySelectorAll("button").forEach((b) => (b.onclick = () => showRun(b.dataset.run, b)));
-  const first = $("#run-tabs button"); if (first) showRun(first.dataset.run, first);
-  if (cal) {
-    const a = cal.adjudicated, raw = cal.raw;
-    const counts = Object.entries(a.classes).sort((x, y) => y[1] - x[1]);
-    $("#calibration").innerHTML = `<p>For each ARVO case we applied the developer's real fix commit and ran it through the same gate, judged exactly like a model patch. <strong>${a.classes.accepted} of ${a.judged}</strong> countable developer fixes are accepted (raw, before review: ${raw.classes.accepted}/${raw.judged}); ${a.classes.true_reject || 0} is rejected because it really leaks; ${a.classes.false_reject || 0} are false rejects from known limits.</p>
-      <table><tbody>${counts.map(([k, v]) => `<tr><td>${esc((cal.labels || {})[k] || k)}</td><td class="num">${v}</td></tr>`).join("")}</tbody></table>
-      <details><summary>All ${cal.rows.length} cases</summary><div class="scroll"><table><thead><tr><th>case</th><th>project</th><th>result</th><th>why</th></tr></thead><tbody>${
-      cal.rows.map((r) => `<tr><td><code>${esc(r.case)}</code></td><td>${esc(r.project)}</td><td>${esc(r.label)}</td><td class="muted">${esc(r.why || "")}</td></tr>`).join("")}</tbody></table></div></details>`;
-  }
-  const cu = await get("data/cuda.json");
-  if (cu) {
-    const names = Object.keys(cu).filter((k) => !k.startsWith("_"));
-    $("#cuda").innerHTML = `<p class="muted">Each candidate is built with nvcc and run under compute-sanitizer (memcheck, leak-check, racecheck); it must also print the correct checksum, which is what catches a patch that only silences the sanitizer.</p><div class="scroll"><table><thead><tr><th>case</th><th>defect</th><th>case verdict</th><th>candidates</th></tr></thead><tbody>${
-      names.map((n) => `<tr><td><code>${esc(n)}</code></td><td>${esc(cu[n].baseline_kind)}</td><td>${chip(cu[n].verdict)}</td><td>${cu[n].candidates.map((c) => chip(c.verdict)).join(" ")}</td></tr>`).join("")}</tbody></table></div>`;
-  }
-  const lb = await get("data/leaderboard.json");
-  let arvoLb = "";
-  if (num && num.planners_arvo) {
-    const pa = num.planners_arvo;
-    arvoLb = `<h3 style="margin-top:0">Real code: ${pa.ultra ? pa.ultra.cases : ""} calibrated ARVO cases, one repeat</h3><div class="scroll"><table><thead><tr><th>planner</th><th>verified</th><th>verified and correct</th><th>$ / verified</th></tr></thead><tbody>${
-      ["lightning", "super", "ultra"].filter((k) => pa[k]).map((k) => `<tr><td>${esc(pa[k].label)}</td><td>${pa[k].verified}/${pa[k].cases}</td><td>${pa[k].strict}/${pa[k].cases}</td><td>${money(pa[k].usd_per_verified)}</td></tr>`).join("")}</tbody></table></div><h3>Synthetic: Juliet</h3>`;
-  }
-  if (lb && lb.configs && Object.keys(lb.configs).length) {
-    $("#leaderboard").innerHTML = arvoLb + `<p class="muted">${lb.cases} Juliet cases, repeated runs per configuration; workers are always 4 × Nemotron 3.5 Lightning.</p><div class="scroll"><table><thead><tr><th>planner</th><th>repeats</th><th>verified (mean, min–max)</th><th>$ / verified</th><th>p50 latency</th></tr></thead><tbody>${
-      Object.entries(lb.configs).map(([k, r]) => `<tr><td>${esc(k)}</td><td>${r.repeats}</td><td>${pct(r.verified_rate_mean, 1)} (${pct(r.verified_rate_min, 1)}–${pct(r.verified_rate_max, 1)})</td><td>${money(r.usd_per_verified)}</td><td>${r.p50_latency_s} s</td></tr>`).join("")}</tbody></table></div>`;
-  }
+  const [idxD, cal, num, rw] = await Promise.all([get("data/index.json"), get("data/calibration.json"), get("data/numbers.json"), get("data/real_world.json")]);
+  IDX = (idxD && idxD.runs) || [];
+  verdictsPanel();
+  proofStrip(num, cal, rw);
+  plannerPanel(num);
+  realWorld(rw, num);
+  refusal(num);
+  more(IDX, cal, num);
+  $("#run-pick").innerHTML = IDX.map((r) => `<option value="${esc(r.run)}">${esc(r.label)}</option>`).join("");
+  $("#run-pick").onchange = () => showRun($("#run-pick").value);
+  if (IDX.length) showRun(IDX[0].run);
 })();
 </script>
 </body>

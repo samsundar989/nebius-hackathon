@@ -5,8 +5,9 @@ scripts/set_links.py --dashboard URL --service URL --video URL [--devpost URL] [
     [--rebuild-video]
 
 Replaces the placeholders in README.md, docs/DEVPOST.md and the video end card. Each link is
-optional; a placeholder stays until its link is given. --service writes site/config.json, which
-the dashboard reads for the live demo's [Run live] and [Re-verify without AI] buttons. --rebuild-video re-records the silent cut
+optional; a placeholder stays until its link is given. --service and --video write site/config.json, which
+the dashboard reads for the live demo's [Run live] and [Re-verify without AI] buttons and the
+nav's "Video" link. --rebuild-video re-records the silent cut
 (video/record.py) so the end card shows the dashboard. Prints every change; --dry-run writes
 nothing.
 """
@@ -86,8 +87,14 @@ def main() -> int:
                 print(f"{rel}: placeholder not found: {old[:60]!r}", file=sys.stderr)
         if not a.dry_run:
             p.write_text(text, encoding="utf-8", newline="\n")
-    if a.service:
-        cfg = json.dumps({"service_url": a.service.rstrip("/")}, indent=1) + "\n"
+    if a.service or a.video:
+        cfg_path = ROOT / "site" / "config.json"
+        conf = json.loads(cfg_path.read_text(encoding="utf-8")) if cfg_path.exists() else {}
+        if a.service:
+            conf["service_url"] = a.service.rstrip("/")
+        if a.video:
+            conf["video_url"] = a.video  # the dashboard nav shows "Video" when set
+        cfg = json.dumps(conf, indent=1) + "\n"
         print(f"site/config.json: {cfg.strip()}")
         if not a.dry_run:
             (ROOT / "site" / "config.json").write_text(cfg, encoding="utf-8", newline="\n")
