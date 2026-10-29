@@ -44,4 +44,4 @@ Where it falls short: two mosquitto fixes passed every check yet were wrong. We 
 
 12
 00:02:32,300 --> 00:02:47,700
-New bugs (October 2026): a correct gpac fix verified; quickjs's own tests refused two silencers.
+New bugs (October 2026): a correct gpac fix verified; three quickjs silencers refused.
