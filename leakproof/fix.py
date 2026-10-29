@@ -110,6 +110,7 @@ def fix_case(
     repair_rounds: int = 0,
     select_model: str | None = None,
     adversary: str = "off",
+    planner_notes: str | None = None,
 ) -> dict[str, Any]:
     """`client` must be this case's own (its ledger's spend is the case's cost).
 
@@ -117,6 +118,7 @@ def fix_case(
     gate-side script (calibration, ARVO batch); called after the workers, before the gate.
     select_model: rank several verified candidates by pairwise review (D-0070); None keeps
     the smallest verified diff.
+    planner_notes: a person's review of earlier runs, shown to the planner only.
     """
     reference: str | None = None
     t0 = time.monotonic()
@@ -128,6 +130,7 @@ def fix_case(
         "planner_model": planner_model,
         "worker_model": worker_model,
         "n_workers": n_workers,
+        "planner_notes": planner_notes,
         "started": time.strftime("%Y-%m-%dT%H:%M:%S"),
     }
     case = load_case(case_id)
@@ -161,6 +164,7 @@ def fix_case(
                 sorted(sources),
                 case.build_description(),
                 model=planner_model,
+                notes=planner_notes,
             )
             rec["plan"] = pl.to_dict()
             root_cause = pl.root_cause
@@ -272,6 +276,7 @@ def fix_case(
                 model=planner_model,
                 history=history,
                 whole_files=whole,
+                notes=planner_notes,
             )
             rec["plan_round2"] = pl2.to_dict() | {"history_chars": len(history)}
             hyps2 = [

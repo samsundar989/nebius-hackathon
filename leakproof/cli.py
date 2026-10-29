@@ -44,6 +44,7 @@ def _fix(args: argparse.Namespace) -> int:
         select_model=None if args.select == "none" else args.select,
         repair_rounds=args.repair_rounds,
         adversary=adversary_setting(args.adversary, args.config),
+        planner_notes=Path(args.notes).read_text(encoding="utf-8") if args.notes else None,
     )
     workers = rec.get("workers", [])
     print(f"\nverdict: {rec['verdict']}   ${rec.get('usd', 0):.4f}   {rec.get('elapsed_s')} s")
@@ -302,6 +303,9 @@ def main(argv: list[str] | None = None) -> int:
         default="auto",
         choices=["auto", "super", "ultra", "off"],
         help="model that attacks each verified candidate with inputs (D-0079)",
+    )
+    fx.add_argument(
+        "--notes", help="file with your review of earlier runs, shown to the planner only"
     )
     fx.add_argument("--run-id")
     fx.add_argument("--json", action="store_true", help="also print the full record")

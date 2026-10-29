@@ -96,6 +96,7 @@ def build_messages(
     build: str,
     history: str | None = None,
     whole_files: dict[str, str] | None = None,
+    notes: str | None = None,
 ) -> list[dict[str, str]]:
     user = (
         f"## Finding\n{render_finding(finding)}\n\n## Build and tests\n{build}\n\n"
@@ -112,6 +113,9 @@ def build_messages(
         user += f"\n\n## Whole file {path}\n{numbered}"
         if budget <= 0:
             break
+    if notes:
+        # A person's review of earlier runs (`fix --notes`): prose about diffs, never gate inputs.
+        user += f"\n\n## Reviewer notes on earlier runs\n{notes}"
     if history:
         user += f"\n\n## Earlier attempts and why they were not verified\n{history}"
     system = SYSTEM + (REPAIR if history else "")
@@ -129,10 +133,11 @@ def plan(
     max_completion_tokens: int = 16_000,
     history: str | None = None,
     whole_files: dict[str, str] | None = None,
+    notes: str | None = None,
 ) -> Plan:
     value, res = client.structured(
         model,
-        build_messages(finding, windows, files, build, history, whole_files),
+        build_messages(finding, windows, files, build, history, whole_files, notes),
         SCHEMA,
         purpose="planner:repair" if history else "planner",
         thinking=True,

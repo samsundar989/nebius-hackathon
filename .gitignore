@@ -26,6 +26,7 @@ runs/*
 data/
 !site/data/
 cases/**/src/
+cases/real_world/gpac_gpac/testsuite/
 cases/**/*.zip
 cases/**/*.tar*
 
