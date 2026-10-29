@@ -38,7 +38,8 @@ from leakproof.findings import parse_report, primary
 from leakproof.runner import ImageRef, LocalDockerRunner, get_runner
 
 MARK = "@@LPGATE@@"
-SOURCE_EXT = (".c", ".h", ".cc", ".cpp", ".cxx", ".hpp", ".hh", ".inc")
+# .inl: C++ inline definitions (assimp glTF2Asset.inl), compiled like headers.
+SOURCE_EXT = (".c", ".h", ".cc", ".cpp", ".cxx", ".hpp", ".hh", ".inc", ".inl")
 FORBIDDEN_DIRS = re.compile(
     r"/(tests?|testsuite|fuzz|fuzzing|fuzzers?|oss-?fuzz|harness(es)?|regress)/", re.I
 )

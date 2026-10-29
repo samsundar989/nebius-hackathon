@@ -24,7 +24,7 @@ from leakproof.cases.project import SKIP_DIRS
 CC = 'CC="clang $CFLAGS" CXX="clang++ $CXXFLAGS"'
 NOT_EDITABLE = {"test", "tests", "testing", "fuzz", "fuzzing", "example", "examples", "doc", "docs"}
 NOT_EDITABLE |= {"perf", "bench", "benchmark", "benchmarks", "third_party", "vendor", "external"}
-SRC_EXT = {".c", ".h", ".cc", ".cpp", ".cxx", ".hh", ".hpp"}
+SRC_EXT = {".c", ".h", ".cc", ".cpp", ".cxx", ".hh", ".hpp", ".inl"}
 
 ISSUE_SCHEMA = {
     "type": "object",

@@ -86,3 +86,11 @@ def test_identical_blocks_twice_are_one_edit() -> None:
     text = "@@ replace a.c lines 10-10 @@\n    for (i = 0; i < n; i++) {\n@@ end @@\n" * 2
     out, how = apply_blocks(FILES, parse_blocks(text), {"/src/p/a.c": [(6, 13)]})
     assert how == ["line_range"]
+
+
+def test_inl_files_are_sources() -> None:
+    from leakproof.edits import SOURCE_PATH
+    from leakproof.gate import SOURCE_EXT
+
+    assert SOURCE_PATH.search("code/AssetLib/glTF2/glTF2Asset.inl")
+    assert "code/AssetLib/glTF2/glTF2Asset.inl".endswith(SOURCE_EXT)

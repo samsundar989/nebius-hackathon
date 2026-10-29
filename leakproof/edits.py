@@ -34,7 +34,7 @@ from dataclasses import dataclass
 SEARCH = re.compile(r"^<{5,}\s*SEARCH\s*$")
 DIVIDER = re.compile(r"^={5,}\s*$")
 REPLACE = re.compile(r"^>{5,}\s*(REPLACE)?\s*$")
-SOURCE_PATH = re.compile(r"[\w./+-]+\.(c|h|cc|cpp|cxx|hpp|hh|inc)\b")
+SOURCE_PATH = re.compile(r"[\w./+-]+\.(c|h|cc|cpp|cxx|hpp|hh|inc|inl)\b")
 RANGE = re.compile(r"^@@\s*replace\s+`?([\w./+-]+)`?\s+lines?\s+(\d+)\s*-\s*(\d+)\s*@@$", re.I)
 FUNCTION = re.compile(r"^@@\s*function\s+`?(\w+)`?\s+in\s+`?([\w./+-]+)`?\s*@@$", re.I)
 END = re.compile(r"^@@\s*end\s*@@$", re.I)
