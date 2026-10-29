@@ -15,13 +15,28 @@ Machine-readable: [cases/real_world/funnel.json](../cases/real_world/funnel.json
 |---|---|
 | shortlisted issues (≥ 1.6k★, active, sanitizer report + reproducer, no fix PR) | 8 |
 | already fixed upstream when re-checked (issue left open) | 3: assimp #6929, LibreDWG #1450, #1439 |
-| reproduced at upstream HEAD and attempted | 4 (gpac #4006 still in setup, see below) |
-| verified by the gate | 1: assimp #6927 |
-| after hand review | **1 partial (defensive) fix**, packaged; 0 complete |
+| reproduced at upstream HEAD and attempted | 5 |
+| verified by the gate | 2: gpac #4006, assimp #6927 |
+| after hand review | **1 correct fix** (gpac #4006, minimal; needs gpac's regression test) and **1 partial fix** (assimp #6927), both packaged; nothing sent |
 
-Model spend for the campaign: $0.84 (ledger: every `rw_*` run and its gate adversary calls), including runs that exposed tooling bugs.
+Model spend for the campaign: $0.97 (ledger: every `rw_*` run and its gate adversary calls), including runs that exposed tooling bugs.
 
 ## Per issue
+
+**gpac #4006: heap-buffer-overflow READ via an unterminated meta item path (3.3k★). Verified, correct.**
+`gf_isom_add_meta_item_extended` copies an in-memory item into `full_path` with exactly `data_len`
+bytes and no terminator; when `data_len` is 0, the writer treats `full_path` as a file name and
+`gf_fopen` reads past the 1-byte allocation. 3 of 4 candidates verified, all the same fix:
+allocate `data_len + 1` and NUL-terminate. Hand review: **correct and minimal** for the reported
+defect. A zero-length in-memory item now reaches `gf_fopen("")`, fails and is skipped at write time
+instead of over-reading. Evidence is weak by our own definition: gpac's unit tests did not run in
+our build and the 148 KB PoC yields only 3 generated inputs. gpac's patching rules also ask for a
+regression test in `src/isomedia/unittests/`, which the package does not have yet
+([package](../cases/real_world/gpac_gpac/4006/generated/SUBMISSION.md), applies to upstream
+`d958f94`; QUESTION 0023). $0.14. One run exposed a Leakproof bug: on a CRLF checkout the edit step
+rewrote whole files (a 2-line fix became a 2,249-line diff); fixed, and the clean patch was re-gated
+without a model call (`runs/rw_gpac_4006_clean`).
+
 
 **assimp #6927: heap-buffer-overflow, glTF data URI (13k★, labelled Security Risk). Verified, partial.**
 `glTFCommon::Util::ParseDataURI` stores the data offset in a signed `char`; a URI longer than 127
@@ -63,13 +78,13 @@ that instead.
 
 ## What this says about Leakproof
 
-- The gate did its job on real, new bugs. Of the 10 candidate patches that built: 4 verified
-  (all the same narrow check on assimp #6927; partial on review), 3 refused because they changed
+- The gate did its job on real, new bugs. Of the 13 candidate patches that built: 7 verified
+  (3 on gpac, one correct fix; 4 the same narrow check on assimp #6927, partial on review), 3 refused because they changed
   the program's output on generated inputs (the assimp variants above), 2 refused as silencers that
   broke quickjs's tests, 1 refused for introducing a use-after-free. It verified nothing that is
   wrong; hand review still had the last word ("partial").
 - The workers are the weak link on large C++ files: most attempts failed to apply or to build.
 - Real-world setup cost more effort than the model calls: Windows line endings and executable
-  bits, autotools needing `.git`, a 2.1 MB source file, a shared-library ASan link. Each became a
+  bits, CRLF sources, autotools needing `.git`, a 2.1 MB source file, a shared-library ASan link. Each became a
   fix in the product (`leakproof doctor`, `scripts/probe_case.py`, the per-file size limit, `.inl`
   support, GoogleTest result parsing).

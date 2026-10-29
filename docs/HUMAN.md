@@ -183,3 +183,10 @@ Render dashboard → **leakproof-demo** → Environment. Set these, then **Save,
 - My review: **correct but partial.** It bounds-checks the raw-data `memcpy` the PoC reaches. The root cause, `ParseDataURI` storing the data offset in a signed `char` (`glTFCommon.cpp:88`), stays, and so do its other callers (glTF2 base64 branch, glTF2 image URIs, the glTF 1 importer). The maintainers would likely prefer fixing `ParseDataURI` itself.
 - assimp's rules: AIToolPolicy.md requires you to read and understand every line, run the tests yourself, and add an `Assisted-by: Leakproof (NVIDIA Nemotron)` trailer. SECURITY.md routes security reports to kim.kulling@assimp.org, but this issue is already public.
 - Options: (a) post a short comment on the issue offering the partial patch and pointing at the root cause; (b) open a PR marked "Part of #6927" with the trailer; (c) send nothing. **Default if no answer: (c).**
+
+## QUESTION 0023 — gpac #4006 (MP4Box meta item over-read): a verified, **correct** fix is packaged (your decision; nothing has been sent)
+- Issue: https://github.com/gpac/gpac/issues/4006 (opened 2026-10-17, still open, no fix PR on 2026-10-29).
+- The fix (2 lines in `src/isomedia/meta.c`): allocate `data_len + 1` for an in-memory item's `full_path` and NUL-terminate it. 3 of 4 Leakproof candidates made exactly this change; my review: correct and minimal. Package: `cases/real_world/gpac_gpac/4006/generated/` (applies to upstream `d958f94`; `PR_BODY.md` says plainly what was and was not tested).
+- **Before sending, gpac's own rules (AGENTS.md, `.agents/skills/gpac-patching`) need three things from you:** (1) build gpac with `--enable-sanitizer` and confirm the issue's `MP4Box -decrypt` command is clean; (2) add a regression test in `src/isomedia/unittests/` that fails without the fix; (3) run the testsuite. Disclose AI use in the PR (the template does).
+- Route: a GitHub PR to gpac/gpac with "Fixes #4006".
+- Options: (a) do the three steps and open the PR; (b) post the patch as a comment on the issue for the maintainers to take; (c) send nothing. **Default if no answer: (c).**

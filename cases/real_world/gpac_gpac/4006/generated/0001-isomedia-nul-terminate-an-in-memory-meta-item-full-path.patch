@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: <your git identity>
+Date: Thu, 29 Oct 2026 06:36:22 +0000
+Subject: [PATCH] isomedia: NUL-terminate an in-memory meta item's full_path
+
+AddressSanitizer reports a heap-buffer-overflow in gf_fopen_ex()
+(src/utils/os_file.c:1721).
+
+The change, in meta.c:
+
+    -				infe->full_path = (char *)gf_malloc(sizeof(char) * data_len);
+    +				infe->full_path = (char *)gf_malloc(sizeof(char) * (data_len + 1));
+    +				infe->full_path[data_len] = '\0';
+
+Fixes #4006.
+---
+ src/isomedia/meta.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/isomedia/meta.c b/src/isomedia/meta.c
+--- a/src/isomedia/meta.c
++++ b/src/isomedia/meta.c
+@@ -1769,10 +1769,11 @@
+ 		/*store full path for info*/
+ 		else if (!location_entry->data_reference_index) {
+ 			if (data) {
+-				infe->full_path = (char *)gf_malloc(sizeof(char) * data_len);
++				infe->full_path = (char *)gf_malloc(sizeof(char) * (data_len + 1));
+ 				if (!infe->full_path) return GF_OUT_OF_MEM;
+ 
+ 				memcpy(infe->full_path, data, sizeof(char) * data_len);
++				infe->full_path[data_len] = '\0';
+ 				infe->data_len = data_len;
+ 			}
+ 			else if (resource_path) {
+--
+leakproof package
