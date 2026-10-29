@@ -392,3 +392,9 @@ Strategist notes 2026-10-28 11:45 (review #16), 13:15 (#16a), 18:05 (#17), 20:20
 - **Not done:** overnight `leakproof hunt` (skipped: not buildable in ≤ 1 h alongside the campaign); repo still private (strategist audits first).
 
 Model spend since review #15: $1.08 (campaign, incl. its adversary calls); ledger $14.19 of the $19 cap.
+
+## Day 9 (cont.) · Thu 2026-10-29, 11:15 CDT → — reviews #20, #21
+
+Strategist notes 2026-10-29 02:05 (review #20) and 04:50 CDT (review #21): acknowledged. The loop had stopped at 01:50; resumed 11:15. Ledger cap raised to $21 (`.env`).
+
+- **demo-fuzz finishes green (#21, #20.1):** the strategist's drafts reviewed and applied unchanged (`af81c3d`, pushed): demo-fuzz always ends green with a job summary; leakproof-fix triggers on `success`, skips cleanly with a notice when no `crashes` artifact exists; repo guard and no `pull_request` trigger unchanged. CI checks pass (secret scan, ruff, 310 tests). README and `examples/github-action/README.md` document both variants (the template keeps "fuzz job fails on a crash"). **Waiting on a Run click** (strategist or Samuel) for the green pair's URLs.
