@@ -39,6 +39,17 @@ The wrong and defensive fixes do not concentrate in the weak level: the tests th
 
 - Cross-candidate differential (D-0070): 13 cases with several distinct verified diffs; in 11 every candidate behaves identically on corpus, PoC, amplified variants and 30 s of fuzz finds per candidate, wrong ones included (the harnesses print too little to separate them). 2 split (42500232, 42508524); in 2 of them the unpatched program **and the developer's fix** crash on the separating inputs: some candidates also fixed a second, pre-existing bug, and the pairwise review chose one of those.
 
+## Sanitizer silent is not fixed
+
+Unit: worker candidates; ARVO runs p3_arvo27_r1 + p3_arvo27_r2; from `scripts/silent_not_fixed.py` (`site/data/silent.json`).
+
+- **78** candidate patches made the reported crash disappear on the PoC (48 + 30).
+- **17** of them were rejected by later gate checks: re-fuzz new crash 12, safe-fix (leak/UAF) 4, output check (`silenced_only`) 1.
+- **61** were verified; the review against the developer's fix: correct 53, defensive 4 (reported separately, not counted as wrong), **wrong 4**.
+- **21 of 78 (27%) patches that silenced the sanitizer on real OSS-Fuzz bugs were not fixes** (17 + 4); the gate caught 17 of those 21 (81%), the other 4 were found by review.
+- Juliet (synthetic NIST Juliet cases): 524 silenced, 524 verified.
+- CUDA (compute-sanitizer, T4): 9 candidates silenced the sanitizer; 2 of them printed the wrong checksum and were rejected (oob_global__H2w1, oob_global__H3w2).
+
 ## Gate calibration: the developers' own fixes through the same gate
 
 - Adjudicated: **24/27 accepted**, 1 true reject (the developer fix leaks), 2 false rejects (7.4%).

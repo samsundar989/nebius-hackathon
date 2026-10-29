@@ -257,6 +257,36 @@ def main() -> int:
             "program **and the developer's fix** crash on the separating inputs: some candidates "
             "also fixed a second, pre-existing bug, and the pairwise review chose one of those.",
         ]
+    silent = REPO_ROOT / "site" / "data" / "silent.json"  # scripts/silent_not_fixed.py
+    if silent.exists():
+        s = json.loads(silent.read_text())
+        a, j, cu = s["arvo"], s["juliet"], s["cuda"]
+        rej = a["rejected_by_gate"]
+        out += [
+            "",
+            "## Sanitizer silent is not fixed",
+            "",
+            f"Unit: worker candidates; ARVO runs {' + '.join(a['runs'])}; "
+            "from `scripts/silent_not_fixed.py` (`site/data/silent.json`).",
+            "",
+            f"- **{a['silenced']}** candidate patches made the reported crash disappear on the PoC "
+            f"({' + '.join(str(n) for n in a['silenced_by_run'].values())}).",
+            f"- **{a['rejected_total']}** of them were rejected by later gate checks: re-fuzz new "
+            f"crash {rej.get('rejected:refuzz_new_crash', 0)}, safe-fix (leak/UAF) "
+            f"{rej.get('rejected:safe_fix', 0)}, output check (`silenced_only`) "
+            f"{rej.get('silenced_only', 0)}.",
+            f"- **{a['verified']}** were verified; the review against the developer's fix: correct "
+            f"{a['correct']}, defensive {a['defensive']} (reported separately, not counted as "
+            f"wrong), **wrong {a['wrong']}**.",
+            f"- **{a['not_fixes']} of {a['silenced']} ({a['not_fixes_pct']}%) patches that silenced "
+            f"the sanitizer on real OSS-Fuzz bugs were not fixes** ({a['rejected_total']} + "
+            f"{a['wrong']}); the gate caught {a['rejected_total']} of those {a['not_fixes']} "
+            f"({a['caught_by_gate_pct']}%), the other {a['wrong']} were found by review.",
+            f"- Juliet ({j['note']}): {j['silenced']} silenced, {j['verified']} verified.",
+            f"- CUDA (compute-sanitizer, T4): {cu['silenced']} candidates silenced the sanitizer; "
+            f"{len(cu['silenced_only'])} of them printed the wrong checksum and were rejected "
+            f"({', '.join(cu['silenced_only'])}).",
+        ]
     cal = RUNS_DIR / "p1_calibration_v3" / "summary.json"
     if cal.exists():
         c = json.loads(cal.read_text())
