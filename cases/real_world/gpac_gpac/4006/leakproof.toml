@@ -5,6 +5,7 @@
 [project]
 name = "gpac_4006"
 src = "../src"
+image = "leakproof/cpp-sanitizers:zlib"  # images/cpp-sanitizers-zlib: configure requires zlib
 build = '''( set -e
 # Windows checkouts lose the executable bit.
 grep -rlI --exclude-dir=.git '^#!' . | xargs -r chmod +x

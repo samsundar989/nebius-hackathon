@@ -9,7 +9,7 @@ build = '''( set -e
 # Windows checkouts lose the executable bit.
 grep -rlI --exclude-dir=.git '^#!' . | xargs -r chmod +x
 [ -f .tarball-version ] || echo 0.13.3.9999 > .tarball-version
-[ -f configure ] || sh autogen.sh > /tmp/autogen.log 2>&1 || { tail -30 /tmp/autogen.log; exit 1; }
+[ -f configure ] || autoreconf -f --install -I m4 > /tmp/autogen.log 2>&1 || { tail -30 /tmp/autogen.log; exit 1; }
 [ -f Makefile ] || ./configure --disable-bindings --disable-docs --disable-werror > /tmp/configure.log 2>&1 || { tail -30 /tmp/configure.log; exit 1; }
 make -j8 > /tmp/make.log 2>&1 || { grep -E 'error' /tmp/make.log | head -30; tail -20 /tmp/make.log; exit 1; }
 )'''

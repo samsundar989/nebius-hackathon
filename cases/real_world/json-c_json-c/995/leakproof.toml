@@ -7,6 +7,8 @@
 name = "jsonc_995"
 src = "../src"
 build = '''( set -e
+# Windows checkouts lose the executable bit (the tests are shell scripts).
+grep -rlI --exclude-dir=.git '^#!' . | xargs -r chmod +x
 cmake -S . -B build -DCMAKE_BUILD_TYPE= -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=ON > /tmp/cmake.log 2>&1 || { tail -30 /tmp/cmake.log; exit 1; }
 cmake --build build -j8 > /tmp/make.log 2>&1 || { grep -E 'error' /tmp/make.log | head -30; tail -20 /tmp/make.log; exit 1; }
 cp /tmp/poc /tmp/poc.c
@@ -16,5 +18,5 @@ $CC $CFLAGS -Ibuild -I. /tmp/poc.c build/libjson-c.a $LDFLAGS -o build/poc
 # The PoC needs no input: the program itself is the reproducer.
 reproduce = '''./build/poc'''
 poc = "../995/poc.c"
-test = '''cd build && ctest > /tmp/ct.log 2>&1; rc=$?; sed -nE 's/^.*Test +#[0-9]+: ([^ ]+) .*(Passed|Failed).*$/\2: \1/p' /tmp/ct.log | sed 's/^Passed/PASS/; s/^Failed/FAIL/'; tail -5 /tmp/ct.log; exit $rc'''
+test = '''cd build && ctest > /tmp/ct.log 2>&1; rc=$?; awk '/Test +#[0-9]+:/ { print (($0 ~ /Passed/) ? "PASS: " : "FAIL: ") $4 }' /tmp/ct.log; tail -5 /tmp/ct.log; exit $rc'''
 editable = ["*.c", "*.h"]
