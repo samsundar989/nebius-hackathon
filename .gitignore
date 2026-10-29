@@ -67,3 +67,5 @@ video/*.mp4
 video/*.wav
 video/*.m4a
 video/.narration_path
+cases/real_world/gpac_gpac/4006/validation/*
+!cases/real_world/gpac_gpac/4006/validation/RESULTS.txt
