@@ -33,7 +33,8 @@ from leakproof.runner import ImageRef, Runner
 
 SAN = "-fsanitize=address,undefined -fno-omit-frame-pointer -g -O0"
 SKIP_DIRS = {".git", ".hg", "build", "out", "node_modules", "__pycache__"}
-MAX_FILE_BYTES = 2 * 1024 * 1024
+# quickjs.c is 2.1 MB; binaries and test media above this stay out of the copy.
+MAX_FILE_BYTES = 8 * 1024 * 1024
 TOOLCHAIN = {"docker": "leakproof/cpp-sanitizers:e0", "sandboxes": "tag:lp-cpp-sanitizers"}
 
 
