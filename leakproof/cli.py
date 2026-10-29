@@ -320,6 +320,8 @@ def main(argv: list[str] | None = None) -> int:
     it.add_argument("--out", help="where to write (default: <repo-dir>/leakproof.toml)")
     it.add_argument("--force", action="store_true")
     it.add_argument("--budget", type=float, default=0.05, help="USD cap for the issue read")
+    dr = sub.add_parser("doctor", help="check Docker, the toolchain image, the key and budget")
+    dr.add_argument("--config", help="also check this leakproof.toml")
     pk = sub.add_parser("package", help="SUBMISSION.md + format-patch from a verified fix")
     pk.add_argument(
         "record_json", nargs="?", help="a `leakproof fix` record (runs/<id>/<case>.json)"
@@ -338,6 +340,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     pk.add_argument("--force", action="store_true", help="package a candidate that is not verified")
     args = ap.parse_args(argv)
+    if args.cmd == "doctor":
+        from leakproof.doctor import doctor
+
+        return doctor(Path(args.config) if args.config else None)
     if args.cmd == "package":
         return _package(args)
     if args.cmd == "init":

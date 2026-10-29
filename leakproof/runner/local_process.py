@@ -29,7 +29,7 @@ ROOT = Path(os.environ.get("LEAKPROOF_LOCAL_IMAGES", tempfile.gettempdir())) / "
 SAFE_PATH = "/usr/local/bin:/usr/bin:/bin"
 
 
-DROP = [
+FULL_DROP = [
     "setpriv",
     "--reuid=nobody",
     "--regid=nogroup",
@@ -39,27 +39,36 @@ DROP = [
     "--no-new-privs",
     "--",
 ]
+# Some hosts (Render) refuse to change the bounding set. Switching from root to nobody with
+# no-new-privs still leaves the child no capabilities and no way to regain any.
+NO_BOUNDING = [a for a in FULL_DROP if not a.startswith("--bounding-set")]
+DROP: list[str] = FULL_DROP
 _isolation: str | None = None
 
 
 def isolation() -> str:
     """ "nobody" when commands can run as `nobody`, else why not (probed once per process).
 
-    Some hosts run the container as root but without CAP_SETUID/SETGID, so setpriv fails; the
+    A host that runs the container as root without CAP_SETUID/SETGID makes setpriv fail; the
     runner then runs commands as the server's own user with a cleared environment, and the demo
     service refuses live (model-written) runs (fail closed)."""
-    global _isolation
+    global _isolation, DROP
     if _isolation is None:
         if os.name != "posix" or os.geteuid() != 0:
             _isolation = "not root: commands run as the server's user"
-        else:
+            return _isolation
+        errors = []
+        for variant in (FULL_DROP, NO_BOUNDING):
             try:
-                r = subprocess.run([*DROP, "/bin/true"], capture_output=True, timeout=10)
-                _isolation = (
-                    "nobody" if r.returncode == 0 else r.stderr.decode(errors="replace")[-300:]
-                )
+                r = subprocess.run([*variant, "/bin/true"], capture_output=True, timeout=10)
             except (OSError, subprocess.TimeoutExpired) as exc:
-                _isolation = f"{type(exc).__name__}: {exc}"
+                errors.append(f"{type(exc).__name__}: {exc}")
+                continue
+            if r.returncode == 0:
+                DROP, _isolation = variant, "nobody"
+                return _isolation
+            errors.append(r.stderr.decode(errors="replace").strip()[-200:])
+        _isolation = "; ".join(errors)
     return _isolation
 
 
