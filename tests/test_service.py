@@ -96,3 +96,4 @@ def test_no_live_run_without_isolation(client: TestClient, monkeypatch: pytest.M
     j = client.post("/run").json()
     assert j["recorded"] is True and "isolation" in j["reason"]
     assert "isolation" in client.get("/healthz").json()
+    assert client.get("/status").json() == client.get("/healthz").json()  # blocker-safe ping

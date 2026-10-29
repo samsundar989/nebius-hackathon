@@ -41,9 +41,15 @@ if ($Reverify) {
     Write-Output "reverify mismatches: $bad"
     $Runs = 0
 }
+# Live runs need DEMO_PASSCODE (from .env; never printed).
+$runBody = "{}"
+if ($Live) {
+    $line = Get-Content (Join-Path $PSScriptRoot "..\.env") | Where-Object { $_ -match '^DEMO_PASSCODE=' } | Select-Object -First 1
+    if ($line) { $runBody = @{ passcode = ($line -replace '^DEMO_PASSCODE=', '').Trim('"') } | ConvertTo-Json -Compress }
+}
 foreach ($k in 1..$Runs) {
     if ($Runs -eq 0) { break }
-    $r = Invoke-RestMethod -Uri "http://127.0.0.1:18080/run" -Method Post -TimeoutSec 600
+    $r = Invoke-RestMethod -Uri "http://127.0.0.1:18080/run" -Method Post -Body $runBody -ContentType "application/json" -TimeoutSec 600
     Write-Output ("run ${k}: verdict=" + $r.verdict + " recorded=" + $r.recorded + " reason=" + $r.reason + " case=" + $r.case + " usd=" + $r.usd + " s=" + $r.elapsed_s + " workers=" + (($r.workers | ForEach-Object { $_.verdict }) -join ","))
     Start-Sleep -Seconds 2
 }

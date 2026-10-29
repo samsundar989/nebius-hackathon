@@ -115,7 +115,8 @@ def _isolation() -> str:
     return isolation()
 
 
-@app.get("/healthz")
+@app.get("/healthz")  # Render's health check
+@app.get("/status")  # the dashboard's wake-up ping: content blockers drop URLs with "healthz"
 def healthz() -> dict:
     return {
         "ok": True,

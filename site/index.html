@@ -495,10 +495,18 @@ async function demo() {
   if (cfg && cfg.video_url) { const v = $("#nav-video"); v.href = cfg.video_url; v.hidden = false; }
   const note = $("#demo-note"), out = $("#demo-out");
   // A sleeping Render instance answers with a loading page without CORS headers: retry until awake.
+  // Ping /status, then /openapi.json (content blockers drop URLs with "healthz"); if the browser
+  // refuses both instantly, it is blocking them, so stop waiting and let the POST go.
   const wake = async () => {
     note.textContent = "Waking the demo service (up to a minute if it was asleep)…";
     for (let i = 0; i < 20; i++) {
-      try { if ((await fetch(svc + "/healthz")).ok) return; } catch (e) { /* still waking */ }
+      let instant = true;
+      for (const path of ["/status", "/openapi.json"]) {
+        const t0 = performance.now();
+        try { if ((await fetch(svc + path)).ok) return; } catch (e) { /* still waking, or blocked */ }
+        if (performance.now() - t0 >= 50) instant = false;
+      }
+      if (instant) return;
       await new Promise((r) => setTimeout(r, 5000));
     }
     throw new Error("demo service asleep");
@@ -508,7 +516,7 @@ async function demo() {
     const b = $("#reverify"); b.disabled = true;
     try {
       await wake();
-      note.textContent = "Re-running the gate: build, sanitizer run, output check…";
+      note.textContent = "Re-running the gate (30–60 s on the free server)…";
       const which = Math.random() < 0.5 ? "verified" : "rejected";
       const r = await fetch(svc + "/reverify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ candidate: which }) });
       const j = await r.json();
