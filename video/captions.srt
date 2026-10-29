@@ -1,47 +1,35 @@
 1
-00:00:03,300 --> 00:00:14,700
-jq: the model's patch passed jq's own tests, and the original crash input no longer crashes.
+00:00:03,300 --> 00:00:10,700
+Leakproof fixes memory bugs in C, C++ and CUDA, then tries to break every patch.
 
 2
-00:00:15,300 --> 00:00:29,700
-Leakproof doubled one number in that input: the patched jq overflows. Refused.
+00:00:11,300 --> 00:00:28,700
+78 patches made a real crash go away. A crash-is-gone check ships 21 bad ones; Leakproof 4.
 
 3
-00:00:30,300 --> 00:00:39,700
-A bug to fix live: a CSV splitter writes one byte past a buffer.
+00:00:29,300 --> 00:00:42,700
+Anyone can re-run the gate on a stored patch: no AI, $0, on our server (recorded response).
 
 4
-00:00:40,300 --> 00:00:55,700
-Nemotron 3 Ultra plans; four Nemotron 3.5 Lightning workers patch; the gate verifies with the network off.
+00:00:43,300 --> 00:00:58,700
+Nebius Token Factory: Nemotron Ultra plans, four Lightning workers patch, Super attacks.
 
 5
-00:00:56,300 --> 00:01:06,700
-The verified fix: one byte more for the terminator.
+00:00:59,300 --> 00:01:12,700
+A recorded run on a CSV splitter: the gate verifies the patch with the network off.
 
 6
-00:01:07,300 --> 00:01:20,700
-27 real OSS-Fuzz bugs: crash gone in 18, verified 15, correct 14.
+00:01:13,300 --> 00:01:27,700
+jq: a patch passed jq's own tests. Leakproof doubled one number in the input; it overflowed. Refused.
 
 7
-00:01:21,300 --> 00:01:30,700
-The gate accepts 24 of 27 of the developers' own fixes.
+00:01:28,300 --> 00:01:40,700
+New bugs, reported after the models' training: our 2-line gpac fix matches the fix gpac shipped on Oct 29.
 
 8
-00:01:31,300 --> 00:01:44,700
-Same Lightning workers, 10 real bugs: no planner 2, Super 4, Ultra 7 verified.
+00:01:41,300 --> 00:01:54,700
+Every run, every check, with its evidence.
 
 9
-00:01:45,300 --> 00:01:57,700
-Judges can re-run the gate without AI: a stored patch re-checked on our server, $0 (recorded).
-
-10
-00:01:58,300 --> 00:02:11,700
-On the GPU: two patches silenced compute-sanitizer and printed the wrong answer. Rejected.
-
-11
-00:02:12,300 --> 00:02:31,700
-Where it falls short: two mosquitto fixes passed every check yet were wrong. We report verified and correct.
-
-12
-00:02:32,300 --> 00:02:47,700
-New bugs (October 2026): a correct gpac fix verified; three quickjs silencers refused.
+00:01:55,300 --> 00:02:03,700
+Verified means safe on every input we tried, not proven correct. A person decides what is sent.
