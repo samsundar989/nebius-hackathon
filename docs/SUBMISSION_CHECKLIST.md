@@ -53,7 +53,7 @@ git add -A && git commit -m "Links: video" && git push
 | Built with | the "## Built with" line (comma-separated tags) |
 | "Try it out" links | repository URL, dashboard URL |
 | Video demo link | the YouTube URL from (f) |
-| Image gallery | thumbnail first (`docs/devpost/thumbnail.png`), then images 1–6 and `architecture.png`, in the order listed under "## Gallery images" |
+| Image gallery | thumbnail first (`docs/devpost/thumbnail.png`), then images 1–7 and `architecture.png`, in the order listed under "## Gallery images" |
 | Feedback question | the "## Feedback for Nebius and NVIDIA" section (full version: `docs/FEEDBACK.md`) |
 | Repository | github.com/samsundar989/nebius-hackathon |
 

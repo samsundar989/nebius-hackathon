@@ -122,10 +122,11 @@ nvidia-nemotron, nemotron-3-ultra, nemotron-3.5-lightning, nemotron-3-super, nem
 ## Gallery images (rendered by `docs/devpost/render_assets.py`, 3:2 at 2×)
 
 - Thumbnail: `docs/devpost/thumbnail.png` ("15/27 real bugs verified · 14 correct").
-1. `docs/devpost/1_first_screen.png` — the dashboard's first screen.
+1. `docs/devpost/1_first_screen.png` — the dashboard's first screen (1440 px).
 2. `docs/devpost/2_jq_refusal.png` — what a refusal looks like (jq).
-3. `docs/devpost/3_funnel.png` — from "the crash went away" to "verified and correct".
-4. `docs/devpost/4_planner.png` — which model does what: 2 → 4 → 7 of 10.
+3. `docs/devpost/3_head_to_head.png` — the 78 patches that silenced a real OSS-Fuzz crash, and the head-to-head: "crash is gone" ships 21 bad ones, Leakproof 4; with the project's tests (49), 10 vs 3.
+4. `docs/devpost/4_planner.png` — how it works: which model does what, and the planner bars (2 → 4 → 7 of 10).
 5. `docs/devpost/5_gate_matrix.png` — every check, every candidate (jq 42531297: one candidate verified, two refused because re-fuzzing the amplified PoC found a new crash).
 6. `docs/devpost/6_review_findings.png` — wrong fixes a human review found on open bugs, and which machine check now catches them (2 of 5: generated inputs and the adversary; D-0078, D-0079).
+7. `docs/devpost/7_phone_390.png` — the dashboard on a phone (390 px).
 - Architecture: `docs/devpost/architecture.png`.
