@@ -1,0 +1,52 @@
+{
+ "checked": "2026-10-29 CDT",
+ "note": "Still-open sanitizer issues opened in October 2026, after the models' training data. Hand review of every verified diff; nothing is sent without Samuel.",
+ "targets": [
+  {
+   "repo": "assimp/assimp", "stars": "13k", "issue": 6927, "url": "https://github.com/assimp/assimp/issues/6927",
+   "opened": "2026-10-13", "bug": "heap-buffer-overflow, glTF data URI (signed-char offset)",
+   "reproduces": "yes", "verdict": "verified", "runs": ["rw_assimp_6927", "rw_assimp_6927_r2"], "usd": 0.2115,
+   "review": "partial (defensive): guards the reported copy; ParseDataURI's signed-char offset and its other callers remain",
+   "package": "cases/real_world/assimp_assimp/6927/generated/SUBMISSION.md", "sent": "no (QUESTION 0022)"
+  },
+  {
+   "repo": "assimp/assimp", "stars": "13k", "issue": 6945, "url": "https://github.com/assimp/assimp/issues/6945",
+   "opened": "2026-10-14", "bug": "LeakSanitizer leak, STL ASCII importer on a parse error",
+   "reproduces": "yes", "verdict": "rejected:new_use-after-free", "runs": ["rw_assimp_6945", "rw_assimp_6945_r2"], "usd": 0.1324,
+   "review": "no fix: the one candidate that built freed the meshes and kept using them (the gate caught the new use-after-free); the rest broke the build",
+   "package": null, "sent": "no"
+  },
+  {
+   "repo": "quickjs-ng/quickjs", "stars": "4.0k", "issue": 1853, "url": "https://github.com/quickjs-ng/quickjs/issues/1853",
+   "opened": "2026-10-27", "bug": "heap-buffer-overflow, JS_ReadFunctionTag size overflow",
+   "reproduces": "yes", "verdict": "silenced_only", "runs": ["rw_quickjs_1853"], "usd": 0.4124,
+   "review": "no fix: both candidates that built clamped the free loop to the allocation size; the crash went quiet, quickjs's own tests then failed (gate refused)",
+   "package": null, "sent": "no"
+  },
+  {
+   "repo": "json-c/json-c", "stars": "3.3k", "issue": 995, "url": "https://github.com/json-c/json-c/issues/995",
+   "opened": "2026-10-28", "bug": "heap-use-after-free after json_pointer_set (PoC misuses the API)",
+   "reproduces": "yes", "verdict": "no_candidate", "runs": ["rw_jsonc_995"], "usd": 0.0745,
+   "review": "control: the PoC releases a value whose ownership json_pointer_set already took (json_pointer.h); nothing shipped, but because no edit applied, not because Leakproof recognised the misuse",
+   "package": null, "sent": "no"
+  },
+  {
+   "repo": "LibreDWG/libredwg", "stars": "1.6k", "issue": 1450, "url": "https://github.com/LibreDWG/libredwg/issues/1450",
+   "opened": "2026-10-14", "bug": "heap-buffer-overflow READ, add_LTYPE_dashes",
+   "reproduces": "no (fixed upstream 2026-10-28, 7b3144b3; issue still open)", "verdict": null, "runs": [], "usd": 0,
+   "review": "dropped", "package": null, "sent": "no"
+  },
+  {
+   "repo": "LibreDWG/libredwg", "stars": "1.6k", "issue": 1439, "url": "https://github.com/LibreDWG/libredwg/issues/1439",
+   "opened": "2026-10-12", "bug": "heap-buffer-overflow WRITE, _set_struct_field",
+   "reproduces": "no (fixed upstream 2026-10-27, bbaec638; issue still open)", "verdict": null, "runs": [], "usd": 0,
+   "review": "dropped", "package": null, "sent": "no"
+  },
+  {
+   "repo": "assimp/assimp", "stars": "13k", "issue": 6929, "url": "https://github.com/assimp/assimp/issues/6929",
+   "opened": "2026-10-13", "bug": "heap-buffer-overflow, MD2 importer",
+   "reproduces": "no (PR #6963 merged 2026-10-25; issue still open)", "verdict": null, "runs": [], "usd": 0,
+   "review": "dropped", "package": null, "sent": "no"
+  }
+ ]
+}
