@@ -1,0 +1,20 @@
+# json-c/json-c issue #995 (opened 2026-10-28): heap-use-after-free after json_pointer_set().
+# Upstream source in ../src (shallow clone of master, not committed). The issue's poc.c calls
+# json_object_put(val) after json_pointer_set() returned 0, i.e. after ownership of `val` passed
+# to the tree (json_pointer.h documents this). A control case: the expected outcome is no
+# verified library fix. The models never see the issue text.
+[project]
+name = "jsonc_995"
+src = "../src"
+build = '''( set -e
+cmake -S . -B build -DCMAKE_BUILD_TYPE= -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=ON > /tmp/cmake.log 2>&1 || { tail -30 /tmp/cmake.log; exit 1; }
+cmake --build build -j8 > /tmp/make.log 2>&1 || { grep -E 'error' /tmp/make.log | head -30; tail -20 /tmp/make.log; exit 1; }
+cp /tmp/poc /tmp/poc.c
+mkdir -p build/json-c && cp json*.h build/json-c/ 2>/dev/null; cp build/json*.h build/json-c/ 2>/dev/null || true
+$CC $CFLAGS -Ibuild -I. /tmp/poc.c build/libjson-c.a $LDFLAGS -o build/poc
+)'''
+# The PoC needs no input: the program itself is the reproducer.
+reproduce = '''./build/poc'''
+poc = "../995/poc.c"
+test = '''cd build && ctest > /tmp/ct.log 2>&1; rc=$?; sed -nE 's/^.*Test +#[0-9]+: ([^ ]+) .*(Passed|Failed).*$/\2: \1/p' /tmp/ct.log | sed 's/^Passed/PASS/; s/^Failed/FAIL/'; tail -5 /tmp/ct.log; exit $rc'''
+editable = ["*.c", "*.h"]
