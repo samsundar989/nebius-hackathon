@@ -1,0 +1,48 @@
+  0
+SECTION
+  2
+HEADER
+  9
+$ACADVER
+  1
+AC1024
+  0
+ENDSEC
+  0
+SECTION
+  2
+TABLES
+  0
+TABLE
+  2
+LTYPE
+  5
+5
+ 70
+1
+  0
+LTYPE
+  5
+3200
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+CPLX
+ 70
+0
+  3
+complex
+ 73
+1
+ 49
+0.5
+  9
+TXT
+  0
+ENDTAB
+  0
+ENDSEC
+  0
+EOF

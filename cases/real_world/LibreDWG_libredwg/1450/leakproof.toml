@@ -1,0 +1,19 @@
+# LibreDWG/libredwg issue #1450 (opened 2026-10-14): heap-buffer-overflow READ in
+# add_LTYPE_dashes -> bit_wcs2cpy importing an r2007+ DXF linetype with dash text. Upstream
+# source in ../src (shallow clone of master + the jsmn submodule, not committed). The models never
+# see the issue text.
+[project]
+name = "libredwg_1450"
+src = "../src"
+build = '''( set -e
+[ -f .tarball-version ] || echo 0.13.3.9999 > .tarball-version
+[ -f configure ] || sh autogen.sh > /tmp/autogen.log 2>&1 || { tail -30 /tmp/autogen.log; exit 1; }
+[ -f Makefile ] || ./configure --disable-bindings --disable-docs --disable-werror > /tmp/configure.log 2>&1 || { tail -30 /tmp/configure.log; exit 1; }
+make -j8 > /tmp/make.log 2>&1 || { grep -E 'error' /tmp/make.log | head -30; tail -20 /tmp/make.log; exit 1; }
+)'''
+reproduce = '''./programs/dwgwrite -y -I DXF -o /tmp/out.dwg /tmp/poc'''
+poc = "../1450/repro.dxf"
+# LibreDWG's own unit tests (AGENTS.md: prefer make check); the full make check is very slow
+# under ASan.
+test = '''make -C test/unit-testing check -j8'''
+editable = ["src/*.c", "src/*.h"]

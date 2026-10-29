@@ -1,0 +1,16 @@
+# LibreDWG/libredwg issue #1439 (opened 2026-10-12): heap-buffer-overflow WRITE in
+# _set_struct_field (in_json.c) importing an LWPOLYLINE "widths" object. Upstream source in ../src
+# (shared with #1450, not committed). The models never see the issue text.
+[project]
+name = "libredwg_1439"
+src = "../src"
+build = '''( set -e
+[ -f .tarball-version ] || echo 0.13.3.9999 > .tarball-version
+[ -f configure ] || sh autogen.sh > /tmp/autogen.log 2>&1 || { tail -30 /tmp/autogen.log; exit 1; }
+[ -f Makefile ] || ./configure --disable-bindings --disable-docs --disable-werror > /tmp/configure.log 2>&1 || { tail -30 /tmp/configure.log; exit 1; }
+make -j8 > /tmp/make.log 2>&1 || { grep -E 'error' /tmp/make.log | head -30; tail -20 /tmp/make.log; exit 1; }
+)'''
+reproduce = '''./programs/dwgwrite -y -I JSON -o /tmp/out.dwg /tmp/poc'''
+poc = "../1439/poc.json"
+test = '''make -C test/unit-testing check -j8'''
+editable = ["src/*.c", "src/*.h"]

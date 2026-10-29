@@ -1,0 +1,35 @@
+# quickjs-ng/quickjs issue #1853 (opened 2026-10-27): heap-buffer-overflow in
+# free_function_bytecode after JS_ReadFunctionTag's size computation overflows (cpool_count).
+# Upstream source in ../src (shallow clone of master, not committed). Reproducer program and
+# 65-byte input from the issue. The maintainers' SECURITY.md puts bytecode loading out of scope
+# for security reports; the reporter filed it as a plain bug. The models never see the issue text.
+[project]
+name = "quickjs_1853"
+src = "../src"
+build = '''( set -e
+cmake -S . -B build -DCMAKE_BUILD_TYPE= > /tmp/cmake.log 2>&1 || { tail -30 /tmp/cmake.log; exit 1; }
+cmake --build build -j8 > /tmp/make.log 2>&1 || { grep -E 'error' /tmp/make.log | head -30; tail -20 /tmp/make.log; exit 1; }
+cat > /tmp/rd.c <<'C'
+#include <stdio.h>
+#include "quickjs.h"
+int main(void) {
+    static unsigned char buf[1 << 20];
+    size_t n = fread(buf, 1, sizeof(buf), stdin);
+    if (!n) return 0;
+    JSRuntime *rt = JS_NewRuntime();
+    JSContext *ctx = JS_NewContext(rt);
+    JSValue v = JS_ReadObject(ctx, buf, n, JS_READ_OBJ_BYTECODE);
+    if (JS_IsException(v)) { JSValue e = JS_GetException(ctx); JS_FreeValue(ctx, e); }
+    JS_FreeValue(ctx, v);
+    JS_FreeContext(ctx); JS_FreeRuntime(rt);
+    return 0;
+}
+C
+$CC $CFLAGS -I. /tmp/rd.c build/libqjs.a -lm -lpthread $LDFLAGS -o build/rd
+)'''
+reproduce = '''./build/rd < /tmp/poc'''
+poc = "../1853/poc.bin"
+# The project's own test runner on tests/ (make test = run-test262 -c tests.conf).
+test = '''./build/run-test262 -c tests.conf'''
+artifact = "build/rd"
+editable = ["quickjs.c", "quickjs.h"]

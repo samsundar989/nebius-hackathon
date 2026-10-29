@@ -158,7 +158,8 @@ class ProjectCase(ArvoCase):
         found = primary(parse_report(res.stderr + res.stdout))
         if found is None or res.image is None:
             raise RuntimeError(
-                f"{self.id}: `reproduce` did not trip a sanitizer (exit {res.exit_code})"
+                f"{self.id}: `reproduce` did not trip a sanitizer (exit {res.exit_code}):\n"
+                f"{(res.stdout + res.stderr)[-1500:]}"
             )
         self.finding = found.to_dict(include_raw=False)
         self.prep["report_tail"] = (res.stderr + res.stdout)[-6000:]

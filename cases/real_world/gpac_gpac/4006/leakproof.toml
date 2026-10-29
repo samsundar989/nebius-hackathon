@@ -1,0 +1,17 @@
+# gpac/gpac issue #4006 (opened 2026-10-17): heap-buffer-overflow READ in gf_fopen_ex/DoWriteMeta
+# on an unterminated meta item full_path (src/isomedia/meta.c). Upstream source in ../src (shallow
+# clone of master, not committed). PoC and DRM config are the issue's attachment (poc.zip,
+# SHA256SUMS checked). The models never see the issue text.
+[project]
+name = "gpac_4006"
+src = "../src"
+build = '''( set -e
+[ -f config.mak ] || ./configure --cc=clang --extra-cflags="$CFLAGS" --extra-ldflags="$LDFLAGS" > /tmp/configure.log 2>&1 || { tail -30 /tmp/configure.log; exit 1; }
+make -j8 > /tmp/make.log 2>&1 || { grep -E 'error' /tmp/make.log | head -30; tail -20 /tmp/make.log; exit 1; }
+)'''
+# The issue's command; the CENC AES-CTR config is written next to the input (261 bytes).
+reproduce = '''printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' '<GPACDRM type="CENC AES-CTR">' ' <DRMInfo type="pssh" version="1">' '  <BS ID128="0x11223344556677889900112233445566"/>' ' </DRMInfo>' ' <CI>' '  <IPMP>' '   <K ID128="0x00112233445566778899aabbccddeeff"/>' '  </IPMP>' ' </CI>' '</GPACDRM>' > /tmp/drm_ctr.xml && cp /tmp/poc /tmp/poc.mp4 && ./bin/gcc/MP4Box -decrypt /tmp/drm_ctr.xml /tmp/poc.mp4 -out /tmp/out.mp4'''
+poc = "../4006/poc.mp4"
+# gpac's unit-test harness (unittests/README.md); the testsuite submodule is not cloned.
+test = '''make unit_tests'''
+editable = ["src/isomedia/*.c", "src/filters/mux_isom.c", "src/utils/os_file.c"]

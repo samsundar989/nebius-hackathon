@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GPACDRM type="CENC AES-CTR">
+ <DRMInfo type="pssh" version="1">
+  <BS ID128="0x11223344556677889900112233445566"/>
+ </DRMInfo>
+ <CI>
+  <IPMP>
+   <K ID128="0x00112233445566778899aabbccddeeff"/>
+  </IPMP>
+ </CI>
+</GPACDRM>
