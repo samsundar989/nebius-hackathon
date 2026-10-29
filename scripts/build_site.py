@@ -186,6 +186,7 @@ def main() -> int:
         ("leaderboard", RUNS_DIR / "leaderboard.json"),
         ("cuda", RUNS_DIR / "p5_cuda" / "verdicts.json"),
         ("leaderboard_arvo", RUNS_DIR / "leaderboard_arvo.json"),
+        ("real_world", REPO_ROOT / "cases" / "real_world" / "funnel.json"),
     ):
         if src.exists():
             (SITE / f"{name}.json").write_text(src.read_text())

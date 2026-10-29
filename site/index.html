@@ -159,6 +159,12 @@ details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
     <div class="panel" id="leaderboard"><p class="muted">Leaderboard runs pending.</p></div>
   </section>
 
+  <section id="real-world" hidden>
+    <h2>Real world: still-open bugs in popular projects (October 2026)</h2>
+    <p class="muted">Issues opened after the models' training data, with no fix anywhere yet. Every verified diff is reviewed by hand before anything is sent; nothing is sent without Samuel's decision.</p>
+    <div class="scroll panel"><table id="rw"><thead><tr><th>project</th><th>issue</th><th>opened</th><th>bug</th><th>reproduces</th><th>gate</th><th>hand review</th><th>package</th><th>sent</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
   <section id="limitations">
     <h2>Limitations</h2>
     <div class="panel"><ul>
@@ -329,6 +335,12 @@ async function showRun(run, btn) {
   }
   if (num && num.precision) stats.push([`${num.precision.correct}/${num.precision.judged}`, "verified diffs that are correct (gate precision, all ARVO runs)"]);
   if (cal) stats.push([`${cal.adjudicated.classes.accepted}/${cal.adjudicated.judged}`, "developers' own fixes the gate accepts"]);
+  const rw = await get("data/real_world.json");
+  if (rw && rw.targets && rw.targets.length) {
+    const gh = "https://github.com/samsundar989/nebius-hackathon/blob/main/";
+    $("#rw tbody").innerHTML = rw.targets.map((r) => `<tr><td>${esc(r.repo)}${r.stars ? ` <span class="muted">${esc(r.stars)}★</span>` : ""}</td><td><a href="${esc(r.url)}" rel="noopener">#${esc(r.issue)}</a></td><td>${esc(r.opened)}</td><td>${esc(r.bug)}</td><td>${esc(r.reproduces)}</td><td>${r.verdict ? chip(r.verdict) : "–"}</td><td>${esc(r.review || "–")}</td><td>${r.package ? `<a href="${gh}${esc(r.package)}" rel="noopener">package</a>` : "–"}</td><td>${esc(r.sent || "no")}</td></tr>`).join("");
+    $("#real-world").hidden = false;
+  }
   const silent = await get("data/silent.json");
   const hero = [];
   if (r1) hero.push([`${r1.verified}/${r1.cases}`, "real OSS-Fuzz bugs with a verified fix", "ok"]);
