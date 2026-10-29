@@ -109,9 +109,19 @@ def _recorded(reason: str) -> dict:
     return rec | {"recorded": True, "reason": reason}
 
 
+def _isolation() -> str:
+    from leakproof.runner.local_process import isolation
+
+    return isolation()
+
+
 @app.get("/healthz")
 def healthz() -> dict:
-    return {"ok": True, "live": os.environ.get("DEMO_ENABLED", "false").lower() == "true"}
+    return {
+        "ok": True,
+        "live": os.environ.get("DEMO_ENABLED", "false").lower() == "true",
+        "isolation": _isolation(),
+    }
 
 
 _busy = threading.Lock()
@@ -178,6 +188,9 @@ async def run(request: Request) -> dict:
         return _recorded("that case is not on the demo's allow-list")
     if not _passcode_ok(body):
         return _recorded("live runs need the passcode from the testing instructions")
+    if _isolation() != "nobody":
+        # Model-written code must not run as the user that holds the API key.
+        return _recorded("live runs need process isolation, which this host does not allow")
     ok, why = _money_left()
     if not ok:
         return _recorded(why)

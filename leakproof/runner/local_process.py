@@ -29,6 +29,40 @@ ROOT = Path(os.environ.get("LEAKPROOF_LOCAL_IMAGES", tempfile.gettempdir())) / "
 SAFE_PATH = "/usr/local/bin:/usr/bin:/bin"
 
 
+DROP = [
+    "setpriv",
+    "--reuid=nobody",
+    "--regid=nogroup",
+    "--clear-groups",
+    "--inh-caps=-all",
+    "--bounding-set=-all",
+    "--no-new-privs",
+    "--",
+]
+_isolation: str | None = None
+
+
+def isolation() -> str:
+    """ "nobody" when commands can run as `nobody`, else why not (probed once per process).
+
+    Some hosts run the container as root but without CAP_SETUID/SETGID, so setpriv fails; the
+    runner then runs commands as the server's own user with a cleared environment, and the demo
+    service refuses live (model-written) runs (fail closed)."""
+    global _isolation
+    if _isolation is None:
+        if os.name != "posix" or os.geteuid() != 0:
+            _isolation = "not root: commands run as the server's user"
+        else:
+            try:
+                r = subprocess.run([*DROP, "/bin/true"], capture_output=True, timeout=10)
+                _isolation = (
+                    "nobody" if r.returncode == 0 else r.stderr.decode(errors="replace")[-300:]
+                )
+            except (OSError, subprocess.TimeoutExpired) as exc:
+                _isolation = f"{type(exc).__name__}: {exc}"
+    return _isolation
+
+
 class LocalProcessRunner:
     name = "local"
 
@@ -74,21 +108,11 @@ class LocalProcessRunner:
         shell = cmd if isinstance(cmd, str) else subprocess.list2cmdline(cmd)
         child_env = {"PATH": SAFE_PATH, "HOME": str(work), "LANG": "C.UTF-8"} | dict(env or {})
         argv = ["/bin/bash", "-c", shell]
-        if os.name == "posix" and os.geteuid() == 0:
+        if isolation() == "nobody":
             shutil.chown(work, "nobody", "nogroup")
             for p in work.rglob("*"):
                 shutil.chown(p, "nobody", "nogroup")
-            argv = [
-                "setpriv",
-                "--reuid=nobody",
-                "--regid=nogroup",
-                "--clear-groups",
-                "--inh-caps=-all",
-                "--bounding-set=-all",
-                "--no-new-privs",
-                "--",
-                *argv,
-            ]
+            argv = [*DROP, *argv]
         t0 = time.monotonic()
         timed_out = False
         proc = subprocess.Popen(

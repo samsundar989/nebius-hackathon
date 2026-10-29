@@ -26,6 +26,7 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
         raise AssertionError("a live run started")
 
     mod._live = no_live
+    mod._isolation = lambda: "nobody"  # the caps are what these tests check
     mod.app.state.mod = mod  # tests swap module functions through the app
     return TestClient(mod.app)
 
@@ -87,3 +88,11 @@ def test_reverify_runs_the_gate_without_a_passcode(
     for _ in range(5):
         client.post("/reverify")
     assert "cap" in client.post("/reverify").json()["error"]
+
+
+def test_no_live_run_without_isolation(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DEMO_ENABLED", "true")
+    client.app.state.mod._isolation = lambda: "setpriv: setresuid failed: Operation not permitted"
+    j = client.post("/run").json()
+    assert j["recorded"] is True and "isolation" in j["reason"]
+    assert "isolation" in client.get("/healthz").json()
