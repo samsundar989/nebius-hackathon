@@ -85,7 +85,8 @@ def _site(finding: dict[str, Any]) -> tuple[str, str]:
     for fr in finding.get("frames") or []:
         f = fr.get("file") or ""
         if f.startswith("/src/") and not f.startswith("/src/llvm-project/"):
-            func = fr.get("function") or ""
+            # C++ frames carry the full signature: keep `Class::name` for a readable subject.
+            func = (fr.get("function") or "").split("(")[0]
             break
     loc = re.sub(r"^/src/[^/]+/", "", finding.get("location") or "")
     return func, loc

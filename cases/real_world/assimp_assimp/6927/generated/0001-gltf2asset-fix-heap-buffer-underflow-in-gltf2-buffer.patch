@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: <your git identity>
+Date: Thu, 29 Oct 2026 06:19:04 +0000
+Subject: [PATCH] glTF2Asset: fix heap-buffer-underflow in glTF2::Buffer::Read()
+
+AddressSanitizer reports a heap-buffer-underflow in
+glTF2::Buffer::Read() (code/AssetLib/glTF2/glTF2Asset.inl:606).
+
+The change, in code/AssetLib/glTF2/glTF2Asset.inl:
+
+    +            }
+    +
+    +            // Bounds check: ensure dataURI.data points within the original URI string
+    +            if (dataURI.data == nullptr || dataURI.data < uri || dataURI.data + dataURI.dataLength > uri + it->GetStringLength()) {
+    +                throw DeadlyImportError("GLTF: buffer \"", id, "\" has invalid data URI");
+
+Part of #6927.
+---
+ code/AssetLib/glTF2/glTF2Asset.inl | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/code/AssetLib/glTF2/glTF2Asset.inl b/code/AssetLib/glTF2/glTF2Asset.inl
+--- a/code/AssetLib/glTF2/glTF2Asset.inl
++++ b/code/AssetLib/glTF2/glTF2Asset.inl
+@@ -600,6 +600,11 @@
+             if (statedLength != dataURI.dataLength) {
+                 throw DeadlyImportError("GLTF: buffer \"", id, "\", expected ", ai_to_string(statedLength),
+                         " bytes, but found ", ai_to_string(dataURI.dataLength));
++            }
++
++            // Bounds check: ensure dataURI.data points within the original URI string
++            if (dataURI.data == nullptr || dataURI.data < uri || dataURI.data + dataURI.dataLength > uri + it->GetStringLength()) {
++                throw DeadlyImportError("GLTF: buffer \"", id, "\" has invalid data URI");
+             }
+ 
+             this->mData.reset(new uint8_t[dataURI.dataLength], std::default_delete<uint8_t[]>());
+--
+leakproof package
