@@ -321,7 +321,8 @@ class JulietGate:
         sec, _ = self._run(None, good=False)
         self.unpatched_stdout = sec.get("out_ref", "")
         if sec.get("rc_build", "").strip() != "0":
-            return Check("fail", "unpatched build failed")
+            log = (sec.get("out_b.log", "") + sec.get("rc_build", "")).strip()[-400:]
+            return Check("fail", f"unpatched build failed: {log}")
         p = primary(parse_report(sec.get("err_run", "")))
         if p is None or p.kind != self.case.data["expected_kind"]:
             return Check("fail", f"unpatched run: {p.kind if p else 'no report'}")
