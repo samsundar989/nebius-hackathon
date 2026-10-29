@@ -1,33 +1,30 @@
-# Video draft v5: shot list
+# Video draft v6: shot list
 
-`video/leakproof_draft.mp4` — 2:54, 1920×1080, silent, captions burned in (40 px in a band along the bottom 150 px that nothing else uses; also `captions.srt`). It follows `docs/VIDEO_SCRIPT.md` v3. Record your voice over it, or upload it with `captions.srt` if time is short. Rebuild with:
+`video/leakproof_draft.mp4` — 2:10, 1920×1080, silent, captions burned in (40 px in a band along the bottom 150 px that nothing else uses; also `captions.srt`). It follows `docs/VIDEO_SCRIPT.md` v4 and is recorded from the new dashboard (review #22). Record your voice over it, or upload it with `captions.srt` if time is short. Rebuild with:
 
 ```
 uv run python video/build_transcripts.py      # terminal transcripts from recorded runs
 .venv-win/Scripts/python.exe video/record.py   # Playwright recordings + ffmpeg assembly
 ```
 
-Readable at 1080p and on a phone: terminal scenes use a 28 px font, at most 19 lines, top-anchored above the caption band, with the result line boxed; lines appear at a steady pace so no terminal scene sits still for more than ~4 s. The fix is two scenes: plan → workers → verdict (Ultra's plan wrapped to 3 lines stays on screen through the verdict), then the winning diff with removed/added lines highlighted. Dashboard cards are isolated and zoomed to fill the frame above the caption band (funnel, planner and CUDA at 70–85 % of the frame height). Calibration is a summary card, not the per-case table.
+Dashboard sections are isolated and zoomed to fill the frame above the caption band; a section taller than the frame pans slowly.
 
 | # | time | scene | on screen | source |
 |---|---|---|---|---|
-| 0 | 0:00–0:03 | title card | "Leakproof — Verified fixes, or nothing." · Nemotron on Nebius Token Factory · gate on Nebius Sandboxes | `video/card.html` |
-| 1 | 0:03–0:15 | jq bundle | terminal: the refused jq patch's evidence bundle | `docs/bundles/42530604.md` |
-| 2 | 0:15–0:30 | refusal card | the refused diff and the verified one-line fix | dashboard |
-| 3 | 0:30–0:40 | csvsplit crash | terminal: the AddressSanitizer report | replay of `runs/demo_fix` |
-| 4 | 0:40–0:56 | `leakproof fix` | terminal: Ultra's plan, 4 workers, verdict, evidence label | replay of `runs/demo_fix` |
-| 5 | 0:56–1:07 | winning diff | terminal: `malloc(inner)` → `malloc(inner + 1)`, highlighted | replay of `runs/demo_fix` |
-| 6 | 1:07–1:21 | funnel | crash gone 18 → verified 15 → correct 14 of 27 | dashboard |
-| 7 | 1:21–1:31 | calibration | 24/27 developers' fixes accepted; 1 correct reject (mosquitto leak), 2 false rejects (libzip, quickjs) | `video/card.html?type=calibration` |
-| 8 | 1:31–1:45 | planner card | no planner 2 → Super 4 → Ultra 7 of 10 | dashboard |
-| 9 | 1:45–1:58 | Re-verify without AI | the dashboard's demo row: a stored patch that deleted a `free`, re-gated on the Render demo service, `rejected:new_leak` now and then, 0 model calls (a real response, replayed; captioned "recorded") | dashboard + `video/reverify_render.json` |
-| 10 | 1:58–2:12 | CUDA panel | two `silenced_only` candidates | dashboard |
-| 11 | 2:12–2:32 | mosquitto | "Other verified candidates (2): both wrong", expanded | dashboard |
-| 12 | 2:32–2:48 | Real world | October 2026 issues: gpac #4006 verified and correct, assimp #6927 verified and partial, quickjs-ng silencers refused, assimp #6945 no fix, json-c control (already-fixed issues hidden) | dashboard Real-world section |
-| 13 | 2:48–2:54 | end card | 15/27 · 14/27 · 24/27 · 2 → 7 (104 px numbers, 34 px labels); repo and dashboard links | `video/card.html` |
+| 0 | 0:00–0:03 | title card | "Leakproof — Verified fixes, or nothing." | `video/card.html` |
+| 1 | 0:03–0:11 | hero | "1 in 4 AI patches that make a crash go away isn't a fix." and the one-line summary | dashboard hero |
+| 2 | 0:11–0:29 | waffle + head-to-head | 78 patches (53 correct, 4 defensive, 4 wrong but shipped, 17 refused); "crash is gone" 21 vs Leakproof 4; tests ran (49): 10 vs 3 | dashboard, computed from the run records |
+| 3 | 0:29–0:43 | re-check a stored patch | the buttons and the re-check result: a patch that deleted a `free`, `rejected:new_leak` now and then, 0 model calls (a real Render response, replayed; captioned "recorded") | dashboard + `video/reverify_render.json` |
+| 4 | 0:43–0:59 | how it works | five steps with the model roles, planner bars 2 → 4 → 7 of 10 | dashboard |
+| 5 | 0:59–1:13 | `leakproof fix` | terminal: Ultra's plan, 4 workers, verdict (a replay of a recorded run) | replay of `runs/demo_fix` |
+| 6 | 1:13–1:28 | refusal | the refused jq diff and the verified one-line fix | dashboard |
+| 7 | 1:28–1:41 | new bugs | October 2026 issues, gpac #4006 first (fixed upstream Oct 29 the same way; shortlisted issues already fixed before we started are hidden) | dashboard |
+| 8 | 1:41–1:55 | explorer | jq 42531297: every candidate, every check | dashboard |
+| 9 | 1:55–2:04 | limits | the five limits | dashboard |
+| 10 | 2:04–2:10 | end card | headline numbers; repo and dashboard links | `video/card.html` |
 
 Notes:
-- The terminal scenes are replays of recorded runs, rebuilt from their run records (each starts with a `# replay of a recorded run` line); no new model calls. Narrate them as "a recorded run", or re-record steps 2–4 of `scripts/demo_run.sh` live if you prefer.
-- Captions condense the narration; the full spoken text is the "say" column of `docs/VIDEO_SCRIPT.md` (scene times above supersede the script's).
-- Say aloud: "Nemotron 3 Ultra and 3.5 Lightning on Nebius Token Factory" (scene 4) and "the gate runs on Nebius Sandboxes with networking off" (scene 11; see the script's accuracy notes for the exact phrasing).
-- The end card says "(link when deployed)" for the dashboard until Render or Pages is live; rebuild then.
+- The terminal scene is a replay of a recorded run, rebuilt from its run record (it starts with a `# replay of a recorded run` line); no new model calls. Say "a recorded run".
+- Captions condense the narration; the full spoken text is the "say" column of `docs/VIDEO_SCRIPT.md`.
+- Say aloud the bold sentences (Nebius Token Factory, the four Nemotron models, Nebius Sandboxes).
+- "Reviewed" means reviewed by Claude outside the pipeline (D-0081); "a person decides what is sent" means Samuel.

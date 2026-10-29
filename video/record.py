@@ -6,7 +6,7 @@ video/record.py  -> video/clips/<scene>.webm (Playwright, 1920x1080), video/capt
 
 Readable at 1080p and on a phone: terminal scenes use a 28 px font with at most 19 lines above a 150 px caption band; each
 dashboard scene isolates one card, zooms it (CSS zoom) to fill the frame and pans slowly when it
-is taller than the frame. Scenes follow docs/VIDEO_SCRIPT.md v2; terminal
+is taller than the frame. Scenes follow docs/VIDEO_SCRIPT.md v4 (video v6); terminal
 scenes replay recorded runs (video/transcripts/, from video/build_transcripts.py). Needs
 Playwright with Chromium and imageio-ffmpeg in the Windows venv; no model calls, no Docker.
 """
@@ -29,107 +29,88 @@ VIDEO = ROOT / "video"
 CLIPS = VIDEO / "clips"
 W, H = 1920, 1080
 
-# (scene, kind, target, seconds, caption) in script order. kind: card | term | dash.
+# (scene, kind, target, seconds, caption) in script order (v6, review #22: recorded from the new
+# dashboard). kind: card | term | dash | demo.
 SCENES = [
     ("00_title", "card", "title", 3, ""),
     (
-        "01_jq_bundle",
-        "term",
-        "01_jq_bundle&d=700",
-        12,
-        "jq: the model's patch passed jq's own tests, and the original crash input no longer crashes.",
-    ),
-    (
-        "02_refusal_card",
+        "01_hero",
         "dash",
-        "#refusal",
-        15,
-        "Leakproof doubled one number in that input: the patched jq overflows. Refused.",
+        "hero",
+        8,
+        "Leakproof fixes memory bugs in C, C++ and CUDA, then tries to break every patch.",
     ),
     (
-        "03_crash",
-        "term",
-        "03_crash&d=900",
-        10,
-        "A bug to fix live: a CSV splitter writes one byte past a buffer.",
+        "02_head_to_head",
+        "dash",
+        ".verdicts",
+        18,
+        "78 patches made a real crash go away. A crash-is-gone check ships 21 bad ones; Leakproof 4.",
     ),
     (
-        "04_fix",
+        "03_recheck",
+        "demo",
+        "recheck",
+        14,
+        "Anyone can re-run the gate on a stored patch: no AI, $0, on our server (recorded response).",
+    ),
+    (
+        "04_how",
+        "dash",
+        "#how",
+        16,
+        "Nebius Token Factory: Nemotron Ultra plans, four Lightning workers patch, Super attacks.",
+    ),
+    (
+        "05_fix",
         "term",
         "04_fix&d=800",
-        16,
-        "Nemotron 3 Ultra plans; four Nemotron 3.5 Lightning workers patch; the gate verifies with the network off.",
-    ),
-    (
-        "05_fix_diff",
-        "term",
-        "05_fix_diff&d=700",
-        11,
-        "The verified fix: one byte more for the terminator.",
-    ),
-    (
-        "05_funnel",
-        "dash",
-        "funnel",
         14,
-        "27 real OSS-Fuzz bugs: crash gone in 18, verified 15, correct 14.",
+        "A recorded run on a CSV splitter: the gate verifies the patch with the network off.",
     ),
     (
-        "06_calibration",
-        "card",
-        "calibration",
-        10,
-        "The gate accepts 24 of 27 of the developers' own fixes.",
-    ),
-    (
-        "07_planner",
+        "06_refusal",
         "dash",
-        "#planner",
-        14,
-        "Same Lightning workers, 10 real bugs: no planner 2, Super 4, Ultra 7 verified.",
+        "#refusal-sec",
+        15,
+        "jq: a patch passed jq's own tests. Leakproof doubled one number in the input; it overflowed. Refused.",
     ),
     (
-        "08_reverify",
-        "demo",
-        "#demo-row",
+        "07_still_open",
+        "dash",
+        "#real",
         13,
-        "Judges can re-run the gate without AI: a stored patch re-checked on our server, $0 (recorded).",
+        "New bugs, reported after the models' training: our 2-line gpac fix matches the fix gpac shipped on Oct 29.",
     ),
     (
-        "09_cuda",
+        "08_explorer",
         "dash",
-        "#cuda",
+        "explorer",
         14,
-        "On the GPU: two patches silenced compute-sanitizer and printed the wrong answer. Rejected.",
+        "Every run, every check, with its evidence.",
     ),
     (
-        "10_mosquitto",
+        "09_limits",
         "dash",
-        "mosquitto",
-        20,
-        "Where it falls short: two mosquitto fixes passed every check yet were wrong. We report verified and correct.",
+        "#limitations",
+        9,
+        "Verified means safe on every input we tried, not proven correct. A person decides what is sent.",
     ),
-    (
-        "11_real_world",
-        "dash",
-        "#real-world",
-        16,
-        "New bugs (October 2026): a correct gpac fix verified; three quickjs silencers refused.",
-    ),
-    ("12_end", "card", "end", 6, ""),
+    ("10_end", "card", "end", 6, ""),
 ]
 
-# Stage width per dashboard card: narrower stages zoom further, so short cards fill the frame.
+# Stage width per dashboard target: narrower stages zoom further, so short cards fill the frame.
 STAGE = {
-    "#refusal": 820,
-    "funnel": 600,
-    "#planner": 660,
-    "#cuda": 560,
-    "mosquitto": 880,
-    "#demo-row": 900,
-    "#real-world": 1100,
+    "hero": 900,
+    ".verdicts": 1000,
+    "recheck": 900,
+    "#how": 1000,
+    "#refusal-sec": 900,
+    "#real": 1100,
+    "explorer": 1000,
+    "#limitations": 900,
 }
-# The Re-verify scene replays a real response captured from the Render demo service
+# The re-check scene replays a real response captured from the Render demo service
 # (video/reverify_render.json), so the recording does not wait on a sleeping free instance.
 REVERIFY = VIDEO / "reverify_render.json"
 
@@ -187,38 +168,41 @@ def play(page, base: str, kind: str, target: str, seconds: int) -> None:  # noqa
             lambda r: r.fulfill(body=REVERIFY.read_text(), content_type="application/json"),
         )
         page.goto(f"{base}/site/index.html")
-        page.wait_for_selector("#reverify")
-        page.select_option("#rv-which", "rejected")
-        # A cloned <select> shows its first option unless the choice is an attribute.
-        page.evaluate(
-            "document.querySelector('#rv-which option[value=rejected]').setAttribute('selected', '')"
-        )
+        page.wait_for_selector("#waffle .tile")
         page.click("#reverify")
-        page.wait_for_selector("#rv-out .panel")
-        page.evaluate(ISOLATE, [target, seconds, STAGE[target]])
+        page.wait_for_selector("#demo-out .case")
+        # The buttons, the note and the result, without the waffle below them.
+        page.evaluate(
+            "() => { const h = document.querySelector('.hero'); h.id = 'recheck';"
+            " h.querySelectorAll('.verdicts, #proof, h1, .sub').forEach(e => e.remove()); }"
+        )
+        page.evaluate(ISOLATE, ["#recheck", seconds, STAGE[target]])
     else:
         page.goto(f"{base}/site/index.html")
-        page.wait_for_selector("#headline .stat")
-        if target == "#real-world":
+        page.wait_for_selector("#waffle .tile")
+        page.wait_for_selector("#cases button")
+        sel = target
+        if target == "hero":
+            page.evaluate(
+                "() => { const h = document.querySelector('.hero').cloneNode(true); h.id = 'hero-only';"
+                " h.querySelectorAll('.verdicts, #proof, .actions, #demo-note, #demo-out')"
+                ".forEach(e => e.remove()); document.querySelector('main').append(h); }"
+            )
+            sel = "#hero-only"
+        elif target == "#real":
             page.wait_for_selector("#rw tbody tr")
             # The scene shows the attempted issues; the already-fixed ones are in REAL_WORLD.md.
             page.evaluate(
                 "document.querySelectorAll('#rw tbody tr').forEach("
-                "r => r.textContent.includes('dropped') && r.remove())"
+                "r => /already fixed|dropped/i.test(r.textContent) && r.remove())"
             )
-        page.wait_for_selector("#cases button")
-        sel = target
-        if target == "funnel":
-            sel = "#funnel"
-            page.evaluate("document.querySelector('#funnel').closest('.panel').id = 'funnel-panel'")
-            sel = "#funnel-panel"
-        elif target == "mosquitto":
+        elif target == "explorer":
             page.evaluate(
                 "[...document.querySelectorAll('#cases button')]"
-                ".find(b => b.textContent.includes('42520955')).click()"
+                ".find(b => b.textContent.includes('42531297')).click()"
             )
-            page.wait_for_selector("#case details")
-            sel = "#case details"
+            page.wait_for_timeout(400)
+            sel = "#runs"
         page.wait_for_timeout(300)
         page.evaluate(ISOLATE, [sel, seconds, STAGE[target]])
     page.wait_for_timeout(seconds * 1000)
