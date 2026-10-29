@@ -60,7 +60,7 @@
     card.innerHTML = `<div class="ob"><h2>Open bugs: still-open GitHub issues, fixed and gated</h2>
       <p class="flow">${flow.replace(/(\d+ ready to propose)/, "<b>$1</b>").split(". Model spend")[0]}</p>
       <p class="flow" style="font-size:34px">toybox #572: a one-line fix that passes all 13 of toybox's own <code>patch</code> tests.</p>
-      <table><tr><th>case</th><th>candidate</th><th>human review said</th><th>caught by</th></tr>
+      <table><tr><th>case</th><th>candidate</th><th>review said</th><th>caught by</th></tr>
       ${table.slice(1).map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="${cls(r[4])}">${cell(r[4]).split(":")[0]}</td></tr>`).join("")}</table></div>`;
     return;
   }

@@ -114,7 +114,7 @@ def build_messages(
         if budget <= 0:
             break
     if notes:
-        # A person's review of earlier runs (`fix --notes`): prose about diffs, never gate inputs.
+        # A reviewer's notes on earlier runs (`fix --notes`): prose about diffs, never gate inputs.
         user += f"\n\n## Reviewer notes on earlier runs\n{notes}"
     if history:
         user += f"\n\n## Earlier attempts and why they were not verified\n{history}"

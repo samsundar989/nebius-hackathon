@@ -305,7 +305,7 @@ def main(argv: list[str] | None = None) -> int:
         help="model that attacks each verified candidate with inputs (D-0079)",
     )
     fx.add_argument(
-        "--notes", help="file with your review of earlier runs, shown to the planner only"
+        "--notes", help="file with a reviewer's notes on earlier runs, shown to the planner only"
     )
     fx.add_argument("--run-id")
     fx.add_argument("--json", action="store_true", help="also print the full record")

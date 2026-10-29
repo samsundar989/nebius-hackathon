@@ -1,5 +1,5 @@
 {
- "_note": "Hand-reviewed outcomes of the open-bugs rounds (cases/open_bugs/REVIEW.md); scripts/readme_numbers.py publishes them to docs/NUMBERS.md and site/data/numbers.json.",
+ "_note": "Outcomes reviewed outside the pipeline by Claude of the open-bugs rounds (cases/open_bugs/REVIEW.md); scripts/readme_numbers.py publishes them to docs/NUMBERS.md and site/data/numbers.json.",
  "rounds": [
   {"round": 1, "date": "2026-10-25", "triaged": 14, "reproduce_no_pr": 4, "verified": 3, "ready": 1, "ready_partial": 0, "usd": 0.70},
   {"round": 2, "date": "2026-10-25", "triaged": 16, "reproduce_no_pr": 3, "verified": 2, "ready": 0, "ready_partial": 0, "usd": 0.22},

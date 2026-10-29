@@ -1,4 +1,4 @@
-Review of two earlier Leakproof runs on this leak (written by a person from the run records; no gate inputs, tests or test results are quoted here). No candidate was verified.
+Review of two earlier Leakproof runs on this leak (written by Claude Code from the run records; no gate inputs, tests or test results are quoted here). No candidate was verified.
 
 - Where the leak is: `STLImporter::LoadASCIIFile` allocates one `aiMesh` and one `aiNode` per `solid` block and keeps them only in the local vectors `meshes` and `nodes`. Ownership moves to `mScene->mMeshes` and `root->mChildren` only at the end of the function. Every `DeadlyImportError` thrown between the allocation and that hand-over (node name too long, unexpected EOF while parsing a facet, invalid number of vertices, normal/position buffer size mismatch) leaves the function with every mesh and node created so far unreachable.
 - The normal path does not leak: at the end of the function the meshes and nodes are attached to the scene. Run 2's plan said they were never attached; that was wrong.

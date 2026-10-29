@@ -1,6 +1,6 @@
 {
  "checked": "2026-10-29 CDT",
- "note": "Still-open sanitizer issues opened in October 2026, after the models' training data. Hand review of every verified diff; nothing is sent without Samuel.",
+ "note": "Still-open sanitizer issues opened in October 2026, after the models' training data. Every verified diff reviewed outside the pipeline by Claude; nothing is sent without Samuel.",
  "targets": [
   {
    "repo": "assimp/assimp",

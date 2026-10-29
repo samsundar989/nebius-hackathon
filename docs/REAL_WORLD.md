@@ -17,7 +17,7 @@ Machine-readable: [cases/real_world/funnel.json](../cases/real_world/funnel.json
 | already fixed upstream when re-checked (issue left open) | 3: assimp #6929, LibreDWG #1450, #1439 |
 | reproduced at upstream HEAD and attempted | 5 |
 | verified by the gate | 2: gpac #4006, assimp #6927 |
-| after hand review | **1 correct fix** (gpac #4006, minimal; needs gpac's regression test) and **1 partial fix** (assimp #6927), both packaged; nothing sent |
+| after review (Claude, outside the pipeline) | **1 correct fix** (gpac #4006, minimal; needs gpac's regression test) and **1 partial fix** (assimp #6927), both packaged; nothing sent |
 
 Model spend for the campaign: $1.08 (ledger: every `rw_*` run and its gate adversary calls), including runs that exposed tooling bugs.
 
@@ -27,7 +27,7 @@ Model spend for the campaign: $1.08 (ledger: every `rw_*` run and its gate adver
 `gf_isom_add_meta_item_extended` copies an in-memory item into `full_path` with exactly `data_len`
 bytes and no terminator; when `data_len` is 0, the writer treats `full_path` as a file name and
 `gf_fopen` reads past the 1-byte allocation. 3 of 4 candidates verified, all the same fix:
-allocate `data_len + 1` and NUL-terminate. Hand review: **correct and minimal** for the reported
+allocate `data_len + 1` and NUL-terminate. Review (Claude, outside the pipeline): **correct and minimal** for the reported
 defect. A zero-length in-memory item now reaches `gf_fopen("")`, fails and is skipped at write time
 instead of over-reading. Evidence is weak by our own definition: gpac's unit tests did not run in
 our build and the 148 KB PoC yields only 3 generated inputs. gpac's patching rules also ask for a
@@ -42,7 +42,7 @@ without a model call (`runs/rw_gpac_4006_clean`).
 `glTFCommon::Util::ParseDataURI` stores the data offset in a signed `char`; a URI longer than 127
 bytes wraps it and `glTF2::Buffer::Read` copies from before the buffer. 3 of 4 candidates verified
 (assimp's 720 gtest tests ran, 233 inputs generated from the PoC re-run unpatched and patched).
-The winner bounds-checks the copy the PoC reaches. Hand review: correct but **partial**: the
+The winner bounds-checks the copy the PoC reaches. Review (Claude, outside the pipeline): correct but **partial**: the
 signed-char offset and its other callers (base64 branch, image URIs, the glTF 1 importer) remain.
 Packaged as "Part of #6927" with that said plainly ([package](../cases/real_world/assimp_assimp/6927/generated/SUBMISSION.md),
 applies to upstream `a2a586d`); QUESTION 0022, default not sent. One more detail the gate showed:
@@ -86,7 +86,7 @@ that instead.
   (3 on gpac, one correct fix; 4 the same narrow check on assimp #6927, partial on review), 3 refused because they changed
   the program's output on generated inputs (the assimp variants above), 3 refused as quickjs silencers (two broke its tests; one passed them
   and was caught by re-fuzzing), 1 refused for introducing a use-after-free. It verified nothing that is
-  wrong; hand review still had the last word ("partial").
+  wrong; the review outside the pipeline still had the last word ("partial").
 - The workers are the weak link on large C++ files: most attempts failed to apply or to build.
 - Real-world setup cost more effort than the model calls: Windows line endings and executable
   bits, CRLF sources, autotools needing `.git`, a 2.1 MB source file, a shared-library ASan link. Each became a

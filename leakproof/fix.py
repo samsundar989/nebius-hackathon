@@ -118,7 +118,7 @@ def fix_case(
     gate-side script (calibration, ARVO batch); called after the workers, before the gate.
     select_model: rank several verified candidates by pairwise review (D-0070); None keeps
     the smallest verified diff.
-    planner_notes: a person's review of earlier runs, shown to the planner only.
+    planner_notes: a reviewer's notes on earlier runs, shown to the planner only.
     """
     reference: str | None = None
     t0 = time.monotonic()

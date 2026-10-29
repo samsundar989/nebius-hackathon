@@ -1,4 +1,4 @@
-Review of the patch an earlier Leakproof run produced for this bug (written by a person; no gate inputs, tests or test results are quoted here). It was verified, and the hand review rated it correct but partial.
+Review of the patch an earlier Leakproof run produced for this bug (written by Claude Code from the earlier review; no gate inputs, tests or test results are quoted here). It was verified, and the review (Claude, outside the pipeline) rated it correct but partial.
 
 - The earlier patch added a bounds check in `glTF2::Buffer::Read` after `ParseDataURI` returns. It stops this one copy, but the defect is upstream of it.
 - Root cause: `glTFCommon::Util::ParseDataURI` caches the offsets of the media type, the charset, the `base64` marker and the data start in `uri[1]`..`uri[4]`, which are plain `char` (signed on x86). An offset above 127 becomes negative and one above 255 wraps, so `uri + uri[4]` (and the media type / charset pointers) can point before the string, and `dataLength = (uri + uriLen) - out.data` is then too large.

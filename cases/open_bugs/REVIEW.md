@@ -3,7 +3,7 @@
 Runs `runs/open_bugs_fix` (first attempt) and `runs/open_bugs_fix2` (retry with one repair round);
 Ultra's advisory review in `runs/open_bugs/review.json`. Model spend for the whole exercise: $0.70
 (fix $0.24 + $0.36, review $0.10). No developer fix exists, so each diff is judged against the
-defect and the surrounding code, by Ultra and then by hand. The hand review decides.
+defect and the surrounding code, by Ultra and then by a second reviewer outside the pipeline (Claude Code or the strategist, also Claude; not Samuel). That review decides.
 
 Evidence for all of them is **weak** (D-0074): toybox has no runnable tests in our setup and no
 fuzz harness, and berry's suite already fails 1 of 58 tests at HEAD with output the gate cannot
@@ -15,7 +15,7 @@ The defect: an escape sequence can consume the last character, so `s++` lands on
 terminator, the head-of-loop check `if (!s[1])` then reads past the end, and the loop keeps
 writing. The minimal fix is to stop at the terminator (`if (!*s || !s[1]) error_exit(...)`).
 
-| candidate | Ultra | hand review |
+| candidate | Ultra | review (Claude) |
 |---|---|---|
 | H2·w1 | correct | **correct.** Pre-scans to the closing quote with the same escape rules and calls `error_exit("bad %s")` on the terminator; allocates exactly what is written. Verbose: the minimal one-line fix above is equivalent. **Ready to propose** (with the one-line alternative mentioned). |
 | H3·w2 (the selected winner) | wrong | **wrong.** Grows the buffer with `realloc`, but still walks past the terminator; Ultra also notes no room is kept for the final `*t = 0`. |
@@ -26,7 +26,7 @@ first such case. Recorded in D-0076.
 
 ## toybox #571 (`getopt -l`, heap overflow in `parse_long_opt`): not ready
 
-| candidate | Ultra | hand review |
+| candidate | Ultra | review (Claude) |
 |---|---|---|
 | H2·w1 (the only verified one) | correct | **wrong.** `TT.l` is a `struct arg_list *` (`l*` in the option string: `-l` may repeat), but the patch iterates it as `const char *` and counts commas in the bytes of the list struct, so the allocation size is unrelated to the options given; a longer `-l a,b,c,d` overflows again. A correct fix counts commas over every `arg_list` entry (and keeps the zero entry `getopt_long` needs). Ultra did not have the `GLOBALS` definition in its context. |
 
@@ -35,7 +35,7 @@ first such case. Recorded in D-0076.
 Upstream already truncates an over-long specifier in `get_mode` (keeping the conversion
 character); `mode_fixlen` then appends the integer length modifier `BE_INT_FMTLEN` past the end.
 
-| candidate | Ultra | hand review |
+| candidate | Ultra | review (Claude) |
 |---|---|---|
 | H1·w0 (the selected winner) | correct | **defensive.** Safe, but when the specifier is over-long it truncates the **length modifier** (`ll` → `l` or nothing) instead of the flags/width, so the format no longer matches the 64-bit argument on targets where `long` is 32 bits. The fix belongs in `get_mode`: reserve room for `BE_INT_FMTLEN`. |
 | H3·w2 | correct | **defensive**, same reason (strncpy of a truncated `lenmode`). |
@@ -53,7 +53,7 @@ the iterator's lifetime across garbage collection needs a design change the work
 
 # Round 2 (review #7 order 5)
 
-Runs `runs/open_bugs_r2` (one repair round each, $0.22). Hand review only (the Ultra review of
+Runs `runs/open_bugs_r2` (one repair round each, $0.22). Review by Claude only (the Ultra review of
 round 1 added little over it).
 
 ## cNBT #28, bug 1 (leak in `parse_unnamed_tag`): not ready — defensive
@@ -141,7 +141,7 @@ and proposed up to 8 inputs; only a sanitizer report confirmed by the machine re
 (`runs/adversary/open/`, job 3862). The final version costs about $0.004 (Super) or $0.019 (Ultra)
 per candidate; developing it, with three prompt versions and repair calls, cost $2.44 in total (D-0079).
 
-| case | candidate | human review said | verdict now | caught by |
+| case | candidate | review (Claude) said | verdict now | caught by |
 |---|---|---|---|---|
 | toybox #571 | H2w1 | wrong: the overflow recurs on other `-l` strings | rejected:refuzz_same_bug (target crash on 7 of 169 generated inputs) | **generated inputs** |
 | toybox #572 | M1 (one line) | correct | verified | — (no false reject, by either) |

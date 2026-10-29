@@ -188,7 +188,7 @@ def main() -> int:
             "",
             f"Every distinct verified diff in the ARVO runs ({', '.join(SEMANTIC_RUNS)}): "
             f"{total}. Nemotron 3 Ultra classified each against the developer's fix; every one was "
-            "then reviewed by hand (8 of Ultra's classes overridden, D-0069).",
+            "then checked by a second reviewer outside the pipeline (Claude, reading each diff next to the developer's fix; 8 of Ultra's classes overridden, D-0069, D-0081).",
             "",
             f"- **Gate precision: {ok}/{judged} ({pct(ok, judged)})** of verified diffs are correct "
             f"(equivalent {cls.get('equivalent', 0)}, different but correct "
@@ -282,6 +282,20 @@ def main() -> int:
             f"the sanitizer on real OSS-Fuzz bugs were not fixes** ({a['rejected_total']} + "
             f"{a['wrong']}); the gate caught {a['rejected_total']} of those {a['not_fixes']} "
             f"({a['caught_by_gate_pct']}%), the other {a['wrong']} were found by review.",
+        ]
+        if h := a.get("head_to_head"):
+            ha, ht = h["all"], h["tested"]
+            out.append(
+                "- **Head-to-head** (`head_to_head` in `silent.json`; bad = rejected by the gate or "
+                f'reviewed wrong; {ha["patches"]} patches on {h["bugs"]} bugs): a "crash is gone" '
+                f"check ships **{ha['crash_gone_ships']}** bad patches, Leakproof ships "
+                f"**{ha['leakproof_ships']}** (the ones reviewed wrong). On the **{ht['patches']}** "
+                'where the project\'s own tests ran (pass or fail), "crash gone + tests pass" ships '
+                f"**{ht['crash_gone_tests_pass_ships']}** bad patches, Leakproof "
+                f"**{ht['leakproof_ships']}**. The dashboard computes the same numbers in the "
+                "browser from the run records."
+            )
+        out += [
             f"- Juliet ({j['note']}): {j['silenced']} silenced, {j['verified']} verified.",
             f"- CUDA (compute-sanitizer, T4): {cu['silenced']} candidates silenced the sanitizer; "
             f"{len(cu['silenced_only'])} of them printed the wrong checksum and were rejected "
@@ -478,7 +492,7 @@ def main() -> int:
         nums["open_bugs"] = {"rounds": f["rounds"], "total": tot, "ready_cases": f["ready_cases"]}
         out += [
             "",
-            "## Open bugs: still-open GitHub issues (hand-reviewed, cases/open_bugs/REVIEW.md)",
+            "## Open bugs: still-open GitHub issues (reviewed outside the pipeline by Claude, cases/open_bugs/REVIEW.md)",
             "",
             "| round | triaged | reproduce at HEAD, no fix PR | verified | ready to propose | $ |",
             "|---|---|---|---|---|---|",

@@ -3,7 +3,7 @@
 The gate shows a candidate is safe on every input it tried; it cannot see behaviour the harness
 does not print (mosquitto 42520955: the default listener's settings land on the wrong listener).
 Nemotron 3 Ultra compares each verified diff with the upstream fix and gives one class. Advisory
-only: the result is adjudicated by hand (cases/arvo/semantic_adjudication.json) and never feeds a
+only: the result is adjudicated outside the pipeline by Claude (cases/arvo/semantic_adjudication.json) and never feeds a
 gate verdict. Runs after the fact on stored records; no worker sees it.
 """
 
