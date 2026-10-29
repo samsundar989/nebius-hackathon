@@ -11,6 +11,17 @@
 > - **Which model does what:** Nemotron 3 Ultra plans and four Nemotron 3.5 Lightning workers patch; on real bugs Ultra's plan takes the same workers from 2 to 7 verified fixes out of 10.
 > - **Try it:** `uv run leakproof fix --config examples/csvsplit/leakproof.toml` (Docker and a Nebius Token Factory key; about one cent). The [walkthrough](docs/WALKTHROUGH.md) goes from `init` to a ready-to-send patch, with real outputs.
 
+**For judges**
+
+| criterion | evidence | where |
+|---|---|---|
+| Technological implementation | Nemotron 3 Ultra plans, four Nemotron 3.5 Lightning workers patch, Nemotron 3 Super attacks verified candidates, Nemotron 3 Nano drafts configs from bug reports, all on Nebius Token Factory; a separate gate process (Docker or Nebius Sandboxes, network off) decides; every model call is metered | [How we use Nemotron](#how-we-use-nvidia-nemotron) · [Nebius](#how-we-use-nebius) · [NUMBERS](docs/NUMBERS.md) |
+| Design | a CLI from `init` to `fix` to a ready-to-send `package`; a live dashboard with **[Re-verify without AI]** (the full gate re-run on a stored patch, no model call, $0) and a passcode-gated live run | [dashboard](https://leakproof-dashboard.onrender.com) · [walkthrough](docs/WALKTHROUGH.md) |
+| Potential impact | **of 78 patches that silenced the sanitizer on real OSS-Fuzz bugs, 21 (27%) were not fixes; the gate caught 17 of those 21**, review found the other 4. Fixes for still-open bugs, packaged for maintainers | [silent ≠ fixed](docs/NUMBERS.md#sanitizer-silent-is-not-fixed) · [open bugs](cases/open_bugs/REVIEW.md) · [real-world targets](cases/real_world/TARGETS.md) |
+| Quality of the idea | "verified fixes, or nothing": workers never see the gate; the gate re-fuzzes with amplified inputs and checks leaks and behaviour; it is calibrated on the developers' own fixes (accepts 24 of 27) | [the evidence gate](#the-evidence-gate) · [calibration](docs/NUMBERS.md#gate-calibration-the-developers-own-fixes-through-the-same-gate) |
+
+**Limits up front:** the gate shows the crash is gone and no new sanitizer report appears on the inputs it tries, not that a fix is correct for every input, so every fix goes to a human before it is sent. ARVO's developer fixes are public and may be in the models' training data; the still-open bugs are the clean test. Leak results come from synthetic Juliet cases. [All limitations](#limitations).
+
 ![A recorded leakproof fix run ending in "verdict: verified" and an evidence label, then the jq refusal card: a patch that passed jq's tests, refused because a doubled number in the crash input overflowed the patched jq](docs/media/leakproof.gif)
 
 **Verified fixes, or nothing.** Leakproof is an agent that fixes memory-safety defects in C, C++ and CUDA code — leaks, use-after-free, double free, buffer overflows, data races — and reports a fix only when an evidence gate verifies it. On Nebius Token Factory, Nemotron 3 Ultra plans, Nemotron 3.5 Lightning patches, and Nemotron 3 Super attacks every candidate on projects without tests; a separate gate process, with the network off, decides.

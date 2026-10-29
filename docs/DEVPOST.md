@@ -17,6 +17,17 @@ Numbers come from `docs/NUMBERS.md`; re-check them on Wed Oct 29 before the fina
 - Video: [YouTube URL] — 2:50.
 - Walkthrough: [docs/WALKTHROUGH.md](https://github.com/samsundar989/nebius-hackathon/blob/main/docs/WALKTHROUGH.md) — from `leakproof init` to a ready-to-send patch on the csvsplit example, with real outputs.
 
+## For judges
+
+| criterion | evidence | where |
+|---|---|---|
+| Technological implementation | Nemotron 3 Ultra plans, four Nemotron 3.5 Lightning workers patch, Nemotron 3 Super attacks verified candidates, Nemotron 3 Nano drafts configs from bug reports, all on Nebius Token Factory; a separate gate process (Docker or Nebius Sandboxes, network off) decides; every model call is metered | README "How we use" sections; docs/NUMBERS.md |
+| Design | a CLI from `init` to `fix` to a ready-to-send `package`; a live dashboard with "Re-verify without AI" (the full gate re-run on a stored patch, no model call, $0) and a passcode-gated live run | https://leakproof-dashboard.onrender.com |
+| Potential impact | of 78 patches that silenced the sanitizer on real OSS-Fuzz bugs, 21 (27%) were not fixes; the gate caught 17 of those 21, review found the other 4. Fixes for still-open bugs, packaged for maintainers | docs/NUMBERS.md ("Sanitizer silent is not fixed"); cases/open_bugs/REVIEW.md; cases/real_world/TARGETS.md |
+| Quality of the idea | "verified fixes, or nothing": workers never see the gate; it re-fuzzes with amplified inputs and checks leaks and behaviour; calibrated on the developers' own fixes (accepts 24 of 27) | README "The evidence gate" |
+
+**Limits up front:** the gate shows the crash is gone and no new sanitizer report appears on the inputs it tries, not that a fix is correct for every input, so every fix goes to a human before it is sent. ARVO's developer fixes are public and may be in the models' training data; the still-open bugs are the clean test. Leak results come from synthetic Juliet cases.
+
 ## The 30-second version
 
 **A patch that passed the tests, refused.** For a real jq bug (OSS-Fuzz 42530604), the model's patch passed jq's own test suite and the original crash input ran clean. Leakproof doubled one number in that input, and the patched jq overflowed a heap buffer. The unpatched program and the developer's real fix are both clean on that input, so the patch was refused.
