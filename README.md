@@ -5,6 +5,7 @@
 **[Live dashboard](https://leakproof-dashboard.onrender.com)** · **3-minute video** (link when recorded) · **Devpost** (link when submitted)
 
 > **In 60 seconds**
+> - **On real OSS-Fuzz bugs, a "crash is gone" check would ship 21 bad AI patches out of 78, and "crash gone + tests pass" still ships 10 of the 49 that had tests.** Leakproof ships 4 (3). ([how it's counted](docs/NUMBERS.md#sanitizer-silent-is-not-fixed))
 > - **What it does:** fixes memory-safety bugs in C, C++ and CUDA, and reports a fix only when a separate, offline evidence gate verifies it.
 > - **The aha:** a patch for a real jq bug passed jq's own tests; Leakproof doubled one number in the crash input, the patched jq overflowed, and the patch was refused.
 > - **Proof:** 15/27 real OSS-Fuzz bugs verified · 14 correct when compared with the developers' fixes · the gate accepts 24/27 of the developers' own fixes.

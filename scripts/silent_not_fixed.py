@@ -27,11 +27,39 @@ REVIEW_OK = ("equivalent", "different_but_correct")
 def silenced(run: str) -> list[dict]:
     d = json.loads((DATA / "runs" / f"{run}.json").read_text())
     return [
-        w
+        w | {"_case": c["case"]}
         for c in d["cases"]
         for w in c["workers"]
         if (w["checks"].get("patched") or {}).get("s") == "pass"
     ]
+
+
+def head_to_head(ws: list[dict]) -> dict:
+    """Bad patches each check would ship (review #22): bad = rejected by the gate or reviewed
+    wrong. "Crash gone" ships every bad one; "crash gone + tests pass" ships the bad ones whose
+    project tests passed, among those where the tests ran; Leakproof ships the verified wrong."""
+
+    def bad(w: dict) -> bool:
+        return w["verdict"] != "verified" or w.get("semantic") == "wrong"
+
+    def shipped(w: dict) -> bool:
+        return w["verdict"] == "verified" and w.get("semantic") == "wrong"
+
+    tests = lambda w: (w["checks"].get("tests") or {}).get("s")  # noqa: E731
+    tested = [w for w in ws if tests(w) in ("pass", "fail")]
+    return {
+        "all": {
+            "patches": len(ws),
+            "crash_gone_ships": sum(map(bad, ws)),
+            "leakproof_ships": sum(map(shipped, ws)),
+        },
+        "tested": {
+            "patches": len(tested),
+            "crash_gone_tests_pass_ships": sum(bad(w) and tests(w) == "pass" for w in tested),
+            "leakproof_ships": sum(map(shipped, tested)),
+        },
+        "bugs": len({w["_case"] for w in ws}),
+    }
 
 
 def main() -> int:
@@ -67,6 +95,7 @@ def main() -> int:
             "not_fixes": not_fixes,
             "not_fixes_pct": round(100 * not_fixes / len(ws)),
             "caught_by_gate_pct": round(100 * sum(rejected.values()) / not_fixes),
+            "head_to_head": head_to_head(ws),
         },
         "juliet": {
             "runs": list(JULIET),
@@ -91,6 +120,7 @@ def main() -> int:
         f"  not fixes = {a['rejected_total']} + {wrong} = {not_fixes} of {a['silenced']} "
         f"({a['not_fixes_pct']}%); the gate caught {a['rejected_total']} of {not_fixes} "
         f"({a['caught_by_gate_pct']}%)\n"
+        f"  head-to-head: {json.dumps(a['head_to_head'])}\n"
         f"Juliet: {out['juliet']['silenced']} silenced, {out['juliet']['verified']} verified\n"
         f"CUDA: {out['cuda']['silenced']} silenced, {out['cuda']['verified']} verified, "
         f"silenced only: {out['cuda']['silenced_only']}"

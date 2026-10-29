@@ -32,6 +32,8 @@ Numbers come from `docs/NUMBERS.md`; re-check them on Wed Oct 29 before the fina
 
 ## The 30-second version
 
+**On real OSS-Fuzz bugs, a "crash is gone" check would ship 21 bad AI patches out of 78, and "crash gone + tests pass" still ships 10 of the 49 that had tests. Leakproof ships 4 (3).** (Counted from the run records: [NUMBERS](https://github.com/samsundar989/nebius-hackathon/blob/main/docs/NUMBERS.md#sanitizer-silent-is-not-fixed).)
+
 **A patch that passed the tests, refused.** For a real jq bug (OSS-Fuzz 42530604), the model's patch passed jq's own test suite and the original crash input ran clean. Leakproof doubled one number in that input, and the patched jq overflowed a heap buffer. The unpatched program and the developer's real fix are both clean on that input, so the patch was refused.
 
 **Proof:** 15 of 27 real OSS-Fuzz bugs verified · 14 of them correct against the developers' own fixes · the gate accepts 24 of 27 developer fixes, so it is strict without being impossible.

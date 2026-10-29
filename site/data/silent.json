@@ -28,7 +28,20 @@
   "defensive": 4,
   "not_fixes": 21,
   "not_fixes_pct": 27,
-  "caught_by_gate_pct": 81
+  "caught_by_gate_pct": 81,
+  "head_to_head": {
+   "all": {
+    "patches": 78,
+    "crash_gone_ships": 21,
+    "leakproof_ships": 4
+   },
+   "tested": {
+    "patches": 49,
+    "crash_gone_tests_pass_ships": 10,
+    "leakproof_ships": 3
+   },
+   "bugs": 20
+  }
  },
  "juliet": {
   "runs": [

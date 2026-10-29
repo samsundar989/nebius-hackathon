@@ -47,6 +47,7 @@ Unit: worker candidates; ARVO runs p3_arvo27_r1 + p3_arvo27_r2; from `scripts/si
 - **17** of them were rejected by later gate checks: re-fuzz new crash 12, safe-fix (leak/UAF) 4, output check (`silenced_only`) 1.
 - **61** were verified; the review against the developer's fix: correct 53, defensive 4 (reported separately, not counted as wrong), **wrong 4**.
 - **21 of 78 (27%) patches that silenced the sanitizer on real OSS-Fuzz bugs were not fixes** (17 + 4); the gate caught 17 of those 21 (81%), the other 4 were found by review.
+- **Head-to-head** (`head_to_head` in `silent.json`; bad = rejected by the gate or reviewed wrong; 78 patches on 20 bugs): a "crash is gone" check ships **21** bad patches, Leakproof ships **4** (the 4 reviewed wrong). On the **49** where the project's own tests ran (pass or fail), "crash gone + tests pass" ships **10** bad patches, Leakproof **3**. The dashboard computes the same numbers in the browser from the run records.
 - Juliet (synthetic NIST Juliet cases): 524 silenced, 524 verified.
 - CUDA (compute-sanitizer, T4): 9 candidates silenced the sanitizer; 2 of them printed the wrong checksum and were rejected (oob_global__H2w1, oob_global__H3w2).
 
