@@ -1,0 +1,51 @@
+{
+ "unit": "worker candidates",
+ "arvo": {
+  "runs": [
+   "p3_arvo27_r1",
+   "p3_arvo27_r2"
+  ],
+  "silenced": 78,
+  "silenced_by_run": {
+   "p3_arvo27_r1": 48,
+   "p3_arvo27_r2": 30
+  },
+  "rejected_by_gate": {
+   "rejected:refuzz_new_crash": 12,
+   "rejected:safe_fix": 4,
+   "silenced_only": 1
+  },
+  "rejected_total": 17,
+  "verified": 61,
+  "review_of_verified": {
+   "different_but_correct": 31,
+   "equivalent": 22,
+   "defensive": 4,
+   "wrong": 4
+  },
+  "correct": 53,
+  "wrong": 4,
+  "defensive": 4,
+  "not_fixes": 21,
+  "not_fixes_pct": 27,
+  "caught_by_gate_pct": 81
+ },
+ "juliet": {
+  "runs": [
+   "e1_juliet60_v1",
+   "p2_sandboxes_juliet3",
+   "p4_juliet401x100_r1"
+  ],
+  "silenced": 524,
+  "verified": 524,
+  "note": "synthetic NIST Juliet cases"
+ },
+ "cuda": {
+  "silenced": 9,
+  "verified": 7,
+  "silenced_only": [
+   "oob_global__H2w1",
+   "oob_global__H3w2"
+  ]
+ }
+}

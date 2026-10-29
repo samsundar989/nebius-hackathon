@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Put the real links in, everywhere at once (review #11 order 3d).
 
-scripts/set_links.py --dashboard URL --video URL [--devpost URL] [--repo URL] [--rebuild-video]
+scripts/set_links.py --dashboard URL --service URL --video URL [--devpost URL] [--repo URL]
+    [--rebuild-video]
 
 Replaces the placeholders in README.md, docs/DEVPOST.md and the video end card. Each link is
-optional; a placeholder stays until its link is given. --rebuild-video re-records the silent cut
+optional; a placeholder stays until its link is given. --service writes site/config.json, which
+the dashboard reads for the live demo's [Run live] and [Re-verify without AI] buttons. --rebuild-video re-records the silent cut
 (video/record.py) so the end card shows the dashboard. Prints every change; --dry-run writes
 nothing.
 """
@@ -12,6 +14,7 @@ nothing.
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -63,6 +66,7 @@ def edits(a: argparse.Namespace) -> dict[str, list[tuple[str, str]]]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dashboard")
+    ap.add_argument("--service")
     ap.add_argument("--video")
     ap.add_argument("--devpost")
     ap.add_argument("--repo", default=REPO)
@@ -82,6 +86,11 @@ def main() -> int:
                 print(f"{rel}: placeholder not found: {old[:60]!r}", file=sys.stderr)
         if not a.dry_run:
             p.write_text(text, encoding="utf-8", newline="\n")
+    if a.service:
+        cfg = json.dumps({"service_url": a.service.rstrip("/")}, indent=1) + "\n"
+        print(f"site/config.json: {cfg.strip()}")
+        if not a.dry_run:
+            (ROOT / "site" / "config.json").write_text(cfg, encoding="utf-8", newline="\n")
     print(f"{changed} replacement(s){' (dry run)' if a.dry_run else ''}")
     if a.rebuild_video and not a.dry_run:
         subprocess.run([sys.executable, str(ROOT / "video" / "record.py")], check=True)

@@ -89,6 +89,9 @@ footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
 details summary { cursor: pointer; color: var(--accent); margin: 8px 0; }
 .stat .n.ok { color: var(--ok); }
 #headline { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.demo-box { margin: 6px 0; }
+.demo-box input, .demo-box select { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 6px 8px; max-width: 100%; }
+#rv-out { width: 100%; }
 @media (max-width: 560px) { .bar { grid-template-columns: 1fr 56px; } .bar .lab { grid-column: 1 / -1; } }
 </style>
 </head>
@@ -204,8 +207,9 @@ const evBadge = (ev) => ev ? `<span class="chip c-${ev.level === "weak" ? "incon
 async function demo() {
   const cfg = await get("config.json");
   const row = $("#demo-row");
+  const svc = cfg && cfg.service_url;
   // A recorded run is a real earlier run, always labelled as such with the reason no live run
-  // happened (service off, asleep, or out of its demo budget).
+  // happened (service off, asleep, wrong passcode, or out of its demo budget).
   const recorded = async (why) => {
     const recs = (await get("data/demo_recorded.json")) || [];
     const j = recs[Math.floor(Math.random() * recs.length)];
@@ -216,17 +220,46 @@ async function demo() {
       ? ` ${chip(j.verdict || "error")} ${esc(j.case || "")} ${money(j.usd)} ${j.recorded ? `<strong>recorded run</strong> <span class="muted">(${esc(j.reason || "live runs unavailable")}; this is a real earlier run, not a live one)</span>` : "<strong>live run</strong>"}`
       : "no recorded run available";
   };
-  row.innerHTML = `<button class="btn" id="run-live">Run a fix (one Juliet case)</button><span class="muted" id="live-state"></span>`;
+  const wake = async (st) => {
+    st.textContent = "waking up the service (~1 min if idle)…";
+    await fetch(svc + "/healthz");
+  };
+  row.innerHTML = `<div class="demo-box">
+      <div class="row"><button class="btn" id="run-live">Run live (one Juliet case)</button>
+        <input id="passcode" type="password" autocomplete="off" placeholder="passcode (Devpost testing instructions)" aria-label="passcode for live runs"></div>
+      <div class="muted" id="live-state"></div>
+    </div>
+    <div class="demo-box">
+      <div class="row"><button class="btn" id="reverify">Re-verify without AI</button>
+        <select id="rv-which" aria-label="which stored patch"><option value="verified">a patch the gate verified</option><option value="rejected">a patch the gate rejected</option></select></div>
+      <div class="muted" id="rv-state">The full gate re-runs here on a stored worker patch: no model call, $0, about a minute.</div>
+    </div>
+    <div id="rv-out"></div>`;
   $("#run-live").onclick = async () => {
     const st = $("#live-state");
-    if (!cfg || !cfg.service_url) { show(st, await recorded("the live demo service is off")); return; }
-    st.textContent = "waking up the service (~1 min if idle)…";
+    if (!svc) { show(st, await recorded("the live demo service is off")); return; }
     try {
-      await fetch(cfg.service_url + "/healthz");
+      await wake(st);
       st.textContent = "running: plan, workers, gate…";
-      const r = await fetch(cfg.service_url + "/run", { method: "POST" });
+      const r = await fetch(svc + "/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ passcode: $("#passcode").value }) });
       show(st, await r.json());
     } catch (e) { show(st, await recorded("the live demo service did not answer")); }
+  };
+  $("#reverify").onclick = async () => {
+    const st = $("#rv-state"), out = $("#rv-out");
+    if (!svc) { st.textContent = "The demo service is not configured; see the walkthrough to re-run the gate locally."; return; }
+    $("#reverify").disabled = true;
+    try {
+      await wake(st);
+      st.textContent = "re-running the gate: build, sanitizer run, good-path build, output check…";
+      const r = await fetch(svc + "/reverify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ candidate: $("#rv-which").value }) });
+      const j = await r.json();
+      if (j.error) { st.textContent = j.error; return; }
+      st.innerHTML = `${chip(j.verdict)} now · ${chip(j.verdict_then)} in the original run · <strong>${j.matches ? "same verdict" : "different verdict"}</strong> · ${esc(j.elapsed_s)} s · ${j.model_calls} model calls · $0`;
+      const checks = Object.entries(j.checks).map(([k, v]) => `${esc(k)} ${chip(v.status, v.detail)}`).join(" ");
+      out.innerHTML = `<div class="panel"><p><code>${esc(j.case)}</code> · unpatched: ${chip(j.unpatched.status, j.unpatched.detail)} · stored patch from <a href="https://github.com/samsundar989/nebius-hackathon/blob/main/${esc(j.source)}" rel="noopener"><code>${esc(j.source)}</code></a></p><pre>${diffHtml(j.diff)}</pre><p>${checks}</p><p class="muted">Hover a check for its evidence.</p></div>`;
+    } catch (e) { st.textContent = "the demo service did not answer; try again in a minute"; }
+    finally { $("#reverify").disabled = false; }
   };
 }
 

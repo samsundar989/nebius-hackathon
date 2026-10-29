@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/samsundar989/nebius-hackathon/actions/workflows/ci.yml/badge.svg)](https://github.com/samsundar989/nebius-hackathon/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**Live dashboard** (link when deployed) · **3-minute video** (link when recorded) · **Devpost** (link when submitted)
+**[Live dashboard](https://leakproof-dashboard.onrender.com)** · **3-minute video** (link when recorded) · **Devpost** (link when submitted)
 
 > **In 60 seconds**
 > - **What it does:** fixes memory-safety bugs in C, C++ and CUDA, and reports a fix only when a separate, offline evidence gate verifies it.

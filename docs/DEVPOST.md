@@ -8,12 +8,12 @@ Numbers come from `docs/NUMBERS.md`; re-check them on Wed Oct 29 before the fina
 
 **Track:** Coding & Agentic Engineering
 
-**Links:** repository [GitHub URL] · live dashboard [Render static site URL] · video [YouTube URL]
+**Links:** repository https://github.com/samsundar989/nebius-hackathon · live dashboard https://leakproof-dashboard.onrender.com · video [YouTube URL]
 
 ## Try it out
 
-- Repository: [GitHub URL] — `uv run leakproof fix --config examples/csvsplit/leakproof.toml` (Docker and a Nebius Token Factory key; about one cent per fix).
-- Dashboard: [dashboard URL] — every run, every gate check, the calibration and the planner comparison.
+- Repository: https://github.com/samsundar989/nebius-hackathon — `uv run leakproof fix --config examples/csvsplit/leakproof.toml` (Docker and a Nebius Token Factory key; about one cent per fix).
+- Dashboard: https://leakproof-dashboard.onrender.com — every run, every gate check, the calibration and the planner comparison.
 - Video: [YouTube URL] — 2:50.
 - Walkthrough: [docs/WALKTHROUGH.md](https://github.com/samsundar989/nebius-hackathon/blob/main/docs/WALKTHROUGH.md) — from `leakproof init` to a ready-to-send patch on the csvsplit example, with real outputs.
 
