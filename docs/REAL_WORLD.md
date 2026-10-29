@@ -23,7 +23,7 @@ Model spend for the campaign: $1.27 (ledger: every `rw_*` run and its gate adver
 
 ## Per issue
 
-**gpac #4006: heap-buffer-overflow READ via an unterminated meta item path (3.3k★). Verified, correct; gpac then fixed it the same way.**
+**gpac #4006: heap-buffer-overflow READ via an unterminated meta item path (3.3k★). Verified, correct; hours later gpac fixed the same line, with the same result.**
 `gf_isom_add_meta_item_extended` copies an in-memory item into `full_path` with exactly `data_len`
 bytes and no terminator; when `data_len` is 0, the writer treats `full_path` as a file name and
 `gf_fopen` reads past the 1-byte allocation. 3 of 4 candidates verified, all the same fix:

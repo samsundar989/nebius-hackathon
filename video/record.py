@@ -80,7 +80,7 @@ SCENES = [
         "dash",
         "#real",
         13,
-        "New bugs, reported after the models' training: our 2-line gpac fix matches the fix gpac shipped on Oct 29.",
+        "New bugs, after the models' training: our gpac fix verified hours before gpac fixed the same line.",
     ),
     (
         "08_explorer",

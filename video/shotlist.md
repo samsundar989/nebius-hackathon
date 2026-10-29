@@ -18,7 +18,7 @@ Dashboard sections are isolated and zoomed to fill the frame above the caption b
 | 4 | 0:43–0:59 | how it works | five steps with the model roles, planner bars 2 → 4 → 7 of 10 | dashboard |
 | 5 | 0:59–1:13 | `leakproof fix` | terminal: Ultra's plan, 4 workers, verdict (a replay of a recorded run) | replay of `runs/demo_fix` |
 | 6 | 1:13–1:28 | refusal | the refused jq diff and the verified one-line fix | dashboard |
-| 7 | 1:28–1:41 | new bugs | October 2026 issues, gpac #4006 first (fixed upstream Oct 29 the same way; shortlisted issues already fixed before we started are hidden) | dashboard |
+| 7 | 1:28–1:41 | new bugs | October 2026 issues, gpac #4006 first (fixed upstream Oct 29 at the same line, same result; shortlisted issues already fixed before we started are hidden) | dashboard |
 | 8 | 1:41–1:55 | explorer | jq 42531297: every candidate, every check | dashboard |
 | 9 | 1:55–2:04 | limits | the five limits | dashboard |
 | 10 | 2:04–2:10 | end card | headline numbers; repo and dashboard links | `video/card.html` |
