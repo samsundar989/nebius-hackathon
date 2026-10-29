@@ -409,3 +409,4 @@ Strategist notes 2026-10-29 02:05 (review #20) and 04:50 CDT (review #21): ackno
 - **assimp #6927 root-cause run (#23.4):** started 13:12 with `--notes` (Claude Code's review of the partial fix; no gate inputs), Ultra + one repair round, cap $0.25, stop at 15:30 whatever happens.
 
 Model spend since 11:15: $0.021 (two live demo runs); ledger $14.21 of the $21 cap.
+- **assimp #6927 root-cause run: did not verify** ($0.21, `runs/rw_assimp_6927_r3`). Round 1: 4 caller-side bounds checks, all refused by the differential (output changed on 10 of 203 generated inputs, as last night). Round 2's plan named `ParseDataURI` but pointed at the header; no edit applied. Cause, a Leakproof limitation: the models see the files on the crash stack, and `glTFCommon.cpp` is not on it. Recorded in REAL_WORLD, funnel and QUESTION 0022 (issue still open; Samuel gets the strategist's comment draft, nothing posted). Campaign spend now $1.27; ledger $14.42 of $21.

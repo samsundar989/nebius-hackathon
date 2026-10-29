@@ -13,10 +13,11 @@
    "verdict": "verified",
    "runs": [
     "rw_assimp_6927",
-    "rw_assimp_6927_r2"
+    "rw_assimp_6927_r2",
+    "rw_assimp_6927_r3"
    ],
-   "usd": 0.2115,
-   "review": "partial (defensive): guards the reported copy; ParseDataURI's signed-char offset and its other callers remain",
+   "usd": 0.4226,
+   "review": "partial (defensive): guards the reported copy; ParseDataURI's signed-char offset and its other callers remain; a third run (Oct 29) with a reviewer's notes naming the root cause did not verify: ParseDataURI's .cpp is not on the crash stack, so it was never shown to the models; all 4 candidates again guarded the caller and the differential refused them (output changed on 10 of 203 generated inputs)",
    "package": "cases/real_world/assimp_assimp/6927/generated/SUBMISSION.md",
    "sent": "no (QUESTION 0022)"
   },

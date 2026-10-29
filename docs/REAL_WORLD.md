@@ -19,7 +19,7 @@ Machine-readable: [cases/real_world/funnel.json](../cases/real_world/funnel.json
 | verified by the gate | 2: gpac #4006, assimp #6927 |
 | after review (Claude, outside the pipeline) | **1 correct fix** (gpac #4006, minimal; gpac shipped an equivalent fix on Oct 29 before ours was sent) and **1 partial fix** (assimp #6927), both packaged; nothing sent |
 
-Model spend for the campaign: $1.08 (ledger: every `rw_*` run and its gate adversary calls), including runs that exposed tooling bugs.
+Model spend for the campaign: $1.27 (ledger: every `rw_*` run and its gate adversary calls), including runs that exposed tooling bugs.
 
 ## Per issue
 
@@ -60,6 +60,14 @@ without a sanitizer report and the patch changed that output. The gate is conser
 The first run's three built candidates had been rejected as out of scope because our gate did not
 treat `.inl` as a source file; fixed, and those three re-gated without a model call
 (`runs/rw_assimp_6927_regate`).
+A third run on Oct 29 aimed at the root cause (`--notes`: Claude Code's review of the partial fix,
+no gate inputs; Ultra + one repair round; $0.21, `runs/rw_assimp_6927_r3`) **did not verify**, and
+it exposed a Leakproof limitation: the models are shown the files on the crash stack, and
+`ParseDataURI`'s `glTFCommon.cpp` is not on it (the function returns before the crash), so it was
+never shown. Round 1's plan therefore guarded the caller again (4 candidates, all refused by the
+differential: output changed on 10 of 203 generated inputs); round 2's plan named the root cause
+but could point only at the header, and no edit applied. Fix for later: let a planner ask for a
+file that is not on the stack.
 
 **quickjs-ng #1853: heap-buffer-overflow in bytecode loading (4.0k★). No fix: the gate refused three silencers.**
 Both candidates that built "fixed" the crash by clamping the free loop to the allocation's usable
