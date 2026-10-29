@@ -372,3 +372,11 @@ Strategist notes 2026-10-26 16:55 CDT (review #15): acknowledged.
 2. **No stale end card in the final cut:** `video/mux.sh` records the narration it mixed (`video/.narration_path`, gitignored); `set_links.py --rebuild-video` re-records the silent cut and then re-mixes that narration into `leakproof_final.mp4`; `freeze_check.sh` now FAILs when the final video is older than `video/card.html`, the silent cut or the narration. SUBMISSION_CHECKLIST step (d) is two passes (dashboard + rebuild before the upload, video URL after it).
 
 Model spend for review #15: $0.
+
+## Day 9 · Thu 2026-10-29, 00:00 CDT → — reviews #16, #16a, #17, #18, #19
+
+Strategist notes 2026-10-28 11:45 (review #16), 13:15 (#16a), 18:05 (#17), 20:20 (#18) and 23:25 CDT (#19): acknowledged. Samuel confirmed the rewrite and force-push in this chat (ANSWER 0012). One builder (#17); no Worker B clone.
+
+**Git (#16a / #19), 00:00–00:20 CDT.** This checkout's identity is now the GitHub noreply address (`40044199+samsundar989@users.noreply.github.com`). Backup bundle of the old history outside the repo (`../leakproof-backup/`, verified). `git filter-repo` in a fresh clone: mailmap for author/committer, replace-text for the Gmail address in file contents (old toybox patch, SUBMISSION.md) and for the Windows/WSL user path (`C:\Users\<name>` → `C:\Users\<user>`, also in the append-only logs, which #19 allows). Force-pushed `main` (the only remote branch); this checkout reset to it. Checked on a **fresh clone from GitHub**: 188 commits, author and committer are only the noreply address; 0 objects (all blobs, raw, including binaries) contain the Gmail address; 0 contain the user path. The 7 local `refs/gpuq/snapshots/*` (worker-q's, `gpuq@localhost`) were never pushed. The repo is still private: the strategist audits first.
+
+**history clean, safe to make public**
