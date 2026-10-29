@@ -17,23 +17,31 @@ Machine-readable: [cases/real_world/funnel.json](../cases/real_world/funnel.json
 | already fixed upstream when re-checked (issue left open) | 3: assimp #6929, LibreDWG #1450, #1439 |
 | reproduced at upstream HEAD and attempted | 5 |
 | verified by the gate | 2: gpac #4006, assimp #6927 |
-| after review (Claude, outside the pipeline) | **1 correct fix** (gpac #4006, minimal; needs gpac's regression test) and **1 partial fix** (assimp #6927), both packaged; nothing sent |
+| after review (Claude, outside the pipeline) | **1 correct fix** (gpac #4006, minimal; gpac shipped an equivalent fix on Oct 29 before ours was sent) and **1 partial fix** (assimp #6927), both packaged; nothing sent |
 
 Model spend for the campaign: $1.08 (ledger: every `rw_*` run and its gate adversary calls), including runs that exposed tooling bugs.
 
 ## Per issue
 
-**gpac #4006: heap-buffer-overflow READ via an unterminated meta item path (3.3k★). Verified, correct.**
+**gpac #4006: heap-buffer-overflow READ via an unterminated meta item path (3.3k★). Verified, correct; gpac then fixed it the same way.**
 `gf_isom_add_meta_item_extended` copies an in-memory item into `full_path` with exactly `data_len`
 bytes and no terminator; when `data_len` is 0, the writer treats `full_path` as a file name and
 `gf_fopen` reads past the 1-byte allocation. 3 of 4 candidates verified, all the same fix:
 allocate `data_len + 1` and NUL-terminate. Review (Claude, outside the pipeline): **correct and minimal** for the reported
 defect. A zero-length in-memory item now reaches `gf_fopen("")`, fails and is skipped at write time
-instead of over-reading. Evidence is weak by our own definition: gpac's unit tests did not run in
-our build and the 148 KB PoC yields only 3 generated inputs. gpac's patching rules also ask for a
-regression test in `src/isomedia/unittests/`, which the package does not have yet
-([package](../cases/real_world/gpac_gpac/4006/generated/SUBMISSION.md), applies to upstream
-`d958f94`; QUESTION 0023). $0.14. One run exposed a Leakproof bug: on a CRLF checkout the edit step
+instead of over-reading. The gate's evidence was weak by our own definition (gpac's unit tests did
+not run in the gate's build; the 148 KB PoC yields only 3 generated inputs), so on Oct 29 we did the
+three things gpac's patching rules ask for, with gpac's own `--enable-sanitizer --unittests` build
+on `d958f94` ([validate.sh](../cases/real_world/gpac_gpac/4006/validate.sh),
+[RESULTS](../cases/real_world/gpac_gpac/4006/validation/RESULTS.txt)): the issue's command crashes
+unpatched and is clean patched; a new public-API unit test aborts under ASan unpatched and passes
+patched (70/70 unit tests); 6 affected testsuite scripts give the same 79/82 on both builds (the 3
+failures need external media). **Before we sent it, gpac fixed the bug itself:**
+[3f05654](https://github.com/gpac/gpac/commit/3f056542b3) (Oct 29, "fixes #4006") changes
+`if (data)` to `if (data && data_len)`, so a zero-length item never gets a `full_path`. Same path,
+same outcome as ours (no over-read, the item is skipped); the maintainer's fix agrees with the
+review. Nothing was sent ([package](../cases/real_world/gpac_gpac/4006/generated/SUBMISSION.md);
+QUESTION 0023). $0.14. One run exposed a Leakproof bug: on a CRLF checkout the edit step
 rewrote whole files (a 2-line fix became a 2,249-line diff); fixed, and the clean patch was re-gated
 without a model call (`runs/rw_gpac_4006_clean`).
 

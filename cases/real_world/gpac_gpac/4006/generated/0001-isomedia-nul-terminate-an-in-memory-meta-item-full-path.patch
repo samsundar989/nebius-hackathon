@@ -1,26 +1,33 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: <your git identity>
-Date: Thu, 29 Oct 2026 06:36:22 +0000
+Date: Thu, 29 Oct 2026 12:51:12 -0500
 Subject: [PATCH] isomedia: NUL-terminate an in-memory meta item's full_path
 
-AddressSanitizer reports a heap-buffer-overflow in gf_fopen_ex()
-(src/utils/os_file.c:1721).
+When a meta item is added from memory, meta.c copies its bytes into
+infe->full_path with exactly data_len bytes and no terminator. For a
+zero-length item, DoWriteMeta() in isom_store.c takes the
+"!data_len && full_path" branch and passes full_path to gf_fopen() as a
+file name, which reads past the allocation (heap-buffer-overflow in
+gf_fopen_ex, #4006).
 
-The change, in meta.c:
+Allocate one more byte and terminate the copy. A zero-length in-memory
+item now gives an empty name, gf_fopen() fails and the existing
+"if (!src) continue;" skips the item, as for any unreadable file.
 
-    -				infe->full_path = (char *)gf_malloc(sizeof(char) * data_len);
-    +				infe->full_path = (char *)gf_malloc(sizeof(char) * (data_len + 1));
-    +				infe->full_path[data_len] = '\0';
+Add a unit test that writes a file with a zero-length in-memory item.
 
-Fixes #4006.
+Fixes #4006
 ---
- src/isomedia/meta.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ src/isomedia/meta.c                          |  3 +-
+ src/isomedia/unittests/ut_meta_item_memory.c | 68 ++++++++++++++++++++
+ 2 files changed, 70 insertions(+), 1 deletion(-)
+ create mode 100644 src/isomedia/unittests/ut_meta_item_memory.c
 
 diff --git a/src/isomedia/meta.c b/src/isomedia/meta.c
+index ea5705d..dc01012 100644
 --- a/src/isomedia/meta.c
 +++ b/src/isomedia/meta.c
-@@ -1769,10 +1769,11 @@
+@@ -1769,10 +1769,11 @@ GF_Err gf_isom_add_meta_item_extended(GF_ISOFile *file, Bool root_meta, u32 trac
  		/*store full path for info*/
  		else if (!location_entry->data_reference_index) {
  			if (data) {
@@ -33,5 +40,80 @@ diff --git a/src/isomedia/meta.c b/src/isomedia/meta.c
  				infe->data_len = data_len;
  			}
  			else if (resource_path) {
---
-leakproof package
+diff --git a/src/isomedia/unittests/ut_meta_item_memory.c b/src/isomedia/unittests/ut_meta_item_memory.c
+new file mode 100644
+index 0000000..641dfe2
+--- /dev/null
++++ b/src/isomedia/unittests/ut_meta_item_memory.c
+@@ -0,0 +1,68 @@
++#include "tests.h"
++#include <gpac/isomedia.h>
++
++/* An in-memory item keeps a copy of its bytes in infe->full_path. On write,
++ * DoWriteMeta opens full_path as a file name when data_len is 0, so the copy
++ * must be NUL-terminated (#4006: heap-buffer-overflow read in gf_fopen_ex).
++ * Under --enable-sanitizer, the unpatched library aborts inside gf_isom_close(). */
++unittest(meta_item_memory_zero_length)
++{
++#if !defined(GPAC_DISABLE_ISOM) && !defined(GPAC_DISABLE_ISOM_WRITE)
++	const char *path = "meta-item-memory.mp4";
++	/* Exact-size heap buffers with no terminator, as callers pass them. */
++	char *payload = gf_malloc(3);
++	char *empty = gf_malloc(1);
++	GF_ISOFile *file = NULL;
++	GF_Err e;
++	u32 data_id = 0, empty_id = 0, out_size = 0, out_alloc = 0;
++	u8 *out = NULL;
++
++	assert_not_null(payload);
++	assert_not_null(empty);
++	if (!payload || !empty) goto exit;
++	memcpy(payload, "abc", 3);
++	empty[0] = 'x';
++
++	/* Edit mode: items stay in memory until gf_isom_close() writes the file. */
++	file = gf_isom_open(path, GF_ISOM_WRITE_EDIT, NULL);
++	assert_not_null(file);
++	if (!file) goto exit;
++	e = gf_isom_set_meta_type(file, GF_TRUE, 0, GF_4CC('t', 'e', 's', 't'));
++	assert_equal(e, GF_OK, "%d");
++	if (e) goto exit;
++
++	/* Valid control: a 3-byte item. */
++	e = gf_isom_add_meta_item_memory(file, GF_TRUE, 0, "data", &data_id, GF_4CC('m', 'i', 'm', 'e'),
++		"text/plain", NULL, NULL, payload, 3, NULL);
++	assert_equal(e, GF_OK, "%d");
++	if (e) goto exit;
++
++	/* Trigger: a zero-length item; its full_path is later used as a file name. */
++	e = gf_isom_add_meta_item_memory(file, GF_TRUE, 0, "empty", &empty_id, GF_4CC('m', 'i', 'm', 'e'),
++		"text/plain", NULL, NULL, empty, 0, NULL);
++	assert_equal(e, GF_OK, "%d");
++	if (e) goto exit;
++
++	/* Writing reaches DoWriteMeta -> gf_fopen(full_path): over-read without the fix. */
++	e = gf_isom_close(file);
++	file = NULL;
++	assert_equal(e, GF_OK, "%d");
++	if (e) goto exit;
++
++	/* The 3-byte item round-trips through the written file. */
++	file = gf_isom_open(path, GF_ISOM_OPEN_READ, NULL);
++	assert_not_null(file);
++	if (!file) goto exit;
++	e = gf_isom_extract_meta_item_mem(file, GF_TRUE, 0, data_id, &out, &out_size, &out_alloc, NULL, GF_FALSE);
++	assert_equal(e, GF_OK, "%d");
++	assert_equal(out_size, 3, "%u");
++	if (out && out_size == 3) assert_equal_mem(out, "abc", 3);
++
++exit:
++	if (file) gf_isom_delete(file);
++	gf_file_delete(path);
++	if (out) gf_free(out);
++	if (payload) gf_free(payload);
++	if (empty) gf_free(empty);
++#endif
++}
+-- 
+2.50.1.windows.1
+

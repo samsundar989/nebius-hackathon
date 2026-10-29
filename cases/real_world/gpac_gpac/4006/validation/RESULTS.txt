@@ -1,0 +1,34 @@
+gpac #4006 validation, 2026-10-29T17:47:26Z
+upstream: d958f9433c85828ad1ccc5b6be723da71b9f0acc
+testsuite: 31fab45e42fe65cdebb2b2902dd3e1c90c25edf3
+compiler: gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+[unpatched] build: make exit 0
+[unpatched] unit tests: exit 2
+[unpatched]   Test 0005: meta_item_memory_zero_length... =================================================================
+[unpatched]   ==9458==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000271 at pc 0x73b018d849a8 bp 0x7fff666b7590 sp 0x7fff666b6d38
+[unpatched]       #8 0x5d32297f108f in test_meta_item_memory_zero_length /w/unpatched/src/isomedia/unittests/ut_meta_item_memory.c:47
+[unpatched]       #2 0x73b015736a53 in gf_isom_add_meta_item_memory /w/unpatched/src/isomedia/meta.c:1806
+[unpatched]       #3 0x5d32297f0cfd in test_meta_item_memory_zero_length /w/unpatched/src/isomedia/unittests/ut_meta_item_memory.c:41
+[unpatched]   SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:6149 in fopen64
+[unpatched] issue command: exit 1, AddressSanitizer: heap-buffer-overflow in fopen
+[unpatched] testsuite (scripts/item.sh scripts/heif.sh scripts/items_pids.sh scripts/iff_crypt.sh scripts/encryption.sh scripts/decryption_selkey.sh): exit 0
+[unpatched]   Number of Tests 82 - 358 subtests - Executed: 82 (100 %) - Cached: 0 (0 %)
+[unpatched]   Tests passed 79 (96 %) - 358 sub-tests
+[unpatched]   Tests failed 3 (3 % of subtests)
+[unpatched]   Tests Unknown 0 (5 % of subtests)
+[unpatched]   Tests HASH total 347 - fail 20 (5 % of subtests)
+[patched] build: make exit 0
+[patched] unit tests: exit 0
+[patched]   Test 0005: meta_item_memory_zero_length... Success.
+[patched]   Tests passed: 70
+[patched]   Tests failed: 0
+[patched]   Checks passed: 37982
+[patched]   Checks failed: 0
+[patched] issue command: exit 0, no sanitizer report
+[patched] testsuite (scripts/item.sh scripts/heif.sh scripts/items_pids.sh scripts/iff_crypt.sh scripts/encryption.sh scripts/decryption_selkey.sh): exit 0
+[patched]   Number of Tests 82 - 358 subtests - Executed: 82 (100 %) - Cached: 0 (0 %)
+[patched]   Tests passed 79 (96 %) - 358 sub-tests
+[patched]   Tests failed 3 (3 % of subtests)
+[patched]   Tests Unknown 0 (5 % of subtests)
+[patched]   Tests HASH total 347 - fail 20 (5 % of subtests)
+done 2026-10-29T17:55:34Z

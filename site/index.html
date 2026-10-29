@@ -258,7 +258,7 @@ footer { margin: 72px 0 40px; color: var(--soft); font-size: 14px; border-top: 1
     </section>
 
     <section class="block" id="real" aria-labelledby="real-h">
-      <h2 id="real-h">Bugs that are still open</h2>
+      <h2 id="real-h">New bugs, October 2026</h2>
       <p class="lead" id="real-lead">Reported in October 2026, after the models' training data. No fix existed to copy.</p>
       <div class="sheet scroll"><table class="table" id="rw"><thead><tr><th>Project</th><th>Bug</th><th>Leakproof</th><th>Our review</th><th></th></tr></thead><tbody></tbody></table></div>
     </section>
@@ -412,7 +412,7 @@ async function proofStrip(num, cal, rw) {
   if (r1) out.push([`${r1.verified} of ${r1.cases}`, `real OSS-Fuzz bugs fixed and verified, ${r1.strict} of them correct against the developer's fix`]);
   if (cal) out.push([`${cal.adjudicated.classes.accepted} of ${cal.adjudicated.judged}`, "developers' own fixes accepted by the same gate, so it's strict, not impossible"]);
   const gp = rw && rw.targets && rw.targets.find((t) => /gpac/.test(t.repo) && /correct/.test(String(t.review)));
-  if (gp) out.push([`gpac #${gp.issue}`, `a still-open bug in a ${gp.stars ? gp.stars + "★" : "popular"} project, fixed in 2 lines and reviewed`]);
+  if (gp) out.push([`gpac #${gp.issue}`, `a new bug in a ${gp.stars ? gp.stars + "★" : "popular"} project: our 2-line fix matches the one gpac shipped`]);
   $("#proof").innerHTML = out.map(([b, p]) => `<div><div class="big">${esc(b)}</div><p>${esc(p)}</p></div>`).join("");
 }
 

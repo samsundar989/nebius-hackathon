@@ -190,3 +190,19 @@ Render dashboard → **leakproof-demo** → Environment. Set these, then **Save,
 - **Before sending, gpac's own rules (AGENTS.md, `.agents/skills/gpac-patching`) need three things from you:** (1) build gpac with `--enable-sanitizer` and confirm the issue's `MP4Box -decrypt` command is clean; (2) add a regression test in `src/isomedia/unittests/` that fails without the fix; (3) run the testsuite. Disclose AI use in the PR (the template does).
 - Route: a GitHub PR to gpac/gpac with "Fixes #4006".
 - Options: (a) do the three steps and open the PR; (b) post the patch as a comment on the issue for the maintainers to take; (c) send nothing. **Default if no answer: (c).**
+- **Update 2026-10-29 13:45 CDT: DO NOT SEND. gpac fixed #4006 upstream today** — commit [`3f05654`](https://github.com/gpac/gpac/commit/3f056542b3) by aureliendavid, 2026-10-29 07:17 CDT ("fuzz: more memory issues … fixes #4006", with five other issues); the issue was closed at 09:33 CDT. Their fix is one line in the same place: `if (data)` → `if (data && data_len)`, so a zero-length in-memory item never gets a `full_path` and is skipped at write time. Ours (allocate +1, terminate) reaches the same outcome on the same path: no over-read, item skipped. So the maintainer's own fix agrees with our review ("correct"), and our patch no longer applies to master (checked: `git apply --check` fails on `3f05654`). The one thing gpac's commit has no counterpart for is a regression test; our `ut_meta_item_memory.c` uses public API only and could be offered on its own (option (d) below) — your call, default: send nothing.
+  - Options now: (c) send nothing (default); (d) offer the unit test alone as a small PR "isomedia: unit test for zero-length in-memory meta items (#4006)" — it would need re-running on current master first; I have not done that.
+- **Superseded by the 13:45 update above. Update 2026-10-29 13:30 CDT (review #23): ready to send.** gpac's three steps are done (by Claude Code, on this machine; `cases/real_world/gpac_gpac/4006/validate.sh`, results in `validation/RESULTS.txt`), all on upstream `d958f94`, gcc 13.3, `./configure --enable-sanitizer --unittests`, unpatched and patched side by side:
+  - the issue's `MP4Box -decrypt` command: heap-buffer-overflow in `gf_fopen_ex` unpatched; exit 0, no sanitizer report patched;
+  - new unit test `meta_item_memory_zero_length` (`src/isomedia/unittests/ut_meta_item_memory.c`, public API only): unpatched it aborts with that heap-buffer-overflow inside `gf_isom_close()`; patched, all 70 unit tests pass;
+  - testsuite `item.sh heif.sh items_pids.sh iff_crypt.sh encryption.sh decryption_selkey.sh` with `-re`: 82 executed on each build, the same 79 pass, the same 3 fail on both (they need gpac's external media, not synced).
+  - Package regenerated: one commit (`meta.c` + the unit test), title `isomedia: NUL-terminate an in-memory meta item's full_path`, the strategist's commit message; `PR_BODY.md` has the tested lines above, a trimmed ASan excerpt and the AI disclosure. Its last sentence, "I reviewed the change and the test myself", is yours to make true before sending.
+  - **Exact commands, only after you say so** (from a clone of your fork; nothing has been forked, pushed or posted):
+    ```
+    gh repo fork gpac/gpac --clone && cd gpac
+    git checkout -b fix-4006-meta-item-full-path d958f94   # or current master; the patch applies there too if meta.c is unchanged
+    git am /path/to/nebius-hackathon/cases/real_world/gpac_gpac/4006/generated/0001-isomedia-nul-terminate-an-in-memory-meta-item-full-path.patch
+    git commit --amend --reset-author --no-edit
+    git push -u origin fix-4006-meta-item-full-path
+    gh pr create --repo gpac/gpac --base master --title "isomedia: NUL-terminate an in-memory meta item's full_path" --body-file /path/to/nebius-hackathon/cases/real_world/gpac_gpac/4006/generated/PR_BODY.md
+    ```
