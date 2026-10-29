@@ -163,3 +163,16 @@ Neither repository states an AI-contribution policy. Options: (a) send one or bo
 
 ## ANSWER 0012 — rewrite history before going public
 Yes; given to the strategist in chat 2026-10-28 13:08 CDT and confirmed by Samuel in Claude Code 2026-10-29 00:00 CDT ("Yes to the history rewrite and force-push"). Executed by Worker A (Review #19).
+
+## QUESTION 0021 — Render: five environment values for the demo service (about 2 minutes; money cap $3)
+Render dashboard → **leakproof-demo** → Environment. Set these, then **Save, rebuild and deploy**:
+
+| name | value |
+|---|---|
+| `DEMO_PASSCODE` | a word of your choice (it goes in Devpost's "testing instructions"; do not post it anywhere else) |
+| `DEMO_TOTAL_USD` | `3.00` |
+| `DEMO_DAILY_USD` | `0.50` |
+| `LEAKPROOF_BUDGET_USD` | `3.00` (today it is `0.50`, which would cap the whole demo at $0.50) |
+| `DEMO_ENABLED` | `true` (live Juliet runs; per #16/#17 and QUESTION 0019 = yes) |
+
+`NEBIUS_API_KEY` / `NEBIUS_PROJECT_ID` must be the dedicated demo key you entered at Blueprint creation. The new **Re-verify without AI** button (the gate on a stored patch, no model call, $0) works without any of these. Tell me the passcode in chat (or put it in `.env` as `DEMO_PASSCODE=...`) so I can test the live button end to end. **Default if no answer: live runs stay off; the dashboard shows labelled recorded runs and Re-verify still works.**
