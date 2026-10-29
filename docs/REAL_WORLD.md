@@ -19,7 +19,7 @@ Machine-readable: [cases/real_world/funnel.json](../cases/real_world/funnel.json
 | verified by the gate | 2: gpac #4006, assimp #6927 |
 | after hand review | **1 correct fix** (gpac #4006, minimal; needs gpac's regression test) and **1 partial fix** (assimp #6927), both packaged; nothing sent |
 
-Model spend for the campaign: $0.97 (ledger: every `rw_*` run and its gate adversary calls), including runs that exposed tooling bugs.
+Model spend for the campaign: $1.08 (ledger: every `rw_*` run and its gate adversary calls), including runs that exposed tooling bugs.
 
 ## Per issue
 
@@ -53,12 +53,16 @@ The first run's three built candidates had been rejected as out of scope because
 treat `.inl` as a source file; fixed, and those three re-gated without a model call
 (`runs/rw_assimp_6927_regate`).
 
-**quickjs-ng #1853: heap-buffer-overflow in bytecode loading (4.0k★). No fix: the gate refused two silencers.**
+**quickjs-ng #1853: heap-buffer-overflow in bytecode loading (4.0k★). No fix: the gate refused three silencers.**
 Both candidates that built "fixed" the crash by clamping the free loop to the allocation's usable
 size: the sanitizer went quiet on the PoC, and quickjs's own test suite then failed with new
 sanitizer reports, so the gate refused both (`silenced_only`). The size computation that overflows
 is untouched by either. This is "sanitizer silent ≠ fixed" on a bug opened two days earlier.
-$0.41, the costliest run: quickjs.c is 2.1 MB and Ultra's plan read large windows of it.
+$0.41, the costliest run: quickjs.c is 2.1 MB and Ultra's plan read large windows of it. A second run with the cheaper Super planner ($0.11) produced the sharpest
+case of the campaign: a patch that stops freeing the argument entries passed the PoC **and all of
+quickjs's own tests** (0/120 errors), and re-fuzzing then hit the same overflow on 2 of 202
+generated inputs, so the gate refused it. Both planners blamed the `vardefs` loop; the
+issue's overflow is in the `cpool_count` size computation.
 
 **assimp #6945: LeakSanitizer leak in the STL importer. No fix.**
 The one candidate that built deleted the meshes and nodes on an early-EOF path and kept using
@@ -78,10 +82,10 @@ that instead.
 
 ## What this says about Leakproof
 
-- The gate did its job on real, new bugs. Of the 13 candidate patches that built: 7 verified
+- The gate did its job on real, new bugs. Of the 14 candidate patches that built: 7 verified
   (3 on gpac, one correct fix; 4 the same narrow check on assimp #6927, partial on review), 3 refused because they changed
-  the program's output on generated inputs (the assimp variants above), 2 refused as silencers that
-  broke quickjs's tests, 1 refused for introducing a use-after-free. It verified nothing that is
+  the program's output on generated inputs (the assimp variants above), 3 refused as quickjs silencers (two broke its tests; one passed them
+  and was caught by re-fuzzing), 1 refused for introducing a use-after-free. It verified nothing that is
   wrong; hand review still had the last word ("partial").
 - The workers are the weak link on large C++ files: most attempts failed to apply or to build.
 - Real-world setup cost more effort than the model calls: Windows line endings and executable

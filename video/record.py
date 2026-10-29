@@ -114,7 +114,7 @@ SCENES = [
         "dash",
         "#real-world",
         16,
-        "New bugs (October 2026): a correct gpac fix verified; quickjs's own tests refused two silencers.",
+        "New bugs (October 2026): a correct gpac fix verified; three quickjs silencers refused.",
     ),
     ("12_end", "card", "end", 6, ""),
 ]

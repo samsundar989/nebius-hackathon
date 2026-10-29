@@ -64,12 +64,13 @@
    "opened": "2026-10-27",
    "bug": "heap-buffer-overflow, JS_ReadFunctionTag size overflow",
    "reproduces": "yes",
-   "verdict": "silenced_only",
+   "verdict": "rejected:refuzz_same_bug",
    "runs": [
-    "rw_quickjs_1853"
+    "rw_quickjs_1853",
+    "rw_quickjs_1853_r2"
    ],
-   "usd": 0.4124,
-   "review": "no fix: both candidates that built clamped the free loop to the allocation size; the crash went quiet, quickjs's own tests then failed (gate refused)",
+   "usd": 0.522,
+   "review": "no fix (2 runs): three patches silenced the crash; two broke quickjs's tests, and one passed the PoC and all of quickjs's tests but re-fuzzing hit the same overflow on 2 of 202 generated inputs (gate refused)",
    "package": null,
    "sent": "no"
   },
