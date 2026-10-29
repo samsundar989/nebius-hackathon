@@ -17,7 +17,7 @@ Machine-readable: [cases/real_world/funnel.json](../cases/real_world/funnel.json
 | already fixed upstream when re-checked (issue left open) | 3: assimp #6929, LibreDWG #1450, #1439 |
 | reproduced at upstream HEAD and attempted | 5 |
 | verified by the gate | 2: gpac #4006, assimp #6927 |
-| after review (Claude, outside the pipeline) | **1 correct fix** (gpac #4006, minimal; gpac shipped an equivalent fix on Oct 29 before ours was sent) and **1 partial fix** (assimp #6927), both packaged; nothing sent |
+| after review (Claude, outside the pipeline) | **1 correct fix** (gpac #4006, minimal; gpac's maintainer fixed the same line, with the same result, on Oct 29 before ours was sent) and **1 partial fix** (assimp #6927), both packaged; nothing sent |
 
 Model spend for the campaign: $1.27 (ledger: every `rw_*` run and its gate adversary calls), including runs that exposed tooling bugs.
 

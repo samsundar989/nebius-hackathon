@@ -410,3 +410,23 @@ Strategist notes 2026-10-29 02:05 (review #20) and 04:50 CDT (review #21): ackno
 
 Model spend since 11:15: $0.021 (two live demo runs); ledger $14.21 of the $21 cap.
 - **assimp #6927 root-cause run: did not verify** ($0.21, `runs/rw_assimp_6927_r3`). Round 1: 4 caller-side bounds checks, all refused by the differential (output changed on 10 of 203 generated inputs, as last night). Round 2's plan named `ParseDataURI` but pointed at the header; no edit applied. Cause, a Leakproof limitation: the models see the files on the crash stack, and `glTFCommon.cpp` is not on it. Recorded in REAL_WORLD, funnel and QUESTION 0022 (issue still open; Samuel gets the strategist's comment draft, nothing posted). Campaign spend now $1.27; ledger $14.42 of $21.
+
+## Day 9 (cont.) · Thu 2026-10-29, 18:20 CDT → — reviews #25, #26
+
+Strategist notes 15:05 (review #25) and 16:40 CDT (review #26): acknowledged. The loop had stopped at 13:16 and resumed at 18:20, after the 17:00 narration slot. No narration WAV is in `video/` yet.
+
+- **#26.1:** the strategist's five wording edits committed unchanged (`b4c453a`, pushed). Our verified gpac run is from about 01:30 CDT (`runs/rw_gpac_4006`) and gpac's 3f05654 from 07:17 CDT, so "hours before" holds.
+- **#26.2, video v6 re-rendered** (`c713201`). The new 1:28 caption reads "…our gpac fix verified hours before gpac fixed the same line." Scene timings come from `SCENES` and did not change: the cut is **2:10.00**, as before. Frames checked at 0:40 (re-check), 1:15 (jq refusal) and 1:35 (gpac caption, fits the width). The demo scene now also mocks `/status`, the dashboard's wake-up ping since #24, so the recording never depends on the live service.
+- **#25: "equivalent" was still in seven places,** all changed to "same line, same result" (and "different code" where there is room). The places: README and DEVPOST (impact row and results bullet), REAL_WORLD's table row, VIDEO_SCRIPT's evidence row, `funnel.json` and `site/data/real_world.json` (the dashboard's review text, not visible in the video frame), and the gpac package's "do not send" banner. REPORT_SHIP's 11:15 entry keeps its old wording as a record; this entry corrects it.
+- **#26.4, DEVPOST paste-ready:**
+  - the header now says how the placeholders get filled;
+  - the testing instructions use the dashboard's real button names ("Re-check a stored patch", "Run a live fix"), say the re-check picks a verified or a refused patch at random, and give "30–60 s";
+  - the stale "— 2:50" video length is gone;
+  - no passcode is in the file, only the bracketed note telling Samuel to type it on Devpost;
+  - all 9 gallery files listed (thumbnail, 1–7, architecture) exist and are tracked.
+- **#25, `mux.sh` checked** on the old TTS WAV, writing to the scratchpad: 158.7 s, H.264 plus AAC, audio throughout. No `leakproof_final.mp4` and no `.narration_path` were written.
+- **freeze_check** (WSL): 3 FAIL. Two are expected (the video link placeholders and the missing final video). The third is the uncommitted tree, cleared by this commit. Numbers have no drift, 313 tests pass, ruff and the secret scan pass.
+
+Model spend since 13:16: $0. Ledger $14.42 of $21.
+
+**Waiting on Samuel:** the narration WAV (then `bash video/mux.sh <wav>`, which must come out ≤ 2:55) and the YouTube link (then `set_links.py --video <url>`, push, and check `site/config.json` on Render).

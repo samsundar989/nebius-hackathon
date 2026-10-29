@@ -35,7 +35,7 @@
     "rw_gpac_4006_clean"
    ],
    "usd": 0.1358,
-   "review": "correct, minimal: allocate data_len + 1 and NUL-terminate. gpac fixed it upstream on 2026-10-29 (3f05654) with an equivalent one-line fix (skip full_path when data_len is 0) before ours was sent. Our package passed gpac's own checks: a new unit test fails under ASan before the fix and passes after; 6 testsuite scripts unchanged",
+   "review": "correct, minimal: allocate data_len + 1 and NUL-terminate. gpac fixed it upstream on 2026-10-29 (3f05654) in the same place, with the same result but different code (skip full_path when data_len is 0) before ours was sent. Our package passed gpac's own checks: a new unit test fails under ASan before the fix and passes after; 6 testsuite scripts unchanged",
    "package": "cases/real_world/gpac_gpac/4006/generated/SUBMISSION.md",
    "sent": "no: fixed upstream by gpac (3f05654, 2026-10-29) first",
    "upstream_fix": "https://github.com/gpac/gpac/commit/3f056542b3"
