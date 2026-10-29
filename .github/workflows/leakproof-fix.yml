@@ -1,6 +1,6 @@
-# Leakproof in CI on this repository's own demo (review #9 order 3): when demo-fuzz fails with a
-# crash, run `leakproof fix` on examples/csvsplit with the first crash input and publish the
-# evidence bundle as the job summary and an artifact. It never pushes code.
+# Leakproof in CI on this repository's own demo (review #9 order 3; review #20): after demo-fuzz
+# completes and uploaded crash inputs, run `leakproof fix` on examples/csvsplit with the first one
+# and publish the evidence bundle as the job summary and an artifact. It never pushes code.
 #
 # Secret NEBIUS_API_KEY and variable NEBIUS_PROJECT_ID are set by the repository owner. Only
 # workflow_run and workflow_dispatch trigger it (no pull_request), and it only runs in this
@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       run_id:
-        description: "Run id of a failed demo-fuzz run (its artifact holds the crash inputs)"
+        description: "Run id of a demo-fuzz run whose artifact holds the crash inputs"
         required: true
 
 permissions:
@@ -25,7 +25,7 @@ jobs:
   fix:
     if: >-
       github.repository == 'samsundar989/nebius-hackathon' &&
-      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'failure')
+      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
@@ -38,10 +38,9 @@ jobs:
 
       - uses: astral-sh/setup-uv@v6
 
-      - name: Toolchain image for the gate (clang 18 + sanitizers)
-        run: docker build -q -t leakproof/cpp-sanitizers:e0 images/cpp-sanitizers
-
       - name: Download the crash inputs
+        id: dl
+        continue-on-error: true          # no artifact when demo-fuzz found nothing
         uses: actions/download-artifact@v4
         with:
           name: crashes
@@ -49,8 +48,23 @@ jobs:
           run-id: ${{ github.event.workflow_run.id || inputs.run_id }}
           github-token: ${{ github.token }}
 
+      - name: Any crash inputs?
+        id: crashes
+        run: |
+          if [ -d crashes ] && [ -n "$(ls -A crashes 2>/dev/null)" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "No crash inputs from demo-fuzz: nothing to fix." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Toolchain image for the gate (clang 18 + sanitizers)
+        if: steps.crashes.outputs.found == 'true'
+        run: docker build -q -t leakproof/cpp-sanitizers:e0 images/cpp-sanitizers
+
       - name: leakproof fix
         id: fix
+        if: steps.crashes.outputs.found == 'true'
         run: |
           set -euo pipefail
           test -n "$NEBIUS_API_KEY" || { echo "::error::repository secret NEBIUS_API_KEY is not set"; exit 1; }
@@ -62,20 +76,20 @@ jobs:
           echo "exit=$?" >> "$GITHUB_OUTPUT"
 
       - name: Evidence bundle
-        if: always()
+        if: always() && steps.crashes.outputs.found == 'true'
         run: |
           uv run python scripts/render_bundle.py ci --all --out bundle || true
           cat bundle/*.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "no bundle" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Submission package (when verified)
-        if: steps.fix.outputs.exit == '0'
+        if: steps.crashes.outputs.found == 'true' && steps.fix.outputs.exit == '0'
         run: |
           rec=$(ls leakproof-runs/ci/*.json | grep -v summary | head -1)
           uv run leakproof package "$rec" --out submission
           echo "A ready-to-review patch and SUBMISSION.md are in the leakproof-evidence artifact." >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && steps.crashes.outputs.found == 'true'
         with:
           name: leakproof-evidence
           path: |
@@ -84,7 +98,7 @@ jobs:
             leakproof-runs/ci/
 
       - name: Verdict
-        if: always()
+        if: always() && steps.crashes.outputs.found == 'true'
         run: |
           if [ "${{ steps.fix.outputs.exit }}" = "0" ]; then
             echo "::notice::Leakproof verified a fix: see the job summary and the leakproof-evidence artifact."

@@ -1,6 +1,7 @@
-# Demo fuzzing run for examples/csvsplit (review #9 order 3): fuzz the CSV splitter for at most
-# 120 s; when libFuzzer finds a crash, upload the crash inputs as artifact `crashes` and fail, so
-# leakproof-fix.yml picks them up. Manual only.
+# Demo fuzzing run for examples/csvsplit (review #9 order 3; green since review #20): fuzz the CSV
+# splitter for at most 120 s, upload any crash inputs as artifact `crashes`, report them in the job
+# summary and finish green; leakproof-fix.yml then picks the inputs up. Manual only.
+# (examples/github-action/ keeps the realistic variant where a project's fuzz job fails on a crash.)
 name: demo-fuzz
 
 on:
@@ -38,10 +39,13 @@ jobs:
           path: crashes/
           if-no-files-found: ignore
 
-      - name: Fail when a crash was found
+      - name: Report (green either way; leakproof-fix takes over)
         run: |
-          if [ -n "$(ls -A crashes)" ]; then
-            echo "::error::libFuzzer found $(ls crashes | wc -l) crash input(s); leakproof-fix will try to fix it."
-            exit 1
+          n=$(ls -A crashes 2>/dev/null | wc -l)
+          if [ "$n" -gt 0 ]; then
+            echo "::notice::libFuzzer found $n crash input(s) in csvsplit; handed to leakproof-fix."
+            echo "### demo-fuzz: found $n crash input(s) in csvsplit" >> "$GITHUB_STEP_SUMMARY"
+            echo "Uploaded as artifact \`crashes\`; the **leakproof-fix** workflow starts automatically and tries to fix the first one." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "no crash in 120 s" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
-          echo "no crash in 120 s"

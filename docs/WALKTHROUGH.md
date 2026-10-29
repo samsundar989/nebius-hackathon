@@ -145,5 +145,5 @@ diff), an AI-assistance note and a "Before sending" checklist. The author is a p
 
 A real case: [toybox #572](../cases/open_bugs/landley_toybox/572/generated/SUBMISSION.md), an
 open upstream bug, packaged the same way and waiting for a human decision. In CI the same steps
-run after a failed fuzzing job (`.github/workflows/leakproof-fix.yml`), and the patch and
+run after a fuzzing job that uploaded crash inputs (`.github/workflows/leakproof-fix.yml`), and the patch and
 SUBMISSION.md are uploaded with the evidence.
