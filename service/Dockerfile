@@ -18,6 +18,7 @@ RUN python3 -m venv /venv && /venv/bin/pip install --no-cache-dir \
 COPY leakproof /app/leakproof
 COPY service/app.py /app/service_app.py
 COPY service/recorded /app/recorded
+COPY service/reverify /app/reverify
 COPY service/juliet/cases /app/cases/juliet
 COPY service/juliet/C /app/cache/juliet/C
 COPY service/juliet/cases.txt /app/juliet/cases.txt
