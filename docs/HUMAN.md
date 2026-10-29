@@ -157,3 +157,9 @@ Options: (a) turn live runs on (`DEMO_ENABLED=true` in Render's environment) wit
 - **me7alix/utf8.h #1** — https://github.com/me7alix/utf8.h/issues/1. `utf8_decode` stops at the terminator before reading each continuation byte and returns U+FFFD. The issue's other requests (reject overlong, surrogate and non-continuation sequences) are not done. Package: `cases/open_bugs/round3/me7alix_utf8.h/generated/` (applies to upstream `c08d482`).
 
 Neither repository states an AI-contribution policy. Options: (a) send one or both under your name with the disclosure in each SUBMISSION.md, saying plainly what is and isn't fixed; (b) leave them. **Default if no answer: (b), nothing is sent.**
+
+## ANSWER 0011 — Render deployed
+2026-10-28 23:20 CDT (Samuel deployed the Blueprint; URLs read from the Render dashboard by the strategist): dashboard **https://leakproof-dashboard.onrender.com** (static site, loads all data; `config.json` 404 until you set the service URL) · demo service **https://leakproof-demo.onrender.com** (free instance; `/healthz` → `{"ok":true,"live":false}`).
+
+## ANSWER 0012 — rewrite history before going public
+Yes; given to the strategist in chat 2026-10-28 13:08 CDT and confirmed by Samuel in Claude Code 2026-10-29 00:00 CDT ("Yes to the history rewrite and force-push"). Executed by Worker A (Review #19).
