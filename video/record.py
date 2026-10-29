@@ -114,7 +114,7 @@ SCENES = [
         "dash",
         "#real-world",
         16,
-        "New bugs (October 2026): quickjs's own tests refused two silencers; an assimp fix verified, partial.",
+        "New bugs (October 2026): a correct gpac fix verified; quickjs's own tests refused two silencers.",
     ),
     ("12_end", "card", "end", 6, ""),
 ]
@@ -189,6 +189,10 @@ def play(page, base: str, kind: str, target: str, seconds: int) -> None:  # noqa
         page.goto(f"{base}/site/index.html")
         page.wait_for_selector("#reverify")
         page.select_option("#rv-which", "rejected")
+        # A cloned <select> shows its first option unless the choice is an attribute.
+        page.evaluate(
+            "document.querySelector('#rv-which option[value=rejected]').setAttribute('selected', '')"
+        )
         page.click("#reverify")
         page.wait_for_selector("#rv-out .panel")
         page.evaluate(ISOLATE, [target, seconds, STAGE[target]])
@@ -197,6 +201,11 @@ def play(page, base: str, kind: str, target: str, seconds: int) -> None:  # noqa
         page.wait_for_selector("#headline .stat")
         if target == "#real-world":
             page.wait_for_selector("#rw tbody tr")
+            # The scene shows the attempted issues; the already-fixed ones are in REAL_WORLD.md.
+            page.evaluate(
+                "document.querySelectorAll('#rw tbody tr').forEach("
+                "r => r.textContent.includes('dropped') && r.remove())"
+            )
         page.wait_for_selector("#cases button")
         sel = target
         if target == "funnel":

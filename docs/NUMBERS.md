@@ -116,7 +116,7 @@ Prompt v4 with the Ultra fallback (D-0080), re-run on the 12 cases Super had lef
 
 ## Spend
 
-- Every model call in the project, failed runs included: **$13.1127** (Nebius billing agreed within $0.01 on 2026-10-24).
+- Every model call in the project, failed runs included: **$14.0792** (Nebius billing agreed within $0.01 on 2026-10-24).
 - Nebius Sandboxes: 12.23 units, not billed during the beta.
 
 ## Open bugs: still-open GitHub issues (hand-reviewed, cases/open_bugs/REVIEW.md)
