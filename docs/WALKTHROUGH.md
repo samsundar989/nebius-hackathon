@@ -7,7 +7,12 @@ key in `.env` (`cp .env.example .env`, then fill in `NEBIUS_API_KEY` and `NEBIUS
 
 ```
 uv sync
+uv run leakproof doctor --config examples/csvsplit/leakproof.toml
 ```
+
+`doctor` prints one PASS / WARN / FAIL line per check (Docker engine, the toolchain image, the key
+accepted by Token Factory without printing it, Sandboxes, budget and ledger cap, the config) and
+the fix for each failure, for example the `docker build` command when the image is missing.
 
 ## 1. `leakproof init`: draft a config
 

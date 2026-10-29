@@ -155,7 +155,7 @@ In CI: [examples/github-action](examples/github-action/) is a workflow template 
 
 ## Setup
 
-Python 3.12 and [uv](https://docs.astral.sh/uv/); Docker for the ARVO and bring-your-own runners. Copy `.env.example` to `.env` and fill in `NEBIUS_API_KEY`, `NEBIUS_PROJECT_ID`, `LEAKPROOF_BUDGET_USD`. Then `uv sync` and `uv run pytest -q -m "not network and not docker and not contree"`.
+Python 3.12 and [uv](https://docs.astral.sh/uv/); Docker for the ARVO and bring-your-own runners. Copy `.env.example` to `.env` and fill in `NEBIUS_API_KEY`, `NEBIUS_PROJECT_ID`, `LEAKPROOF_BUDGET_USD`. Then `uv sync`, `uv run leakproof doctor` (checks Docker, the toolchain image, the key and the budget, with a fix for each failure) and `uv run pytest -q -m "not network and not docker and not contree"`.
 
 ## Cost
 
