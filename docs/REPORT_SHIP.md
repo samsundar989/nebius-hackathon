@@ -430,3 +430,8 @@ Strategist notes 15:05 (review #25) and 16:40 CDT (review #26): acknowledged. Th
 Model spend since 13:16: $0. Ledger $14.42 of $21.
 
 **Waiting on Samuel:** the narration WAV (then `bash video/mux.sh <wav>`, which must come out ≤ 2:55) and the YouTube link (then `set_links.py --video <url>`, push, and check `site/config.json` on Render).
+- **19:30 hourly check:**
+  - no new strategist entry and no narration WAV;
+  - freeze_check: 2 expected FAIL (video link placeholders, final video), everything else PASS (313 tests, tree clean and pushed);
+  - Render serves the new gpac review text in `data/real_world.json`;
+  - the demo's `/status` returns `{"ok":true,"live":true,"isolation":"nobody"}`.
