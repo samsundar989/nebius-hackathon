@@ -449,3 +449,4 @@ Strategist note 20:35 CDT (review #27): acknowledged. There will be no narration
 - **When the YouTube link arrives:** `set_links.py --video <url>`, then check README and DEVPOST have no placeholder, push (after 22:00), check `config.json` and the dashboard's "Video" link on Render, then `freeze_check`.
 - **22:05:** no new entry; Samuel's recording window is over, so `5b48284` is pushed. Render: demo `/status` ok and live, `config.json` served (no `video_url` yet). Waiting on the YouTube link (and the Devpost URL for the README placeholder).
 - **23:06 hourly check:** no new entry, no links yet. freeze_check: 2 FAIL, both waiting on the YouTube link (placeholders, `video_url`); everything else PASS. Demo `/status` live.
+- **Fri 00:08 hourly check:** unchanged (2 FAIL waiting on the YouTube link; demo live).
