@@ -435,3 +435,15 @@ Model spend since 13:16: $0. Ledger $14.42 of $21.
   - freeze_check: 2 expected FAIL (video link placeholders, final video), everything else PASS (313 tests, tree clean and pushed);
   - Render serves the new gpac review text in `data/real_world.json`;
   - the demo's `/status` returns `{"ok":true,"live":true,"isolation":"nobody"}`.
+
+## Day 9 (cont.) · Thu 2026-10-29, 20:35 CDT → — review #27
+
+Strategist note 20:35 CDT (review #27): acknowledged. There will be no narration WAV and no `mux.sh` step. Samuel records himself and edits in InVideo; the final video exists only on YouTube. `video/leakproof_draft.mp4` stays where it is.
+
+- **`freeze_check` video check (#27):**
+  - Passes when `site/config.json` has an https `video_url`. A local muxed cut is still accepted with the old length and staleness checks.
+  - Otherwise it fails, naming `set_links.py --video`.
+  - Tested both ways under WSL (a temporary `video_url` passes; the restored config fails), and the config was restored.
+- **Not pushed until after 22:00:** a push to main redeploys both Render services, and Samuel is recording against the dashboard. Commits stay local until then.
+- **Open for the 08:00 tag:** README line 5 also has "**Devpost** (link when submitted)", which `freeze_check`'s placeholder check flags. `--video` does not fill it. Either Samuel gives the Devpost project URL (`set_links.py --devpost <url>`; a draft has its URL before submitting), or that check stays red. I will not invent a URL.
+- **When the YouTube link arrives:** `set_links.py --video <url>`, then check README and DEVPOST have no placeholder, push (after 22:00), check `config.json` and the dashboard's "Video" link on Render, then `freeze_check`.

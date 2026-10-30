@@ -6,7 +6,8 @@
 #
 # Checks: numbers regenerate with no drift; unit tests, ruff and the secret scan; every relative
 # link resolves; no link placeholders left; the dashboard's live-run mode is configured or the
-# recorded mode is stated; the final video exists and is at most 2:59; README/DEVPOST numbers
+# recorded mode is stated; the final video is linked (video_url in site/config.json) or a local
+# muxed cut exists and is at most 2:59; README/DEVPOST numbers
 # match site/data/numbers.json; the working tree is clean and pushed. No model calls.
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
@@ -78,7 +79,11 @@ ok &= say(bool(cfg.get("service_url")) or stated,
                            else "off; the dashboard states recorded mode"))
 
 final = "video/leakproof_final.mp4"
-if os.path.exists(final):
+video_url = str(cfg.get("video_url") or "")
+if video_url.startswith("https://"):
+    # Review #27: Samuel edits the final video himself; it exists only on YouTube.
+    ok &= say(True, f"final video: video_url {video_url}")
+elif os.path.exists(final):
     import imageio_ffmpeg
     err = subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), "-i", final],
                          capture_output=True, text=True).stderr
@@ -93,7 +98,8 @@ if os.path.exists(final):
     stale = [f for f in inputs if os.path.exists(f) and os.path.getmtime(f) > os.path.getmtime(final)]
     ok &= say(not stale, "final video newer than its inputs" + (f": older than {stale}" if stale else ""))
 else:
-    ok &= say(False, f"final video missing ({final}: run video/mux.sh with the narration)")
+    ok &= say(False, "final video missing (no video_url in site/config.json: "
+                     "set_links.py --video <YouTube URL>)")
 
 n = json.load(open("site/data/numbers.json"))
 r1, ob, cal = n["arvo"]["p3_arvo27_r1"], n["open_bugs"]["total"], json.load(open("site/data/calibration.json"))
